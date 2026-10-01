@@ -1,0 +1,30 @@
+# Lokale Entwicklungsdienste: `docker compose up -d`
+name: coop
+services:
+  database:
+    image: mariadb:11.8
+    environment:
+      MARIADB_DATABASE: coop
+      MARIADB_USER: coop
+      MARIADB_PASSWORD: coop
+      MARIADB_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306" # 3307, damit es nicht mit XAMPP-MariaDB kollidiert
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      retries: 10
+    volumes:
+      - database_data:/var/lib/mysql
+
+  mailer:
+    image: axllent/mailpit
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Weboberfläche: http://localhost:8025
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+volumes:
+  database_data:

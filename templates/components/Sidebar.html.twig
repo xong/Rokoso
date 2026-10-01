@@ -1,0 +1,69 @@
+<nav id="main-nav" aria-label="{{ 'nav.label'|trans }}" data-shell-target="nav"
+     class="z-40 flex shrink-0 flex-col border-r border-slate-200 bg-white transition-[width,transform]
+            max-lg:invisible max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:w-72 max-lg:-translate-x-full
+            max-lg:nav-open:visible max-lg:nav-open:translate-x-0
+            lg:w-[20vw] lg:min-w-52 lg:max-w-80 lg:collapsed:w-16 lg:collapsed:min-w-16">
+    <div class="flex h-14 items-center gap-2 border-b border-slate-200 px-4 lg:collapsed:justify-center lg:collapsed:px-0">
+        <span class="grid size-8 shrink-0 place-items-center rounded-lg bg-brand-600 text-xs font-bold text-white" aria-hidden="true">{{ 'app.short_name'|trans }}</span>
+        <span class="truncate font-semibold lg:collapsed:sr-only">{{ 'app.name'|trans }}</span>
+        <button type="button" data-action="shell#close" aria-label="{{ 'nav.close'|trans }}"
+                class="ml-auto grid size-10 place-items-center rounded-md text-slate-500 hover:bg-slate-100 lg:hidden">
+            {{ ux_icon('lucide:x', {class: 'size-5', 'aria-hidden': 'true'}) }}
+        </button>
+    </div>
+
+    <ul role="list" class="flex-1 space-y-0.5 overflow-y-auto p-2 lg:collapsed:overflow-visible">
+        {% for item in this.items %}
+            <li class="group/item relative">
+                <a href="{{ path(item.route) }}" {% if item.active %}aria-current="{{ item.children is empty ? 'page' : 'true' }}"{% endif %}
+                   class="flex items-center gap-3 rounded-md px-3 py-2 font-medium
+                          {{ item.active ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-slate-100' }}
+                          lg:collapsed:justify-center lg:collapsed:px-0">
+                    {{ ux_icon(item.icon, {class: 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
+                    <span class="truncate lg:collapsed:sr-only">{{ item.label|trans }}</span>
+                </a>
+
+                {% if item.children is not empty %}
+                    {# Ausgeklappte Navigation: Unterpunkte des aktiven Bereichs inline #}
+                    <ul role="list" class="mt-0.5 space-y-0.5 pl-8 lg:collapsed:hidden {{ item.active ? '' : 'hidden' }}">
+                        {% for child in item.children %}
+                            <li>{{ _self.child_link(child) }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {# Eingeklappte Navigation: Name und Unterpunkte als Flyout bei Hover/Fokus #}
+                <div class="absolute top-0 left-full z-50 hidden pl-2 lg:collapsed:group-hover/item:block lg:collapsed:group-focus-within/item:block">
+                    <div class="min-w-48 rounded-lg bg-white p-1 shadow-lg ring-1 ring-slate-200">
+                        <p class="px-3 py-1.5 font-semibold text-slate-900" aria-hidden="true">{{ item.label|trans }}</p>
+                        {% if item.children is not empty %}
+                            <ul role="list" class="space-y-0.5">
+                                {% for child in item.children %}
+                                    <li>{{ _self.child_link(child) }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="hidden border-t border-slate-200 p-2 lg:block">
+        <button type="button" data-shell-target="collapseToggle" data-action="shell#toggleCollapsed"
+                aria-label="{{ 'nav.collapse'|trans }}" title="{{ 'nav.collapse'|trans }}"
+                class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-slate-500 hover:bg-slate-100 lg:collapsed:justify-center lg:collapsed:px-0">
+            {{ ux_icon('lucide:panel-left-close', {class: 'size-5 shrink-0 lg:collapsed:hidden', 'aria-hidden': 'true'}) }}
+            {{ ux_icon('lucide:panel-left-open', {class: 'hidden size-5 shrink-0 lg:collapsed:block', 'aria-hidden': 'true'}) }}
+            <span class="truncate lg:collapsed:hidden" aria-hidden="true">{{ 'nav.collapse'|trans }}</span>
+        </button>
+    </div>
+</nav>
+
+{% macro child_link(child) %}
+    <a href="{{ path(child.route) }}" {% if child.active %}aria-current="page"{% endif %}
+       class="flex items-center gap-2 rounded-md px-3 py-1.5 {{ child.active ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
+        {{ ux_icon(child.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+        <span class="truncate">{{ child.label|trans }}</span>
+    </a>
+{% endmacro %}

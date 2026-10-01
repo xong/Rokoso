@@ -1,0 +1,32 @@
+@import "tailwindcss" source(none);
+
+@source "../../templates";
+@source "../../assets/controllers";
+@source "../../src";
+
+/* Zustände des App-Rahmens (gesetzt per Stimulus am Element mit data-controller="shell") */
+@custom-variant collapsed (&:where([data-collapsed="true"] *));
+@custom-variant nav-open (&:where([data-nav-open="true"] *));
+
+@theme {
+    --color-brand-50: oklch(0.97 0.02 250);
+    --color-brand-100: oklch(0.93 0.04 250);
+    --color-brand-600: oklch(0.52 0.17 255);
+    --color-brand-700: oklch(0.45 0.16 255);
+}
+
+@layer base {
+    :focus-visible {
+        outline: 2px solid var(--color-brand-600);
+        outline-offset: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

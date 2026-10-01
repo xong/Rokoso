@@ -1,0 +1,3 @@
+symfonycasts_tailwind:
+    # Standalone-Binary, kein Node nötig. Version bewusst gepinnt.
+    binary_version: 'v4.3.3'

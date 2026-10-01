@@ -1,0 +1,24 @@
+app:
+    name: Coop
+    short_name: Co
+
+nav:
+    label: Hauptnavigation
+    skip_to_content: Zum Inhalt springen
+    open: Navigation öffnen
+    close: Navigation schließen
+    collapse: Navigation einklappen
+    expand: Navigation ausklappen
+    back: Zurück zur Liste
+    mail: E-Mails
+    mail_inbox: Eingang
+    mail_sent: Ausgang
+    mail_trash: Papierkorb
+    mail_compose: Neue E-Mail
+    calendar: Kalender
+    contacts: Kontakte
+    projects: Projekte
+    organizations: Organisationen
+
+placeholder:
+    coming: Dieser Bereich folgt in Phase %phase%.

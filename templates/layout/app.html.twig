@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{#
+    Dreispaltiges App-Layout: Navigation (20 %) · Liste (25 %) · Detail (Rest, 55 %).
+    Kind-Templates füllen die Blöcke `list` und `detail`.
+    Mobil ist immer nur eine Spalte sichtbar: die Liste, oder – wenn has_detail – die Detailansicht.
+#}
+{% set has_detail = has_detail ?? false %}
+{% set nav_collapsed = app.request.cookies.get('nav_collapsed') == '1' %}
+
+{% block body %}
+    <a href="#main" class="sr-only z-50 rounded-md bg-white px-4 py-2 shadow focus:not-sr-only focus:fixed focus:top-2 focus:left-2">{{ 'nav.skip_to_content'|trans }}</a>
+
+    <div class="flex h-dvh overflow-hidden"
+         data-controller="shell"
+         data-shell-collapsed-value="{{ nav_collapsed ? 'true' : 'false' }}"
+         data-shell-collapse-label-value="{{ 'nav.collapse'|trans }}"
+         data-shell-expand-label-value="{{ 'nav.expand'|trans }}"
+         data-collapsed="{{ nav_collapsed ? 'true' : 'false' }}"
+         data-action="keydown.esc@window->shell#close">
+
+        <twig:Sidebar />
+        <div class="fixed inset-0 z-30 hidden bg-slate-900/30 max-lg:nav-open:block" data-action="click->shell#close" aria-hidden="true"></div>
+
+        <main id="main" tabindex="-1" data-shell-target="main" class="flex min-w-0 flex-1">
+            <section aria-labelledby="list-heading"
+                     class="flex w-full min-w-0 shrink-0 flex-col border-r border-slate-200 bg-white lg:w-[25vw] lg:min-w-72{{ has_detail ? ' max-lg:hidden' }}">
+                <header class="flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 px-3">
+                    <button type="button" data-shell-target="openButton" data-action="shell#open"
+                            aria-label="{{ 'nav.open'|trans }}" aria-controls="main-nav" aria-expanded="false"
+                            class="grid size-10 place-items-center rounded-md text-slate-600 hover:bg-slate-100 lg:hidden">
+                        {{ ux_icon('lucide:menu', {class: 'size-5', 'aria-hidden': 'true'}) }}
+                    </button>
+                    <h1 id="list-heading" class="truncate text-base font-semibold">{% block list_title %}{% endblock %}</h1>
+                    <div class="ml-auto flex items-center gap-1">{% block list_actions %}{% endblock %}</div>
+                </header>
+                <div class="min-h-0 flex-1 overflow-y-auto">
+                    {% block list %}{% endblock %}
+                </div>
+            </section>
+
+            <section aria-labelledby="detail-heading" class="flex min-w-0 flex-1 flex-col bg-white{{ has_detail ? '' : ' max-lg:hidden' }}">
+                <header class="flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 px-3">
+                    {% if has_detail %}
+                        <a href="{% block back_url %}{% endblock %}" aria-label="{{ 'nav.back'|trans }}"
+                           class="grid size-10 place-items-center rounded-md text-slate-600 hover:bg-slate-100 lg:hidden">
+                            {{ ux_icon('lucide:arrow-left', {class: 'size-5', 'aria-hidden': 'true'}) }}
+                        </a>
+                    {% endif %}
+                    <h2 id="detail-heading" class="truncate text-base font-semibold">{% block detail_title %}{% endblock %}</h2>
+                    <div class="ml-auto flex items-center gap-1">{% block detail_actions %}{% endblock %}</div>
+                </header>
+                <div class="min-h-0 flex-1 overflow-y-auto">
+                    {% block detail %}{% endblock %}
+                </div>
+            </section>
+        </main>
+    </div>
+{% endblock %}
