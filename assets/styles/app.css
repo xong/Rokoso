@@ -34,6 +34,28 @@
     .badge { @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium; }
 }
 
+/* Gerenderter Markdown-Text (Forum) */
+@layer components {
+    .markdown { @apply text-sm leading-relaxed text-slate-800 break-words; }
+    .markdown > * + * { @apply mt-3; }
+    .markdown h1 { @apply text-xl font-semibold; }
+    .markdown h2 { @apply text-lg font-semibold; }
+    .markdown h3, .markdown h4, .markdown h5, .markdown h6 { @apply font-semibold; }
+    .markdown a { @apply text-brand-700 underline underline-offset-2; }
+    .markdown ul { @apply list-disc pl-6; }
+    .markdown ol { @apply list-decimal pl-6; }
+    .markdown li + li { @apply mt-1; }
+    .markdown blockquote { @apply border-l-4 border-slate-200 pl-3 text-slate-600; }
+    .markdown code { @apply rounded bg-slate-100 px-1 py-0.5 font-mono text-[0.85em]; }
+    .markdown pre { @apply overflow-x-auto rounded-md bg-slate-100 p-3; }
+    .markdown pre code { @apply bg-transparent p-0; }
+    .markdown img { @apply max-h-[32rem] max-w-full rounded-md; }
+    .markdown hr { @apply border-slate-200; }
+    .markdown table { @apply block overflow-x-auto border-collapse text-left; }
+    .markdown th, .markdown td { @apply border border-slate-200 px-2 py-1; }
+    .markdown th { @apply bg-slate-50 font-semibold; }
+}
+
 @layer base {
     :focus-visible {
         outline: 2px solid var(--color-brand-600);

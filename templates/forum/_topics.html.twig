@@ -1,0 +1,23 @@
+{# Themenliste; show_board: Bereich je Thema anzeigen (Übersicht, Projektseite) #}
+<ul role="list" class="card divide-y divide-slate-100">
+    {% for t in topics %}
+        {% set unread = t.id in unread_ids %}
+        <li class="flex items-start gap-3 px-3 py-2.5 hover:bg-slate-50">
+            <span class="mt-1.5 size-2 shrink-0 rounded-full {{ unread ? 'bg-brand-600' : 'bg-transparent' }}" aria-hidden="true"></span>
+            <div class="min-w-0 flex-1">
+                <a href="{{ path('forum_topic_show', {id: t.id}) }}" class="block truncate {{ unread ? 'font-semibold' : 'font-medium' }}">
+                    {{ t.title }}{% if unread %}<span class="sr-only"> ({{ 'forum.unread'|trans }})</span>{% endif %}
+                </a>
+                <p class="truncate text-xs text-slate-500">
+                    {% if show_board ?? false %}{{ t.board.name }} · {% endif %}
+                    {{ 'forum.last_post'|trans({'%name%': t.lastPostBy ? t.lastPostBy.name : 'mail.comments.deleted_user'|trans}) }},
+                    <time datetime="{{ t.lastPostAt|date('c') }}">{{ t.lastPostAt|short_date }}</time>
+                    {% if t.project %} · {{ t.project.name }}{% endif %}
+                </p>
+            </div>
+            <span class="badge shrink-0 bg-slate-100 text-slate-600" aria-label="{{ 'forum.post_count'|trans({'%count%': t.postCount}) }}">
+                {{ ux_icon('lucide:message-circle', {class: 'size-3', 'aria-hidden': 'true'}) }}{{ t.postCount }}
+            </span>
+        </li>
+    {% endfor %}
+</ul>

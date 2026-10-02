@@ -113,9 +113,9 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 17.2 Beim Schreiben einer E-Mail Dateien aus der Ablage anhängen
 
 ## Phase 18 – Forum (45)
-- [ ] 18.1 Bereiche (Hierarchie, Organisation/Projekt), Themen, Beiträge
-- [ ] 18.2 Markdown mit Bildern (Drag&Drop) und Dateianhängen
-- [ ] 18.3 Bearbeiten/Löschen, ungelesene Themen, Projektzuordnung
+- [x] 18.1 Bereiche (Hierarchie, Organisation/Projekt), Themen, Beiträge
+- [x] 18.2 Markdown mit Bildern (Drag&Drop) und Dateianhängen
+- [x] 18.3 Bearbeiten/Löschen, ungelesene Themen, Projektzuordnung
 
 ---
 

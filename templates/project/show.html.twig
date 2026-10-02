@@ -84,6 +84,20 @@
                     </ul>
                 {% endif %}
             </section>
+
+            <section aria-labelledby="project-forum-heading">
+                <div class="mb-2 flex items-center justify-between gap-2">
+                    <h2 id="project-forum-heading" class="text-sm font-semibold">{{ 'project.forum'|trans }}</h2>
+                    {% if project.organization %}
+                        <a class="link text-sm" href="{{ path('forum_board_new', {project: project.id}) }}">{{ 'forum.board_new_for_project'|trans }}</a>
+                    {% endif %}
+                </div>
+                {% if topics is empty %}
+                    <p class="text-sm text-slate-500">{{ 'project.no_topics'|trans }}</p>
+                {% else %}
+                    {{ include('forum/_topics.html.twig', {show_board: true}) }}
+                {% endif %}
+            </section>
         </div>
 
         {{ include('_partials/comments.html.twig', {

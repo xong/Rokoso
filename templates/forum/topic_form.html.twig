@@ -1,0 +1,24 @@
+{% extends 'forum/_layout.html.twig' %}
+
+{% set has_detail = true %}
+{% set current = board %}
+
+{% block detail_title %}{{ topic ? 'forum.topic_edit'|trans : 'forum.topic_new'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-3xl space-y-4 p-4 lg:p-6">
+        {{ include('forum/_breadcrumbs.html.twig', {last_link: true}) }}
+        {{ form_start(form) }}
+            {{ form_row(form.title) }}
+            {{ form_row(form.project) }}
+            {% if form.post is defined %}
+                {{ include('forum/_editor.html.twig', {post_form: form.post}) }}
+            {% endif %}
+            {{ form_rest(form) }}
+            <div class="mt-4 flex gap-2">
+                <button type="submit" class="btn-primary">{{ topic ? 'action.save'|trans : 'forum.topic_create'|trans }}</button>
+                <a class="btn-secondary" href="{{ topic ? path('forum_topic_show', {id: topic.id}) : path('forum_board_show', {id: board.id}) }}">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

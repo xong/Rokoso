@@ -1,0 +1,25 @@
+{# Markdown-Textfeld mit Bild-Upload (Drag&Drop, Einfügen, Knopf) und Anhängen; post_form = ForumPostFormType #}
+<div class="space-y-4" data-controller="markdown-editor"
+     data-markdown-editor-url-value="{{ path('forum_image_upload', {id: board.id}) }}"
+     data-markdown-editor-token-value="{{ csrf_token('forum-image') }}"
+     data-markdown-editor-uploading-value="{{ 'forum.image_uploading'|trans }}"
+     data-markdown-editor-done-value="{{ 'forum.image_inserted'|trans }}"
+     data-markdown-editor-error-value="{{ 'forum.image_invalid'|trans }}">
+    <div>
+        {{ form_label(post_form.body) }}
+        {{ form_widget(post_form.body, {attr: {
+            'data-markdown-editor-target': 'input',
+            'data-action': 'dragover->markdown-editor#over drop->markdown-editor#drop paste->markdown-editor#paste',
+        }}) }}
+        <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+            {{ form_help(post_form.body) }}
+            <label class="link cursor-pointer text-xs">
+                {{ ux_icon('lucide:image-plus', {class: 'inline size-3.5', 'aria-hidden': 'true'}) }} {{ 'forum.image_add'|trans }}
+                <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" class="sr-only" data-action="change->markdown-editor#pick">
+            </label>
+            <span class="text-xs text-slate-500" role="status" data-markdown-editor-target="status"></span>
+        </div>
+        {{ form_errors(post_form.body) }}
+    </div>
+    {{ form_row(post_form.files) }}
+</div>

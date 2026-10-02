@@ -1,0 +1,66 @@
+{% extends 'forum/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ board.name }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('forum_board_new', {parent: board.id}) }}" class="btn-icon" aria-label="{{ 'forum.board_new_sub'|trans({'%name%': board.name}) }}" title="{{ 'forum.board_new_sub'|trans({'%name%': board.name}) }}">
+        {{ ux_icon('lucide:folder-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+    {% if is_granted('FORUM_MANAGE', board) %}
+        <a href="{{ path('forum_board_edit', {id: board.id}) }}" class="btn-icon" aria-label="{{ 'forum.board_edit'|trans }}" title="{{ 'forum.board_edit'|trans }}">
+            {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+        </a>
+        {{ ui.post_button(path('forum_board_delete', {id: board.id}), 'delete-board-' ~ board.id, 'forum.board_delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'forum.board_delete_confirm'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block detail %}
+    <div class="max-w-4xl space-y-6 p-4 lg:p-6">
+        <div class="space-y-2">
+            {{ include('forum/_breadcrumbs.html.twig') }}
+            {% if board.description %}<p class="text-slate-600">{{ board.description }}</p>{% endif %}
+            {% if board.project %}
+                <p class="text-sm">
+                    <a class="badge bg-slate-100 text-slate-700 hover:bg-slate-200" href="{{ path('project_show', {id: board.project.id}) }}">
+                        <span class="size-2 rounded-full" style="background-color: {{ board.project.color }}" aria-hidden="true"></span>{{ board.project.name }}
+                    </a>
+                </p>
+            {% endif %}
+        </div>
+
+        {% if board.children is not empty %}
+            <section aria-labelledby="sub-heading">
+                <h2 id="sub-heading" class="mb-2 text-sm font-semibold">{{ 'forum.sub_boards_title'|trans }}</h2>
+                <ul role="list" class="grid gap-2 sm:grid-cols-2">
+                    {% for sub in board.children %}
+                        <li>
+                            <a href="{{ path('forum_board_show', {id: sub.id}) }}" class="card flex items-start gap-2 p-3 hover:bg-slate-50">
+                                {{ ux_icon('lucide:messages-square', {class: 'mt-0.5 size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                                <span class="min-w-0">
+                                    <span class="block font-medium">{{ sub.name }}</span>
+                                    {% if sub.description %}<span class="block truncate text-xs text-slate-500">{{ sub.description }}</span>{% endif %}
+                                </span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        <section aria-labelledby="topics-heading">
+            <div class="mb-2 flex items-center justify-between gap-2">
+                <h2 id="topics-heading" class="text-sm font-semibold">{{ 'forum.topics'|trans }}</h2>
+                <a class="btn-primary" href="{{ path('forum_topic_new', {id: board.id}) }}">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'forum.topic_new'|trans }}</a>
+            </div>
+            {% if topics is empty %}
+                <p class="text-sm text-slate-500">{{ 'forum.no_topics_board'|trans }}</p>
+            {% else %}
+                {{ include('forum/_topics.html.twig') }}
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

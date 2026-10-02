@@ -1,0 +1,64 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+{% import _self as tree %}
+
+{#
+    Forum: mittlere Spalte = Bereichsbaum je Organisation (ForumController::treeContext),
+    rechts Bereich, Thema oder Formular.
+#}
+
+{# Bereich im Baum; Unterbereiche nur entlang des geöffneten Pfads #}
+{% macro node(board, current, open_ids, depth) %}
+    {% import _self as tree %}
+    {% set active = current and current.id == board.id %}
+    {% set open = board.id in open_ids %}
+    <li>
+        <a href="{{ path('forum_board_show', {id: board.id}) }}" {% if active %}aria-current="page"{% endif %}
+           class="flex items-center gap-2 rounded-md py-1.5 pr-2 text-sm {{ active ? 'bg-brand-50 font-medium text-brand-700' : 'hover:bg-slate-100' }}"
+           style="padding-left: {{ 0.5 + depth * 1 }}rem">
+            {{ ux_icon('lucide:messages-square', {class: 'size-4 shrink-0 ' ~ (active ? 'text-brand-600' : 'text-slate-400'), 'aria-hidden': 'true'}) }}
+            <span class="min-w-0 flex-1 truncate">{{ board.name }}</span>
+            {% if board.children is not empty and not open %}
+                <span class="text-xs text-slate-400" aria-label="{{ 'forum.sub_boards'|trans({'%count%': board.children|length}) }}">{{ board.children|length }}</span>
+            {% endif %}
+        </a>
+        {% if open and board.children is not empty %}
+            <ul role="list">
+                {% for child in board.children %}{{ tree.node(child, current, open_ids, depth + 1) }}{% endfor %}
+            </ul>
+        {% endif %}
+    </li>
+{% endmacro %}
+
+{% block title %}{{ 'nav.forum'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.forum'|trans }}{% endblock %}
+{% block back_url %}{{ current and current.parent ? path('forum_board_show', {id: current.parent.id}) : path('forum_index') }}{% endblock %}
+
+{% block list_actions %}
+    <a href="{{ path('forum_board_new') }}" class="btn-icon" aria-label="{{ 'forum.board_new_root'|trans }}" title="{{ 'forum.board_new_root'|trans }}">
+        {{ ux_icon('lucide:plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block list %}
+    <nav aria-label="{{ 'forum.tree'|trans }}" class="space-y-4 p-2">
+        <a href="{{ path('forum_index') }}" {% if app.current_route == 'forum_index' %}aria-current="page"{% endif %}
+           class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm {{ app.current_route == 'forum_index' ? 'bg-brand-50 font-medium text-brand-700' : 'hover:bg-slate-100' }}">
+            {{ ux_icon('lucide:clock', {class: 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}{{ 'forum.recent'|trans }}
+        </a>
+        {% if tree is empty %}
+            {{ ui.empty('forum.no_boards', 'lucide:messages-square') }}
+        {% endif %}
+        {% for group in tree %}
+            <div>
+                <h3 class="flex items-center gap-2 px-2 pb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                    <span class="size-2 rounded-full" style="background-color: {{ group.organization.color }}" aria-hidden="true"></span>
+                    {{ group.organization.name }}
+                </h3>
+                <ul role="list">
+                    {% for board in group.boards %}{{ tree.node(board, current, open_ids, 0) }}{% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </nav>
+{% endblock %}

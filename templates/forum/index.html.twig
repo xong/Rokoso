@@ -1,0 +1,32 @@
+{% extends 'forum/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = false %}
+
+{% block detail_title %}{{ 'forum.recent'|trans }}{% endblock %}
+
+{% block detail_actions %}
+    {% if unread_ids is not empty %}
+        {{ ui.post_button(path('forum_mark_read'), 'forum', 'forum.mark_read', {class: 'btn-ghost', icon: 'lucide:check-check'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block detail %}
+    <div class="max-w-3xl space-y-6 p-4 lg:p-6">
+        <p class="text-slate-600">{{ 'forum.intro'|trans }}</p>
+        {% if organizations is empty %}
+            <p class="text-sm text-slate-500">{{ 'folder.no_organization'|trans }}</p>
+        {% elseif tree is empty %}
+            <ul role="list" class="flex flex-wrap gap-2">
+                {% for org in organizations %}
+                    <li><a class="btn-secondary" href="{{ path('forum_board_new', {organization: org.id}) }}">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'forum.board_new_in'|trans({'%name%': org.name}) }}</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if recent is empty %}
+            {{ ui.empty('forum.no_topics', 'lucide:message-circle') }}
+        {% else %}
+            {{ include('forum/_topics.html.twig', {topics: recent, show_board: true}) }}
+        {% endif %}
+    </div>
+{% endblock %}

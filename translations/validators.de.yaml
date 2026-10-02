@@ -15,3 +15,5 @@ folder:
     project_mismatch: Das Projekt gehört zu einer anderen Organisation.
 file:
     none_selected: Bitte wähle mindestens eine Datei aus.
+forum:
+    body_required: Bitte gib einen Text ein.

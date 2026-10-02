@@ -46,9 +46,11 @@ php bin/console cache:clear
 
 Der **Document Root** des Webservers zeigt auf `public/`. Für Apache liefert `composer require symfony/apache-pack` eine passende `.htaccess`; für nginx siehe die Symfony-Dokumentation („Configuring a Web Server“).
 
-Schreibrechte für den Webserver-Benutzer: `var/` (Cache, Logs, **Anhänge in `var/storage`**) und `public/uploads/` (Profilbilder, Logos, Fotos).
+Schreibrechte für den Webserver-Benutzer: `var/` (Cache, Logs, **Anhänge, Dateien und Forum-Uploads in `var/storage`**) und `public/uploads/` (Profilbilder, Logos, Fotos).
 
 Die Zeitzone ist auf `Europe/Berlin` ausgelegt: in der `php.ini` `date.timezone = Europe/Berlin` setzen.
+
+Dateien (Menü „Dateien“, Forum-Anhänge) dürfen bis zu **50 MB** groß sein. Damit das klappt, in der `php.ini` z. B. `upload_max_filesize = 50M`, `post_max_size = 200M` und `max_file_uploads = 20` setzen (bei nginx zusätzlich `client_max_body_size 200m;`).
 
 ## Cronjobs
 
@@ -85,7 +87,7 @@ php bin/console cache:clear
 Zu sichern sind:
 
 - die **Datenbank** (z. B. täglich `mysqldump --single-transaction coop > coop-$(date +%F).sql`)
-- **`var/storage/`** – Anhänge von E-Mails und Nachrichten
+- **`var/storage/`** – Anhänge von E-Mails und Nachrichten, Dateien (`files/`) und Forum-Uploads
 - **`public/uploads/`** – Profilbilder, Logos, Kontaktfotos
 - **`.env.local`** – insbesondere `APP_SECRET` (siehe oben)
 

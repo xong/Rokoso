@@ -1,0 +1,16 @@
+{# Pfad eines Bereichs; last_link: auch der letzte Bereich ist ein Link (z. B. auf der Themenseite) #}
+<nav aria-label="{{ 'forum.path'|trans }}" class="text-sm text-slate-500">
+    <ol role="list" class="flex flex-wrap items-center gap-1">
+        <li><a class="hover:underline" href="{{ path('forum_index') }}">{{ board.organization.name }}</a></li>
+        {% for b in board.path %}
+            <li class="flex items-center gap-1">
+                {{ ux_icon('lucide:chevron-right', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                {% if loop.last and not (last_link ?? false) %}
+                    <span aria-current="page" class="font-medium text-slate-700">{{ b.name }}</span>
+                {% else %}
+                    <a class="hover:underline" href="{{ path('forum_board_show', {id: b.id}) }}">{{ b.name }}</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+</nav>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Twig\Components;
 
 use App\Entity\User;
+use App\Repository\ForumTopicRepository;
 use App\Repository\MessageRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -40,6 +41,7 @@ final class Sidebar
         ['label' => 'nav.calendar', 'icon' => 'lucide:calendar', 'route' => 'calendar_month', 'match' => ['calendar_']],
         ['label' => 'nav.files', 'icon' => 'lucide:folder', 'route' => 'file_index', 'match' => ['file_', 'folder_']],
         ['label' => 'nav.shelf', 'icon' => 'lucide:bookmark', 'route' => 'shelf_index', 'match' => ['shelf_']],
+        ['label' => 'nav.forum', 'icon' => 'lucide:messages-square', 'route' => 'forum_index', 'match' => ['forum_']],
         ['label' => 'nav.contacts', 'icon' => 'lucide:contact', 'route' => 'contact_index', 'match' => ['contact_']],
         ['label' => 'nav.projects', 'icon' => 'lucide:folder-kanban', 'route' => 'project_index', 'match' => ['project_']],
         ['label' => 'nav.organizations', 'icon' => 'lucide:building-2', 'route' => 'organization_index', 'match' => ['organization_', 'mail_account_']],
@@ -48,6 +50,7 @@ final class Sidebar
     public function __construct(
         private readonly RequestStack $requestStack,
         private readonly MessageRepository $messages,
+        private readonly ForumTopicRepository $topics,
         private readonly Security $security,
     ) {
     }
@@ -60,6 +63,16 @@ final class Sidebar
         $user = $this->security->getUser();
 
         return $user instanceof User ? $this->messages->countUnreadInbox($user) : 0;
+    }
+
+    /**
+     * Forum topics with unread posts (badge next to "Forum").
+     */
+    public function getUnreadTopicCount(): int
+    {
+        $user = $this->security->getUser();
+
+        return $user instanceof User ? $this->topics->countUnread($user) : 0;
     }
 
     /**
@@ -80,6 +93,7 @@ final class Sidebar
                 $children[] = $child + ['active' => $child['route'] === $nav];
             }
             $item['children'] = $children;
+            $item['badge'] = 'forum_index' === $item['route'] ? $this->getUnreadTopicCount() : 0;
             $items[] = $item;
         }
 

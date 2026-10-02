@@ -1,0 +1,37 @@
+{% extends 'forum/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+{% set board = topic.board %}
+
+{% block detail_title %}{{ 'forum.post_edit'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-3xl space-y-4 p-4 lg:p-6">
+        <p class="text-sm text-slate-500">
+            <a class="link" href="{{ path('forum_topic_show', {id: topic.id}) }}#post-{{ post.id }}">{{ topic.title }}</a>
+        </p>
+        {% if post.attachments is not empty %}
+            <section aria-labelledby="attachments-heading">
+                <h2 id="attachments-heading" class="mb-2 text-sm font-semibold">{{ 'forum.attachments'|trans }}</h2>
+                <ul role="list" class="space-y-1 text-sm">
+                    {% for a in post.attachments %}
+                        <li class="flex items-center gap-2">
+                            {{ include('file/_icon.html.twig', {mime: a.mimeType}) }}<span class="min-w-0 truncate">{{ a.filename }}</span>
+                            {{ ui.post_button(path('forum_upload_delete', {id: a.id}), 'delete-upload-' ~ a.id, 'forum.attachment_remove',
+                                {class: 'btn-icon size-7 hover:text-red-600', icon: 'lucide:x', icon_only: true}) }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+        {{ form_start(form) }}
+            {{ include('forum/_editor.html.twig', {post_form: form}) }}
+            {{ form_rest(form) }}
+            <div class="mt-4 flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a class="btn-secondary" href="{{ path('forum_topic_show', {id: topic.id}) }}#post-{{ post.id }}">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

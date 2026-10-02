@@ -1,0 +1,83 @@
+{% extends 'forum/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+{% set board = topic.board %}
+
+{% block detail_title %}{{ topic.title }}{% endblock %}
+
+{% block detail_actions %}
+    {% if is_granted('FORUM_MANAGE', topic) %}
+        <a href="{{ path('forum_topic_edit', {id: topic.id}) }}" class="btn-icon" aria-label="{{ 'forum.topic_edit'|trans }}" title="{{ 'forum.topic_edit'|trans }}">
+            {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+        </a>
+        {{ ui.post_button(path('forum_topic_delete', {id: topic.id}), 'delete-topic-' ~ topic.id, 'forum.topic_delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'forum.topic_delete_confirm'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block detail %}
+    <div class="max-w-4xl space-y-6 p-4 lg:p-6">
+        <div class="space-y-1">
+            {{ include('forum/_breadcrumbs.html.twig', {last_link: true}) }}
+            {% if topic.project %}
+                <p class="text-sm">
+                    <a class="badge bg-slate-100 text-slate-700 hover:bg-slate-200" href="{{ path('project_show', {id: topic.project.id}) }}">
+                        <span class="size-2 rounded-full" style="background-color: {{ topic.project.color }}" aria-hidden="true"></span>{{ topic.project.name }}
+                    </a>
+                </p>
+            {% endif %}
+        </div>
+
+        <ol role="list" class="space-y-4" aria-label="{{ 'forum.posts'|trans }}">
+            {% for post in topic.posts %}
+                <li id="post-{{ post.id }}" class="card scroll-mt-4">
+                    <article aria-labelledby="post-{{ post.id }}-author">
+                        <header class="flex items-center gap-2 border-b border-slate-100 px-4 py-2">
+                            <twig:Avatar name="{{ post.author ? post.author.name : '?' }}" image="{{ post.author ? post.author.avatar : null }}" size="size-7 text-[10px]" />
+                            <div class="min-w-0 flex-1 text-sm">
+                                <span id="post-{{ post.id }}-author" class="font-medium">{{ post.author ? post.author.name : 'mail.comments.deleted_user'|trans }}</span>
+                                <time class="ml-1 text-xs text-slate-500" datetime="{{ post.createdAt|date('c') }}">{{ post.createdAt|date('d.m.Y H:i') }}</time>
+                                {% if post.editedAt %}
+                                    <span class="ml-1 text-xs text-slate-400">({{ 'forum.edited'|trans }} <time datetime="{{ post.editedAt|date('c') }}">{{ post.editedAt|short_date }}</time>)</span>
+                                {% endif %}
+                            </div>
+                            {% if is_granted('FORUM_EDIT_POST', post) %}
+                                <a href="{{ path('forum_post_edit', {id: post.id}) }}" class="btn-icon size-8" aria-label="{{ 'forum.post_edit'|trans }}" title="{{ 'forum.post_edit'|trans }}">
+                                    {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                </a>
+                            {% endif %}
+                            {% if not post.first and is_granted('FORUM_MANAGE', post) %}
+                                {{ ui.post_button(path('forum_post_delete', {id: post.id}), 'delete-post-' ~ post.id, 'forum.post_delete',
+                                    {class: 'btn-icon size-8 hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'forum.post_delete_confirm'}) }}
+                            {% endif %}
+                        </header>
+                        <div class="markdown px-4 py-3">{{ post.body|markdown }}</div>
+                        {% if post.attachments is not empty %}
+                            <ul role="list" class="flex flex-wrap gap-2 border-t border-slate-100 px-4 py-2" aria-label="{{ 'forum.attachments'|trans }}">
+                                {% for a in post.attachments %}
+                                    <li>
+                                        <a href="{{ path('forum_upload', {id: a.id, download: 1}) }}" data-turbo="false"
+                                           class="inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-2 py-1 text-sm ring-1 ring-slate-200 hover:bg-slate-100">
+                                            {{ include('file/_icon.html.twig', {mime: a.mimeType}) }}{{ a.filename }}
+                                            <span class="text-xs text-slate-500">{{ a.size|filesize }}</span>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </article>
+                </li>
+            {% endfor %}
+        </ol>
+
+        <section id="reply" aria-labelledby="reply-heading" class="card scroll-mt-4 p-4">
+            <h2 id="reply-heading" class="mb-3 font-semibold">{{ 'forum.reply'|trans }}</h2>
+            {{ form_start(form) }}
+                {{ include('forum/_editor.html.twig', {post_form: form}) }}
+                {{ form_rest(form) }}
+                <button type="submit" class="btn-primary mt-4">{{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'forum.reply_submit'|trans }}</button>
+            {{ form_end(form) }}
+        </section>
+    </div>
+{% endblock %}

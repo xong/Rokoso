@@ -1,0 +1,20 @@
+{% extends 'forum/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ board ? 'forum.board_edit'|trans : (parent ? 'forum.board_new_sub'|trans({'%name%': parent.name}) : 'forum.board_new_root'|trans) }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-xl p-4 lg:p-6">
+        {% if parent and not board %}
+            <p class="mb-4 text-sm text-slate-500">{{ 'folder.inherits'|trans({'%organization%': parent.organization.name}) }}</p>
+        {% endif %}
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a class="btn-secondary" href="{{ board ? path('forum_board_show', {id: board.id}) : (parent ? path('forum_board_show', {id: parent.id}) : path('forum_index')) }}">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Form\ProjectFormType;
 use App\Mail\MessageFilter;
 use App\Repository\CommentRepository;
+use App\Repository\ForumTopicRepository;
 use App\Repository\MessageRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
@@ -77,9 +78,13 @@ final class ProjectController extends AbstractController
 
     #[Route('/{id<\d+>}', name: 'project_show')]
     #[IsGranted(ProjectVoter::VIEW, 'project')]
-    public function show(Project $project, #[CurrentUser] User $user, MessageRepository $messages, CommentRepository $comments, StoredFileRepository $files): Response
+    public function show(Project $project, #[CurrentUser] User $user, MessageRepository $messages, CommentRepository $comments, StoredFileRepository $files, ForumTopicRepository $topics): Response
     {
+        $forumTopics = $topics->forProject($project, $user);
+
         return $this->render('project/show.html.twig', [
+            'topics' => $forumTopics,
+            'unread_ids' => $topics->unreadIds($user, $forumTopics),
             'projects' => $this->projects->findVisibleFor($user),
             'project' => $project,
             'comments' => $comments->forTarget($project),

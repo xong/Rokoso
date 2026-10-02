@@ -19,6 +19,7 @@ nav:
     mail_message: Neue Nachricht
     files: Dateien
     shelf: Ablage
+    forum: Forum
     calendar: Kalender
     contacts: Kontakte
     projects: Projekte
@@ -202,6 +203,8 @@ project:
     no_messages: Diesem Projekt sind noch keine Nachrichten zugeordnet.
     files: Dateien
     no_files: Diesem Projekt sind noch keine Dateien zugeordnet.
+    forum: Forum
+    no_topics: Diesem Projekt sind noch keine Forumsthemen zugeordnet.
 
 mail_account:
     title: E-Mail-Konten
@@ -542,6 +545,55 @@ shelf:
     source: Herkunft
     actions: Aktionen
     send: Ausgewählte per E-Mail senden
+
+forum:
+    intro: Im Forum tauscht ihr euch in Bereichen und Themen aus. Bereiche gehören zu einer Organisation, alle Mitglieder können lesen und schreiben.
+    tree: Forumsbereiche
+    path: Bereichspfad
+    recent: Neueste Themen
+    no_boards: Noch keine Bereiche
+    no_topics: Noch keine Themen
+    no_topics_board: In diesem Bereich gibt es noch keine Themen.
+    mark_read: Alle als gelesen markieren
+    marked_read: Alle Themen als gelesen markiert.
+    unread: ungelesen
+    sub_boards: '{1} 1 Unterbereich|]1,Inf[ %count% Unterbereiche'
+    sub_boards_title: Unterbereiche
+    board_new_root: Neuer Bereich
+    board_new_in: 'Neuer Bereich in %name%'
+    board_new_sub: 'Neuer Unterbereich in „%name%“'
+    board_new_for_project: Bereich für dieses Projekt anlegen
+    board_edit: Bereich bearbeiten
+    board_delete: Bereich löschen
+    board_delete_confirm: Bereich mit allen Unterbereichen, Themen und Beiträgen löschen?
+    board_created: Bereich angelegt.
+    board_name: Name
+    board_description: Beschreibung
+    organization_help: Alle Mitglieder dieser Organisation sehen den Bereich. Unterbereiche erben die Organisation.
+    topics: Themen
+    topic_new: Neues Thema
+    topic_create: Thema eröffnen
+    topic_title: Titel
+    topic_edit: Thema bearbeiten
+    topic_delete: Thema löschen
+    topic_delete_confirm: Thema mit allen Beiträgen löschen?
+    last_post: 'Letzter Beitrag von %name%'
+    post_count: '{1} 1 Beitrag|]1,Inf[ %count% Beiträge'
+    posts: Beiträge
+    edited: bearbeitet
+    post_edit: Beitrag bearbeiten
+    post_delete: Beitrag löschen
+    post_delete_confirm: Beitrag löschen?
+    reply: Antworten
+    reply_submit: Antwort senden
+    body: Text
+    markdown_help: 'Formatierung mit Markdown: **fett**, *kursiv*, [Link](https://…), Listen mit „-“. Bilder per Drag&Drop oder Einfügen.'
+    attachments: Anhänge
+    attachment_remove: Anhang entfernen
+    image_add: Bild einfügen
+    image_uploading: Bild wird hochgeladen …
+    image_inserted: Bild eingefügt.
+    image_invalid: Das Bild konnte nicht hochgeladen werden (PNG, JPEG, GIF oder WebP bis 10 MB).
 
 pwa:
     description: Gemeinsames Postfach, Projekte, Kalender und Kontakte für Stadtelternvertretungen.
