@@ -6,6 +6,7 @@ namespace App\Form;
 
 use App\Entity\MailAccount;
 use App\Entity\Project;
+use App\Entity\ShelfItem;
 use App\Mail\ComposeData;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -44,6 +45,15 @@ final class ComposeFormType extends AbstractType
                 'help' => 'compose.attachments_help',
                 'constraints' => [new Assert\All([new Assert\File(maxSize: '20M')])],
             ])
+            ->add('shelfItems', EntityType::class, [
+                'label' => 'compose.from_shelf',
+                'class' => ShelfItem::class,
+                'choices' => $options['shelf'],
+                'choice_label' => static fn (ShelfItem $i): string => $i->getFilename(),
+                'multiple' => true,
+                'expanded' => true,
+                'required' => false,
+            ])
             ->add('project', EntityType::class, [
                 'label' => 'nav.projects',
                 'class' => Project::class,
@@ -65,7 +75,9 @@ final class ComposeFormType extends AbstractType
             'accounts' => [],
             'projects' => [],
             'forward_attachments' => false,
+            'shelf' => [],
         ]);
+        $resolver->setAllowedTypes('shelf', 'array');
         $resolver->setAllowedTypes('accounts', 'array');
         $resolver->setAllowedTypes('projects', 'array');
         $resolver->setAllowedTypes('forward_attachments', 'bool');

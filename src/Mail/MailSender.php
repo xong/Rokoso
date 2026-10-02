@@ -9,6 +9,7 @@ use App\Entity\Message;
 use App\Entity\User;
 use App\Enum\MessageFolder;
 use App\Service\AttachmentStorage;
+use App\Service\Shelf;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Mime\Address;
@@ -22,6 +23,7 @@ final readonly class MailSender
     public function __construct(
         private SmtpTransportFactory $transports,
         private AttachmentStorage $storage,
+        private Shelf $shelf,
         private ReadTracker $readTracker,
         private EntityManagerInterface $em,
     ) {
@@ -75,6 +77,11 @@ final readonly class MailSender
             $mime = $file->getClientMimeType();
             $email->attach($content, $name, $mime);
             $message->addAttachment(new Attachment($message, $name, $mime, \strlen($content), $this->storage->store($content)));
+        }
+        foreach ($data->shelfItems as $item) {
+            $content = $this->shelf->read($item);
+            $email->attach($content, $item->getFilename(), $item->getMimeType());
+            $message->addAttachment(new Attachment($message, $item->getFilename(), $item->getMimeType(), \strlen($content), $this->storage->store($content)));
         }
         if (null !== $original && $data->forward && $data->keepAttachments) {
             foreach ($original->getVisibleAttachments() as $attachment) {

@@ -1,0 +1,76 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set show_list = false %}
+
+{% block title %}{{ 'nav.shelf'|trans }}{% endblock %}
+{% block detail_title %}{{ 'nav.shelf'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-4xl space-y-4 p-4 lg:p-6">
+        <p class="text-sm text-slate-600">{{ 'shelf.intro'|trans }}</p>
+
+        {% if items is empty %}
+            {{ ui.empty('shelf.empty', 'lucide:bookmark') }}
+        {% else %}
+            <form id="shelf-send" method="get" action="{{ path('mail_compose') }}"></form>
+            <div class="card overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="border-b border-slate-200 text-left text-xs text-slate-500">
+                        <tr>
+                            <th scope="col" class="w-10 px-3 py-2"><span class="sr-only">{{ 'shelf.select'|trans }}</span></th>
+                            <th scope="col" class="px-3 py-2 font-medium">{{ 'file.name'|trans }}</th>
+                            <th scope="col" class="px-3 py-2 font-medium max-md:hidden">{{ 'shelf.source'|trans }}</th>
+                            <th scope="col" class="px-3 py-2 text-right font-medium">{{ 'file.size'|trans }}</th>
+                            <th scope="col" class="px-3 py-2"><span class="sr-only">{{ 'shelf.actions'|trans }}</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for item in items %}
+                            {% set file = item.file %}
+                            {% set attachment = item.attachment %}
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-3 py-2">
+                                    <input type="checkbox" name="shelf[]" value="{{ item.id }}" form="shelf-send" id="shelf-item-{{ item.id }}"
+                                           class="size-4 rounded border-slate-300">
+                                </td>
+                                <td class="max-w-0 px-3 py-2">
+                                    <label for="shelf-item-{{ item.id }}" class="flex items-center gap-2">
+                                        {{ include('file/_icon.html.twig', {mime: item.mimeType}) }}<span class="truncate">{{ item.filename }}</span>
+                                    </label>
+                                </td>
+                                <td class="max-w-0 px-3 py-2 text-slate-600 max-md:hidden">
+                                    {% if file %}
+                                        <a class="link flex items-center gap-1 truncate" href="{{ path('file_show', {id: file.id}) }}">
+                                            {{ ux_icon('lucide:folder', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                            <span class="truncate">{{ file.folder.path|map(f => f.name)|join(' / ') }}</span>
+                                        </a>
+                                    {% else %}
+                                        <a class="link flex items-center gap-1 truncate" href="{{ path('mail_show', {folder: 'all', id: attachment.message.id}) }}">
+                                            {{ ux_icon('lucide:mail', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                            <span class="truncate">{{ attachment.message.subject ?: 'mail.no_subject'|trans }}</span>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-2 text-right whitespace-nowrap text-slate-600 tabular-nums">{{ item.size|filesize }}</td>
+                                <td class="px-3 py-2">
+                                    <div class="flex justify-end gap-1">
+                                        <a href="{{ path('shelf_download', {id: item.id}) }}" class="btn-icon size-8" data-turbo="false"
+                                           aria-label="{{ 'file.download_named'|trans({'%name%': item.filename}) }}" title="{{ 'file.download'|trans }}">
+                                            {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                        </a>
+                                        {{ ui.post_button(path('shelf_remove', {id: item.id}), 'shelf', 'shelf.remove_named'|trans({'%name%': item.filename}),
+                                            {class: 'btn-icon size-8 hover:text-red-600', icon: 'lucide:bookmark-x', icon_only: true}) }}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <button type="submit" form="shelf-send" class="btn-primary">
+                {{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'shelf.send'|trans }}
+            </button>
+        {% endif %}
+    </div>
+{% endblock %}

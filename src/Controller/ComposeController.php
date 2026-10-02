@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\MailAccount;
 use App\Entity\Message;
+use App\Entity\ShelfItem;
 use App\Entity\User;
 use App\Enum\MessageFolder;
 use App\Form\ComposeFormType;
@@ -15,6 +16,7 @@ use App\Repository\MailAccountRepository;
 use App\Repository\MessageRepository;
 use App\Repository\ProjectRepository;
 use App\Security\Voter\MessageVoter;
+use App\Service\Shelf;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -38,6 +40,7 @@ final class ComposeController extends AbstractController
         MessageRepository $messages,
         ProjectRepository $projects,
         MailSender $sender,
+        Shelf $shelf,
         TranslatorInterface $translator,
         LoggerInterface $logger,
     ): Response {
@@ -61,9 +64,14 @@ final class ComposeController extends AbstractController
             $this->prefill($data, $original, $request->query->has('forward'), $request->query->getBoolean('all'), $available, $translator);
         }
 
+        $shelfItems = $shelf->items($user);
+        $preselected = array_map(intval(...), $request->query->all('shelf'));
+        $data->shelfItems = array_values(array_filter($shelfItems, static fn (ShelfItem $i): bool => \in_array($i->getId(), $preselected, true)));
+
         $form = $this->createForm(ComposeFormType::class, $data, [
             'accounts' => $available,
             'projects' => $projects->findVisibleFor($user),
+            'shelf' => $shelfItems,
             'forward_attachments' => $data->forward && null !== $data->original && $data->original->hasAttachments(),
         ]);
         $form->handleRequest($request);

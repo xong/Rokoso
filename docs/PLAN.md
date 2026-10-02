@@ -109,8 +109,8 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 16.3 Datei-Detail mit Projektzuordnung und Kommentarspalte
 
 ## Phase 17 – Persönliche Ablage (44)
-- [ ] 17.1 Dateien und E-Mail-Anhänge in die eigene Ablage legen (Verweis, keine Kopie)
-- [ ] 17.2 Beim Schreiben einer E-Mail Dateien aus der Ablage anhängen
+- [x] 17.1 Dateien und E-Mail-Anhänge in die eigene Ablage legen (Verweis, keine Kopie)
+- [x] 17.2 Beim Schreiben einer E-Mail Dateien aus der Ablage anhängen
 
 ## Phase 18 – Forum (45)
 - [ ] 18.1 Bereiche (Hierarchie, Organisation/Projekt), Themen, Beiträge

@@ -18,6 +18,7 @@ nav:
     mail_compose: Neue E-Mail
     mail_message: Neue Nachricht
     files: Dateien
+    shelf: Ablage
     calendar: Kalender
     contacts: Kontakte
     projects: Projekte
@@ -323,6 +324,7 @@ mail:
         reset: Filter zurücksetzen
 
 compose:
+    from_shelf: Aus der Ablage anhängen
     title_reply: Antworten
     title_forward: Weiterleiten
     from: Von
@@ -526,6 +528,20 @@ file:
     properties: Eigenschaften
     delete: Datei löschen
     delete_confirm: Datei löschen?
+
+shelf:
+    intro: In deiner persönlichen Ablage sammelst du Verweise auf Dateien und E-Mail-Anhänge, um sie schnell wiederzufinden oder per E-Mail zu versenden. Es werden keine Kopien angelegt.
+    empty: Deine Ablage ist leer. Lege Dateien oder E-Mail-Anhänge über das Lesezeichen-Symbol hier ab.
+    add: In die Ablage legen
+    add_named: '„%name%“ in die Ablage legen'
+    remove: Aus der Ablage nehmen
+    remove_named: '„%name%“ aus der Ablage nehmen'
+    added: In die Ablage gelegt.
+    removed: Aus der Ablage genommen.
+    select: Auswählen
+    source: Herkunft
+    actions: Aktionen
+    send: Ausgewählte per E-Mail senden
 
 pwa:
     description: Gemeinsames Postfach, Projekte, Kalender und Kontakte für Stadtelternvertretungen.

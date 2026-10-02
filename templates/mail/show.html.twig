@@ -106,12 +106,16 @@
                     <h3 id="attachments-heading" class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'mail.attachments'|trans }}</h3>
                     <ul role="list" class="flex flex-wrap gap-2">
                         {% for a in message.visibleAttachments %}
-                            <li>
-                                <a href="{{ path('mail_attachment', {id: message.id, attachment: a.id}) }}" class="card flex items-center gap-2 px-3 py-2 hover:bg-slate-50" data-turbo="false">
+                            {% set shelved = in_shelf(a) %}
+                            <li class="card flex items-center">
+                                <a href="{{ path('mail_attachment', {id: message.id, attachment: a.id}) }}" class="flex items-center gap-2 py-2 pr-1 pl-3 hover:bg-slate-50" data-turbo="false">
                                     {{ ux_icon('lucide:file', {class: 'size-4 text-slate-400', 'aria-hidden': 'true'}) }}
                                     <span class="max-w-48 truncate">{{ a.filename }}</span>
                                     <span class="text-xs text-slate-500">{{ a.size|filesize }}</span>
                                 </a>
+                                {{ ui.post_button(path('shelf_toggle_attachment', {id: message.id, attachment: a.id}),
+                                    'shelf', (shelved ? 'shelf.remove_named' : 'shelf.add_named')|trans({'%name%': a.filename}),
+                                    {class: 'btn-icon size-8' ~ (shelved ? ' text-indigo-600' : ''), icon: shelved ? 'lucide:bookmark-check' : 'lucide:bookmark-plus', icon_only: true}) }}
                             </li>
                         {% endfor %}
                     </ul>

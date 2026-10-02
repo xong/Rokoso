@@ -9,6 +9,9 @@
     <a href="{{ path('file_download', {id: file.id}) }}" class="btn-icon" data-turbo="false" aria-label="{{ 'file.download'|trans }}" title="{{ 'file.download'|trans }}">
         {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
     </a>
+    {% set shelved = in_shelf(file) %}
+    {{ ui.post_button(path('shelf_toggle_file', {id: file.id}), 'shelf', shelved ? 'shelf.remove' : 'shelf.add',
+        {class: 'btn-icon' ~ (shelved ? ' text-indigo-600' : ''), icon: shelved ? 'lucide:bookmark-check' : 'lucide:bookmark-plus', icon_only: true}) }}
     {% if is_granted('FOLDER_DELETE', file) %}
         {{ ui.post_button(path('file_delete', {id: file.id}), 'delete-file-' ~ file.id, 'file.delete',
             {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'file.delete_confirm'}) }}

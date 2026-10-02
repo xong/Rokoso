@@ -32,6 +32,14 @@
                 {{ form_row(form.files) }}
                 {{ form_row(form.project) }}
             </div>
+            {% if form.shelfItems.vars.choices is empty %}
+                {% do form.shelfItems.setRendered %}
+            {% else %}
+                <details class="mb-4" {{ form.shelfItems.vars.value is not empty ? 'open' }}>
+                    <summary class="link cursor-pointer text-sm">{{ 'compose.from_shelf'|trans }}</summary>
+                    <div class="mt-3">{{ form_row(form.shelfItems, {label_attr: {class: 'sr-only'}}) }}</div>
+                </details>
+            {% endif %}
             {% if form.keepAttachments is defined %}
                 {{ form_row(form.keepAttachments, {help: original.visibleAttachments|map(a => a.filename)|join(', ')}) }}
             {% endif %}
