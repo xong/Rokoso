@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| **Aktuelle Phase** | Basisversion fertig (Phasen 0–12) – Abnahme durch den Projektinhaber |
+| **Aktuelle Phase** | Ausbau nach App.md 38–48 (Phasen 13–18) |
 | **Nächster Schritt** | Im Browser durchklicken (Layout, Mobil, Tastatur), Feedback sammeln, offene Fragen in `OFFENE-FRAGEN.md` klären, dann Ausbau aus dem Ideen-Parkplatz |
 | **Letzte Sitzung** | 2026-10-02 (Nacht): alle Phasen ohne Rückfragen umgesetzt, je Phase ein Commit; 46 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
@@ -89,6 +89,33 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 ## Phase 12 – Betrieb
 - [x] 12.1 Deployment-Anleitung (`docs/BETRIEB.md`: Cron für Sync, kein Worker nötig)
 - [x] 12.2 Backup, Updates, Admin-Doku; Demodaten-Befehl `app:demo`
+
+## Phase 13 – E-Mail-Feinschliff (38, 39, 40, 46, 47)
+- [ ] 13.1 Anhänge per Drag&Drop (E-Mail schreiben, interne Nachricht)
+- [ ] 13.2 Hover-Funktionsleiste unten links
+- [ ] 13.3 Auswahllisten (Projekt, Verantwortliche) schließen bei Klick außerhalb und mit Esc
+- [ ] 13.4 Nachrichten mit Projekt nicht mehr im Eingang; neuer Unterpunkt „Alle E-Mails“; Nachrichten beim Projekt sichtbar
+
+## Phase 14 – Kalender-Layout (48)
+- [ ] 14.1 Mittlere Spalte: Mini-Monat mit KW und Punkten, darunter „Demnächst“
+- [ ] 14.2 Detail: Woche (Standard) / Tag mit gleich hohen Stunden-Slots, Einträge positioniert, ganztägige oben
+
+## Phase 15 – Projekt-Kommentare (43)
+- [ ] 15.1 `Comment` verallgemeinert (Nachricht, Projekt, Datei); Kommentarspalte beim Projekt
+
+## Phase 16 – Dateien (41, 42)
+- [ ] 16.1 `Folder` (Hierarchie, Organisation/Projekt) und `File` (Speicher wie Anhänge)
+- [ ] 16.2 Menüpunkt „Dateien“: Ordner anlegen/umbenennen/löschen, hochladen (auch Drag&Drop), herunterladen
+- [ ] 16.3 Datei-Detail mit Projektzuordnung und Kommentarspalte
+
+## Phase 17 – Persönliche Ablage (44)
+- [ ] 17.1 Dateien und E-Mail-Anhänge in die eigene Ablage legen (Verweis, keine Kopie)
+- [ ] 17.2 Beim Schreiben einer E-Mail Dateien aus der Ablage anhängen
+
+## Phase 18 – Forum (45)
+- [ ] 18.1 Bereiche (Hierarchie, Organisation/Projekt), Themen, Beiträge
+- [ ] 18.2 Markdown mit Bildern (Drag&Drop) und Dateianhängen
+- [ ] 18.3 Bearbeiten/Löschen, ungelesene Themen, Projektzuordnung
 
 ---
 

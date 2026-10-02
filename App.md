@@ -45,3 +45,14 @@
 35. Nachrichten werden in der E-Mail-Ansicht angezeigt und genau wie E-Mails behandelt.
 36. Es gibt einen Menüpunkt "Kontakte". Kontakte sollen alle denkbaren Felder haben, die aber übersichtlich und leicht zu bedienen sind.
 37. Wenn eine E-Mail von einem Kontakt kommt, soll das Bild des Kontakts oder ein Icon mit den Initialen des Kontakts angezeigt werden.
+38. Dateianhänge können per Drag&Drop hinzugefügt werden.
+39. Die hoverbare Funktionenleiste in der E-Mail-Liste soll unten links angezeigt werden.
+40. Wenn man in dieser Funktionleiste auf "E-Mail zu Projekt zuordnen" klickt, öffnet sich die Detailansicht und die Dropdownbox für die Projektzuordnung wird angezeigt. Diese lässt sich dann allerdings nicht mit einem Klick irgendwo anders hin schließen. Das muss verbessert werden.
+41. Es soll einen weiteren Menüpunkt "Dateien" geben, der die Möglichkeit bietet, Dateien hochzuladen und herunterzuladen. Dateien werden dabei innerhalb einer Hierarchie organisiert, die frei gewählt werden kann.
+42. Dateien können Projekten zugeordnet werden und haben wie die E-Mails eine Kommentarspalte.
+43. Projekte haben auch eine Kommentarspalte.
+44. Dateien können in einer Dateiablage als Referenz gespeichert werden. Die Dateien in der Dateiablage können beim Erstellen einer E-Mail als Anhang verwendet werden.
+45. Es gibt einen weiteren Menüpunkt "Forum". Dort soll ein vollwertiges Forum entstehen, das sowohl Textbeiträge und Bilder als auch Dateianhänge entgegennehmen kann. Das Forum soll ähnlich wie die Dateien in einer Hierarchie organisiert werden. Hierarchieebenen und Forenthemen sollen Organisationen und Projekten zugeordnet werden können.
+46. Sobald E-Mails einem Projekt zugeordnet sind, sollen sie nicht mehr im Posteingang angezeigt werden. Natürlich soll man über die Projekte aber noch auf die E-Mails zugreifen können.
+47. Es soll einen weiteren Untermenüpunkt "Alle E-Mails" geben, der alle E-Mails auflistet, egal ob sie einem Projekt zugeordnet sind oder nicht.
+48. In der Kalenderansicht fehlt die mittlere Spalte. Hier soll der Monatskalender mit Kalenderwochen angezeigt werden. Die Detailansicht enthält entweder eine Wochenansicht, wenn man auf eine Kalenderwoche klickt oder eine Tagesansicht, wenn man auf einen Tag klickt. Die Tagesansicht ist eine Liste mit gleichhohen Uhrzeitenslots, in die die Aufgaben und Termine eingetragen sind. In der Wochenansicht werden diese Tage genauso angezeigt, sind aber zusammengestaucht nebeneinander. Wenn du hier Fragen hast, frag lieber nochmal nach.
