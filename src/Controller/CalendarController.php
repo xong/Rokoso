@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Calendar\CalendarService;
+use App\Calendar\Occurrence;
 use App\Entity\CalendarItem;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
@@ -34,45 +35,23 @@ final class CalendarController extends AbstractController
     ) {
     }
 
+    /**
+     * Start page: mini month (middle column) and the current week (detail). On mobile only the mini month.
+     */
     #[Route('', name: 'calendar_month')]
     public function month(Request $request, #[CurrentUser] User $user): Response
     {
-        $month = self::parseDate($request->query->getString('month').'-01') ?? new \DateTimeImmutable('first day of this month');
-        $month = $month->modify('first day of this month')->setTime(0, 0);
-        $gridStart = $month->modify('monday this week');
-        $gridEnd = $month->modify('last day of this month')->modify('sunday this week')->modify('+1 day');
-        $project = $this->projectFilter($request);
+        $monday = new \DateTimeImmutable('monday this week')->setTime(0, 0);
 
-        $occurrences = $this->calendar->occurrences($user, $gridStart, $gridEnd, $project);
-        $weeks = [];
-        for ($day = $gridStart; $day < $gridEnd; $day = $day->modify('+1 day')) {
-            $key = $day->format('o-W');
-            $weeks[$key] ??= ['year' => (int) $day->format('o'), 'number' => (int) $day->format('W'), 'days' => []];
-            $weeks[$key]['days'][] = [
-                'date' => $day,
-                'in_month' => $day->format('m') === $month->format('m'),
-                'occurrences' => CalendarService::forDay($occurrences, $day),
-            ];
-        }
-
-        return $this->render('calendar/month.html.twig', [
-            'month' => $month,
-            'weeks' => array_values($weeks),
-            'project_filter' => $project,
-            'projects' => $this->projects->findVisibleFor($user),
-        ]);
+        return $this->renderTimeline($request, $user, self::weekDays($monday), 'week', true);
     }
 
     #[Route('/week/{year<\d{4}>}/{week<\d{1,2}>}', name: 'calendar_week')]
     public function week(Request $request, int $year, int $week, #[CurrentUser] User $user): Response
     {
-        $start = (new \DateTimeImmutable())->setISODate($year, max(1, min(53, $week)))->setTime(0, 0);
-        $days = [];
-        for ($i = 0; $i < 7; ++$i) {
-            $days[] = $start->modify("+$i days");
-        }
+        $start = new \DateTimeImmutable()->setISODate($year, max(1, min(53, $week)))->setTime(0, 0);
 
-        return $this->renderTimeline($request, $user, $days, 'week');
+        return $this->renderTimeline($request, $user, self::weekDays($start), 'week');
     }
 
     #[Route('/day/{date<\d{4}-\d{2}-\d{2}>}', name: 'calendar_day')]
@@ -105,12 +84,14 @@ final class CalendarController extends AbstractController
 
     #[Route('/item/{id<\d+>}', name: 'calendar_item_show')]
     #[IsGranted(CalendarItemVoter::EDIT, 'item')]
-    public function show(Request $request, CalendarItem $item): Response
+    public function show(Request $request, CalendarItem $item, #[CurrentUser] User $user): Response
     {
+        $date = self::parseDate($request->query->getString('date'));
+
         return $this->render('calendar/show.html.twig', [
             'item' => $item,
-            'occurrence_date' => self::parseDate($request->query->getString('date')),
-        ]);
+            'occurrence_date' => $date,
+        ] + $this->sidebarContext($request, $user, $date ?? $item->getStartsAt()));
     }
 
     #[Route('/item/{id<\d+>}/edit', name: 'calendar_item_edit')]
@@ -169,13 +150,14 @@ final class CalendarController extends AbstractController
             $this->em->refresh($item);
         }
 
-        return $this->render('calendar/form.html.twig', ['form' => $form, 'item' => $isNew ? null : $item]);
+        return $this->render('calendar/form.html.twig', ['form' => $form, 'item' => $isNew ? null : $item]
+            + $this->sidebarContext($request, $user, $item->getStartsAt()));
     }
 
     /**
      * @param non-empty-list<\DateTimeImmutable> $days
      */
-    private function renderTimeline(Request $request, User $user, array $days, string $mode): Response
+    private function renderTimeline(Request $request, User $user, array $days, string $mode, bool $isStart = false): Response
     {
         $project = $this->projectFilter($request);
         $last = $days[\count($days) - 1];
@@ -187,23 +169,109 @@ final class CalendarController extends AbstractController
             foreach (CalendarService::forDay($occurrences, $day) as $occurrence) {
                 if ($occurrence->isAllDayLike()) {
                     $allDay[] = $occurrence;
-                    continue;
+                } else {
+                    $timed[] = ['o' => $occurrence, 'start' => $occurrence->startMinute($day), 'end' => $occurrence->endMinute($day)];
                 }
-                // Überlappende Termine nebeneinander versetzen (einfache Spuren)
-                $start = $occurrence->startMinute($day);
-                $lane = \count(array_filter($timed, static fn (array $t): bool => $t['end'] > $start));
-                $timed[] = ['o' => $occurrence, 'start' => $start, 'end' => $occurrence->endMinute($day), 'lane' => min($lane, 3)];
             }
-            $columns[] = ['date' => $day, 'all_day' => $allDay, 'timed' => $timed];
+            $columns[] = ['date' => $day, 'all_day' => $allDay, 'timed' => self::layoutLanes($timed)];
         }
 
         return $this->render('calendar/timeline.html.twig', [
             'mode' => $mode,
+            'is_start' => $isStart,
             'columns' => $columns,
             'first' => $days[0],
+        ] + $this->sidebarContext($request, $user, $days[0]));
+    }
+
+    /**
+     * Overlapping entries side by side: each gets a lane and the number of lanes of its overlap group.
+     *
+     * @param list<array{o: Occurrence, start: int, end: int}> $timed
+     *
+     * @return list<array{o: Occurrence, start: int, end: int, lane: int, lanes: int}>
+     */
+    private static function layoutLanes(array $timed): array
+    {
+        usort($timed, static fn (array $a, array $b): int => [$a['start'], $b['end']] <=> [$b['start'], $a['end']]);
+        // Group index per entry; a new group starts when an entry begins after all previous ones ended
+        $placed = [];
+        $laneCount = [];
+        $laneEnds = [];
+        $groupEnd = -1;
+        $groupIndex = -1;
+        foreach ($timed as $entry) {
+            if ($entry['start'] >= $groupEnd) {
+                ++$groupIndex;
+                $laneEnds = [];
+                $groupEnd = -1;
+            }
+            $lane = 0;
+            while (isset($laneEnds[$lane]) && $laneEnds[$lane] > $entry['start']) {
+                ++$lane;
+            }
+            $laneEnds[$lane] = $entry['end'];
+            $groupEnd = max($groupEnd, $entry['end']);
+            $laneCount[$groupIndex] = \count($laneEnds);
+            $placed[] = [$groupIndex, $entry + ['lane' => $lane]];
+        }
+
+        return array_map(static fn (array $p): array => $p[1] + ['lanes' => $laneCount[$p[0]]], $placed);
+    }
+
+    /**
+     * Middle column of all calendar pages: mini month (from ?month= or the shown date) and upcoming entries.
+     *
+     * @return array<string, mixed>
+     */
+    private function sidebarContext(Request $request, User $user, \DateTimeImmutable $reference): array
+    {
+        $project = $this->projectFilter($request);
+        $month = self::parseDate($request->query->getString('month').'-01') ?? $reference;
+        $month = $month->modify('first day of this month')->setTime(0, 0);
+        $gridStart = $month->modify('monday this week');
+        $gridEnd = $month->modify('last day of this month')->modify('sunday this week')->modify('+1 day');
+
+        $occurrences = $this->calendar->occurrences($user, $gridStart, $gridEnd, $project);
+        $weeks = [];
+        for ($day = $gridStart; $day < $gridEnd; $day = $day->modify('+1 day')) {
+            $key = $day->format('o-W');
+            $weeks[$key] ??= ['year' => (int) $day->format('o'), 'number' => (int) $day->format('W'), 'days' => []];
+            $dayOccurrences = CalendarService::forDay($occurrences, $day);
+            $weeks[$key]['days'][] = [
+                'date' => $day,
+                'in_month' => $day->format('m') === $month->format('m'),
+                'count' => \count($dayOccurrences),
+                'colors' => \array_slice(array_values(array_unique(array_map(static fn (Occurrence $o): string => $o->item->getColor(), $dayOccurrences))), 0, 3),
+            ];
+        }
+
+        $now = new \DateTimeImmutable();
+        $upcoming = array_values(array_filter(
+            $this->calendar->occurrences($user, $now->setTime(0, 0), $now->modify('+30 days'), $project),
+            static fn (Occurrence $o): bool => !$o->item->isDone() && $o->end >= $now,
+        ));
+
+        return [
+            'mini_month' => $month,
+            'mini_weeks' => array_values($weeks),
+            'upcoming' => \array_slice($upcoming, 0, 8),
             'project_filter' => $project,
             'projects' => $this->projects->findVisibleFor($user),
-        ]);
+        ];
+    }
+
+    /**
+     * @return non-empty-list<\DateTimeImmutable>
+     */
+    private static function weekDays(\DateTimeImmutable $monday): array
+    {
+        $days = [$monday];
+        for ($i = 1; $i < 7; ++$i) {
+            $days[] = $monday->modify("+$i days");
+        }
+
+        return $days;
     }
 
     private function projectFilter(Request $request): ?int

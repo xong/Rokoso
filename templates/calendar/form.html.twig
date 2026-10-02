@@ -1,8 +1,5 @@
-{% extends 'layout/app.html.twig' %}
+{% extends 'calendar/_layout.html.twig' %}
 
-{% set show_list = false %}
-
-{% block title %}{{ (item ? 'calendar.edit' : 'calendar.new')|trans }}{% endblock %}
 {% block detail_title %}{{ (item ? 'calendar.edit' : 'calendar.new')|trans }}{% endblock %}
 
 {% macro people(field, label) %}

@@ -1,15 +1,17 @@
-{% extends 'layout/app.html.twig' %}
+{% extends 'calendar/_layout.html.twig' %}
 
-{% set show_list = false %}
-{% set pf = project_filter ? {project: project_filter} : {} %}
+{# Startseite: auf dem Handy nur Mini-Monat, am Desktop zusätzlich die aktuelle Woche #}
+{% set has_detail = not is_start %}
 {% set weekdays = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] %}
 {% set today = 'now'|date('Y-m-d') %}
-{% set hour_px = 48 %}
+{% set hour_px = 44 %}
+{% set sel_from = first|date('Y-m-d') %}
+{% set sel_to = mode == 'week' ? first|date_modify('+6 days')|date('Y-m-d') : sel_from %}
+{% set compact = mode == 'week' %}
 
-{% block title %}{{ 'nav.calendar'|trans }}{% endblock %}
 {% block detail_title %}
     {% if mode == 'week' %}
-        {{ 'calendar.week_title'|trans({'%week%': first|date('W'), '%from%': first|date('d.m.'), '%to%': first|date_modify('+6 days')|date('d.m.Y')}) }}
+        {{ 'calendar.week_title'|trans({'%week%': first|date('W') + 0, '%from%': first|date('d.m.'), '%to%': first|date_modify('+6 days')|date('d.m.Y')}) }}
     {% else %}
         {{ weekdays[first|date('w')] }}, {{ first|date('d.m.Y') }}
     {% endif %}
@@ -26,57 +28,57 @@
         today_url: mode == 'week' ? path('calendar_week', {year: 'now'|date('o'), week: 'now'|date('W')}|merge(pf)) : path('calendar_day', {date: today}|merge(pf)),
     }) }}
 
-    <div class="overflow-x-auto">
-        <div class="{{ mode == 'week' ? 'min-w-[48rem]' : '' }}">
-            {# Kopf mit Tagen und ganztägigen Einträgen #}
-            <div class="grid border-b border-slate-200" style="grid-template-columns: 3.5rem repeat({{ columns|length }}, minmax(0, 1fr))">
-                <div class="py-1 text-[10px] text-slate-400 self-end text-right pr-2">{{ 'calendar.all_day_short'|trans }}</div>
-                {% for col in columns %}
-                    {% set is_today = col.date|date('Y-m-d') == today %}
-                    <div class="min-w-0 border-l border-slate-100 p-1">
-                        <a href="{{ path('calendar_day', {date: col.date|date('Y-m-d')}|merge(pf)) }}" {% if is_today %}aria-current="date"{% endif %}
-                           class="mb-1 flex items-baseline gap-1 rounded px-1 text-xs hover:bg-slate-100 {{ is_today ? 'font-semibold text-brand-700' : 'text-slate-600' }}">
-                            {{ weekdays[col.date|date('w')] }} <span class="text-base">{{ col.date|date('j') }}</span>
-                        </a>
-                        <ul role="list" class="space-y-0.5 text-xs">
-                            {% for o in col.all_day %}<li>{{ include('calendar/_chip.html.twig', {o: o, day: col.date}) }}</li>{% endfor %}
-                        </ul>
-                    </div>
+    {% set grid_cols = (compact ? '2.25rem' : '3.5rem') ~ ' repeat(' ~ columns|length ~ ', minmax(0, 1fr))' %}
+
+    {# Kopf mit Tagen und ganztägigen Einträgen #}
+    <div class="grid border-b border-slate-200" style="grid-template-columns: {{ grid_cols }}">
+        <div class="self-end pr-1 pb-1 text-right text-[10px] leading-tight text-slate-400">{{ 'calendar.all_day_short'|trans }}</div>
+        {% for col in columns %}
+            {% set is_today = col.date|date('Y-m-d') == today %}
+            <div class="min-w-0 border-l border-slate-100 p-0.5">
+                <a href="{{ path('calendar_day', {date: col.date|date('Y-m-d')}|merge(pf)) }}" {% if is_today %}aria-current="date"{% endif %}
+                   aria-label="{{ weekdays[col.date|date('w')] }}, {{ col.date|date('d.m.Y') }}"
+                   class="mb-0.5 flex items-baseline justify-center gap-1 rounded px-0.5 text-xs hover:bg-slate-100 {{ is_today ? 'font-semibold text-brand-700' : 'text-slate-600' }}">
+                    <span aria-hidden="true">{{ weekdays[col.date|date('w')] }}</span> <span class="text-base" aria-hidden="true">{{ col.date|date('j') }}</span>
+                </a>
+                <ul role="list" class="space-y-0.5 text-xs">
+                    {% for o in col.all_day %}<li class="min-w-0">{{ include('calendar/_chip.html.twig', {o: o, day: col.date}) }}</li>{% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+
+    {# Zeitleiste: jede Stunde gleich hoch, Start bei 7 Uhr #}
+    <div class="max-h-[calc(100dvh-12rem)] overflow-y-auto" data-controller="scroll-to" data-scroll-to-offset-value="{{ 7 * hour_px }}">
+        <div class="relative grid" style="grid-template-columns: {{ grid_cols }}; height: {{ 24 * hour_px }}px">
+            <div aria-hidden="true">
+                {% for h in 0..23 %}
+                    <div class="relative pr-1 text-right text-[10px] text-slate-400 tabular-nums" style="height: {{ hour_px }}px"><span class="inline-block -translate-y-1/2">{{ h > 0 ? (compact ? h : '%02d:00'|format(h)) : '' }}</span></div>
                 {% endfor %}
             </div>
-
-            {# Zeitleiste #}
-            <div class="max-h-[calc(100dvh-12rem)] overflow-y-auto" data-controller="scroll-to" data-scroll-to-offset-value="{{ 7 * hour_px }}">
-                <div class="relative grid" style="grid-template-columns: 3.5rem repeat({{ columns|length }}, minmax(0, 1fr)); height: {{ 24 * hour_px }}px">
-                    <div aria-hidden="true">
-                        {% for h in 0..23 %}
-                            <div class="relative pr-2 text-right text-[10px] text-slate-400" style="height: {{ hour_px }}px"><span class="-translate-y-1/2 inline-block">{{ h > 0 ? '%02d:00'|format(h) : '' }}</span></div>
+            {% for col in columns %}
+                <div class="relative min-w-0 border-l border-slate-100">
+                    {% for h in 0..23 %}<div class="border-t border-slate-100" style="height: {{ hour_px }}px" aria-hidden="true"></div>{% endfor %}
+                    {% if col.date|date('Y-m-d') == today %}
+                        {% set now_min = ('now'|date('G')) * 60 + ('now'|date('i')) %}
+                        <div class="pointer-events-none absolute inset-x-0 z-10 border-t-2 border-red-500" style="top: {{ now_min * hour_px / 60 }}px" aria-hidden="true"></div>
+                    {% endif %}
+                    <ul role="list" aria-label="{{ weekdays[col.date|date('w')] }}, {{ col.date|date('d.m.Y') }}">
+                        {% for t in col.timed %}
+                            {% set item = t.o.item %}
+                            <li class="absolute overflow-hidden px-px" style="top: {{ t.start * hour_px / 60 }}px; height: {{ max(14, (t.end - t.start) * hour_px / 60 - 1) }}px; left: {{ t.lane * 100 / t.lanes }}%; width: {{ 100 / t.lanes }}%">
+                                <a href="{{ path('calendar_item_show', {id: item.id, date: t.o.start|date('Y-m-d')}) }}"
+                                   title="{{ t.o.start|date('H:i') }}{% if not item.task %}–{{ t.o.end|date('H:i') }}{% endif %} {{ item.title }}"
+                                   class="block h-full overflow-hidden rounded-sm border-l-[3px] px-1 py-px leading-tight shadow-sm hover:brightness-95 {{ compact ? 'text-[11px]' : 'text-xs' }} {{ item.done ? 'line-through opacity-60' : '' }}"
+                                   style="border-color: {{ item.color }}; background-color: color-mix(in oklab, {{ item.color }} 15%, white)">
+                                    <span class="block truncate font-medium">{{ item.title }}</span>
+                                    <span class="block truncate text-slate-600 tabular-nums">{{ t.o.start|date('H:i') }}{% if not item.task %}–{{ t.o.end|date('H:i') }}{% endif %}{% if item.location and not compact %} · {{ item.location }}{% endif %}</span>
+                                </a>
+                            </li>
                         {% endfor %}
-                    </div>
-                    {% for col in columns %}
-                        <div class="relative border-l border-slate-100">
-                            {% for h in 0..23 %}<div class="border-t border-slate-100" style="height: {{ hour_px }}px" aria-hidden="true"></div>{% endfor %}
-                            {% if col.date|date('Y-m-d') == today %}
-                                {% set now_min = ('now'|date('G')) * 60 + ('now'|date('i')) %}
-                                <div class="pointer-events-none absolute inset-x-0 z-10 border-t-2 border-red-500" style="top: {{ now_min * hour_px / 60 }}px" aria-hidden="true"></div>
-                            {% endif %}
-                            <ul role="list" class="contents">
-                                {% for t in col.timed %}
-                                    {% set item = t.o.item %}
-                                    <li class="absolute right-0.5 overflow-hidden" style="top: {{ t.start * hour_px / 60 }}px; height: {{ (t.end - t.start) * hour_px / 60 - 2 }}px; left: {{ 2 + t.lane * 14 }}%">
-                                        <a href="{{ path('calendar_item_show', {id: item.id, date: t.o.start|date('Y-m-d')}) }}"
-                                           class="block h-full rounded border-l-4 px-1.5 py-0.5 text-xs shadow-sm hover:brightness-95 {{ item.done ? 'line-through opacity-60' : '' }}"
-                                           style="border-color: {{ item.color }}; background-color: color-mix(in oklab, {{ item.color }} 15%, white)">
-                                            <span class="block font-medium">{{ item.title }}</span>
-                                            <span class="block text-slate-600 tabular-nums">{{ t.o.start|date('H:i') }}{% if not item.task %}–{{ t.o.end|date('H:i') }}{% endif %}{% if item.location %} · {{ item.location }}{% endif %}</span>
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endfor %}
+                    </ul>
                 </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

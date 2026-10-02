@@ -39,16 +39,61 @@ final class CalendarTest extends AppTestCase
 
         $this->client->request('GET', '/calendar?month=2026-10');
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('table', 'Elternabend');
-        self::assertSelectorExists('a[href="/calendar/week/2026/42"]');
-        self::assertSelectorExists('a[href="/calendar/day/2026-10-14"]');
+        // Mini month: KW links to the week, days to the day view, entries as count
+        self::assertSelectorExists('table a[href="/calendar/week/2026/42"]');
+        self::assertSelectorExists('table a[href="/calendar/day/2026-10-14"][aria-label$="1 Eintrag"]');
+        self::assertSelectorNotExists('table a[href="/calendar/day/2026-10-15"][aria-label*="Eintrag"]');
 
         $this->client->request('GET', '/calendar/week/2026/42');
-        self::assertSelectorTextContains('main', '19:00–21:00');
+        self::assertSelectorTextContains('[aria-labelledby="detail-heading"]', '19:00–21:00');
         $this->client->request('GET', '/calendar/day/2026-10-14');
-        self::assertSelectorTextContains('main', 'Elternabend');
+        self::assertSelectorTextContains('[aria-labelledby="detail-heading"]', 'Elternabend');
         $this->client->request('GET', '/calendar/day/2026-10-15');
-        self::assertSelectorTextNotContains('main', 'Elternabend');
+        self::assertSelectorTextNotContains('[aria-labelledby="detail-heading"]', 'Elternabend');
+    }
+
+    public function testOverlappingEntriesShareTheColumn(): void
+    {
+        foreach (['Sitzung' => ['10:00', '12:00'], 'Telefonat' => ['11:00', '11:30'], 'Mittag' => ['13:00', '14:00']] as $title => [$from, $to]) {
+            $this->em()->persist((new CalendarItem($this->user))->setTitle($title)
+                ->setStartsAt(new \DateTimeImmutable('2026-10-14 '.$from))->setEndsAt(new \DateTimeImmutable('2026-10-14 '.$to)));
+        }
+        $this->em()->flush();
+
+        $crawler = $this->client->request('GET', '/calendar/day/2026-10-14');
+        $styles = [];
+        foreach ($crawler->filter('li[style*="width"]') as $li) {
+            \assert($li instanceof \DOMElement);
+            $styles[trim($li->textContent)] = $li->getAttribute('style');
+        }
+        self::assertCount(3, $styles);
+        self::assertStringContainsString('width: 50%', $this->styleFor($styles, 'Sitzung'));
+        self::assertStringContainsString('left: 50%', $this->styleFor($styles, 'Telefonat'));
+        self::assertStringContainsString('width: 100%', $this->styleFor($styles, 'Mittag'));
+    }
+
+    /**
+     * @param array<string, string> $styles
+     */
+    private function styleFor(array $styles, string $title): string
+    {
+        foreach ($styles as $text => $style) {
+            if (str_contains($text, $title)) {
+                return $style;
+            }
+        }
+        self::fail('No entry '.$title);
+    }
+
+    public function testStartPageShowsCurrentWeekAndUpcoming(): void
+    {
+        $this->em()->persist((new CalendarItem($this->user))->setTitle('Bald')->setStartsAt(new \DateTimeImmutable('+2 days 10:00')));
+        $this->em()->flush();
+
+        $this->client->request('GET', '/calendar');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('#upcoming-heading + ul', 'Bald');
+        self::assertSelectorTextContains('main', 'KW '.(int) date('W'));
     }
 
     public function testEndBeforeStartIsRejected(): void

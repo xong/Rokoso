@@ -1,6 +1,6 @@
 {#
-    Kopfzeile des Kalenders. Variablen:
-    mode (month|week|day), prev_url, next_url, today_url, ref (Datum für Ansichtswechsel), projects, project_filter
+    Kopfzeile der Wochen-/Tagesansicht. Variablen:
+    mode (week|day), prev_url, next_url, today_url, ref (Datum für Ansichtswechsel und neue Einträge), project_filter
 #}
 {% set pf = project_filter ? {project: project_filter} : {} %}
 <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 px-3 py-2">
@@ -10,37 +10,17 @@
         <a href="{{ next_url }}" class="btn-icon" aria-label="{{ ('calendar.next_' ~ mode)|trans }}" title="{{ ('calendar.next_' ~ mode)|trans }}">{{ ux_icon('lucide:chevron-right', {class: 'size-5', 'aria-hidden': 'true'}) }}</a>
     </div>
 
-    {# Monat/Jahr direkt wählen #}
-    <form method="get" action="{{ path('calendar_month') }}" class="flex items-center gap-1" data-controller="autosubmit">
-        <label for="month-picker" class="sr-only">{{ 'calendar.choose_month'|trans }}</label>
-        <input type="month" id="month-picker" name="month" value="{{ ref|date('Y-m') }}" class="input w-auto py-1" data-action="change->autosubmit#submit">
-        {% if project_filter %}<input type="hidden" name="project" value="{{ project_filter }}">{% endif %}
-        <noscript><button type="submit" class="btn-secondary py-1">{{ 'action.show'|trans }}</button></noscript>
-    </form>
-
     <nav aria-label="{{ 'calendar.views'|trans }}" class="inline-flex rounded-md ring-1 ring-slate-200">
-        {% for view in ['month', 'week', 'day'] %}
-            {% set url = view == 'month' ? path('calendar_month', {month: ref|date('Y-m')}|merge(pf))
-                : (view == 'week' ? path('calendar_week', {year: ref|date('o'), week: ref|date('W')}|merge(pf))
-                : path('calendar_day', {date: ref|date('Y-m-d')}|merge(pf))) %}
+        {% for view in ['week', 'day'] %}
+            {% set url = view == 'week' ? path('calendar_week', {year: ref|date('o'), week: ref|date('W')}|merge(pf))
+                : path('calendar_day', {date: (mode == 'week' and ref|date('o-W') == 'now'|date('o-W') ? 'now' : ref)|date('Y-m-d')}|merge(pf)) %}
             <a href="{{ url }}" {% if mode == view %}aria-current="page"{% endif %}
                class="px-2.5 py-1 text-sm {{ loop.first ? 'rounded-l-md' : '' }} {{ loop.last ? 'rounded-r-md' : '' }} {{ mode == view ? 'bg-slate-800 text-white' : 'hover:bg-slate-50' }}">{{ ('calendar.view_' ~ view)|trans }}</a>
         {% endfor %}
     </nav>
 
-    {% if projects is not empty %}
-        <form method="get" class="flex items-center" data-controller="autosubmit">
-            {% for name, value in app.request.query.all|filter((v, k) => k != 'project') %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
-            <label for="calendar-project" class="sr-only">{{ 'nav.projects'|trans }}</label>
-            <select id="calendar-project" name="project" class="input w-auto py-1" data-action="autosubmit#submit">
-                <option value="">{{ 'mail.filter.all_projects'|trans }}</option>
-                {% for p in projects %}<option value="{{ p.id }}" {{ project_filter == p.id ? 'selected' }}>{{ p.name }}</option>{% endfor %}
-            </select>
-        </form>
-    {% endif %}
-
     <div class="ml-auto flex gap-1">
-        <a href="{{ path('calendar_item_new', {date: ref|date('Y-m-d'), type: 'task'}|merge(pf)) }}" class="btn-secondary py-1">{{ ux_icon('lucide:square-check', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'calendar.new_task'|trans }}</a>
-        <a href="{{ path('calendar_item_new', {date: ref|date('Y-m-d')}|merge(pf)) }}" class="btn-primary py-1">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'calendar.new_event'|trans }}</a>
+        <a href="{{ path('calendar_item_new', {date: ref|date('Y-m-d'), type: 'task'}|merge(pf)) }}" class="btn-secondary py-1">{{ ux_icon('lucide:square-check', {class: 'size-4', 'aria-hidden': 'true'}) }} <span class="max-sm:sr-only">{{ 'calendar.new_task'|trans }}</span></a>
+        <a href="{{ path('calendar_item_new', {date: ref|date('Y-m-d')}|merge(pf)) }}" class="btn-primary py-1">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} <span class="max-sm:sr-only">{{ 'calendar.new_event'|trans }}</span></a>
     </div>
 </div>

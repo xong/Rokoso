@@ -1,0 +1,26 @@
+{% extends 'layout/app.html.twig' %}
+
+{#
+    Kalender: mittlere Spalte = Mini-Monat + „Demnächst“ (calendar/_sidebar.html.twig), rechts Woche/Tag/Eintrag.
+    Variablen aus CalendarController::sidebarContext(): mini_month, mini_weeks, upcoming, projects, project_filter.
+    Optional: sel_from/sel_to (Y-m-d) markieren die gezeigten Tage im Mini-Monat.
+#}
+{% set has_detail = has_detail ?? true %}
+{% set pf = project_filter ? {project: project_filter} : {} %}
+
+{% block title %}{{ block('detail_title')|striptags|trim }}{% endblock %}
+{% block list_title %}{{ 'nav.calendar'|trans }}{% endblock %}
+{% block back_url %}{{ path('calendar_month', {month: mini_month|date('Y-m')}|merge(pf)) }}{% endblock %}
+
+{% block list_actions %}
+    <a href="{{ path('calendar_item_new', {type: 'task'}|merge(pf)) }}" class="btn-icon" aria-label="{{ 'calendar.new_task'|trans }}" title="{{ 'calendar.new_task'|trans }}">
+        {{ ux_icon('lucide:square-check', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+    <a href="{{ path('calendar_item_new', pf) }}" class="btn-icon" aria-label="{{ 'calendar.new_event'|trans }}" title="{{ 'calendar.new_event'|trans }}">
+        {{ ux_icon('lucide:calendar-plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block list %}
+    {{ include('calendar/_sidebar.html.twig') }}
+{% endblock %}

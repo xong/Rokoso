@@ -1,14 +1,12 @@
-{% extends 'layout/app.html.twig' %}
+{% extends 'calendar/_layout.html.twig' %}
 {% import '_partials/ui.html.twig' as ui %}
 
-{% set show_list = false %}
 {% set ref = occurrence_date ?? item.startsAt %}
+{% set sel_from = ref|date('Y-m-d') %}
 
-{% block title %}{{ item.title }}{% endblock %}
 {% block detail_title %}{{ item.title }}{% endblock %}
 
 {% block detail_actions %}
-    <a href="{{ path('calendar_month', {month: ref|date('Y-m')}) }}" class="btn-ghost">{{ ux_icon('lucide:calendar', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'nav.calendar'|trans }}</a>
     <a href="{{ path('calendar_item_edit', {id: item.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">{{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
     {{ ui.post_button(path('calendar_item_delete', {id: item.id}), 'delete-calendar-item-' ~ item.id, 'calendar.delete',
         {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: item.recurring ? 'calendar.delete_series_confirm' : 'calendar.delete_confirm'}) }}

@@ -97,8 +97,8 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 13.4 Nachrichten mit Projekt nicht mehr im Eingang; neuer Unterpunkt „Alle E-Mails“; Nachrichten beim Projekt sichtbar
 
 ## Phase 14 – Kalender-Layout (48)
-- [ ] 14.1 Mittlere Spalte: Mini-Monat mit KW und Punkten, darunter „Demnächst“
-- [ ] 14.2 Detail: Woche (Standard) / Tag mit gleich hohen Stunden-Slots, Einträge positioniert, ganztägige oben
+- [x] 14.1 Mittlere Spalte: Mini-Monat mit KW und Punkten, darunter „Demnächst“
+- [x] 14.2 Detail: Woche (Standard) / Tag mit gleich hohen Stunden-Slots, Einträge positioniert, ganztägige oben
 
 ## Phase 15 – Projekt-Kommentare (43)
 - [ ] 15.1 `Comment` verallgemeinert (Nachricht, Projekt, Datei); Kommentarspalte beim Projekt
