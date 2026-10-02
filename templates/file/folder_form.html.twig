@@ -1,0 +1,20 @@
+{% extends 'file/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ folder ? 'folder.edit'|trans : (parent ? 'folder.new_sub'|trans({'%name%': parent.name}) : 'folder.new_root'|trans) }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-xl p-4 lg:p-6">
+        {% if parent and not folder %}
+            <p class="mb-4 text-sm text-slate-500">{{ 'folder.inherits'|trans({'%organization%': parent.organization.name}) }}</p>
+        {% endif %}
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a class="btn-secondary" href="{{ folder ? path('folder_show', {id: folder.id}) : (parent ? path('folder_show', {id: parent.id}) : path('file_index')) }}">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

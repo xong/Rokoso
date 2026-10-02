@@ -59,6 +59,31 @@
                     </ul>
                 {% endif %}
             </section>
+
+            <section aria-labelledby="project-files-heading">
+                <div class="mb-2 flex items-center justify-between gap-2">
+                    <h2 id="project-files-heading" class="text-sm font-semibold">{{ 'project.files'|trans }}</h2>
+                    {% if project.organization %}
+                        <a class="link text-sm" href="{{ path('folder_new', {project: project.id}) }}">{{ 'folder.new_for_project'|trans }}</a>
+                    {% endif %}
+                </div>
+                {% if files is empty %}
+                    <p class="text-sm text-slate-500">{{ 'project.no_files'|trans }}</p>
+                {% else %}
+                    <ul role="list" class="card divide-y divide-slate-100">
+                        {% for f in files %}
+                            <li>
+                                <a href="{{ path('file_show', {id: f.id}) }}" class="flex items-center gap-3 px-3 py-2 hover:bg-slate-50">
+                                    {{ include('file/_icon.html.twig', {mime: f.mimeType}) }}
+                                    <span class="min-w-0 flex-1 truncate">{{ f.filename }}</span>
+                                    <span class="shrink-0 text-xs text-slate-500 max-sm:hidden">{{ f.folder.name }}</span>
+                                    <span class="shrink-0 text-xs text-slate-500 tabular-nums">{{ f.size|filesize }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
         </div>
 
         {{ include('_partials/comments.html.twig', {

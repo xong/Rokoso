@@ -1,0 +1,12 @@
+{# Dateisymbol nach MIME-Typ #}
+{% set icon = 'lucide:file' %}
+{% if mime starts with 'image/' %}
+    {% set icon = 'lucide:file-image' %}
+{% elseif 'sheet' in mime or 'excel' in mime or mime == 'text/csv' %}
+    {% set icon = 'lucide:file-spreadsheet' %}
+{% elseif mime == 'application/pdf' or mime starts with 'text/' or 'word' in mime or 'opendocument.text' in mime %}
+    {% set icon = 'lucide:file-text' %}
+{% elseif 'zip' in mime or 'compressed' in mime %}
+    {% set icon = 'lucide:file-archive' %}
+{% endif %}
+{{ ux_icon(icon, {class: class ?? 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}

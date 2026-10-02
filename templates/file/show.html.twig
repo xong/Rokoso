@@ -1,0 +1,72 @@
+{% extends 'file/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ file.filename }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('file_download', {id: file.id}) }}" class="btn-icon" data-turbo="false" aria-label="{{ 'file.download'|trans }}" title="{{ 'file.download'|trans }}">
+        {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+    {% if is_granted('FOLDER_DELETE', file) %}
+        {{ ui.post_button(path('file_delete', {id: file.id}), 'delete-file-' ~ file.id, 'file.delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'file.delete_confirm'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block detail %}
+    <div class="flex min-h-full flex-col xl:flex-row">
+        <div class="min-w-0 flex-1 space-y-6 p-4 lg:p-6">
+            {{ include('file/_breadcrumbs.html.twig', {folder: file.folder, last_link: true}) }}
+
+            <div class="flex items-start gap-4">
+                {% if file.image %}
+                    <a href="{{ path('file_download', {id: file.id, inline: 1}) }}" target="_blank" rel="noopener" class="shrink-0">
+                        <img src="{{ path('file_download', {id: file.id, inline: 1}) }}" alt="{{ 'file.preview'|trans({'%name%': file.filename}) }}"
+                             class="max-h-48 max-w-48 rounded-lg object-contain ring-1 ring-slate-200">
+                    </a>
+                {% else %}
+                    <span class="grid size-16 shrink-0 place-items-center rounded-lg bg-slate-100">
+                        {{ include('file/_icon.html.twig', {mime: file.mimeType, class: 'size-8 text-slate-500'}) }}
+                    </span>
+                {% endif %}
+                <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+                    <dt class="text-slate-500">{{ 'file.size'|trans }}</dt>
+                    <dd class="tabular-nums">{{ file.size|filesize }}</dd>
+                    <dt class="text-slate-500">{{ 'file.type'|trans }}</dt>
+                    <dd class="break-all">{{ file.mimeType }}</dd>
+                    <dt class="text-slate-500">{{ 'file.uploaded_by'|trans }}</dt>
+                    <dd>{{ file.uploadedBy ? file.uploadedBy.name : 'mail.comments.deleted_user'|trans }}, <time datetime="{{ file.createdAt|date('c') }}">{{ file.createdAt|date('d.m.Y H:i') }}</time></dd>
+                    {% if file.project %}
+                        <dt class="text-slate-500">{{ 'nav.projects'|trans }}</dt>
+                        <dd><a class="link" href="{{ path('project_show', {id: file.project.id}) }}">{{ file.project.name }}</a></dd>
+                    {% endif %}
+                </dl>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ path('file_download', {id: file.id}) }}" class="btn-primary" data-turbo="false">{{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'file.download'|trans }}</a>
+                {% if file.mimeType == 'application/pdf' %}
+                    <a href="{{ path('file_download', {id: file.id, inline: 1}) }}" class="btn-secondary" target="_blank" rel="noopener">{{ ux_icon('lucide:external-link', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'file.open'|trans }}</a>
+                {% endif %}
+            </div>
+
+            <section aria-labelledby="file-edit-heading" class="max-w-xl">
+                <h2 id="file-edit-heading" class="mb-2 text-sm font-semibold">{{ 'file.properties'|trans }}</h2>
+                {{ form_start(form, {attr: {class: 'card p-4'}}) }}
+                    {{ form_widget(form) }}
+                    <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                {{ form_end(form) }}
+            </section>
+        </div>
+
+        {{ include('_partials/comments.html.twig', {
+            comments: comments,
+            add_url: path('file_comment', {id: file.id}),
+            delete_route: 'file_comment_delete',
+            delete_params: {id: file.id},
+            token: 'file-comment',
+        }) }}
+    </div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{# Pfad eines Ordners; last_link: auch der letzte Ordner ist ein Link (z. B. auf der Dateiseite) #}
+<nav aria-label="{{ 'folder.path'|trans }}" class="text-sm text-slate-500">
+    <ol role="list" class="flex flex-wrap items-center gap-1">
+        <li><a class="hover:underline" href="{{ path('file_index') }}">{{ folder.organization.name }}</a></li>
+        {% for f in folder.path %}
+            <li class="flex items-center gap-1">
+                {{ ux_icon('lucide:chevron-right', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                {% if loop.last and not (last_link ?? false) %}
+                    <span aria-current="page" class="font-medium text-slate-700">{{ f.name }}</span>
+                {% else %}
+                    <a class="hover:underline" href="{{ path('folder_show', {id: f.id}) }}">{{ f.name }}</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+</nav>

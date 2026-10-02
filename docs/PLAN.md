@@ -104,9 +104,9 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 15.1 `Comment` verallgemeinert (Nachricht, Projekt, Datei); Kommentarspalte beim Projekt
 
 ## Phase 16 – Dateien (41, 42)
-- [ ] 16.1 `Folder` (Hierarchie, Organisation/Projekt) und `File` (Speicher wie Anhänge)
-- [ ] 16.2 Menüpunkt „Dateien“: Ordner anlegen/umbenennen/löschen, hochladen (auch Drag&Drop), herunterladen
-- [ ] 16.3 Datei-Detail mit Projektzuordnung und Kommentarspalte
+- [x] 16.1 `Folder` (Hierarchie, Organisation/Projekt) und `File` (Speicher wie Anhänge)
+- [x] 16.2 Menüpunkt „Dateien“: Ordner anlegen/umbenennen/löschen, hochladen (auch Drag&Drop), herunterladen
+- [x] 16.3 Datei-Detail mit Projektzuordnung und Kommentarspalte
 
 ## Phase 17 – Persönliche Ablage (44)
 - [ ] 17.1 Dateien und E-Mail-Anhänge in die eigene Ablage legen (Verweis, keine Kopie)

@@ -27,3 +27,6 @@ when@test:
         App\Tests\Fake\FakeMailboxReader:
             public: true
         App\Mail\MailboxReader: '@App\Tests\Fake\FakeMailboxReader'
+        App\Service\FileStorage:
+            arguments:
+                $baseDir: '%kernel.project_dir%/var/storage/test/files'

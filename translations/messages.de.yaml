@@ -17,6 +17,7 @@ nav:
     mail_trash: Papierkorb
     mail_compose: Neue E-Mail
     mail_message: Neue Nachricht
+    files: Dateien
     calendar: Kalender
     contacts: Kontakte
     projects: Projekte
@@ -198,6 +199,8 @@ project:
     calendar: Termine im Projekt
     recent_messages: Neueste Nachrichten
     no_messages: Diesem Projekt sind noch keine Nachrichten zugeordnet.
+    files: Dateien
+    no_files: Diesem Projekt sind noch keine Dateien zugeordnet.
 
 mail_account:
     title: E-Mail-Konten
@@ -484,6 +487,45 @@ calendar:
     entries: '{1} 1 Eintrag|]1,Inf[ %count% Einträge'
     upcoming: Demnächst
     no_upcoming: In den nächsten 30 Tagen steht nichts an.
+
+folder:
+    tree: Ordner
+    path: Ordnerpfad
+    none: Noch keine Ordner. Lege einen Ordner für eine Organisation an.
+    intro: Dateien liegen in Ordnern. Jeder oberste Ordner gehört zu einer Organisation; alle Mitglieder sehen ihn mit allen Unterordnern und können Dateien hochladen.
+    no_organization: Du bist noch in keiner Organisation Mitglied.
+    new: Neuer Ordner
+    new_root: Neuer Ordner
+    new_sub: 'Unterordner in „%name%“ anlegen'
+    new_for_project: Ordner für dieses Projekt anlegen
+    created: Ordner angelegt.
+    edit: Ordner bearbeiten
+    delete: Ordner löschen
+    delete_confirm: Ordner mit allen Unterordnern und Dateien löschen?
+    name: Name
+    organization: Organisation
+    organization_help: Alle Mitglieder der Organisation sehen den Ordner und können Dateien hochladen.
+    inherits: 'Der Ordner gehört wie sein übergeordneter Ordner zu „%organization%“.'
+    content: Inhalt
+    empty: Dieser Ordner ist leer.
+    subfolders: '{1} 1 Unterordner|]1,Inf[ %count% Unterordner'
+
+file:
+    upload: Dateien hochladen
+    upload_submit: Hochladen
+    uploaded: Dateien hochgeladen.
+    name: Name
+    folder: Ordner
+    size: Größe
+    type: Dateityp
+    uploaded_by: Hochgeladen von
+    download: Herunterladen
+    download_named: '„%name%“ herunterladen'
+    open: Im Browser öffnen
+    preview: 'Vorschau von %name%'
+    properties: Eigenschaften
+    delete: Datei löschen
+    delete_confirm: Datei löschen?
 
 pwa:
     description: Gemeinsames Postfach, Projekte, Kalender und Kontakte für Stadtelternvertretungen.

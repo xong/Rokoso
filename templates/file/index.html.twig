@@ -1,0 +1,33 @@
+{% extends 'file/_layout.html.twig' %}
+
+{% set has_detail = false %}
+
+{% block detail_title %}{{ 'nav.files'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-3xl space-y-6 p-4 lg:p-6">
+        <p class="text-slate-600">{{ 'folder.intro'|trans }}</p>
+        {% if organizations is empty %}
+            <p class="text-sm text-slate-500">{{ 'folder.no_organization'|trans }}</p>
+        {% else %}
+            <ul role="list" class="grid gap-3 sm:grid-cols-2">
+                {% for org in organizations %}
+                    {% set group = tree|filter(g => g.organization.id == org.id)|first %}
+                    <li class="card p-4">
+                        <h2 class="mb-2 flex items-center gap-2 font-semibold">
+                            <span class="size-2.5 rounded-full" style="background-color: {{ org.color }}" aria-hidden="true"></span>{{ org.name }}
+                        </h2>
+                        {% if group %}
+                            <ul role="list" class="mb-3 space-y-1 text-sm">
+                                {% for f in group.folders %}
+                                    <li><a class="link inline-flex items-center gap-1.5" href="{{ path('folder_show', {id: f.id}) }}">{{ ux_icon('lucide:folder', {class: 'size-4 text-slate-400', 'aria-hidden': 'true'}) }}{{ f.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <a class="btn-secondary py-1 text-sm" href="{{ path('folder_new', {organization: org.id}) }}">{{ ux_icon('lucide:folder-plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'folder.new'|trans }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock %}

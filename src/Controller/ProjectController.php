@@ -13,6 +13,7 @@ use App\Repository\CommentRepository;
 use App\Repository\MessageRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
+use App\Repository\StoredFileRepository;
 use App\Security\Voter\OrganizationVoter;
 use App\Security\Voter\ProjectVoter;
 use App\Service\ImageUploader;
@@ -76,12 +77,13 @@ final class ProjectController extends AbstractController
 
     #[Route('/{id<\d+>}', name: 'project_show')]
     #[IsGranted(ProjectVoter::VIEW, 'project')]
-    public function show(Project $project, #[CurrentUser] User $user, MessageRepository $messages, CommentRepository $comments): Response
+    public function show(Project $project, #[CurrentUser] User $user, MessageRepository $messages, CommentRepository $comments, StoredFileRepository $files): Response
     {
         return $this->render('project/show.html.twig', [
             'projects' => $this->projects->findVisibleFor($user),
             'project' => $project,
-            'comments' => $comments->forProject($project),
+            'comments' => $comments->forTarget($project),
+            'files' => $files->forProject($project),
             'recent_messages' => \array_slice($messages->findForList($user, new MessageFilter('all', project: $project->getId())), 0, 5),
         ]);
     }

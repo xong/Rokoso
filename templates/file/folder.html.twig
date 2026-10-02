@@ -1,0 +1,95 @@
+{% extends 'file/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ folder.name }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('folder_new', {parent: folder.id}) }}" class="btn-icon" aria-label="{{ 'folder.new_sub'|trans({'%name%': folder.name}) }}" title="{{ 'folder.new_sub'|trans({'%name%': folder.name}) }}">
+        {{ ux_icon('lucide:folder-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+    <a href="{{ path('folder_edit', {id: folder.id}) }}" class="btn-icon" aria-label="{{ 'folder.edit'|trans }}" title="{{ 'folder.edit'|trans }}">
+        {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+    {% if is_granted('FOLDER_DELETE', folder) %}
+        {{ ui.post_button(path('folder_delete', {id: folder.id}), 'delete-folder-' ~ folder.id, 'folder.delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'folder.delete_confirm'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block detail %}
+    <div class="space-y-6 p-4 lg:p-6">
+        <div class="space-y-1">
+            {{ include('file/_breadcrumbs.html.twig') }}
+            {% if folder.project %}
+                <p class="text-sm">
+                    <a class="badge bg-slate-100 text-slate-700 hover:bg-slate-200" href="{{ path('project_show', {id: folder.project.id}) }}">
+                        <span class="size-2 rounded-full" style="background-color: {{ folder.project.color }}" aria-hidden="true"></span>{{ folder.project.name }}
+                    </a>
+                </p>
+            {% endif %}
+        </div>
+
+        <section aria-labelledby="upload-heading" class="max-w-xl">
+            <h2 id="upload-heading" class="sr-only">{{ 'file.upload'|trans }}</h2>
+            {{ form_start(upload_form, {attr: {class: 'space-y-2'}}) }}
+                {{ form_row(upload_form.files, {label_attr: {class: 'sr-only'}}) }}
+                <button type="submit" class="btn-primary">{{ ux_icon('lucide:upload', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'file.upload_submit'|trans }}</button>
+            {{ form_end(upload_form) }}
+        </section>
+
+        <section aria-labelledby="content-heading">
+            <h2 id="content-heading" class="mb-2 text-sm font-semibold">{{ 'folder.content'|trans }}</h2>
+            {% if folder.children is empty and folder.files is empty %}
+                <p class="text-sm text-slate-500">{{ 'folder.empty'|trans }}</p>
+            {% else %}
+                <div class="card overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="border-b border-slate-200 text-left text-xs text-slate-500">
+                            <tr>
+                                <th scope="col" class="px-3 py-2 font-medium">{{ 'file.name'|trans }}</th>
+                                <th scope="col" class="px-3 py-2 font-medium max-md:hidden">{{ 'nav.projects'|trans }}</th>
+                                <th scope="col" class="px-3 py-2 font-medium max-sm:hidden">{{ 'file.uploaded_by'|trans }}</th>
+                                <th scope="col" class="px-3 py-2 text-right font-medium">{{ 'file.size'|trans }}</th>
+                                <th scope="col" class="px-3 py-2"><span class="sr-only">{{ 'file.download'|trans }}</span></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for sub in folder.children %}
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-3 py-2" colspan="5">
+                                        <a href="{{ path('folder_show', {id: sub.id}) }}" class="flex items-center gap-2 font-medium">
+                                            {{ ux_icon('lucide:folder', {class: 'size-4 shrink-0 text-amber-500', 'aria-hidden': 'true'}) }}{{ sub.name }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            {% for f in folder.files %}
+                                <tr class="hover:bg-slate-50">
+                                    <td class="max-w-0 px-3 py-2">
+                                        <a href="{{ path('file_show', {id: f.id}) }}" class="flex items-center gap-2">
+                                            {{ include('file/_icon.html.twig', {mime: f.mimeType}) }}<span class="truncate">{{ f.filename }}</span>
+                                        </a>
+                                    </td>
+                                    <td class="px-3 py-2 text-slate-600 max-md:hidden">{{ f.project ? f.project.name }}</td>
+                                    <td class="px-3 py-2 text-slate-600 max-sm:hidden">
+                                        {{ f.uploadedBy ? f.uploadedBy.name : 'mail.comments.deleted_user'|trans }}
+                                        <time class="block text-xs text-slate-400" datetime="{{ f.createdAt|date('c') }}">{{ f.createdAt|short_date }}</time>
+                                    </td>
+                                    <td class="px-3 py-2 text-right whitespace-nowrap text-slate-600 tabular-nums">{{ f.size|filesize }}</td>
+                                    <td class="px-3 py-2 text-right">
+                                        <a href="{{ path('file_download', {id: f.id}) }}" class="btn-icon size-8" data-turbo="false"
+                                           aria-label="{{ 'file.download_named'|trans({'%name%': f.filename}) }}" title="{{ 'file.download'|trans }}">
+                                            {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}
