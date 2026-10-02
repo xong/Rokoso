@@ -177,3 +177,23 @@ invitation:
     login: Ich habe schon ein Konto
     joined: Willkommen! Du bist jetzt Mitglied.
     registered: Dein Konto ist angelegt und du bist der Organisation beigetreten. Bitte melde dich an.
+
+project:
+    new: Projekt anlegen
+    edit: Projekt bearbeiten
+    delete: Projekt löschen
+    delete_confirm: Projekt wirklich löschen? Zuordnungen von Nachrichten und Terminen gehen verloren.
+    none: Noch keine Projekte.
+    intro: Projekte bündeln Nachrichten und Termine zu einem Thema, z. B. „Schulwegsicherheit“ oder „Elternabend Herbst“.
+    created: Projekt angelegt.
+    name: Name
+    organization: Organisation
+    no_organization: '– persönliches Projekt –'
+    organization_help: Projekte einer Organisation sehen alle Mitglieder; verwalten können sie die Administratoren.
+    description: Beschreibung
+    color: Farbe
+    image: Bild
+    remove_image: Bild entfernen
+    personal: Persönlich
+    messages: Nachrichten im Projekt
+    calendar: Termine im Projekt

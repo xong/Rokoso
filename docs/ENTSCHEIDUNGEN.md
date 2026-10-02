@@ -23,3 +23,4 @@ Kurzprotokoll getroffener Architektur- und Produktentscheidungen. Neueste unten.
 | 17 | 2026-10-02 | **Papierkorb nur in Coop** (Mail bleibt auf dem IMAP-Server, wiederherstellbar) | Antwort des Projektinhabers; einfach und ohne Datenverlust. |
 | 18 | 2026-10-02 | **Kontakte und Kalendereinträge gehören einer Organisation** (optional Projekt); ohne Organisation nur für den Ersteller sichtbar | Antwort des Projektinhabers. |
 | 19 | 2026-10-02 | **E-Mails schreiben nur als Text** (Plaintext-Versand) | Antwort des Projektinhabers; Rich-Text später möglich. |
+| 20 | 2026-10-02 | **Projekte einer Organisation** sehen alle Mitglieder, verwalten nur deren Administratoren; **Projekte ohne Organisation** sind persönlich (nur Ersteller) | Beantwortet die offene Frage aus Phase 3 mit der einfachsten sicheren Regel. |

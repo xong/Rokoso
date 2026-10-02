@@ -1,0 +1,30 @@
+{% extends 'project/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ project ? 'project.edit'|trans : 'project.new'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-xl p-4 lg:p-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.name) }}
+            {{ form_row(form.organization) }}
+            {{ form_row(form.description) }}
+            {{ form_row(form.color) }}
+            <div class="mb-4 flex items-center gap-4">
+                {% if project %}{{ ui.tile(project.name, project.image, project.color, 'size-16 text-lg') }}{% endif %}
+                <div class="flex-1">
+                    {{ form_row(form.imageFile, {row_attr: {class: 'mb-2'}}) }}
+                    {% if project and project.image %}{{ form_row(form.removeImage, {row_attr: {class: 'mb-0'}}) }}{% else %}{% do form.removeImage.setRendered %}{% endif %}
+                </div>
+            </div>
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ project ? path('project_show', {id: project.id}) : path('project_index') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

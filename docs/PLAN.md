@@ -42,8 +42,8 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 2.4 Einladungen per E-Mail (Token-Link → Registrierung bzw. Beitritt)
 
 ## Phase 3 – Projekte (19, 23)
-- [ ] 3.1 `Project` (Name, Bild optional, Farbe, Beschreibung, Organisation optional)
-- [ ] 3.2 Verwaltung durch Org-Administratoren
+- [x] 3.1 `Project` (Name, Bild optional, Farbe, Beschreibung, Organisation optional)
+- [x] 3.2 Verwaltung durch Org-Administratoren
 
 ## Phase 4 – E-Mail-Konten (9)
 - [ ] 4.1 `MailAccount` je Organisation: IMAP + SMTP (Host, Port, Verschlüsselung, Benutzer, Passwort verschlüsselt gespeichert)

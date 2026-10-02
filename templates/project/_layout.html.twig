@@ -1,0 +1,26 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.projects'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.projects'|trans }}{% endblock %}
+{% block back_url %}{{ path('project_index') }}{% endblock %}
+
+{% block list_actions %}
+    <a href="{{ path('project_new') }}" class="btn-icon" aria-label="{{ 'project.new'|trans }}" title="{{ 'project.new'|trans }}">
+        {{ ux_icon('lucide:plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block list %}
+    {% if projects is empty %}
+        {{ ui.empty('project.none', 'lucide:folder-kanban') }}
+    {% else %}
+        <ul role="list">
+            {% for p in projects %}
+                <li>{{ ui.list_link(path('project_show', {id: p.id}), project is defined and project and project.id == p.id,
+                        p.name, p.organization ? p.organization.name : 'project.personal'|trans,
+                        ui.tile(p.name, p.image, p.color)) }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
