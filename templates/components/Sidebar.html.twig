@@ -49,6 +49,25 @@
         {% endfor %}
     </ul>
 
+    {% if app.user %}
+        {% set profile_active = app.request.attributes.get('_route') starts with 'profile_' %}
+        <div class="border-t border-slate-200 p-2">
+            <div class="group/item relative flex items-center gap-1 lg:collapsed:flex-col">
+                <a href="{{ path('profile_edit') }}" {% if profile_active %}aria-current="page"{% endif %}
+                   class="flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-1.5 {{ profile_active ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-slate-100' }} lg:collapsed:justify-center lg:collapsed:px-0">
+                    <twig:Avatar name="{{ app.user.name }}" image="{{ app.user.avatar }}" size="size-8 text-xs" />
+                    <span class="min-w-0 lg:collapsed:sr-only">
+                        <span class="block truncate font-medium">{{ app.user.name }}</span>
+                        <span class="block truncate text-xs text-slate-500">{{ 'nav.profile'|trans }}</span>
+                    </span>
+                </a>
+                <a href="{{ path('app_logout') }}" class="btn-icon" aria-label="{{ 'nav.logout'|trans }}" title="{{ 'nav.logout'|trans }}" data-turbo="false">
+                    {{ ux_icon('lucide:log-out', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
     <div class="hidden border-t border-slate-200 p-2 lg:block">
         <button type="button" data-shell-target="collapseToggle" data-action="shell#toggleCollapsed"
                 aria-label="{{ 'nav.collapse'|trans }}" title="{{ 'nav.collapse'|trans }}"

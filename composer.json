@@ -30,6 +30,7 @@
         "symfony/process": "8.0.*",
         "symfony/property-access": "8.0.*",
         "symfony/property-info": "8.0.*",
+        "symfony/rate-limiter": "8.0.*",
         "symfony/runtime": "8.0.*",
         "symfony/security-bundle": "8.0.*",
         "symfony/serializer": "8.0.*",
@@ -43,7 +44,9 @@
         "symfony/validator": "8.0.*",
         "symfony/web-link": "8.0.*",
         "symfony/yaml": "8.0.*",
+        "symfonycasts/reset-password-bundle": "^1.25",
         "symfonycasts/tailwind-bundle": "^1.0",
+        "symfonycasts/verify-email-bundle": "^1.18",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/twig": "^2.12|^3.0"
     },
@@ -108,9 +111,11 @@
         }
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^8.6",
         "friendsofphp/php-cs-fixer": "^3.95",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "*",
+        "phpstan/phpstan-doctrine": "^2.0",
         "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^13.3",
         "symfony/browser-kit": "8.0.*",

@@ -1,0 +1,39 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'security.login'|trans }}{% endblock %}
+
+{% block content %}
+    <form method="post" action="{{ path('app_login') }}" data-turbo="false">
+        {% if error %}
+            <div role="alert" class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+                {% if error.messageKey == 'security.not_verified' %}
+                    <a class="link mt-1 block" href="{{ path('app_verify_resend') }}">{{ 'registration.resend_link'|trans }}</a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="mb-4">
+            <label for="username" class="label">{{ 'user.email'|trans }}</label>
+            <input type="email" value="{{ last_username }}" name="_username" id="username" class="input" autocomplete="email" required autofocus>
+        </div>
+        <div class="mb-4">
+            <div class="flex items-baseline justify-between">
+                <label for="password" class="label">{{ 'user.password'|trans }}</label>
+                <a href="{{ path('app_forgot_password') }}" class="link text-xs">{{ 'security.forgot'|trans }}</a>
+            </div>
+            <input type="password" name="_password" id="password" class="input" autocomplete="current-password" required>
+        </div>
+        <div class="mb-5 flex items-center gap-2">
+            <input type="checkbox" name="_remember_me" id="remember_me" class="size-4 accent-brand-600">
+            <label for="remember_me" class="text-sm text-slate-700">{{ 'security.remember_me'|trans }}</label>
+        </div>
+
+        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+        <button type="submit" class="btn-primary w-full">{{ 'security.login'|trans }}</button>
+    </form>
+{% endblock %}
+
+{% block below %}
+    <p class="mt-4 text-sm text-slate-600">{{ 'security.no_account'|trans }} <a class="link" href="{{ path('app_register') }}">{{ 'registration.title'|trans }}</a></p>
+{% endblock %}

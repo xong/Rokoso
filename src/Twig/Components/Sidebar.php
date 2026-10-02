@@ -30,12 +30,13 @@ final class Sidebar
                 ['label' => 'nav.mail_sent', 'icon' => 'lucide:send', 'route' => 'mail_sent'],
                 ['label' => 'nav.mail_trash', 'icon' => 'lucide:trash-2', 'route' => 'mail_trash'],
                 ['label' => 'nav.mail_compose', 'icon' => 'lucide:square-pen', 'route' => 'mail_compose'],
+                ['label' => 'nav.mail_message', 'icon' => 'lucide:message-square-plus', 'route' => 'mail_message_new'],
             ],
         ],
-        ['label' => 'nav.calendar', 'icon' => 'lucide:calendar', 'route' => 'calendar', 'match' => ['calendar']],
-        ['label' => 'nav.contacts', 'icon' => 'lucide:contact', 'route' => 'contacts', 'match' => ['contacts']],
-        ['label' => 'nav.projects', 'icon' => 'lucide:folder-kanban', 'route' => 'projects', 'match' => ['projects']],
-        ['label' => 'nav.organizations', 'icon' => 'lucide:building-2', 'route' => 'organizations', 'match' => ['organizations']],
+        ['label' => 'nav.calendar', 'icon' => 'lucide:calendar', 'route' => 'calendar_month', 'match' => ['calendar_']],
+        ['label' => 'nav.contacts', 'icon' => 'lucide:contact', 'route' => 'contact_index', 'match' => ['contact_']],
+        ['label' => 'nav.projects', 'icon' => 'lucide:folder-kanban', 'route' => 'project_index', 'match' => ['project_']],
+        ['label' => 'nav.organizations', 'icon' => 'lucide:building-2', 'route' => 'organization_index', 'match' => ['organization_', 'mail_account_']],
     ];
 
     public function __construct(

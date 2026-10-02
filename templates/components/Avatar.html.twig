@@ -1,0 +1,7 @@
+{# Rundes Bild oder Initialen. Props: name, image (Pfad relativ zu public), size (Tailwind-Klassen), color (CSS-Farbe) #}
+{% props name = '', image = null, size = 'size-8 text-xs', color = null %}
+{% if image %}
+    <img src="{{ asset(image) }}" alt="" class="avatar {{ size }} object-cover {{ attributes.render('class') }}" {{ attributes.without('class') }}>
+{% else %}
+    <span class="avatar {{ size }} {{ color ? 'text-white' : '' }} {{ attributes.render('class') }}" {% if color %}style="background-color: {{ color }}"{% endif %} aria-hidden="true" {{ attributes.without('class') }}>{{ initials(name) }}</span>
+{% endif %}

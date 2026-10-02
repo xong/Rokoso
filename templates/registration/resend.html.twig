@@ -1,0 +1,15 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'registration.resend_title'|trans }}{% endblock %}
+
+{% block content %}
+    {{ form_start(form) }}
+        {{ form_row(form.email) }}
+        {{ form_rest(form) }}
+        <button type="submit" class="btn-primary w-full">{{ 'registration.resend_submit'|trans }}</button>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block below %}
+    <p class="mt-4 text-sm"><a class="link" href="{{ path('app_login') }}">{{ 'security.back_to_login'|trans }}</a></p>
+{% endblock %}

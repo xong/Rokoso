@@ -1,4 +1,7 @@
 {
+    "dama/doctrine-test-bundle": {
+        "version": "v8.6.0"
+    },
     "doctrine/deprecations": {
         "version": "1.1",
         "recipe": {
@@ -359,6 +362,18 @@
             "./config/packages/messenger.yaml"
         ]
     },
+    "symfonycasts/reset-password-bundle": {
+        "version": "1.25",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "97c1627c0384534997ae1047b93be517ca16de43"
+        },
+        "files": [
+            "./config/packages/reset_password.yaml"
+        ]
+    },
     "symfonycasts/tailwind-bundle": {
         "version": "1.0",
         "recipe": {
@@ -367,6 +382,9 @@
             "version": "0.14",
             "ref": "b8af60cec7149fd0cde0ec9d89ccb32335c4d9bd"
         }
+    },
+    "symfonycasts/verify-email-bundle": {
+        "version": "v1.18.0"
     },
     "twig/extra-bundle": {
         "version": "v3.29.0"

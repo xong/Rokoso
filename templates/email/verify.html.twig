@@ -1,0 +1,7 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ 'email.hello'|trans({'%name%': name}) }}</p>
+    <p>{{ 'email.verify.text'|trans }}</p>
+    {{ include('email/_button.html.twig', {url: url, label: 'email.verify.button'|trans}) }}
+    <p style="font-size:13px;color:#64748b;">{{ 'email.verify.expires'|trans }}</p>
+{% endblock %}

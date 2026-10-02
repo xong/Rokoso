@@ -1,0 +1,4 @@
+user:
+    email_taken: Diese E-Mail-Adresse ist bereits registriert.
+    password_mismatch: Die Passwörter stimmen nicht überein.
+    wrong_password: Das aktuelle Passwort ist falsch.

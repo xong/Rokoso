@@ -1,0 +1,16 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'reset.title'|trans }}{% endblock %}
+
+{% block content %}
+    <p class="mb-4 text-slate-600">{{ 'reset.intro'|trans }}</p>
+    {{ form_start(form) }}
+        {{ form_row(form.email) }}
+        {{ form_rest(form) }}
+        <button type="submit" class="btn-primary w-full">{{ 'reset.submit'|trans }}</button>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block below %}
+    <p class="mt-4 text-sm"><a class="link" href="{{ path('app_login') }}">{{ 'security.back_to_login'|trans }}</a></p>
+{% endblock %}

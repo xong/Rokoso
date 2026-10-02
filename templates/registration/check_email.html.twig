@@ -1,0 +1,12 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'registration.check_title'|trans }}{% endblock %}
+
+{% block content %}
+    <p class="text-slate-700">{{ 'registration.check_text'|trans({'%email%': email}) }}</p>
+    <p class="mt-4 text-sm text-slate-500">{{ 'registration.check_hint'|trans }} <a class="link" href="{{ path('app_verify_resend') }}">{{ 'registration.resend_link'|trans }}</a></p>
+{% endblock %}
+
+{% block below %}
+    <p class="mt-4 text-sm"><a class="link" href="{{ path('app_login') }}">{{ 'security.back_to_login'|trans }}</a></p>
+{% endblock %}

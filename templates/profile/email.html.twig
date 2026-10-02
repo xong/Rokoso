@@ -1,0 +1,15 @@
+{% extends 'profile/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'profile.section_email'|trans }}{% endblock %}
+
+{% block form %}
+    <p class="mb-4 text-slate-600">{{ 'profile.current_email'|trans }} <strong>{{ app.user.email }}</strong></p>
+    {% if app.user.pendingEmail %}
+        <p class="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-800">{{ 'profile.pending_email'|trans({'%email%': app.user.pendingEmail}) }}</p>
+    {% endif %}
+    {{ form_start(form) }}
+        {{ form_row(form.email, {help: 'profile.email_help'}) }}
+        {{ form_rest(form) }}
+        <button type="submit" class="btn-primary">{{ 'profile.change_email'|trans }}</button>
+    {{ form_end(form) }}
+{% endblock %}

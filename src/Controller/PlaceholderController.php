@@ -24,10 +24,11 @@ final class PlaceholderController extends AbstractController
     #[Route('/mail/sent', name: 'mail_sent', defaults: ['title' => 'nav.mail_sent', 'phase' => 5])]
     #[Route('/mail/trash', name: 'mail_trash', defaults: ['title' => 'nav.mail_trash', 'phase' => 5])]
     #[Route('/mail/new', name: 'mail_compose', defaults: ['title' => 'nav.mail_compose', 'phase' => 7])]
-    #[Route('/calendar', name: 'calendar', defaults: ['title' => 'nav.calendar', 'phase' => 10])]
-    #[Route('/contacts', name: 'contacts', defaults: ['title' => 'nav.contacts', 'phase' => 9])]
-    #[Route('/projects', name: 'projects', defaults: ['title' => 'nav.projects', 'phase' => 3])]
-    #[Route('/organizations', name: 'organizations', defaults: ['title' => 'nav.organizations', 'phase' => 2])]
+    #[Route('/mail/message/new', name: 'mail_message_new', defaults: ['title' => 'nav.mail_message', 'phase' => 8])]
+    #[Route('/calendar', name: 'calendar_month', defaults: ['title' => 'nav.calendar', 'phase' => 10])]
+    #[Route('/contacts', name: 'contact_index', defaults: ['title' => 'nav.contacts', 'phase' => 9])]
+    #[Route('/projects', name: 'project_index', defaults: ['title' => 'nav.projects', 'phase' => 3])]
+    #[Route('/organizations', name: 'organization_index', defaults: ['title' => 'nav.organizations', 'phase' => 2])]
     public function placeholder(string $title, int $phase): Response
     {
         return $this->render('placeholder.html.twig', ['title' => $title, 'phase' => $phase]);

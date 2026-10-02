@@ -1,0 +1,6 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ 'email.hello'|trans({'%name%': name}) }}</p>
+    <p>{{ 'email.email_change.text'|trans }}</p>
+    {{ include('email/_button.html.twig', {url: url, label: 'email.email_change.button'|trans}) }}
+{% endblock %}

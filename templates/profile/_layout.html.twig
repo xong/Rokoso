@@ -1,0 +1,39 @@
+{% extends 'layout/app.html.twig' %}
+
+{% set has_detail = section is defined and section != 'menu' %}
+
+{% block title %}{{ 'profile.title'|trans }}{% endblock %}
+{% block list_title %}{{ 'profile.title'|trans }}{% endblock %}
+{% block back_url %}{{ path('profile_menu') }}{% endblock %}
+
+{% block list %}
+    <div class="flex items-center gap-3 border-b border-slate-200 p-4">
+        <twig:Avatar name="{{ app.user.name }}" image="{{ app.user.avatar }}" size="size-12 text-base" />
+        <div class="min-w-0">
+            <p class="truncate font-semibold">{{ app.user.name }}</p>
+            <p class="truncate text-xs text-slate-500">{{ app.user.email }}</p>
+        </div>
+    </div>
+    <ul role="list" class="p-2">
+        {% for item in [
+            {key: 'profile', route: 'profile_edit', icon: 'lucide:user-round', label: 'profile.section_profile'},
+            {key: 'password', route: 'profile_password', icon: 'lucide:key-round', label: 'profile.section_password'},
+            {key: 'email', route: 'profile_email', icon: 'lucide:at-sign', label: 'profile.section_email'},
+        ] %}
+            {% set active = section|default('') == item.key %}
+            <li>
+                <a href="{{ path(item.route) }}" {% if active %}aria-current="page"{% endif %}
+                   class="flex items-center gap-3 rounded-md px-3 py-2 {{ active ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-700 hover:bg-slate-100' }}">
+                    {{ ux_icon(item.icon, {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    {{ item.label|trans }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+{% block detail %}
+    <div class="max-w-lg p-4 lg:p-6">
+        {% block form %}{% endblock %}
+    </div>
+{% endblock %}

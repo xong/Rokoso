@@ -1,0 +1,19 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'registration.title'|trans }}{% endblock %}
+
+{% block content %}
+    {{ form_start(form) }}
+        {{ form_errors(form) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.email) }}
+        {{ form_row(form.plainPassword.first) }}
+        {{ form_row(form.plainPassword.second) }}
+        {{ form_rest(form) }}
+        <button type="submit" class="btn-primary w-full">{{ 'registration.submit'|trans }}</button>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block below %}
+    <p class="mt-4 text-sm text-slate-600">{{ 'registration.have_account'|trans }} <a class="link" href="{{ path('app_login') }}">{{ 'security.login'|trans }}</a></p>
+{% endblock %}

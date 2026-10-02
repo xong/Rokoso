@@ -1,0 +1,19 @@
+{% extends 'profile/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'profile.section_profile'|trans }}{% endblock %}
+
+{% block form %}
+    {{ form_start(form) }}
+        {{ form_errors(form) }}
+        {{ form_row(form.name) }}
+        <div class="mb-4 flex items-center gap-4">
+            <twig:Avatar name="{{ app.user.name }}" image="{{ app.user.avatar }}" size="size-16 text-lg" />
+            <div class="flex-1">
+                {{ form_row(form.avatarFile, {row_attr: {class: 'mb-2'}}) }}
+                {% if app.user.avatar %}{{ form_row(form.removeAvatar, {row_attr: {class: 'mb-0'}}) }}{% endif %}
+            </div>
+        </div>
+        {{ form_rest(form) }}
+        <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+    {{ form_end(form) }}
+{% endblock %}

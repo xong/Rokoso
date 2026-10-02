@@ -1,0 +1,109 @@
+{% use 'form_div_layout.html.twig' %}
+
+{# Tailwind-Formular-Theme: Klassen .label, .input, .help, .error aus app.css #}
+
+{%- block form_row -%}
+    {%- set widget_attr = {} -%}
+    {%- if help is not empty -%}
+        {%- set widget_attr = {attr: {'aria-describedby': id ~ '_help'}} -%}
+    {%- endif -%}
+    <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' mb-4')|trim})} %}{{ block('attributes') }}{% endwith %}>
+        {{- form_label(form) -}}
+        {{- form_widget(form, widget_attr) -}}
+        {{- form_help(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock form_row -%}
+
+{%- block checkbox_row -%}
+    <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' mb-4')|trim})} %}{{ block('attributes') }}{% endwith %}>
+        <div class="flex items-center gap-2">
+            {{- form_widget(form) -}}
+            {{- form_label(form, null, {label_attr: {class: 'text-sm text-slate-700'}}) -}}
+        </div>
+        {{- form_help(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock checkbox_row -%}
+
+{%- block form_label -%}
+    {%- if label is not same as(false) -%}
+        {%- set label_attr = label_attr|merge({class: label_attr.class|default('label')}) -%}
+        {{- parent() -}}
+    {%- endif -%}
+{%- endblock form_label -%}
+
+{%- block form_label_content -%}
+    {{- parent() -}}
+    {%- if required and compound is same as(false) and type|default('') != 'checkbox' -%}<span class="text-red-600" aria-hidden="true"> *</span>{%- endif -%}
+{%- endblock form_label_content -%}
+
+{%- block form_widget_simple -%}
+    {%- if type|default('text') not in ['checkbox', 'radio', 'file', 'color', 'hidden'] -%}
+        {%- set attr = attr|merge({class: (attr.class|default('') ~ ' input')|trim}) -%}
+    {%- endif -%}
+    {%- if type|default('text') == 'file' -%}
+        {%- set attr = attr|merge({class: (attr.class|default('') ~ ' block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium hover:file:bg-slate-200')|trim}) -%}
+    {%- endif -%}
+    {%- if type|default('text') == 'color' -%}
+        {%- set attr = attr|merge({class: (attr.class|default('') ~ ' h-10 w-16 cursor-pointer rounded-md ring-1 ring-slate-300')|trim}) -%}
+    {%- endif -%}
+    {%- if not valid -%}{%- set attr = attr|merge({'aria-invalid': 'true'}) -%}{%- endif -%}
+    {{- parent() -}}
+{%- endblock form_widget_simple -%}
+
+{%- block textarea_widget -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' input')|trim, rows: attr.rows|default(4)}) -%}
+    {%- if not valid -%}{%- set attr = attr|merge({'aria-invalid': 'true'}) -%}{%- endif -%}
+    {{- parent() -}}
+{%- endblock textarea_widget -%}
+
+{%- block choice_widget_collapsed -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' input')|trim}) -%}
+    {%- if not valid -%}{%- set attr = attr|merge({'aria-invalid': 'true'}) -%}{%- endif -%}
+    {{- parent() -}}
+{%- endblock choice_widget_collapsed -%}
+
+{%- block choice_widget_expanded -%}
+    <div {{ block('widget_container_attributes') }} class="space-y-1">
+        {%- for child in form %}
+            <div class="flex items-center gap-2">
+                {{- form_widget(child) -}}
+                {{- form_label(child, null, {translation_domain: choice_translation_domain, label_attr: {class: 'text-sm text-slate-700'}}) -}}
+            </div>
+        {% endfor -%}
+    </div>
+{%- endblock choice_widget_expanded -%}
+
+{%- block checkbox_widget -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' size-4 rounded border-slate-300 text-brand-600 accent-brand-600')|trim}) -%}
+    {{- parent() -}}
+{%- endblock checkbox_widget -%}
+
+{%- block radio_widget -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' size-4 accent-brand-600')|trim}) -%}
+    {{- parent() -}}
+{%- endblock radio_widget -%}
+
+{%- block form_help -%}
+    {%- if help is not empty -%}
+        <p id="{{ id }}_help" class="help">{{ help|trans(help_translation_parameters, translation_domain) }}</p>
+    {%- endif -%}
+{%- endblock form_help -%}
+
+{%- block form_errors -%}
+    {%- if errors|length > 0 -%}
+        <div role="alert" class="{{ compound ? 'mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700' : 'error' }}">
+            {%- for error in errors -%}<p>{{ error.message }}</p>{%- endfor -%}
+        </div>
+    {%- endif -%}
+{%- endblock form_errors -%}
+
+{%- block button_widget -%}
+    {%- set attr = attr|merge({class: attr.class|default('btn-primary')}) -%}
+    {{- parent() -}}
+{%- endblock button_widget -%}
+
+{%- block button_row -%}
+    {{- form_widget(form) -}}
+{%- endblock button_row -%}

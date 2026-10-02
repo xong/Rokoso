@@ -27,13 +27,13 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 0.5 Qualität: PHPUnit (Smoke-Tests Navigation), PHP-CS-Fixer, PHPStan Level 8, `composer check`; UI-Texte in `translations/messages.de.yaml`
 
 ## Phase 1 – Benutzer & Anmeldung (1, 2)
-- [ ] 1.1 `User`-Entity (E-Mail, Name, Passwort-Hash, Profilbild, verifiziert) + Migration
-- [ ] 1.2 Registrierung mit E-Mail-Bestätigung (symfonycasts/verify-email-bundle); Login erst nach Bestätigung
-- [ ] 1.3 Login / Logout / „Angemeldet bleiben“; alle App-Seiten nur angemeldet; Login-Drosselung
-- [ ] 1.4 Passwort vergessen (symfonycasts/reset-password-bundle)
-- [ ] 1.5 Profil: Bild, Name, Passwort ändern; E-Mail ändern mit erneuter Bestätigung
-- [ ] 1.6 Benutzermenü in der Navigation (Avatar/Initialen, Profil, Abmelden)
-- [ ] 1.7 Systemmails gestaltet (Twig-Inline-CSS), lokal über Mailpit
+- [x] 1.1 `User`-Entity (E-Mail, Name, Passwort-Hash, Profilbild, verifiziert) + Migration
+- [x] 1.2 Registrierung mit E-Mail-Bestätigung (symfonycasts/verify-email-bundle); Login erst nach Bestätigung
+- [x] 1.3 Login / Logout / „Angemeldet bleiben“; alle App-Seiten nur angemeldet; Login-Drosselung
+- [x] 1.4 Passwort vergessen (symfonycasts/reset-password-bundle)
+- [x] 1.5 Profil: Bild, Name, Passwort ändern; E-Mail ändern mit erneuter Bestätigung
+- [x] 1.6 Benutzermenü in der Navigation (Avatar/Initialen, Profil, Abmelden)
+- [x] 1.7 Systemmails gestaltet (Twig-Inline-CSS), lokal über Mailpit
 
 ## Phase 2 – Organisationen & Mitglieder (6, 7, 8, 21, 22, 24)
 - [ ] 2.1 `Organization` (Name, Logo, Farbe, Beschreibung)

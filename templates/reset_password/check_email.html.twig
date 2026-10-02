@@ -1,0 +1,11 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'reset.check_title'|trans }}{% endblock %}
+
+{% block content %}
+    <p class="text-slate-700">{{ 'reset.check_text'|trans }}</p>
+{% endblock %}
+
+{% block below %}
+    <p class="mt-4 text-sm"><a class="link" href="{{ path('app_login') }}">{{ 'security.back_to_login'|trans }}</a></p>
+{% endblock %}

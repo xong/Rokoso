@@ -1,0 +1,12 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'reset.new_title'|trans }}{% endblock %}
+
+{% block content %}
+    {{ form_start(form) }}
+        {{ form_row(form.plainPassword.first) }}
+        {{ form_row(form.plainPassword.second) }}
+        {{ form_rest(form) }}
+        <button type="submit" class="btn-primary w-full">{{ 'reset.save'|trans }}</button>
+    {{ form_end(form) }}
+{% endblock %}

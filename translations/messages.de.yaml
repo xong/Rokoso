@@ -15,10 +15,111 @@ nav:
     mail_sent: Ausgang
     mail_trash: Papierkorb
     mail_compose: Neue E-Mail
+    mail_message: Neue Nachricht
     calendar: Kalender
     contacts: Kontakte
     projects: Projekte
     organizations: Organisationen
+    profile: Mein Profil
+    logout: Abmelden
 
 placeholder:
     coming: Dieser Bereich folgt in Phase %phase%.
+
+action:
+    save: Speichern
+    cancel: Abbrechen
+    close: Schließen
+    delete: Löschen
+    edit: Bearbeiten
+    create: Anlegen
+    back: Zurück
+    search: Suchen
+    confirm_delete: Wirklich löschen?
+
+flash:
+    saved: Gespeichert.
+    deleted: Gelöscht.
+    link_invalid: Der Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.
+    forbidden: Dafür fehlt dir die Berechtigung.
+
+form:
+    image_help: JPG, PNG, GIF oder WebP, höchstens 2 MB.
+    none: '– keine –'
+
+user:
+    name: Name
+    email: E-Mail-Adresse
+    password: Passwort
+    avatar: Profilbild
+    remove_avatar: Profilbild entfernen
+    new_password: Neues Passwort
+    repeat_password: Passwort wiederholen
+    current_password: Aktuelles Passwort
+    password_help: Mindestens 10 Zeichen.
+    email_taken: Diese E-Mail-Adresse ist bereits registriert.
+
+security:
+    login: Anmelden
+    forgot: Passwort vergessen?
+    remember_me: Angemeldet bleiben
+    no_account: Noch kein Konto?
+    back_to_login: Zurück zur Anmeldung
+
+registration:
+    title: Registrieren
+    submit: Konto anlegen
+    have_account: Schon registriert?
+    check_title: Bitte E-Mail bestätigen
+    check_text: Wir haben einen Bestätigungslink an %email% geschickt. Öffne ihn, um dein Konto zu aktivieren.
+    check_hint: Keine E-Mail erhalten?
+    resend_link: Bestätigungslink erneut senden
+    resend_title: Bestätigungslink anfordern
+    resend_submit: Link senden
+    verified: Deine E-Mail-Adresse ist bestätigt. Du kannst dich jetzt anmelden.
+
+reset:
+    title: Passwort vergessen
+    intro: Gib deine E-Mail-Adresse ein. Wir schicken dir einen Link, mit dem du ein neues Passwort setzen kannst.
+    submit: Link anfordern
+    check_title: E-Mail unterwegs
+    check_text: Falls ein Konto mit dieser Adresse existiert, haben wir dir einen Link geschickt. Er ist eine Stunde gültig.
+    new_title: Neues Passwort setzen
+    save: Passwort speichern
+    done: Dein Passwort wurde geändert. Du kannst dich jetzt anmelden.
+
+profile:
+    title: Mein Profil
+    choose_section: Wähle links einen Bereich.
+    section_profile: Name und Bild
+    section_password: Passwort
+    section_email: E-Mail-Adresse
+    change_password: Passwort ändern
+    password_changed: Dein Passwort wurde geändert.
+    current_email: 'Aktuelle Adresse:'
+    new_email: Neue E-Mail-Adresse
+    email_help: Wir schicken einen Bestätigungslink an die neue Adresse. Erst danach wird sie übernommen.
+    change_email: Adresse ändern
+    email_unchanged: Das ist bereits deine aktuelle Adresse.
+    email_sent: Bitte bestätige die neue Adresse über den Link in der E-Mail.
+    email_changed: Deine E-Mail-Adresse wurde geändert.
+    pending_email: '%email% wartet noch auf Bestätigung.'
+
+email:
+    footer: Diese E-Mail wurde automatisch von Coop verschickt.
+    hello: Hallo %name%,
+    link_fallback: 'Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:'
+    verify:
+        subject: Bitte bestätige deine E-Mail-Adresse
+        text: danke für deine Registrierung bei Coop. Bitte bestätige deine E-Mail-Adresse.
+        button: E-Mail-Adresse bestätigen
+        expires: Der Link ist eine Stunde gültig.
+    email_change:
+        subject: Bitte bestätige deine neue E-Mail-Adresse
+        text: du möchtest deine E-Mail-Adresse bei Coop ändern. Bitte bestätige die neue Adresse.
+        button: Neue Adresse bestätigen
+    reset:
+        subject: Neues Passwort für Coop
+        text: jemand (hoffentlich du) möchte das Passwort für dein Coop-Konto zurücksetzen.
+        button: Neues Passwort setzen
+        expires: Der Link ist eine Stunde gültig. Wenn du das nicht angefordert hast, ignoriere diese E-Mail.
