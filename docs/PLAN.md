@@ -7,11 +7,11 @@
 
 | | |
 |---|---|
-| **Aktuelle Phase** | Phase 1 – Benutzer & Anmeldung |
-| **Nächster Schritt** | 1.1 `User`-Entity + Migration; Layout-Abnahme im Browser (0.4) steht noch aus |
-| **Letzte Sitzung** | 2026-10-02: Plan erstellt, Symfony 8 + Tailwind + Layout-Gerüst, Docker-DB läuft, Name „Coop“, offene Registrierung beschlossen |
+| **Aktuelle Phase** | Basisversion fertig (Phasen 0–12) – Abnahme durch den Projektinhaber |
+| **Nächster Schritt** | Im Browser durchklicken (Layout, Mobil, Tastatur), Feedback sammeln, offene Fragen in `OFFENE-FRAGEN.md` klären, dann Ausbau aus dem Ideen-Parkplatz |
+| **Letzte Sitzung** | 2026-10-02 (Nacht): alle Phasen ohne Rückfragen umgesetzt, je Phase ein Commit; 46 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
-**Starten:** `docker compose up -d` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000
+**Starten:** `docker compose up -d` · `php bin/console doctrine:migrations:migrate -n` · `php bin/console app:demo --mails` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000 (Login `demo@coop.test` / `demo-passwort`)
 
 Legende: `[ ]` offen · `[~]` in Arbeit · `[x]` erledigt · Nummern in Klammern = Punkte aus `App.md`
 
@@ -87,8 +87,8 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [~] 11.2 Mobile Feinschliff (Ungelesen-Zähler, Safe Areas); Web-Push-Benachrichtigungen noch offen
 
 ## Phase 12 – Betrieb
-- [ ] 12.1 Deployment-Anleitung (Cron für Sync, Messenger)
-- [ ] 12.2 Backup, Updates, Admin-Doku
+- [x] 12.1 Deployment-Anleitung (`docs/BETRIEB.md`: Cron für Sync, kein Worker nötig)
+- [x] 12.2 Backup, Updates, Admin-Doku; Demodaten-Befehl `app:demo`
 
 ---
 
@@ -98,3 +98,6 @@ Neue Ideen, die noch keiner Phase zugeordnet sind:
 - Gesendete Mails zusätzlich per IMAP in den Gesendet-Ordner des Servers kopieren
 - Unterhaltungen (Threads) in der Liste zusammenfassen
 - Kontakte als vCard importieren/exportieren
+- Web-Push bzw. E-Mail-Benachrichtigungen (neue Nachricht, Zuweisung, Kommentar)
+- Einzelne Termine einer Serie ändern; iCal-Abo für Handy-Kalender; Erinnerungen
+- Plattform-Admin, Konto selbst löschen (DSGVO)
