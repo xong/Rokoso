@@ -57,11 +57,11 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 5.5 Ordner: Eingang (Standard), Ausgang, Papierkorb
 
 ## Phase 6 – Zusammenarbeit an E-Mails (13, 14, 15, 18, 20)
-- [ ] 6.1 Kommentarspalte (Autor, Datum, Text; Eingabe unten)
-- [ ] 6.2 Verantwortliche: Multiselect mit Suche + „Mir zuordnen“
-- [ ] 6.3 Projektzuordnung mit Suchliste
-- [ ] 6.4 Hover-Funktionsleiste: Projekt, verantwortlich, Antworten, Weiterleiten, Papierkorb
-- [ ] 6.5 Filter über der Liste: ohne Verantwortliche, meine, nach Projekt, …
+- [x] 6.1 Kommentarspalte (Autor, Datum, Text; Eingabe unten)
+- [x] 6.2 Verantwortliche: Multiselect mit Suche + „Mir zuordnen“
+- [x] 6.3 Projektzuordnung mit Suchliste
+- [x] 6.4 Hover-Funktionsleiste: Projekt, verantwortlich, Antworten, Weiterleiten, Papierkorb
+- [x] 6.5 Filter über der Liste: ohne Verantwortliche, meine, nach Projekt, …
 
 ## Phase 7 – E-Mail schreiben (18, 25)
 - [ ] 7.1 Neue E-Mail, Antworten, Weiterleiten (Konto wählen, Anhänge)

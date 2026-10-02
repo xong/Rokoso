@@ -260,6 +260,34 @@ mail:
     trashed: In den Papierkorb verschoben.
     restored: Wiederhergestellt.
     sync: Neue E-Mails abrufen
+    reply: Antworten
+    reply_all: Allen antworten
+    forward: Weiterleiten
+    toolbar:
+        project: Projekt zuordnen
+        assignees: Verantwortliche festlegen
+    picker:
+        no_match: Keine Treffer
+    project:
+        none: Kein Projekt
+        change: Projekt ändern
+        search: Projekt suchen …
+    assignees:
+        label: Verantwortliche
+        none: Niemand verantwortlich
+        change: Verantwortliche ändern
+        search: Person suchen …
+        assign_me: Mir zuordnen
+        unassign_me: Nicht mehr verantwortlich
+    comments:
+        title: Kommentare
+        none: Noch keine Kommentare.
+        new: Neuer Kommentar
+        placeholder: Kommentar für das Team …
+        submit: Kommentieren
+        delete: Kommentar löschen
+        delete_confirm: Kommentar löschen?
+        deleted_user: Gelöschtes Konto
     synced: E-Mails abgerufen.
     sync_failed: Mindestens ein Konto konnte nicht abgerufen werden. Details stehen beim E-Mail-Konto.
     pagination: Seiten

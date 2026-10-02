@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Attachment;
+use App\Entity\Comment;
 use App\Entity\Message;
 use App\Entity\User;
 use App\Mail\MailSynchronizer;
 use App\Mail\MessageFilter;
 use App\Mail\MessageHtmlRenderer;
+use App\Mail\ParticipantResolver;
 use App\Mail\ReadTracker;
 use App\Repository\MailAccountRepository;
 use App\Repository\MessageRepository;
@@ -51,7 +53,7 @@ final class MailController extends AbstractController
 
     #[Route('/{folder<inbox|sent|trash>}/{id<\d+>}', name: 'mail_show')]
     #[IsGranted(MessageVoter::VIEW, 'message')]
-    public function show(Request $request, string $folder, Message $message, #[CurrentUser] User $user, MessageHtmlRenderer $renderer): Response
+    public function show(Request $request, string $folder, Message $message, #[CurrentUser] User $user, MessageHtmlRenderer $renderer, ParticipantResolver $participants): Response
     {
         $request->attributes->set('_nav', 'mail_'.$folder);
         $this->readTracker->markRead($message, $user);
@@ -64,6 +66,9 @@ final class MailController extends AbstractController
             'show_html' => $showHtml,
             'has_external_images' => $message->hasHtml() && $renderer->hasExternalImages($message),
             'load_images' => $request->query->getBoolean('images'),
+            'candidates' => $participants->candidates($message),
+            'message_projects' => $participants->projects($message),
+            'open' => $request->query->getString('open'),
         ]);
     }
 
@@ -120,6 +125,89 @@ final class MailController extends AbstractController
         return $this->redirectToList($request);
     }
 
+    #[Route('/{id<\d+>}/comment', name: 'mail_comment', methods: ['POST'])]
+    #[IsGranted(MessageVoter::VIEW, 'message')]
+    #[IsCsrfTokenValid('mail-comment')]
+    public function comment(Request $request, Message $message, #[CurrentUser] User $user): Response
+    {
+        $comment = (new Comment($message, $user))->setBody($request->getPayload()->getString('body'));
+        if ('' !== $comment->getBody()) {
+            $this->em->persist($comment);
+            $this->em->flush();
+        }
+
+        return $this->redirectToMessage($request, $message, 'comments');
+    }
+
+    #[Route('/{id<\d+>}/comment/{comment<\d+>}/delete', name: 'mail_comment_delete', methods: ['POST'])]
+    #[IsGranted(MessageVoter::VIEW, 'message')]
+    #[IsCsrfTokenValid('mail-comment')]
+    public function deleteComment(Request $request, Message $message, Comment $comment, #[CurrentUser] User $user): Response
+    {
+        if ($comment->getMessage() !== $message || $comment->getAuthor() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+        $this->em->remove($comment);
+        $this->em->flush();
+
+        return $this->redirectToMessage($request, $message, 'comments');
+    }
+
+    /**
+     * Replace the assignees (searchable multiselect).
+     */
+    #[Route('/{id<\d+>}/assignees', name: 'mail_assignees', methods: ['POST'])]
+    #[IsGranted(MessageVoter::VIEW, 'message')]
+    #[IsCsrfTokenValid('mail-action')]
+    public function assignees(Request $request, Message $message, ParticipantResolver $participants): Response
+    {
+        $ids = array_map(intval(...), $request->getPayload()->all('assignees'));
+        $candidates = $participants->candidates($message);
+        foreach ($message->getAssignees()->toArray() as $assignee) {
+            $message->removeAssignee($assignee);
+        }
+        foreach ($candidates as $candidate) {
+            if (\in_array($candidate->getId(), $ids, true)) {
+                $message->addAssignee($candidate);
+            }
+        }
+        $this->em->flush();
+
+        return $this->redirectBack($request, $message);
+    }
+
+    /**
+     * "Mir zuordnen" – toggles the current user as assignee.
+     */
+    #[Route('/{id<\d+>}/assign-me', name: 'mail_assign_me', methods: ['POST'])]
+    #[IsGranted(MessageVoter::VIEW, 'message')]
+    #[IsCsrfTokenValid('mail-action')]
+    public function assignMe(Request $request, Message $message, #[CurrentUser] User $user): Response
+    {
+        $message->isAssignedTo($user) ? $message->removeAssignee($user) : $message->addAssignee($user);
+        $this->em->flush();
+
+        return $this->redirectBack($request, $message);
+    }
+
+    #[Route('/{id<\d+>}/project', name: 'mail_project', methods: ['POST'])]
+    #[IsGranted(MessageVoter::VIEW, 'message')]
+    #[IsCsrfTokenValid('mail-action')]
+    public function project(Request $request, Message $message, ParticipantResolver $participants): Response
+    {
+        $id = $request->getPayload()->getInt('project');
+        $project = null;
+        foreach ($participants->projects($message) as $candidate) {
+            if ($candidate->getId() === $id) {
+                $project = $candidate;
+            }
+        }
+        $message->setProject($project);
+        $this->em->flush();
+
+        return $this->redirectBack($request, $message);
+    }
+
     /**
      * Fetch new mails of the user's accounts now (otherwise done by cron).
      */
@@ -159,6 +247,27 @@ final class MailController extends AbstractController
             'accounts' => $this->accounts->findForUser($user),
             'projects' => $this->projects->findVisibleFor($user),
         ];
+    }
+
+    /**
+     * After toolbar actions: back to the list (from list hover toolbar) or to the message.
+     */
+    private function redirectBack(Request $request, Message $message): Response
+    {
+        return 'list' === $request->getPayload()->getString('return')
+            ? $this->redirectToList($request)
+            : $this->redirectToMessage($request, $message);
+    }
+
+    private function redirectToMessage(Request $request, Message $message, ?string $fragment = null): Response
+    {
+        $folder = $request->getPayload()->getString('folder', 'inbox');
+        $url = $this->generateUrl('mail_show', [
+            'folder' => \in_array($folder, self::FOLDERS, true) ? $folder : 'inbox',
+            'id' => $message->getId(),
+        ]);
+
+        return $this->redirect($url.(null === $fragment ? '' : '#'.$fragment));
     }
 
     private function redirectToList(Request $request): Response

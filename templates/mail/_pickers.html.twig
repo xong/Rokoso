@@ -1,0 +1,78 @@
+{# Verantwortliche und Projekt einer Nachricht. Variablen: message, candidates, message_projects, folder, open #}
+<div class="flex flex-wrap items-center gap-2">
+    {# Projekt (Einfachauswahl mit Suche) #}
+    <details class="relative" data-controller="picker" data-action="toggle->picker#toggled keydown.esc->picker#close" {{ open == 'project' ? 'open' }}>
+        <summary class="btn-secondary cursor-pointer list-none py-1 text-xs [&::-webkit-details-marker]:hidden" aria-label="{{ 'mail.project.change'|trans }}">
+            {{ ux_icon('lucide:folder-kanban', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+            {% if message.project %}
+                <span class="size-2 rounded-full" style="background-color: {{ message.project.color }}" aria-hidden="true"></span>{{ message.project.name }}
+            {% else %}
+                {{ 'mail.project.none'|trans }}
+            {% endif %}
+        </summary>
+        <form method="post" action="{{ path('mail_project', {id: message.id}) }}" class="absolute left-0 z-20 mt-1 w-64 rounded-lg bg-white p-2 shadow-lg ring-1 ring-slate-200">
+            <input type="hidden" name="_token" value="{{ csrf_token('mail-action') }}">
+            <input type="hidden" name="folder" value="{{ folder }}">
+            <label for="project-search-{{ message.id }}" class="sr-only">{{ 'mail.project.search'|trans }}</label>
+            <input type="search" id="project-search-{{ message.id }}" class="input mb-2 py-1.5" placeholder="{{ 'mail.project.search'|trans }}"
+                   data-picker-target="search" data-action="input->picker#filter keydown.enter->picker#preventSubmit">
+            <fieldset class="max-h-60 overflow-y-auto">
+                <legend class="sr-only">{{ 'nav.projects'|trans }}</legend>
+                <label class="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-slate-50" data-picker-target="option" data-label="{{ 'mail.project.none'|trans }}">
+                    <input type="radio" name="project" value="0" {{ message.project is null ? 'checked' }} class="accent-brand-600"> <span class="text-slate-500">{{ 'mail.project.none'|trans }}</span>
+                </label>
+                {% for p in message_projects %}
+                    <label class="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-slate-50" data-picker-target="option" data-label="{{ p.name }}">
+                        <input type="radio" name="project" value="{{ p.id }}" {{ message.project and message.project.id == p.id ? 'checked' }} class="accent-brand-600">
+                        <span class="size-2 rounded-full" style="background-color: {{ p.color }}" aria-hidden="true"></span>{{ p.name }}
+                    </label>
+                {% endfor %}
+                <p class="px-2 py-1.5 text-slate-500" data-picker-target="empty" hidden>{{ 'mail.picker.no_match'|trans }}</p>
+            </fieldset>
+            <button type="submit" class="btn-primary mt-2 w-full">{{ 'action.save'|trans }}</button>
+        </form>
+    </details>
+
+    {# Verantwortliche (Mehrfachauswahl mit Suche) #}
+    <details class="relative" data-controller="picker" data-action="toggle->picker#toggled keydown.esc->picker#close" {{ open == 'assignees' ? 'open' }}>
+        <summary class="btn-secondary cursor-pointer list-none py-1 text-xs [&::-webkit-details-marker]:hidden" aria-label="{{ 'mail.assignees.change'|trans }}">
+            {{ ux_icon('lucide:users', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+            {% if message.assignees is empty %}
+                {{ 'mail.assignees.none'|trans }}
+            {% else %}
+                <span class="flex -space-x-1">
+                    {% for u in message.assignees|slice(0, 3) %}<twig:Avatar name="{{ u.name }}" image="{{ u.avatar }}" size="size-5 text-[9px] ring-2 ring-white" />{% endfor %}
+                </span>
+                {{ message.assignees|map(u => u.name)|join(', ') }}
+            {% endif %}
+        </summary>
+        <form method="post" action="{{ path('mail_assignees', {id: message.id}) }}" class="absolute left-0 z-20 mt-1 w-64 rounded-lg bg-white p-2 shadow-lg ring-1 ring-slate-200">
+            <input type="hidden" name="_token" value="{{ csrf_token('mail-action') }}">
+            <input type="hidden" name="folder" value="{{ folder }}">
+            <label for="assignee-search-{{ message.id }}" class="sr-only">{{ 'mail.assignees.search'|trans }}</label>
+            <input type="search" id="assignee-search-{{ message.id }}" class="input mb-2 py-1.5" placeholder="{{ 'mail.assignees.search'|trans }}"
+                   data-picker-target="search" data-action="input->picker#filter keydown.enter->picker#preventSubmit">
+            <fieldset class="max-h-60 overflow-y-auto">
+                <legend class="sr-only">{{ 'mail.assignees.label'|trans }}</legend>
+                {% for u in candidates %}
+                    <label class="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-slate-50" data-picker-target="option" data-label="{{ u.name }} {{ u.email }}">
+                        <input type="checkbox" name="assignees[]" value="{{ u.id }}" {{ message.isAssignedTo(u) ? 'checked' }} class="accent-brand-600">
+                        <twig:Avatar name="{{ u.name }}" image="{{ u.avatar }}" size="size-6 text-[10px]" />
+                        <span class="truncate">{{ u.name }}</span>
+                    </label>
+                {% endfor %}
+                <p class="px-2 py-1.5 text-slate-500" data-picker-target="empty" hidden>{{ 'mail.picker.no_match'|trans }}</p>
+            </fieldset>
+            <button type="submit" class="btn-primary mt-2 w-full">{{ 'action.save'|trans }}</button>
+        </form>
+    </details>
+
+    <form method="post" action="{{ path('mail_assign_me', {id: message.id}) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('mail-action') }}">
+        <input type="hidden" name="folder" value="{{ folder }}">
+        <button type="submit" class="btn-ghost py-1 text-xs">
+            {{ ux_icon(message.isAssignedTo(app.user) ? 'lucide:user-minus' : 'lucide:user-plus', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+            {{ message.isAssignedTo(app.user) ? 'mail.assignees.unassign_me'|trans : 'mail.assignees.assign_me'|trans }}
+        </button>
+    </form>
+</div>
