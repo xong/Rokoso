@@ -101,7 +101,7 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 14.2 Detail: Woche (Standard) / Tag mit gleich hohen Stunden-Slots, Einträge positioniert, ganztägige oben
 
 ## Phase 15 – Projekt-Kommentare (43)
-- [ ] 15.1 `Comment` verallgemeinert (Nachricht, Projekt, Datei); Kommentarspalte beim Projekt
+- [x] 15.1 `Comment` verallgemeinert (Nachricht, Projekt, Datei); Kommentarspalte beim Projekt
 
 ## Phase 16 – Dateien (41, 42)
 - [ ] 16.1 `Folder` (Hierarchie, Organisation/Projekt) und `File` (Speicher wie Anhänge)

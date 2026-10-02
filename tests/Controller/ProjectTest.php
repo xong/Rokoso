@@ -25,6 +25,35 @@ final class ProjectTest extends AppTestCase
         self::assertSelectorTextContains('main', 'SEV Musterstadt');
     }
 
+    public function testMembersCommentOnProject(): void
+    {
+        $admin = $this->createUser('owner@example.org', 'Owner');
+        $member = $this->createUser();
+        $org = $this->createOrganization($admin);
+        $org->addMember($member, OrganizationRole::Member);
+        $project = (new Project($admin))->setName('Elternabend')->setOrganization($org);
+        $this->em()->persist($project);
+        $this->em()->flush();
+
+        $this->login($member);
+        $url = '/projects/'.$project->getId();
+        $this->client->request('GET', $url);
+        $this->client->submitForm('Kommentieren', ['body' => 'Raum ist gebucht.']);
+        self::assertResponseRedirects($url.'#comments');
+        $crawler = $this->client->followRedirect();
+        self::assertSelectorTextContains('#comments', 'Raum ist gebucht.');
+
+        // Only the author may delete
+        $deleteForm = $crawler->filter('#comments form[action*="/comment/"]')->form();
+        $this->login($admin);
+        $this->client->submit($deleteForm);
+        self::assertResponseStatusCodeSame(403);
+        $this->login($member);
+        $this->client->submit($deleteForm);
+        $this->client->followRedirect();
+        self::assertSelectorTextNotContains('#comments', 'Raum ist gebucht.');
+    }
+
     public function testMembersSeeButCannotManageOrganizationProjects(): void
     {
         $admin = $this->createUser('owner@example.org', 'Owner');

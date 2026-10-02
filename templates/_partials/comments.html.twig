@@ -1,0 +1,43 @@
+{#
+    Kommentarspalte (Nachricht, Projekt, Datei …). Variablen:
+    comments, add_url, delete_route, delete_params (ohne comment), token (CSRF-ID), fields (zusätzliche versteckte Felder, optional)
+#}
+{% set fields = fields ?? {} %}
+<aside id="comments" aria-labelledby="comments-heading" tabindex="-1"
+       class="flex flex-col border-t border-slate-200 bg-slate-50 xl:w-80 xl:shrink-0 xl:border-t-0 xl:border-l">
+    <h3 id="comments-heading" class="border-b border-slate-200 px-4 py-3 text-sm font-semibold">
+        {{ 'mail.comments.title'|trans }} <span class="font-normal text-slate-500">({{ comments|length }})</span>
+    </h3>
+    <ol role="list" class="flex-1 space-y-3 overflow-y-auto p-4">
+        {% for c in comments %}
+            <li class="flex gap-2">
+                <twig:Avatar name="{{ c.author ? c.author.name : '?' }}" image="{{ c.author ? c.author.avatar : null }}" size="size-7 text-[10px]" />
+                <div class="min-w-0 flex-1 rounded-lg bg-white p-2.5 shadow-sm ring-1 ring-slate-200">
+                    <p class="flex items-baseline gap-2 text-xs">
+                        <span class="font-semibold">{{ c.author ? c.author.name : 'mail.comments.deleted_user'|trans }}</span>
+                        <time datetime="{{ c.createdAt|date('c') }}" class="text-slate-500">{{ c.createdAt|short_date }}</time>
+                        {% if c.author == app.user %}
+                            <form method="post" action="{{ path(delete_route, delete_params|merge({comment: c.id})) }}" class="ml-auto" data-turbo-confirm="{{ 'mail.comments.delete_confirm'|trans }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token(token) }}">
+                                {% for name, value in fields %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+                                <button type="submit" class="text-slate-400 hover:text-red-600" aria-label="{{ 'mail.comments.delete'|trans }}" title="{{ 'mail.comments.delete'|trans }}">
+                                    {{ ux_icon('lucide:x', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                                </button>
+                            </form>
+                        {% endif %}
+                    </p>
+                    <p class="mt-1 break-words whitespace-pre-line">{{ c.body }}</p>
+                </div>
+            </li>
+        {% else %}
+            <li class="text-sm text-slate-500">{{ 'mail.comments.none'|trans }}</li>
+        {% endfor %}
+    </ol>
+    <form method="post" action="{{ add_url }}" class="border-t border-slate-200 p-3">
+        <input type="hidden" name="_token" value="{{ csrf_token(token) }}">
+        {% for name, value in fields %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+        <label for="comment-body" class="sr-only">{{ 'mail.comments.new'|trans }}</label>
+        <textarea id="comment-body" name="body" rows="2" required class="input mb-2 resize-y" placeholder="{{ 'mail.comments.placeholder'|trans }}"></textarea>
+        <button type="submit" class="btn-primary w-full">{{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'mail.comments.submit'|trans }}</button>
+    </form>
+</aside>

@@ -131,7 +131,7 @@ final class MailController extends AbstractController
     #[IsCsrfTokenValid('mail-comment')]
     public function comment(Request $request, Message $message, #[CurrentUser] User $user): Response
     {
-        $comment = (new Comment($message, $user))->setBody($request->getPayload()->getString('body'));
+        $comment = Comment::onMessage($message, $user)->setBody($request->getPayload()->getString('body'));
         if ('' !== $comment->getBody()) {
             $this->em->persist($comment);
             $this->em->flush();

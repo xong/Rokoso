@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Comment;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Form\ProjectFormType;
 use App\Mail\MessageFilter;
+use App\Repository\CommentRepository;
 use App\Repository\MessageRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
@@ -74,13 +76,42 @@ final class ProjectController extends AbstractController
 
     #[Route('/{id<\d+>}', name: 'project_show')]
     #[IsGranted(ProjectVoter::VIEW, 'project')]
-    public function show(Project $project, #[CurrentUser] User $user, MessageRepository $messages): Response
+    public function show(Project $project, #[CurrentUser] User $user, MessageRepository $messages, CommentRepository $comments): Response
     {
         return $this->render('project/show.html.twig', [
             'projects' => $this->projects->findVisibleFor($user),
             'project' => $project,
+            'comments' => $comments->forProject($project),
             'recent_messages' => \array_slice($messages->findForList($user, new MessageFilter('all', project: $project->getId())), 0, 5),
         ]);
+    }
+
+    #[Route('/{id<\d+>}/comment', name: 'project_comment', methods: ['POST'])]
+    #[IsGranted(ProjectVoter::VIEW, 'project')]
+    #[IsCsrfTokenValid('project-comment')]
+    public function comment(Request $request, Project $project, #[CurrentUser] User $user): Response
+    {
+        $comment = Comment::onProject($project, $user)->setBody($request->getPayload()->getString('body'));
+        if ('' !== $comment->getBody()) {
+            $this->em->persist($comment);
+            $this->em->flush();
+        }
+
+        return $this->redirect($this->generateUrl('project_show', ['id' => $project->getId()]).'#comments');
+    }
+
+    #[Route('/{id<\d+>}/comment/{comment<\d+>}/delete', name: 'project_comment_delete', methods: ['POST'])]
+    #[IsGranted(ProjectVoter::VIEW, 'project')]
+    #[IsCsrfTokenValid('project-comment')]
+    public function deleteComment(Project $project, Comment $comment, #[CurrentUser] User $user): Response
+    {
+        if ($comment->getProject() !== $project || $comment->getAuthor() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+        $this->em->remove($comment);
+        $this->em->flush();
+
+        return $this->redirect($this->generateUrl('project_show', ['id' => $project->getId()]).'#comments');
     }
 
     #[Route('/{id<\d+>}/edit', name: 'project_edit')]
