@@ -461,3 +461,9 @@ calendar:
         10: Oktober
         11: November
         12: Dezember
+
+pwa:
+    description: Gemeinsames Postfach, Projekte, Kalender und Kontakte für Stadtelternvertretungen.
+    offline_title: Keine Verbindung
+    offline_text: Coop braucht eine Internetverbindung. Bitte prüfe deine Verbindung und versuche es erneut.
+    retry: Erneut versuchen

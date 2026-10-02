@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Twig\Components;
 
+use App\Entity\User;
+use App\Repository\MessageRepository;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
@@ -41,7 +44,19 @@ final class Sidebar
 
     public function __construct(
         private readonly RequestStack $requestStack,
+        private readonly MessageRepository $messages,
+        private readonly Security $security,
     ) {
+    }
+
+    /**
+     * Unread messages in the inbox (badge next to "Eingang").
+     */
+    public function getUnreadCount(): int
+    {
+        $user = $this->security->getUser();
+
+        return $user instanceof User ? $this->messages->countUnreadInbox($user) : 0;
     }
 
     /**

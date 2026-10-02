@@ -1,0 +1,8 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'pwa.offline_title'|trans }}{% endblock %}
+
+{% block content %}
+    <p class="mb-4 text-slate-700">{{ 'pwa.offline_text'|trans }}</p>
+    <a href="{{ path('mail_inbox') }}" class="btn-primary w-full">{{ 'pwa.retry'|trans }}</a>
+{% endblock %}

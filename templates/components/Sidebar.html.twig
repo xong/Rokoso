@@ -12,6 +12,7 @@
         </button>
     </div>
 
+    {% set unread = this.unreadCount %}
     <ul role="list" class="flex-1 space-y-0.5 overflow-y-auto p-2 lg:collapsed:overflow-visible">
         {% for item in this.items %}
             <li class="group/item relative">
@@ -27,7 +28,7 @@
                     {# Ausgeklappte Navigation: Unterpunkte des aktiven Bereichs inline #}
                     <ul role="list" class="mt-0.5 space-y-0.5 pl-8 lg:collapsed:hidden {{ item.active ? '' : 'hidden' }}">
                         {% for child in item.children %}
-                            <li>{{ _self.child_link(child) }}</li>
+                            <li>{{ _self.child_link(child, unread) }}</li>
                         {% endfor %}
                     </ul>
                 {% endif %}
@@ -39,7 +40,7 @@
                         {% if item.children is not empty %}
                             <ul role="list" class="space-y-0.5">
                                 {% for child in item.children %}
-                                    <li>{{ _self.child_link(child) }}</li>
+                                    <li>{{ _self.child_link(child, unread) }}</li>
                                 {% endfor %}
                             </ul>
                         {% endif %}
@@ -79,10 +80,13 @@
     </div>
 </nav>
 
-{% macro child_link(child) %}
+{% macro child_link(child, unread = 0) %}
     <a href="{{ path(child.route) }}" {% if child.active %}aria-current="page"{% endif %}
        class="flex items-center gap-2 rounded-md px-3 py-1.5 {{ child.active ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
         {{ ux_icon(child.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
         <span class="truncate">{{ child.label|trans }}</span>
+        {% if child.route == 'mail_inbox' and unread > 0 %}
+            <span class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white">{{ unread > 99 ? '99+' : unread }}<span class="sr-only"> {{ 'mail.unread'|trans }}</span></span>
+        {% endif %}
     </a>
 {% endmacro %}

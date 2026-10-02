@@ -83,8 +83,8 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 10.5 Wiederholungen (RRULE, rlanvin/php-rrule)
 
 ## Phase 11 – PWA & Mobile
-- [ ] 11.1 Web-App-Manifest, Icons, Service Worker
-- [ ] 11.2 Mobile Feinschliff, ggf. Web-Push-Benachrichtigungen
+- [x] 11.1 Web-App-Manifest, Icons, Service Worker
+- [~] 11.2 Mobile Feinschliff (Ungelesen-Zähler, Safe Areas); Web-Push-Benachrichtigungen noch offen
 
 ## Phase 12 – Betrieb
 - [ ] 12.1 Deployment-Anleitung (Cron für Sync, Messenger)

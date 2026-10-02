@@ -4,6 +4,13 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>{% block title %}{% endblock %}{% if block('title') is not empty %} · {% endif %}{{ 'app.name'|trans }}</title>
+        <meta name="theme-color" content="#2563eb">
+        <meta name="description" content="{{ 'pwa.description'|trans }}">
+        <link rel="manifest" href="{{ path('pwa_manifest') }}">
+        <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="{{ 'app.name'|trans }}">
         {% block stylesheets %}
             <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
         {% endblock %}
