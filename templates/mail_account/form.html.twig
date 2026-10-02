@@ -1,0 +1,78 @@
+{% extends 'organization/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ account ? account.name : 'mail_account.new'|trans }}{% endblock %}
+{% block back_url %}{{ path('organization_show', {id: organization.id}) }}{% endblock %}
+{% block detail_title %}{{ account ? account.name : 'mail_account.new'|trans }}{% endblock %}
+
+{% block detail_actions %}
+    {% if account %}
+        {{ ui.post_button(path('mail_account_test', {id: account.id}), 'mail-account-test', 'mail_account.test',
+            {class: 'btn-secondary', icon: 'lucide:plug-zap'}) }}
+        {{ ui.post_button(path('mail_account_delete', {id: account.id}), 'delete-mail-account-' ~ account.id, 'mail_account.delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'mail_account.delete_confirm'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        <p class="mb-4 text-sm text-slate-500">
+            <a class="link" href="{{ path('organization_show', {id: organization.id}) }}">{{ organization.name }}</a>
+            {% if account and account.lastSyncAt %}
+                · {{ 'mail_account.last_sync'|trans({'%date%': account.lastSyncAt|date('d.m.Y H:i')}) }}
+            {% endif %}
+        </p>
+        {% if account and account.lastSyncError %}
+            <p role="alert" class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{{ 'mail_account.sync_error'|trans }} {{ account.lastSyncError }}</p>
+        {% endif %}
+
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'mail_account.section_general'|trans }}</legend>
+                {{ form_row(form.name) }}
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.emailAddress) }}
+                    {{ form_row(form.senderName) }}
+                </div>
+                {{ form_row(form.enabled, {row_attr: {class: 'mb-0'}}) }}
+            </fieldset>
+
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'mail_account.section_imap'|trans }}</legend>
+                <div class="grid gap-x-4 sm:grid-cols-[1fr_7rem_10rem]">
+                    {{ form_row(form.imapHost) }}
+                    {{ form_row(form.imapPort) }}
+                    {{ form_row(form.imapEncryption) }}
+                </div>
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.imapUsername) }}
+                    {{ form_row(form.imapPasswordPlain) }}
+                    {{ form_row(form.inboxFolder) }}
+                    {{ form_row(form.importDays) }}
+                </div>
+            </fieldset>
+
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'mail_account.section_smtp'|trans }}</legend>
+                <div class="grid gap-x-4 sm:grid-cols-[1fr_7rem_10rem]">
+                    {{ form_row(form.smtpHost) }}
+                    {{ form_row(form.smtpPort) }}
+                    {{ form_row(form.smtpEncryption) }}
+                </div>
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.smtpUsername) }}
+                    {{ form_row(form.smtpPasswordPlain) }}
+                </div>
+            </fieldset>
+
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ path('organization_show', {id: organization.id}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

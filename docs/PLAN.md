@@ -46,8 +46,8 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 3.2 Verwaltung durch Org-Administratoren
 
 ## Phase 4 – E-Mail-Konten (9)
-- [ ] 4.1 `MailAccount` je Organisation: IMAP + SMTP (Host, Port, Verschlüsselung, Benutzer, Passwort verschlüsselt gespeichert)
-- [ ] 4.2 Verbindungstest im Formular
+- [x] 4.1 `MailAccount` je Organisation: IMAP + SMTP (Host, Port, Verschlüsselung, Benutzer, Passwort verschlüsselt gespeichert)
+- [x] 4.2 Verbindungstest im Formular
 
 ## Phase 5 – E-Mail lesen (10, 11, 12, 16, 17, 25)
 - [ ] 5.1 Datenmodell `Message` (E-Mail **und** interne Nachricht), `Attachment`

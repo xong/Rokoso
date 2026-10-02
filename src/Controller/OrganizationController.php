@@ -12,7 +12,9 @@ use App\Enum\OrganizationRole;
 use App\Form\InvitationFormType;
 use App\Form\OrganizationFormType;
 use App\Repository\InvitationRepository;
+use App\Repository\MailAccountRepository;
 use App\Repository\OrganizationRepository;
+use App\Repository\ProjectRepository;
 use App\Security\Voter\OrganizationVoter;
 use App\Service\ImageUploader;
 use App\Service\SystemMailer;
@@ -73,7 +75,7 @@ final class OrganizationController extends AbstractController
 
     #[Route('/{id<\d+>}', name: 'organization_show')]
     #[IsGranted(OrganizationVoter::VIEW, 'organization')]
-    public function show(Organization $organization, #[CurrentUser] User $user, InvitationRepository $invitations): Response
+    public function show(Organization $organization, #[CurrentUser] User $user, InvitationRepository $invitations, MailAccountRepository $mailAccounts, ProjectRepository $projects): Response
     {
         $inviteForm = $this->createForm(InvitationFormType::class, null, [
             'action' => $this->generateUrl('organization_invite', ['id' => $organization->getId()]),
@@ -85,6 +87,8 @@ final class OrganizationController extends AbstractController
             'invitations' => $invitations->findPending($organization),
             'invite_form' => $inviteForm,
             'roles' => OrganizationRole::cases(),
+            'mail_accounts' => $mailAccounts->findForOrganization($organization),
+            'org_projects' => $projects->findBy(['organization' => $organization], ['name' => 'ASC']),
         ]);
     }
 

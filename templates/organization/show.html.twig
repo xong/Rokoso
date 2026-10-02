@@ -27,7 +27,61 @@
             </div>
         </div>
 
-        {% block org_sections %}{% endblock %}
+        <section aria-labelledby="accounts-heading">
+            <div class="mb-3 flex items-center justify-between gap-2">
+                <h3 id="accounts-heading" class="font-semibold">{{ 'mail_account.title'|trans }}</h3>
+                {% if is_admin %}
+                    <a href="{{ path('mail_account_new', {id: organization.id}) }}" class="btn-secondary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'mail_account.new'|trans }}</a>
+                {% endif %}
+            </div>
+            {% if mail_accounts is empty %}
+                <p class="text-slate-500">{{ 'mail_account.none'|trans }}</p>
+            {% else %}
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for account in mail_accounts %}
+                        <li class="flex items-center gap-3 px-4 py-3">
+                            {{ ux_icon('lucide:mailbox', {class: 'size-5 text-slate-400', 'aria-hidden': 'true'}) }}
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate font-medium">{{ account.name }}</p>
+                                <p class="truncate text-xs text-slate-500">
+                                    {{ account.emailAddress }}
+                                    {% if not account.enabled %} · {{ 'mail_account.disabled'|trans }}{% endif %}
+                                    {% if account.lastSyncError %} · <span class="text-red-600">{{ 'mail_account.sync_failed'|trans }}</span>{% endif %}
+                                </p>
+                            </div>
+                            {% if is_admin %}
+                                <a href="{{ path('mail_account_edit', {id: account.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}: {{ account.name }}" title="{{ 'action.edit'|trans }}">
+                                    {{ ux_icon('lucide:settings', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
+
+        <section aria-labelledby="projects-heading">
+            <div class="mb-3 flex items-center justify-between gap-2">
+                <h3 id="projects-heading" class="font-semibold">{{ 'nav.projects'|trans }}</h3>
+                {% if is_admin %}
+                    <a href="{{ path('project_new', {organization: organization.id}) }}" class="btn-secondary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'project.new'|trans }}</a>
+                {% endif %}
+            </div>
+            {% if org_projects is empty %}
+                <p class="text-slate-500">{{ 'project.none'|trans }}</p>
+            {% else %}
+                <ul role="list" class="flex flex-wrap gap-2">
+                    {% for p in org_projects %}
+                        <li>
+                            <a href="{{ path('project_show', {id: p.id}) }}" class="card flex items-center gap-2 py-1.5 pr-3 pl-1.5 hover:bg-slate-50">
+                                {{ ui.tile(p.name, p.image, p.color, 'size-6 text-[10px]') }}
+                                <span class="font-medium">{{ p.name }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
 
         <section aria-labelledby="members-heading">
             <h3 id="members-heading" class="mb-3 font-semibold">{{ 'organization.members'|trans }} <span class="font-normal text-slate-500">({{ organization.memberships|length }})</span></h3>

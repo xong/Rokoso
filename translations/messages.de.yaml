@@ -197,3 +197,41 @@ project:
     personal: Persönlich
     messages: Nachrichten im Projekt
     calendar: Termine im Projekt
+
+mail_account:
+    title: E-Mail-Konten
+    new: E-Mail-Konto hinzufügen
+    none: Noch kein E-Mail-Konto verbunden.
+    created: E-Mail-Konto gespeichert. Teste jetzt die Verbindung.
+    delete: E-Mail-Konto entfernen
+    delete_confirm: E-Mail-Konto und alle daraus abgerufenen E-Mails in Coop löschen? Auf dem Mailserver bleibt alles erhalten.
+    disabled: deaktiviert
+    sync_failed: Abruf fehlgeschlagen
+    sync_error: 'Letzter Abruf fehlgeschlagen:'
+    last_sync: 'zuletzt abgerufen: %date%'
+    section_general: Allgemein
+    section_imap: Empfang (IMAP)
+    section_smtp: Versand (SMTP)
+    name: Bezeichnung
+    name_help: z. B. „Postfach SEV“ – erscheint in Listen und beim Schreiben.
+    email_address: E-Mail-Adresse
+    sender_name: Absendername
+    host: Server
+    port: Port
+    username: Benutzername
+    password: Passwort
+    password_keep: Leer lassen, um das gespeicherte Passwort zu behalten.
+    smtp_same_help: Leer lassen, um die IMAP-Zugangsdaten zu verwenden.
+    inbox_folder: Ordner
+    import_days: Erster Abruf (Tage)
+    import_days_help: Beim ersten Abruf werden E-Mails der letzten so vielen Tage übernommen.
+    enabled: Konto aktiv (wird regelmäßig abgerufen)
+    test: Verbindung testen
+    test_ok: '%protocol%: Verbindung erfolgreich.'
+    test_failed: '%protocol%: %error%'
+    sync: Jetzt abrufen
+    encryption:
+        label: Verschlüsselung
+        ssl: SSL/TLS
+        starttls: STARTTLS
+        none: keine

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
+use App\Entity\MailAccount;
 use App\Entity\Organization;
 use App\Entity\User;
 use App\Enum\OrganizationRole;
@@ -57,6 +58,21 @@ abstract class AppTestCase extends WebTestCase
         $this->em()->flush();
 
         return $organization;
+    }
+
+    protected function createMailAccount(Organization $organization, string $email = 'sev@example.org'): MailAccount
+    {
+        $account = (new MailAccount($organization))
+            ->setName('Postfach')
+            ->setEmailAddress($email)
+            ->setSenderName('SEV Musterstadt')
+            ->setImapHost('imap.example.org')
+            ->setImapUsername($email)
+            ->setSmtpHost('smtp.example.org');
+        $this->em()->persist($account);
+        $this->em()->flush();
+
+        return $account;
     }
 
     protected function login(?User $user = null): User
