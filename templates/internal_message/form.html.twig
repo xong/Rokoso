@@ -1,0 +1,51 @@
+{% extends 'layout/app.html.twig' %}
+
+{% set show_list = false %}
+
+{% block title %}{{ 'nav.mail_message'|trans }}{% endblock %}
+{% block detail_title %}{{ (original ? 'compose.title_reply' : 'nav.mail_message')|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-3xl p-4 lg:p-6">
+        <p class="mb-4 text-sm text-slate-600">{{ 'internal.intro'|trans }}</p>
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <fieldset class="card mb-4 p-4" data-controller="picker">
+                <legend class="px-1 font-semibold">{{ 'internal.to'|trans }}</legend>
+                {% if form.recipients|length > 0 %}
+                    <p class="label">{{ 'internal.recipients'|trans }}</p>
+                    <label for="recipient-search" class="sr-only">{{ 'mail.assignees.search'|trans }}</label>
+                    <input type="search" id="recipient-search" class="input mb-2 py-1.5" placeholder="{{ 'mail.assignees.search'|trans }}"
+                           data-picker-target="search" data-action="input->picker#filter keydown.enter->picker#preventSubmit">
+                    <div class="mb-4 grid max-h-48 gap-1 overflow-y-auto sm:grid-cols-2" role="group" aria-label="{{ 'internal.recipients'|trans }}">
+                        {% for child in form.recipients %}
+                            <label class="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-slate-50" data-picker-target="option" data-label="{{ child.vars.label }}">
+                                {{ form_widget(child) }} <span class="truncate">{{ child.vars.label }}</span>
+                            </label>
+                        {% endfor %}
+                        <p class="px-2 py-1.5 text-slate-500" data-picker-target="empty" hidden>{{ 'mail.picker.no_match'|trans }}</p>
+                    </div>
+                    {{ form_errors(form.recipients) }}
+                    {% do form.recipients.setRendered %}
+                {% else %}
+                    {{ form_errors(form.recipients) }}
+                    {% do form.recipients.setRendered %}
+                {% endif %}
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.organization, {row_attr: {class: 'mb-0'}}) }}
+                    {{ form_row(form.project, {row_attr: {class: 'mb-0'}}) }}
+                </div>
+            </fieldset>
+
+            {{ form_row(form.subject) }}
+            {{ form_row(form.body) }}
+            {{ form_row(form.files) }}
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'compose.send'|trans }}</button>
+                <a href="{{ path('mail_inbox') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

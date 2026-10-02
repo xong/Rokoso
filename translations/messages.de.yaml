@@ -337,3 +337,13 @@ compose:
     no_account: Zum Schreiben brauchst du ein E-Mail-Konto in einer deiner Organisationen.
     reply_header: 'Am %date% schrieb %from%:'
     forward_header: "---------- Weitergeleitete Nachricht ----------\nVon: %from%\nDatum: %date%\nBetreff: %subject%"
+
+internal:
+    intro: Interne Nachrichten bleiben in Coop und erscheinen bei den Empfängern im Eingang – wie E-Mails, mit Kommentaren und Verantwortlichen.
+    to: Empfänger
+    recipients: Personen
+    organization: Ganze Organisation
+    organization_help: Alle Mitglieder sehen die Nachricht.
+    project: Projekt
+    project_help: Alle, die das Projekt sehen, erhalten die Nachricht.
+    sent: Nachricht gesendet.

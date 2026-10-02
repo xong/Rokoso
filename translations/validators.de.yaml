@@ -4,3 +4,5 @@ user:
     wrong_password: Das aktuelle Passwort ist falsch.
 compose:
     invalid_address: '„%address%“ ist keine gültige E-Mail-Adresse.'
+internal:
+    no_recipient: Bitte wähle mindestens eine Person, eine Organisation oder ein Projekt.

@@ -68,8 +68,8 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 7.2 Versand per SMTP, Ablage im Ausgang
 
 ## Phase 8 – Interne Nachrichten (34, 35)
-- [ ] 8.1 Nachrichten an Benutzer, Projekte oder Organisationen
-- [ ] 8.2 Anzeige/Behandlung wie E-Mails in derselben Liste
+- [x] 8.1 Nachrichten an Benutzer, Projekte oder Organisationen
+- [x] 8.2 Anzeige/Behandlung wie E-Mails in derselben Liste
 
 ## Phase 9 – Kontakte (36, 37)
 - [ ] 9.1 `Contact` mit umfangreichen, aber gruppierten Feldern
