@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\CalendarItem;
+use App\Entity\Contact;
 use App\Entity\MailAccount;
+use App\Entity\Message;
 use App\Entity\Organization;
 use App\Entity\Project;
 use App\Entity\User;
+use App\Enum\CalendarItemType;
 use App\Enum\MailEncryption;
+use App\Enum\MessageType;
 use App\Enum\OrganizationRole;
+use App\Enum\Recurrence;
 use App\Mail\MailSynchronizer;
 use App\Repository\UserRepository;
 use App\Service\SecretBox;
@@ -55,9 +61,29 @@ final readonly class DemoCommand
             $org->addMember($colleague, OrganizationRole::Member);
             $this->em->persist($org);
 
+            $projects = [];
             foreach (['Schulwegsicherheit' => '#16a34a', 'Elternabend Herbst' => '#ea580c'] as $name => $color) {
-                $this->em->persist((new Project($user))->setName($name)->setColor($color)->setOrganization($org));
+                $projects[] = $project = (new Project($user))->setName($name)->setColor($color)->setOrganization($org);
+                $this->em->persist($project);
             }
+
+            foreach ([['Eva', 'Elternteil', 'Elternbeirat GS Nord', 'eva@example.org'], [null, null, 'Schulamt Musterstadt', 'info@schulamt.example.org']] as [$first, $last, $company, $email]) {
+                $this->em->persist((new Contact($user))->setFirstName($first)->setLastName($last)->setCompany($company)->setEmail($email)->setOrganization($org));
+            }
+
+            $monday = new \DateTimeImmutable('monday this week');
+            $this->em->persist((new CalendarItem($user))->setTitle('Vorstandstreffen')->setOrganization($org)->setLocation('Rathaus, Raum 2')
+                ->setStartsAt($monday->setTime(19, 0))->setEndsAt($monday->setTime(21, 0))
+                ->setRecurrence(Recurrence::Weekly)->setRecurrenceInterval(2)->addParticipant($user)->addParticipant($colleague));
+            $this->em->persist((new CalendarItem($user))->setTitle('Elternabend')->setOrganization($org)->setProject($projects[1])
+                ->setStartsAt($monday->modify('+9 days')->setTime(19, 30))->setEndsAt($monday->modify('+9 days')->setTime(21, 0))->setLocation('Aula'));
+            $this->em->persist((new CalendarItem($user))->setTitle('Protokoll verschicken')->setType(CalendarItemType::Task)->setOrganization($org)
+                ->setStartsAt($monday->modify('+3 days')->setTime(12, 0))->addAssignee($colleague));
+
+            $note = (new Message(MessageType::Internal))->setAuthor($colleague)->setFrom($colleague->getEmail(), $colleague->getName())
+                ->setOrganization($org)->setSubject('Willkommen in Coop')
+                ->setBody("Hallo zusammen,\n\nhier können wir Mails gemeinsam bearbeiten, kommentieren und Verantwortliche festlegen.\n\nKim");
+            $this->em->persist($note);
 
             $account = (new MailAccount($org))
                 ->setName('Postfach SEV')
