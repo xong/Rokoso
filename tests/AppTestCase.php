@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
+use App\Entity\Organization;
 use App\Entity\User;
+use App\Enum\OrganizationRole;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -45,6 +47,16 @@ abstract class AppTestCase extends WebTestCase
         self::assertSame(1, preg_match('#(?:https?://[^/\s"<]+)?'.$pathPattern.'[^\s"<]*#', (string) $email->getHtmlBody(), $m));
 
         return html_entity_decode($m[0]);
+    }
+
+    protected function createOrganization(User $admin, string $name = 'SEV Musterstadt'): Organization
+    {
+        $organization = (new Organization())->setName($name);
+        $organization->addMember($admin, OrganizationRole::Admin);
+        $this->em()->persist($organization);
+        $this->em()->flush();
+
+        return $organization;
     }
 
     protected function login(?User $user = null): User

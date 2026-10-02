@@ -9,17 +9,21 @@ use App\Form\EmailOnlyType;
 use App\Form\RegistrationFormType;
 use App\Repository\UserRepository;
 use App\Security\EmailVerifier;
+use App\Service\InvitationManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
 final class RegistrationController extends AbstractController
 {
+    use TargetPathTrait;
+
     public function __construct(
         private readonly EmailVerifier $emailVerifier,
         private readonly EntityManagerInterface $em,
@@ -27,21 +31,37 @@ final class RegistrationController extends AbstractController
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $hasher): Response
+    public function register(Request $request, UserPasswordHasherInterface $hasher, InvitationManager $invitations): Response
     {
         if ($this->getUser()) {
             return $this->redirectToRoute('mail_inbox');
         }
 
+        $session = $request->getSession();
+        $invitation = $invitations->findValid($session->get(InvitationController::SESSION_KEY));
         $user = new User();
+        if (null !== $invitation) {
+            $user->setEmail($invitation->getEmail());
+        }
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user->setPassword($hasher->hashPassword($user, (string) $form->get('plainPassword')->getData()));
             $this->em->persist($user);
-            $this->em->flush();
 
+            if (null !== $invitation && $invitation->getEmail() === $user->getEmail()) {
+                // Der Einladungslink kam an diese Adresse: sie gilt damit als bestätigt.
+                $user->setVerified(true);
+                $invitations->join($invitation, $user);
+                $session->remove(InvitationController::SESSION_KEY);
+                $this->removeTargetPath($session, 'main');
+                $this->addFlash('success', 'invitation.registered');
+
+                return $this->redirectToRoute('app_login');
+            }
+
+            $this->em->flush();
             $this->emailVerifier->sendRegistrationConfirmation($user);
 
             return $this->redirectToRoute('app_register_check', ['email' => $user->getEmail()]);

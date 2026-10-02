@@ -1,0 +1,44 @@
+{# Kleine, wiederverwendbare UI-Bausteine. Einbinden mit {% import '_partials/ui.html.twig' as ui %} #}
+
+{# POST-Button mit CSRF-Schutz und Rückfrage #}
+{% macro post_button(url, token_id, label, options = {}) %}
+    <form method="post" action="{{ url }}" class="{{ options.form_class|default('inline') }}"
+          {% if options.confirm|default(false) %}data-turbo-confirm="{{ options.confirm|trans }}"{% endif %}>
+        <input type="hidden" name="_token" value="{{ csrf_token(token_id) }}">
+        {% for name, value in options.fields|default({}) %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+        <button type="submit" class="{{ options.class|default('btn-secondary') }}"
+                {% if options.icon_only|default(false) %}aria-label="{{ label|trans }}" title="{{ label|trans }}"{% endif %}>
+            {% if options.icon|default(false) %}{{ ux_icon(options.icon, {class: 'size-4', 'aria-hidden': 'true'}) }}{% endif %}
+            {% if not options.icon_only|default(false) %}{{ label|trans }}{% endif %}
+        </button>
+    </form>
+{% endmacro %}
+
+{# Hinweis, wenn eine Liste leer ist #}
+{% macro empty(text, icon = 'lucide:inbox') %}
+    <div class="flex flex-col items-center gap-2 px-6 py-12 text-center text-slate-500">
+        {{ ux_icon(icon, {class: 'size-8 text-slate-300', 'aria-hidden': 'true'}) }}
+        <p>{{ text|trans }}</p>
+    </div>
+{% endmacro %}
+
+{# Farbiges Quadrat mit Bild oder Initialen (Organisation, Projekt) #}
+{% macro tile(name, image, color, size = 'size-9 text-xs') %}
+    {% if image %}
+        <img src="{{ asset(image) }}" alt="" class="{{ size }} shrink-0 rounded-lg object-cover">
+    {% else %}
+        <span class="grid {{ size }} shrink-0 place-items-center rounded-lg font-semibold text-white" style="background-color: {{ color }}" aria-hidden="true">{{ initials(name) }}</span>
+    {% endif %}
+{% endmacro %}
+
+{# Eintrag in der Listen-Spalte #}
+{% macro list_link(url, active, title, subtitle = null, leading = null) %}
+    <a href="{{ url }}" {% if active %}aria-current="page"{% endif %}
+       class="flex items-center gap-3 border-b border-slate-100 px-4 py-3 {{ active ? 'bg-brand-50' : 'hover:bg-slate-50' }}">
+        {{ leading|default('')|raw }}
+        <span class="min-w-0 flex-1">
+            <span class="block truncate font-medium {{ active ? 'text-brand-700' : '' }}">{{ title }}</span>
+            {% if subtitle %}<span class="block truncate text-xs text-slate-500">{{ subtitle }}</span>{% endif %}
+        </span>
+    </a>
+{% endmacro %}

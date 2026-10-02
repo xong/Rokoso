@@ -1,0 +1,6 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ 'email.invitation.text'|trans({'%inviter%': inviter, '%organization%': organization}) }}</p>
+    {{ include('email/_button.html.twig', {url: url, label: 'email.invitation.button'|trans}) }}
+    <p style="font-size:13px;color:#64748b;">{{ 'email.invitation.expires'|trans }}</p>
+{% endblock %}

@@ -123,3 +123,57 @@ email:
         text: jemand (hoffentlich du) möchte das Passwort für dein Coop-Konto zurücksetzen.
         button: Neues Passwort setzen
         expires: Der Link ist eine Stunde gültig. Wenn du das nicht angefordert hast, ignoriere diese E-Mail.
+    invitation:
+        subject: Einladung zu „%organization%“ in Coop
+        text: 'Hallo, %inviter% lädt dich in die Organisation „%organization%“ in Coop ein.'
+        button: Einladung ansehen
+        expires: Die Einladung ist 14 Tage gültig.
+
+organization:
+    new: Organisation anlegen
+    edit: Organisation bearbeiten
+    delete: Organisation löschen
+    delete_confirm: Organisation mit allen Daten (Mitglieder, Projekte, E-Mail-Konten, Nachrichten) endgültig löschen?
+    none: Du bist noch in keiner Organisation.
+    intro: Lege eine Organisation an, z. B. deine Stadtelternvertretung, und lade die anderen Mitglieder per E-Mail ein.
+    created: Organisation angelegt. Du bist ihr Administrator.
+    name: Name
+    description: Beschreibung
+    color: Farbe
+    logo: Logo
+    remove_logo: Logo entfernen
+    member_count: '{1}1 Mitglied|]1,Inf[%count% Mitglieder'
+    members: Mitglieder
+    you: du
+    role:
+        label: Rolle
+        admin: Administrator
+        member: Nutzer
+    leave: Organisation verlassen
+    leave_confirm: Organisation wirklich verlassen?
+    left: Du hast die Organisation verlassen.
+    remove_member: Mitglied entfernen
+    remove_confirm: Mitglied wirklich entfernen?
+    member_removed: Mitglied entfernt.
+    last_admin: Eine Organisation braucht mindestens einen Administrator.
+    invite: Mitglied einladen
+    send_invite: Einladen
+    invited: Einladung verschickt.
+    invite_invalid: Bitte gib eine gültige E-Mail-Adresse ein.
+    already_member: Diese Person ist bereits Mitglied.
+    pending_invitations: Offene Einladungen
+    invitation_expired: abgelaufen
+    revoke: Einladung zurückziehen
+    invitation_revoked: Einladung zurückgezogen.
+
+invitation:
+    title: Einladung
+    invalid: Diese Einladung ist ungültig oder abgelaufen. Bitte frage nach einer neuen Einladung.
+    text: '%inviter% lädt dich in die Organisation „%organization%“ ein.'
+    accept: Einladung annehmen
+    already_member: Du bist bereits Mitglied.
+    open: Organisation öffnen
+    register: Neues Konto anlegen
+    login: Ich habe schon ein Konto
+    joined: Willkommen! Du bist jetzt Mitglied.
+    registered: Dein Konto ist angelegt und du bist der Organisation beigetreten. Bitte melde dich an.

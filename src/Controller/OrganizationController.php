@@ -1,0 +1,247 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controller;
+
+use App\Entity\Invitation;
+use App\Entity\Membership;
+use App\Entity\Organization;
+use App\Entity\User;
+use App\Enum\OrganizationRole;
+use App\Form\InvitationFormType;
+use App\Form\OrganizationFormType;
+use App\Repository\InvitationRepository;
+use App\Repository\OrganizationRepository;
+use App\Security\Voter\OrganizationVoter;
+use App\Service\ImageUploader;
+use App\Service\SystemMailer;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+#[Route('/organizations')]
+final class OrganizationController extends AbstractController
+{
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly OrganizationRepository $organizations,
+        private readonly ImageUploader $uploader,
+    ) {
+    }
+
+    #[Route('', name: 'organization_index')]
+    public function index(#[CurrentUser] User $user): Response
+    {
+        return $this->render('organization/index.html.twig', [
+            'organizations' => $this->organizations->findForUser($user),
+        ]);
+    }
+
+    #[Route('/new', name: 'organization_new')]
+    public function new(Request $request, #[CurrentUser] User $user): Response
+    {
+        $organization = new Organization();
+        $form = $this->createForm(OrganizationFormType::class, $organization);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->storeLogo($form, $organization);
+            $organization->addMember($user, OrganizationRole::Admin);
+            $this->em->persist($organization);
+            $this->em->flush();
+            $this->addFlash('success', 'organization.created');
+
+            return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+        }
+
+        return $this->render('organization/form.html.twig', [
+            'organizations' => $this->organizations->findForUser($user),
+            'organization' => null,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id<\d+>}', name: 'organization_show')]
+    #[IsGranted(OrganizationVoter::VIEW, 'organization')]
+    public function show(Organization $organization, #[CurrentUser] User $user, InvitationRepository $invitations): Response
+    {
+        $inviteForm = $this->createForm(InvitationFormType::class, null, [
+            'action' => $this->generateUrl('organization_invite', ['id' => $organization->getId()]),
+        ]);
+
+        return $this->render('organization/show.html.twig', [
+            'organizations' => $this->organizations->findForUser($user),
+            'organization' => $organization,
+            'invitations' => $invitations->findPending($organization),
+            'invite_form' => $inviteForm,
+            'roles' => OrganizationRole::cases(),
+        ]);
+    }
+
+    #[Route('/{id<\d+>}/edit', name: 'organization_edit')]
+    #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
+    public function edit(Request $request, Organization $organization, #[CurrentUser] User $user): Response
+    {
+        $form = $this->createForm(OrganizationFormType::class, $organization);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->storeLogo($form, $organization);
+            $this->em->flush();
+            $this->addFlash('success', 'flash.saved');
+
+            return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+        }
+        if ($form->isSubmitted()) {
+            $this->em->refresh($organization);
+        }
+
+        return $this->render('organization/form.html.twig', [
+            'organizations' => $this->organizations->findForUser($user),
+            'organization' => $organization,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id<\d+>}/delete', name: 'organization_delete', methods: ['POST'])]
+    #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
+    #[IsCsrfTokenValid(new Expression('"delete-organization-" ~ args["organization"].getId()'))]
+    public function delete(Organization $organization): Response
+    {
+        $this->uploader->remove($organization->getLogo());
+        $this->em->remove($organization);
+        $this->em->flush();
+        $this->addFlash('success', 'flash.deleted');
+
+        return $this->redirectToRoute('organization_index');
+    }
+
+    #[Route('/{id<\d+>}/members/{membership<\d+>}/role', name: 'organization_member_role', methods: ['POST'])]
+    #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
+    #[IsCsrfTokenValid('member-role')]
+    public function changeRole(Request $request, Organization $organization, Membership $membership): Response
+    {
+        $this->assertBelongs($organization, $membership);
+        $role = OrganizationRole::tryFrom($request->getPayload()->getString('role'));
+        if (null === $role) {
+            throw $this->createNotFoundException();
+        }
+        if ($membership->isAdmin() && OrganizationRole::Admin !== $role && 1 === $organization->countAdmins()) {
+            $this->addFlash('error', 'organization.last_admin');
+        } else {
+            $membership->setRole($role);
+            $this->em->flush();
+            $this->addFlash('success', 'flash.saved');
+        }
+
+        return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+    }
+
+    /**
+     * Remove a member (admins) or leave the organization (any member for themselves).
+     */
+    #[Route('/{id<\d+>}/members/{membership<\d+>}/remove', name: 'organization_member_remove', methods: ['POST'])]
+    #[IsGranted(OrganizationVoter::VIEW, 'organization')]
+    #[IsCsrfTokenValid('member-remove')]
+    public function removeMember(Organization $organization, Membership $membership, #[CurrentUser] User $user): Response
+    {
+        $this->assertBelongs($organization, $membership);
+        $self = $membership->getUser() === $user;
+        if (!$self) {
+            $this->denyAccessUnlessGranted(OrganizationVoter::MANAGE, $organization);
+        }
+        if ($membership->isAdmin() && 1 === $organization->countAdmins()) {
+            $this->addFlash('error', 'organization.last_admin');
+
+            return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+        }
+
+        $organization->getMemberships()->removeElement($membership);
+        $this->em->flush();
+        $this->addFlash('success', $self ? 'organization.left' : 'organization.member_removed');
+
+        return $self
+            ? $this->redirectToRoute('organization_index')
+            : $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+    }
+
+    #[Route('/{id<\d+>}/invite', name: 'organization_invite', methods: ['POST'])]
+    #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
+    public function invite(Request $request, Organization $organization, #[CurrentUser] User $user, SystemMailer $mailer): Response
+    {
+        $form = $this->createForm(InvitationFormType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var array{email: string, role: OrganizationRole} $data */
+            $data = $form->getData();
+            $email = mb_strtolower(trim($data['email']));
+            $alreadyMember = array_any($organization->getMembers(), static fn (User $u): bool => $u->getEmail() === $email);
+
+            if ($alreadyMember) {
+                $this->addFlash('info', 'organization.already_member');
+            } else {
+                $invitation = new Invitation($organization, $email, $data['role'], $user);
+                $this->em->persist($invitation);
+                $this->em->flush();
+                $mailer->send($email, 'email.invitation.subject', 'invitation', [
+                    'inviter' => $user->getName(),
+                    'organization' => $organization->getName(),
+                    'url' => $this->generateUrl('invitation_show', ['token' => $invitation->getToken()], UrlGeneratorInterface::ABSOLUTE_URL),
+                    'subject_params' => ['%organization%' => $organization->getName()],
+                ]);
+                $this->addFlash('success', 'organization.invited');
+            }
+        } else {
+            $this->addFlash('error', 'organization.invite_invalid');
+        }
+
+        return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+    }
+
+    #[Route('/{id<\d+>}/invitations/{invitation<\d+>}/revoke', name: 'organization_invitation_revoke', methods: ['POST'])]
+    #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
+    #[IsCsrfTokenValid('invitation-revoke')]
+    public function revokeInvitation(Organization $organization, Invitation $invitation): Response
+    {
+        if ($invitation->getOrganization() !== $organization) {
+            throw $this->createNotFoundException();
+        }
+        $this->em->remove($invitation);
+        $this->em->flush();
+        $this->addFlash('success', 'organization.invitation_revoked');
+
+        return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+    }
+
+    /**
+     * @param FormInterface<Organization> $form
+     */
+    private function storeLogo(FormInterface $form, Organization $organization): void
+    {
+        $file = $form->get('logoFile')->getData();
+        if ($file instanceof UploadedFile) {
+            $organization->setLogo($this->uploader->store($file, 'logos', $organization->getLogo()));
+        } elseif (true === $form->get('removeLogo')->getData()) {
+            $this->uploader->remove($organization->getLogo());
+            $organization->setLogo(null);
+        }
+    }
+
+    private function assertBelongs(Organization $organization, Membership $membership): void
+    {
+        if ($membership->getOrganization() !== $organization) {
+            throw $this->createNotFoundException();
+        }
+    }
+}

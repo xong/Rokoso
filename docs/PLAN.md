@@ -36,10 +36,10 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 1.7 Systemmails gestaltet (Twig-Inline-CSS), lokal über Mailpit
 
 ## Phase 2 – Organisationen & Mitglieder (6, 7, 8, 21, 22, 24)
-- [ ] 2.1 `Organization` (Name, Logo, Farbe, Beschreibung)
-- [ ] 2.2 `Membership` mit Rolle Administrator / Nutzer
-- [ ] 2.3 Organisation anlegen, bearbeiten; Mitglieder entfernen, Rollen ändern (Voter)
-- [ ] 2.4 Einladungen per E-Mail (Token-Link → Registrierung bzw. Beitritt)
+- [x] 2.1 `Organization` (Name, Logo, Farbe, Beschreibung)
+- [x] 2.2 `Membership` mit Rolle Administrator / Nutzer
+- [x] 2.3 Organisation anlegen, bearbeiten; Mitglieder entfernen, Rollen ändern (Voter)
+- [x] 2.4 Einladungen per E-Mail (Token-Link → Registrierung bzw. Beitritt)
 
 ## Phase 3 – Projekte (19, 23)
 - [ ] 3.1 `Project` (Name, Bild optional, Farbe, Beschreibung, Organisation optional)

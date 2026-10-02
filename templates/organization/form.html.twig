@@ -1,0 +1,29 @@
+{% extends 'organization/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ organization ? 'organization.edit'|trans : 'organization.new'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-xl p-4 lg:p-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.name) }}
+            {{ form_row(form.description) }}
+            {{ form_row(form.color) }}
+            <div class="mb-4 flex items-center gap-4">
+                {% if organization %}{{ ui.tile(organization.name, organization.logo, organization.color, 'size-16 text-lg') }}{% endif %}
+                <div class="flex-1">
+                    {{ form_row(form.logoFile, {row_attr: {class: 'mb-2'}}) }}
+                    {% if organization and organization.logo %}{{ form_row(form.removeLogo, {row_attr: {class: 'mb-0'}}) }}{% else %}{% do form.removeLogo.setRendered %}{% endif %}
+                </div>
+            </div>
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ organization ? path('organization_show', {id: organization.id}) : path('organization_index') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

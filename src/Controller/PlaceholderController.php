@@ -28,7 +28,6 @@ final class PlaceholderController extends AbstractController
     #[Route('/calendar', name: 'calendar_month', defaults: ['title' => 'nav.calendar', 'phase' => 10])]
     #[Route('/contacts', name: 'contact_index', defaults: ['title' => 'nav.contacts', 'phase' => 9])]
     #[Route('/projects', name: 'project_index', defaults: ['title' => 'nav.projects', 'phase' => 3])]
-    #[Route('/organizations', name: 'organization_index', defaults: ['title' => 'nav.organizations', 'phase' => 2])]
     public function placeholder(string $title, int $phase): Response
     {
         return $this->render('placeholder.html.twig', ['title' => $title, 'phase' => $phase]);

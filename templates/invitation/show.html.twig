@@ -1,0 +1,27 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'invitation.title'|trans }}{% endblock %}
+
+{% block content %}
+    {% if invitation is null %}
+        <p class="text-slate-700">{{ 'invitation.invalid'|trans }}</p>
+    {% else %}
+        <p class="mb-4 text-slate-700">{{ 'invitation.text'|trans({'%organization%': invitation.organization.name, '%inviter%': invitation.invitedBy ? invitation.invitedBy.name : '–'}) }}</p>
+        {% if app.user %}
+            {% if already_member %}
+                <p class="mb-4 text-slate-600">{{ 'invitation.already_member'|trans }}</p>
+                <a class="btn-primary w-full" href="{{ path('organization_show', {id: invitation.organization.id}) }}">{{ 'invitation.open'|trans }}</a>
+            {% else %}
+                <form method="post" action="{{ path('invitation_accept', {token: invitation.token}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('invitation-accept') }}">
+                    <button type="submit" class="btn-primary w-full">{{ 'invitation.accept'|trans }}</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <div class="space-y-2">
+                <a class="btn-primary w-full" href="{{ path('app_register') }}">{{ 'invitation.register'|trans }}</a>
+                <a class="btn-secondary w-full" href="{{ path('app_login') }}">{{ 'invitation.login'|trans }}</a>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.organizations'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.organizations'|trans }}{% endblock %}
+{% block back_url %}{{ path('organization_index') }}{% endblock %}
+
+{% block list_actions %}
+    <a href="{{ path('organization_new') }}" class="btn-icon" aria-label="{{ 'organization.new'|trans }}" title="{{ 'organization.new'|trans }}">
+        {{ ux_icon('lucide:plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block list %}
+    {% if organizations is empty %}
+        {{ ui.empty('organization.none', 'lucide:building-2') }}
+    {% else %}
+        <ul role="list">
+            {% for org in organizations %}
+                <li>{{ ui.list_link(path('organization_show', {id: org.id}), organization is defined and organization and organization.id == org.id,
+                        org.name, ('organization.member_count'|trans({'%count%': org.memberships|length})),
+                        ui.tile(org.name, org.logo, org.color)) }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
