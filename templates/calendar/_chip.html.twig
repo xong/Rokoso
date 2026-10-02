@@ -1,0 +1,13 @@
+{# Kompakter Eintrag (Monatsansicht, Ganztagszeile). Variablen: o (Occurrence), day #}
+{% set item = o.item %}
+<a href="{{ path('calendar_item_show', {id: item.id, date: o.start|date('Y-m-d')}) }}"
+   class="flex items-center gap-1 truncate rounded px-1 py-0.5 hover:brightness-95 {{ item.done ? 'line-through opacity-60' : '' }}"
+   style="background-color: color-mix(in oklab, {{ item.color }} 15%, white); color: color-mix(in oklab, {{ item.color }} 70%, black)">
+    {% if item.task %}
+        {{ ux_icon(item.done ? 'lucide:square-check' : 'lucide:square', {class: 'size-3 shrink-0', 'aria-label': (item.done ? 'calendar.task_done' : 'calendar.task_open')|trans, role: 'img'}) }}
+    {% elseif not o.allDayLike %}
+        <span class="shrink-0 tabular-nums">{{ o.start|date('H:i') }}</span>
+    {% endif %}
+    {% if item.recurring %}{{ ux_icon('lucide:repeat', {class: 'size-3 shrink-0', 'aria-label': 'calendar.recurring'|trans, role: 'img'}) }}{% endif %}
+    <span class="truncate">{{ item.title }}</span>
+</a>

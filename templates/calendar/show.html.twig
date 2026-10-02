@@ -1,0 +1,65 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set show_list = false %}
+{% set ref = occurrence_date ?? item.startsAt %}
+
+{% block title %}{{ item.title }}{% endblock %}
+{% block detail_title %}{{ item.title }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('calendar_month', {month: ref|date('Y-m')}) }}" class="btn-ghost">{{ ux_icon('lucide:calendar', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'nav.calendar'|trans }}</a>
+    <a href="{{ path('calendar_item_edit', {id: item.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">{{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+    {{ ui.post_button(path('calendar_item_delete', {id: item.id}), 'delete-calendar-item-' ~ item.id, 'calendar.delete',
+        {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: item.recurring ? 'calendar.delete_series_confirm' : 'calendar.delete_confirm'}) }}
+{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-2xl space-y-5 p-4 lg:p-6">
+        <div class="flex items-start gap-3">
+            <span class="mt-1.5 size-3 shrink-0 rounded-full" style="background-color: {{ item.color }}" aria-hidden="true"></span>
+            <div class="min-w-0 flex-1">
+                <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">{{ item.type.label|trans }}</p>
+                <p class="text-xl font-semibold {{ item.done ? 'line-through text-slate-500' : '' }}">{{ item.title }}</p>
+                <p class="mt-1 text-slate-700">
+                    {% set start = occurrence_date ? occurrence_date|date('Y-m-d') ~ ' ' ~ item.startsAt|date('H:i') : item.startsAt %}
+                    {% if item.allDay %}
+                        {{ start|date('d.m.Y') }}{% if item.endsAt and item.endsAt|date('Y-m-d') != item.startsAt|date('Y-m-d') %} – {{ item.endsAt|date('d.m.Y') }}{% endif %} · {{ 'calendar.all_day'|trans }}
+                    {% else %}
+                        {{ start|date('d.m.Y H:i') }}{% if item.endsAt %} – {{ item.endsAt|date(item.endsAt|date('Y-m-d') == item.startsAt|date('Y-m-d') ? 'H:i' : 'd.m.Y H:i') }}{% endif %}
+                    {% endif %}
+                </p>
+                {% if item.recurring %}
+                    <p class="mt-1 flex items-center gap-1 text-sm text-slate-600">
+                        {{ ux_icon('lucide:repeat', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                        {{ item.recurrence.label|trans }}{% if item.recurrenceInterval > 1 %} ({{ 'calendar.every_n'|trans({'%n%': item.recurrenceInterval}) }}){% endif %}{% if item.recurrenceUntil %}, {{ 'calendar.until'|trans }} {{ item.recurrenceUntil|date('d.m.Y') }}{% endif %}
+                    </p>
+                {% endif %}
+            </div>
+            {{ ui.post_button(path('calendar_item_done', {id: item.id}), 'calendar-item', item.done ? 'calendar.mark_open' : 'calendar.mark_done',
+                {class: item.done ? 'btn-secondary' : 'btn-primary', icon: item.done ? 'lucide:rotate-ccw' : 'lucide:check'}) }}
+        </div>
+
+        <dl class="card divide-y divide-slate-100 px-4">
+            {% if item.location %}<div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'calendar.location'|trans }}</dt><dd>{{ item.location }}</dd></div>{% endif %}
+            {% if item.url %}<div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'calendar.url'|trans }}</dt><dd class="break-all"><a class="link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.url }}</a></dd></div>{% endif %}
+            <div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'calendar.organization'|trans }}</dt><dd>{{ item.organization ? item.organization.name : 'calendar.personal'|trans }}</dd></div>
+            {% if item.project %}<div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'nav.projects'|trans }}</dt><dd><a class="link" href="{{ path('project_show', {id: item.project.id}) }}">{{ item.project.name }}</a></dd></div>{% endif %}
+            {% for field in ['assignees', 'participants'] %}
+                {% set people = attribute(item, field) %}
+                {% if people is not empty %}
+                    <div class="grid grid-cols-[8rem_1fr] gap-2 py-2">
+                        <dt class="text-slate-500">{{ ('calendar.' ~ field)|trans }}</dt>
+                        <dd class="flex flex-wrap gap-2">
+                            {% for u in people %}<span class="flex items-center gap-1.5"><twig:Avatar name="{{ u.name }}" image="{{ u.avatar }}" size="size-6 text-[10px]" />{{ u.name }}</span>{% endfor %}
+                        </dd>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </dl>
+
+        {% if item.description %}
+            <div class="card px-4 py-3 whitespace-pre-line">{{ item.description }}</div>
+        {% endif %}
+    </div>
+{% endblock %}

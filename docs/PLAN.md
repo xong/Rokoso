@@ -76,11 +76,11 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 9.2 Avatar bzw. Initialen in E-Mail-Liste und -Detail
 
 ## Phase 10 – Kalender (26–33)
-- [ ] 10.1 `CalendarItem` (Termin/Aufgabe): Titel, Projekt, Ort, Von-Bis/ganztägig, Beschreibung, Verantwortliche, Teilnehmer, URL, erledigt
-- [ ] 10.2 Monatsansicht mit Navigation und Monats-/Jahrauswahl
-- [ ] 10.3 Tages- und Wochenansicht (Zeitleiste, ganztägige oben)
-- [ ] 10.4 Anlegen, zuweisen, erledigen, löschen
-- [ ] 10.5 Wiederholungen (RRULE, rlanvin/php-rrule)
+- [x] 10.1 `CalendarItem` (Termin/Aufgabe): Titel, Projekt, Ort, Von-Bis/ganztägig, Beschreibung, Verantwortliche, Teilnehmer, URL, erledigt
+- [x] 10.2 Monatsansicht mit Navigation und Monats-/Jahrauswahl
+- [x] 10.3 Tages- und Wochenansicht (Zeitleiste, ganztägige oben)
+- [x] 10.4 Anlegen, zuweisen, erledigen, löschen
+- [x] 10.5 Wiederholungen (RRULE, rlanvin/php-rrule)
 
 ## Phase 11 – PWA & Mobile
 - [ ] 11.1 Web-App-Manifest, Icons, Service Worker

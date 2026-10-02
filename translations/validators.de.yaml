@@ -8,3 +8,5 @@ internal:
     no_recipient: Bitte wähle mindestens eine Person, eine Organisation oder ein Projekt.
 contact:
     name_required: Bitte gib einen Namen oder eine Organisation an.
+calendar:
+    end_before_start: Das Ende muss nach dem Beginn liegen.

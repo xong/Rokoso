@@ -23,9 +23,6 @@ nav:
     profile: Mein Profil
     logout: Abmelden
 
-placeholder:
-    coming: Dieser Bereich folgt in Phase %phase%.
-
 action:
     save: Speichern
     cancel: Abbrechen
@@ -35,6 +32,7 @@ action:
     create: Anlegen
     back: Zurück
     search: Suchen
+    show: Anzeigen
     confirm_delete: Wirklich löschen?
 
 flash:
@@ -387,3 +385,79 @@ contact:
     notes: Notizen
     photo: Foto
     remove_photo: Foto entfernen
+
+calendar:
+    today: Heute
+    prev_month: Vorheriger Monat
+    next_month: Nächster Monat
+    prev_week: Vorherige Woche
+    next_week: Nächste Woche
+    prev_day: Vorheriger Tag
+    next_day: Nächster Tag
+    choose_month: Monat wählen
+    views: Ansicht
+    view_month: Monat
+    view_week: Woche
+    view_day: Tag
+    kw: KW
+    week_number: Kalenderwoche
+    open_week: Woche %week% öffnen
+    week_title: 'KW %week% · %from% – %to%'
+    more: '+ %count% weitere'
+    all_day: ganztägig
+    all_day_short: ganzt.
+    new: Neuer Eintrag
+    edit: Eintrag bearbeiten
+    new_event: Termin
+    new_task: Aufgabe
+    created: Eintrag gespeichert.
+    delete: Eintrag löschen
+    delete_confirm: Eintrag wirklich löschen?
+    delete_series_confirm: Die ganze Serie löschen?
+    title: Titel
+    starts_at: Beginn (bei Aufgaben Fälligkeit)
+    ends_at: Ende
+    ends_at_help: Leer lassen für eine Stunde bzw. bei Aufgaben.
+    location: Ort
+    organization: Organisation
+    organization_help: Einträge einer Organisation sehen und bearbeiten alle Mitglieder.
+    personal: Persönlich (nur für mich)
+    description: Beschreibung
+    url: Link
+    assignees: Verantwortliche
+    participants: Teilnehmende
+    done: Erledigt
+    mark_done: Erledigt
+    mark_open: Wieder öffnen
+    task_done: Erledigte Aufgabe
+    task_open: Offene Aufgabe
+    recurring: Wiederholt sich
+    every_n: alle %n%
+    until: bis
+    type:
+        label: Art
+        event: Termin
+        task: Aufgabe
+    recurrence:
+        title: Wiederholung
+        label: Wiederholen
+        none: Nicht wiederholen
+        daily: Täglich
+        weekly: Wöchentlich
+        monthly: Monatlich
+        yearly: Jährlich
+        interval: Intervall
+        until: Endet am
+    months:
+        1: Januar
+        2: Februar
+        3: März
+        4: April
+        5: Mai
+        6: Juni
+        7: Juli
+        8: August
+        9: September
+        10: Oktober
+        11: November
+        12: Dezember

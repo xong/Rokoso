@@ -1,0 +1,71 @@
+{% extends 'layout/app.html.twig' %}
+
+{% set show_list = false %}
+
+{% block title %}{{ (item ? 'calendar.edit' : 'calendar.new')|trans }}{% endblock %}
+{% block detail_title %}{{ (item ? 'calendar.edit' : 'calendar.new')|trans }}{% endblock %}
+
+{% macro people(field, label) %}
+    <fieldset class="mb-4" data-controller="picker">
+        <legend class="label">{{ label|trans }}</legend>
+        <input type="search" class="input mb-2 py-1.5" aria-label="{{ 'mail.assignees.search'|trans }}" placeholder="{{ 'mail.assignees.search'|trans }}"
+               data-picker-target="search" data-action="input->picker#filter keydown.enter->picker#preventSubmit">
+        <div class="grid max-h-40 gap-1 overflow-y-auto sm:grid-cols-2">
+            {% for child in field %}
+                <label class="flex items-center gap-2 rounded px-2 py-1 hover:bg-slate-50" data-picker-target="option" data-label="{{ child.vars.label }}">
+                    {{ form_widget(child) }} <span class="truncate">{{ child.vars.label }}</span>
+                </label>
+            {% endfor %}
+            <p class="px-2 py-1 text-slate-500" data-picker-target="empty" hidden>{{ 'mail.picker.no_match'|trans }}</p>
+        </div>
+        {% do field.setRendered %}
+    </fieldset>
+{% endmacro %}
+
+{% block detail %}
+    <div class="mx-auto max-w-2xl p-4 lg:p-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            <fieldset class="mb-4">
+                <legend class="label">{{ 'calendar.type.label'|trans }}</legend>
+                <div class="flex gap-4">
+                    {% for child in form.type %}
+                        <label class="flex items-center gap-2">{{ form_widget(child) }} {{ child.vars.label|trans }}</label>
+                    {% endfor %}
+                </div>
+                {% do form.type.setRendered %}
+            </fieldset>
+            {{ form_row(form.title) }}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.startsAt) }}
+                {{ form_row(form.endsAt, {help: 'calendar.ends_at_help'}) }}
+            </div>
+            {{ form_row(form.allDay) }}
+            {{ form_row(form.location) }}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.organization) }}
+                {{ form_row(form.project) }}
+            </div>
+            {{ form_row(form.description) }}
+            {{ form_row(form.url) }}
+            {% if form.assignees|length > 0 %}
+                {{ _self.people(form.assignees, 'calendar.assignees') }}
+                {{ _self.people(form.participants, 'calendar.participants') }}
+            {% endif %}
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'calendar.recurrence.title'|trans }}</legend>
+                <div class="grid gap-x-4 sm:grid-cols-3">
+                    {{ form_row(form.recurrence, {row_attr: {class: 'mb-0'}}) }}
+                    {{ form_row(form.recurrenceInterval, {row_attr: {class: 'mb-0'}}) }}
+                    {{ form_row(form.recurrenceUntil, {row_attr: {class: 'mb-0'}}) }}
+                </div>
+            </fieldset>
+            {{ form_row(form.done) }}
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ item ? path('calendar_item_show', {id: item.id}) : path('calendar_month') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

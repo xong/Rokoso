@@ -1,0 +1,382 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Entity;
+
+use App\Enum\CalendarItemType;
+use App\Enum\Recurrence;
+use App\Repository\CalendarItemRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * Event or task. Visibility like projects: organization members, otherwise only the creator.
+ * Recurring items repeat by a simple rule (frequency, interval, optional end date).
+ */
+#[ORM\Entity(repositoryClass: CalendarItemRepository::class)]
+#[ORM\Index(columns: ['starts_at'])]
+class CalendarItem
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 20, enumType: CalendarItemType::class)]
+    private CalendarItemType $type = CalendarItemType::Event;
+
+    #[ORM\Column(length: 200)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 200)]
+    private string $title = '';
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 10000)]
+    private ?string $description = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $location = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(requireTld: true)]
+    private ?string $url = null;
+
+    #[ORM\Column]
+    #[Assert\NotNull]
+    private \DateTimeImmutable $startsAt;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\GreaterThanOrEqual(propertyPath: 'startsAt', message: 'calendar.end_before_start')]
+    private ?\DateTimeImmutable $endsAt = null;
+
+    #[ORM\Column]
+    private bool $allDay = false;
+
+    #[ORM\Column]
+    private bool $done = false;
+
+    #[ORM\Column(length: 20, enumType: Recurrence::class)]
+    private Recurrence $recurrence = Recurrence::None;
+
+    #[ORM\Column]
+    #[Assert\Range(min: 1, max: 99)]
+    private int $recurrenceInterval = 1;
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $recurrenceUntil = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    private ?Organization $organization = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?Project $project = null;
+
+    /** @var Collection<int, User> */
+    #[ORM\ManyToMany(targetEntity: User::class)]
+    #[ORM\JoinTable(name: 'calendar_item_assignee')]
+    private Collection $assignees;
+
+    /** @var Collection<int, User> */
+    #[ORM\ManyToMany(targetEntity: User::class)]
+    #[ORM\JoinTable(name: 'calendar_item_participant')]
+    private Collection $participants;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $createdAt;
+
+    public function __construct(
+        #[ORM\ManyToOne]
+        #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+        private User $createdBy,
+    ) {
+        $this->startsAt = new \DateTimeImmutable('today 09:00');
+        $this->createdAt = new \DateTimeImmutable();
+        $this->assignees = new ArrayCollection();
+        $this->participants = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getType(): CalendarItemType
+    {
+        return $this->type;
+    }
+
+    public function setType(CalendarItemType $type): static
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function isTask(): bool
+    {
+        return CalendarItemType::Task === $this->type;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(?string $title): static
+    {
+        $this->title = trim((string) $title);
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getLocation(): ?string
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?string $location): static
+    {
+        $this->location = $location;
+
+        return $this;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(?string $url): static
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    public function getStartsAt(): \DateTimeImmutable
+    {
+        return $this->startsAt;
+    }
+
+    public function setStartsAt(?\DateTimeImmutable $startsAt): static
+    {
+        if (null !== $startsAt) {
+            $this->startsAt = $startsAt;
+        }
+
+        return $this;
+    }
+
+    public function getEndsAt(): ?\DateTimeImmutable
+    {
+        return $this->endsAt;
+    }
+
+    public function setEndsAt(?\DateTimeImmutable $endsAt): static
+    {
+        $this->endsAt = $endsAt;
+
+        return $this;
+    }
+
+    /**
+     * Effective end: explicit end, end of day for all-day items, otherwise one hour.
+     */
+    public function getEffectiveEnd(): \DateTimeImmutable
+    {
+        if ($this->allDay) {
+            return ($this->endsAt ?? $this->startsAt)->setTime(23, 59, 59);
+        }
+
+        return $this->endsAt ?? ($this->isTask() ? $this->startsAt : $this->startsAt->modify('+1 hour'));
+    }
+
+    public function getDuration(): \DateInterval
+    {
+        return $this->startsAt->diff($this->getEffectiveEnd());
+    }
+
+    public function isAllDay(): bool
+    {
+        return $this->allDay;
+    }
+
+    public function setAllDay(bool $allDay): static
+    {
+        $this->allDay = $allDay;
+
+        return $this;
+    }
+
+    public function isDone(): bool
+    {
+        return $this->done;
+    }
+
+    public function setDone(bool $done): static
+    {
+        $this->done = $done;
+
+        return $this;
+    }
+
+    public function getRecurrence(): Recurrence
+    {
+        return $this->recurrence;
+    }
+
+    public function setRecurrence(Recurrence $recurrence): static
+    {
+        $this->recurrence = $recurrence;
+
+        return $this;
+    }
+
+    public function isRecurring(): bool
+    {
+        return Recurrence::None !== $this->recurrence;
+    }
+
+    public function getRecurrenceInterval(): int
+    {
+        return $this->recurrenceInterval;
+    }
+
+    public function setRecurrenceInterval(?int $interval): static
+    {
+        $this->recurrenceInterval = max(1, (int) $interval);
+
+        return $this;
+    }
+
+    public function getRecurrenceUntil(): ?\DateTimeImmutable
+    {
+        return $this->recurrenceUntil;
+    }
+
+    public function setRecurrenceUntil(?\DateTimeImmutable $until): static
+    {
+        $this->recurrenceUntil = $until;
+
+        return $this;
+    }
+
+    /**
+     * RFC 5545 rule, e.g. "FREQ=WEEKLY;INTERVAL=2;UNTIL=20261231T235959Z".
+     */
+    public function getRrule(): ?string
+    {
+        if (!$this->isRecurring()) {
+            return null;
+        }
+        $rule = 'FREQ='.$this->recurrence->value.';INTERVAL='.$this->recurrenceInterval;
+        if (null !== $this->recurrenceUntil) {
+            $rule .= ';UNTIL='.$this->recurrenceUntil->setTime(23, 59, 59)->setTimezone(new \DateTimeZone('UTC'))->format('Ymd\THis\Z');
+        }
+
+        return $rule;
+    }
+
+    public function getOrganization(): ?Organization
+    {
+        return $this->organization;
+    }
+
+    public function setOrganization(?Organization $organization): static
+    {
+        $this->organization = $organization;
+
+        return $this;
+    }
+
+    public function getProject(): ?Project
+    {
+        return $this->project;
+    }
+
+    public function setProject(?Project $project): static
+    {
+        $this->project = $project;
+
+        return $this;
+    }
+
+    /** @return Collection<int, User> */
+    public function getAssignees(): Collection
+    {
+        return $this->assignees;
+    }
+
+    public function addAssignee(User $user): static
+    {
+        if (!$this->assignees->contains($user)) {
+            $this->assignees->add($user);
+        }
+
+        return $this;
+    }
+
+    public function removeAssignee(User $user): static
+    {
+        $this->assignees->removeElement($user);
+
+        return $this;
+    }
+
+    /** @return Collection<int, User> */
+    public function getParticipants(): Collection
+    {
+        return $this->participants;
+    }
+
+    public function addParticipant(User $user): static
+    {
+        if (!$this->participants->contains($user)) {
+            $this->participants->add($user);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipant(User $user): static
+    {
+        $this->participants->removeElement($user);
+
+        return $this;
+    }
+
+    public function getCreatedBy(): User
+    {
+        return $this->createdBy;
+    }
+
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    /** Display color: project, organization or default. */
+    public function getColor(): string
+    {
+        return $this->project?->getColor() ?? $this->organization?->getColor() ?? '#64748b';
+    }
+}
