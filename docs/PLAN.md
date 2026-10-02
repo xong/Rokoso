@@ -64,8 +64,8 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 6.5 Filter über der Liste: ohne Verantwortliche, meine, nach Projekt, …
 
 ## Phase 7 – E-Mail schreiben (18, 25)
-- [ ] 7.1 Neue E-Mail, Antworten, Weiterleiten (Konto wählen, Anhänge)
-- [ ] 7.2 Versand per SMTP, Ablage im Ausgang
+- [x] 7.1 Neue E-Mail, Antworten, Weiterleiten (Konto wählen, Anhänge)
+- [x] 7.2 Versand per SMTP, Ablage im Ausgang
 
 ## Phase 8 – Interne Nachrichten (34, 35)
 - [ ] 8.1 Nachrichten an Benutzer, Projekte oder Organisationen
@@ -95,4 +95,5 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 ## Ideen-Parkplatz
 Neue Ideen, die noch keiner Phase zugeordnet sind:
 
-- *(leer)*
+- Gesendete Mails zusätzlich per IMAP in den Gesendet-Ordner des Servers kopieren
+- Unterhaltungen (Threads) in der Liste zusammenfassen

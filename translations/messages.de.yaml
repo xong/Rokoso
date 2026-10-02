@@ -316,3 +316,24 @@ mail:
         all_projects: Alle Projekte
         all_accounts: Alle Konten
         reset: Filter zurücksetzen
+
+compose:
+    title_reply: Antworten
+    title_forward: Weiterleiten
+    from: Von
+    to: An
+    cc: Cc
+    bcc: Bcc
+    cc_bcc: Cc / Bcc hinzufügen
+    addresses_help: Mehrere Adressen mit Komma trennen.
+    subject: Betreff
+    body: Nachricht
+    attachments: Anhänge
+    attachments_help: Höchstens 20 MB je Datei.
+    keep_attachments: Anhänge der ursprünglichen E-Mail mitsenden
+    send: Senden
+    sent: E-Mail gesendet.
+    failed: 'Senden fehlgeschlagen: %error%'
+    no_account: Zum Schreiben brauchst du ein E-Mail-Konto in einer deiner Organisationen.
+    reply_header: 'Am %date% schrieb %from%:'
+    forward_header: "---------- Weitergeleitete Nachricht ----------\nVon: %from%\nDatum: %date%\nBetreff: %subject%"

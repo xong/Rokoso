@@ -1,0 +1,45 @@
+{% extends 'layout/app.html.twig' %}
+
+{% set show_list = false %}
+{% set heading = original ? (is_forward ? 'compose.title_forward' : 'compose.title_reply') : 'nav.mail_compose' %}
+
+{% block title %}{{ heading|trans }}{% endblock %}
+{% block detail_title %}{{ heading|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-3xl p-4 lg:p-6">
+        {% if original %}
+            <p class="mb-4 flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-600">
+                {{ ux_icon(is_forward ? 'lucide:forward' : 'lucide:reply', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                <a class="link truncate" href="{{ path('mail_show', {folder: original.folder.value == 'sent' ? 'sent' : 'inbox', id: original.id}) }}">{{ original.subject ?: 'mail.no_subject'|trans }}</a>
+            </p>
+        {% endif %}
+
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.account) }}
+            {{ form_row(form.to) }}
+            <details class="mb-4" {{ form.cc.vars.value or form.bcc.vars.value ? 'open' }}>
+                <summary class="link cursor-pointer text-sm">{{ 'compose.cc_bcc'|trans }}</summary>
+                <div class="mt-3 grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.cc) }}
+                    {{ form_row(form.bcc) }}
+                </div>
+            </details>
+            {{ form_row(form.subject) }}
+            {{ form_row(form.body) }}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.files) }}
+                {{ form_row(form.project) }}
+            </div>
+            {% if form.keepAttachments is defined %}
+                {{ form_row(form.keepAttachments, {help: original.visibleAttachments|map(a => a.filename)|join(', ')}) }}
+            {% endif %}
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'compose.send'|trans }}</button>
+                <a href="{{ original ? path('mail_show', {folder: 'inbox', id: original.id}) : path('mail_inbox') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
