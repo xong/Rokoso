@@ -49,14 +49,17 @@ final class Sidebar
      */
     public function getItems(): array
     {
-        $route = (string) $this->requestStack->getCurrentRequest()?->attributes->get('_route');
+        $request = $this->requestStack->getCurrentRequest();
+        $route = (string) $request?->attributes->get('_route');
+        // Detailseiten können den aktiven Unterpunkt über das Request-Attribut _nav festlegen
+        $nav = (string) $request?->attributes->get('_nav', $route);
 
         $items = [];
         foreach (self::ITEMS as $item) {
             $item['active'] = array_any($item['match'], static fn (string $prefix): bool => str_starts_with($route, $prefix));
             $children = [];
             foreach ($item['children'] ?? [] as $child) {
-                $children[] = $child + ['active' => $child['route'] === $route];
+                $children[] = $child + ['active' => $child['route'] === $nav];
             }
             $item['children'] = $children;
             $items[] = $item;

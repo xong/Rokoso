@@ -11,6 +11,9 @@ final class Initials
      */
     public static function of(string $name): string
     {
+        if (str_contains($name, '@')) {
+            $name = strstr($name, '@', true) ?: $name;
+        }
         $parts = preg_split('/[\s@._-]+/u', trim($name), -1, \PREG_SPLIT_NO_EMPTY) ?: [];
         if ([] === $parts) {
             return '?';

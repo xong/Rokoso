@@ -50,11 +50,11 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 4.2 Verbindungstest im Formular
 
 ## Phase 5 – E-Mail lesen (10, 11, 12, 16, 17, 25)
-- [ ] 5.1 Datenmodell `Message` (E-Mail **und** interne Nachricht), `Attachment`
-- [ ] 5.2 IMAP-Sync als Console-Befehl (Cron-fähig), Bibliothek webklex/php-imap
-- [ ] 5.3 Liste: gruppiert nach Heute / Gestern / 7 Tage / 30 Tage / Älter; Absender, Datum, Betreff, Ausschnitt, Icons; Org-Farbe
-- [ ] 5.4 Detailansicht: Kopfdaten, Anhänge, Text/HTML-Umschalter (HTML bereinigt, in Sandbox-iframe)
-- [ ] 5.5 Ordner: Eingang (Standard), Ausgang, Papierkorb
+- [x] 5.1 Datenmodell `Message` (E-Mail **und** interne Nachricht), `Attachment`
+- [x] 5.2 IMAP-Sync als Console-Befehl (Cron-fähig), Bibliothek webklex/php-imap
+- [x] 5.3 Liste: gruppiert nach Heute / Gestern / 7 Tage / 30 Tage / Älter; Absender, Datum, Betreff, Ausschnitt, Icons; Org-Farbe
+- [x] 5.4 Detailansicht: Kopfdaten, Anhänge, Text/HTML-Umschalter (HTML bereinigt, in Sandbox-iframe)
+- [x] 5.5 Ordner: Eingang (Standard), Ausgang, Papierkorb
 
 ## Phase 6 – Zusammenarbeit an E-Mails (13, 14, 15, 18, 20)
 - [ ] 6.1 Kommentarspalte (Autor, Datum, Text; Eingabe unten)

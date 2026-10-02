@@ -1,0 +1,22 @@
+framework:
+    html_sanitizer:
+        sanitizers:
+            app.mail_sanitizer:
+                # HTML-Mails: sichere Elemente + Inline-Styles; Anzeige zusätzlich im Sandbox-iframe mit strenger CSP
+                allow_safe_elements: true
+                allow_attributes:
+                    style: '*'
+                    bgcolor: '*'
+                    align: '*'
+                    valign: '*'
+                    width: '*'
+                    height: '*'
+                    border: '*'
+                    cellpadding: '*'
+                    cellspacing: '*'
+                    color: '*'
+                allowed_link_schemes: ['http', 'https', 'mailto', 'tel']
+                allowed_media_schemes: ['http', 'https', 'data']
+                allow_relative_links: false
+                allow_relative_medias: false
+                max_input_length: 2000000

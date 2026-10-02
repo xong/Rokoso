@@ -235,3 +235,56 @@ mail_account:
         ssl: SSL/TLS
         starttls: STARTTLS
         none: keine
+
+mail:
+    choose: Wähle eine Nachricht aus der Liste.
+    empty: Keine Nachrichten.
+    no_accounts: Noch kein E-Mail-Konto verbunden.
+    setup_account: E-Mail-Konto in einer Organisation einrichten
+    no_subject: (kein Betreff)
+    unread: Ungelesen
+    to_prefix: 'An:'
+    to: An
+    cc: Cc
+    date: Datum
+    internal: Interne Nachricht
+    view: 'Ansicht:'
+    text: Text
+    html_frame: Inhalt der E-Mail
+    images_blocked: Externe Bilder wurden blockiert.
+    load_images: Bilder laden
+    attachments: Anhänge
+    mark_unread: Als ungelesen markieren
+    trash: In den Papierkorb
+    restore: Wiederherstellen
+    trashed: In den Papierkorb verschoben.
+    restored: Wiederhergestellt.
+    sync: Neue E-Mails abrufen
+    synced: E-Mails abgerufen.
+    sync_failed: Mindestens ein Konto konnte nicht abgerufen werden. Details stehen beim E-Mail-Konto.
+    pagination: Seiten
+    newer: Neuere
+    older: Ältere
+    group:
+        today: Heute
+        yesterday: Gestern
+        week: Letzte 7 Tage
+        month: Letzte 30 Tage
+        older: Älter
+    icon:
+        internal: Interne Nachricht
+        attachment: Mit Anhang
+        unassigned: Niemand verantwortlich
+        mine: Mir zugeordnet
+    filter:
+        label: Nachrichten filtern
+        search: Suchen …
+        show: Anzeigen
+        all: Alle
+        unassigned: Ohne Verantwortliche
+        mine: Mir zugeordnet
+        unread: Ungelesen
+        internal: Nur interne
+        all_projects: Alle Projekte
+        all_accounts: Alle Konten
+        reset: Filter zurücksetzen

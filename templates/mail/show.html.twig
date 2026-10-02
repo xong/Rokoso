@@ -1,0 +1,114 @@
+{% extends 'mail/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+{% set action_fields = {folder: folder} %}
+
+{% block title %}{{ message.subject ?: 'mail.no_subject'|trans }}{% endblock %}
+{% block detail_title %}{{ message.subject ?: 'mail.no_subject'|trans }}{% endblock %}
+
+{% block detail_actions %}
+    {% block message_actions %}
+        {{ ui.post_button(path('mail_unread', {id: message.id}), 'mail-action', 'mail.mark_unread',
+            {class: 'btn-icon', icon: 'lucide:mail', icon_only: true, fields: action_fields}) }}
+        {{ ui.post_button(path('mail_trash_message', {id: message.id}), 'mail-action', message.trashed ? 'mail.restore' : 'mail.trash',
+            {class: 'btn-icon hover:text-red-600', icon: message.trashed ? 'lucide:archive-restore' : 'lucide:trash-2', icon_only: true, fields: action_fields}) }}
+    {% endblock %}
+{% endblock %}
+
+{% block detail %}
+    <div class="flex min-h-full flex-col xl:flex-row">
+        <article class="flex min-w-0 flex-1 flex-col" aria-labelledby="detail-heading">
+            {# Kopfdaten #}
+            <div class="space-y-3 border-b border-slate-200 p-4">
+                <div class="flex items-start gap-3">
+                    {% if message.internal and message.author %}
+                        <twig:Avatar name="{{ message.author.name }}" image="{{ message.author.avatar }}" size="size-10 text-sm" />
+                    {% else %}
+                        <twig:SenderAvatar address="{{ message.fromAddress }}" name="{{ message.fromLabel }}" size="size-10 text-sm" />
+                    {% endif %}
+                    <div class="min-w-0 flex-1">
+                        <p class="font-semibold">
+                            {% if message.internal and message.author %}{{ message.author.name }}{% else %}{{ message.fromLabel }}{% endif %}
+                            {% if message.fromAddress and message.fromName %}<span class="font-normal text-slate-500">&lt;{{ message.fromAddress }}&gt;</span>{% endif %}
+                        </p>
+                        <dl class="mt-0.5 grid grid-cols-[auto_1fr] gap-x-2 text-xs text-slate-600">
+                            {% if message.toRecipients is not empty %}
+                                <dt class="text-slate-400">{{ 'mail.to'|trans }}</dt>
+                                <dd class="truncate">{% for r in message.toRecipients %}{{ r.name ?: r.address }}{% if not loop.last %}, {% endif %}{% endfor %}</dd>
+                            {% endif %}
+                            {% if message.ccRecipients is not empty %}
+                                <dt class="text-slate-400">{{ 'mail.cc'|trans }}</dt>
+                                <dd class="truncate">{% for r in message.ccRecipients %}{{ r.name ?: r.address }}{% if not loop.last %}, {% endif %}{% endfor %}</dd>
+                            {% endif %}
+                            {% if message.internal %}
+                                <dt class="text-slate-400">{{ 'mail.to'|trans }}</dt>
+                                <dd class="truncate">
+                                    {% set targets = [] %}
+                                    {% for u in message.recipientUsers %}{% set targets = targets|merge([u.name]) %}{% endfor %}
+                                    {% if message.organization %}{% set targets = targets|merge([message.organization.name]) %}{% endif %}
+                                    {% if message.project %}{% set targets = targets|merge([message.project.name]) %}{% endif %}
+                                    {{ targets|join(', ') }}
+                                </dd>
+                            {% endif %}
+                            <dt class="text-slate-400">{{ 'mail.date'|trans }}</dt>
+                            <dd><time datetime="{{ message.date|date('c') }}">{{ message.date|date('d.m.Y H:i') }}</time></dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                    {% if message.mailAccount %}
+                        <span class="badge bg-slate-100 text-slate-600"><span class="size-2 rounded-full" style="background-color: {{ message.organization.color }}" aria-hidden="true"></span>{{ message.mailAccount.name }}</span>
+                    {% elseif message.internal %}
+                        <span class="badge bg-violet-50 text-violet-700">{{ ux_icon('lucide:message-square', {class: 'size-3', 'aria-hidden': 'true'}) }}{{ 'mail.internal'|trans }}</span>
+                    {% endif %}
+                    {% block meta %}{% endblock %}
+                </div>
+            </div>
+
+            {# Inhalt: HTML oder Text #}
+            {% if message.hasHtml %}
+                <div class="flex flex-wrap items-center gap-2 border-b border-slate-100 px-4 py-2 text-xs">
+                    <span class="text-slate-500" id="view-label">{{ 'mail.view'|trans }}</span>
+                    <div class="inline-flex rounded-md ring-1 ring-slate-200" role="group" aria-labelledby="view-label">
+                        <a href="{{ path('mail_show', {folder: folder, id: message.id, view: 'html'}|merge(filter.params)) }}" aria-pressed="{{ show_html ? 'true' : 'false' }}" role="button"
+                           class="rounded-l-md px-2 py-1 {{ show_html ? 'bg-slate-800 text-white' : 'hover:bg-slate-50' }}">HTML</a>
+                        <a href="{{ path('mail_show', {folder: folder, id: message.id, view: 'text'}|merge(filter.params)) }}" aria-pressed="{{ show_html ? 'false' : 'true' }}" role="button"
+                           class="rounded-r-md px-2 py-1 {{ show_html ? 'hover:bg-slate-50' : 'bg-slate-800 text-white' }}">{{ 'mail.text'|trans }}</a>
+                    </div>
+                    {% if show_html and has_external_images and not load_images %}
+                        <span class="ml-auto text-slate-500">{{ 'mail.images_blocked'|trans }}</span>
+                        <a class="link" href="{{ path('mail_show', {folder: folder, id: message.id, view: 'html', images: 1}|merge(filter.params)) }}">{{ 'mail.load_images'|trans }}</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if show_html %}
+                <iframe src="{{ path('mail_html', {id: message.id, images: load_images ? 1 : 0}) }}" title="{{ 'mail.html_frame'|trans }}"
+                        sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"
+                        class="min-h-[60vh] w-full flex-1 border-0"></iframe>
+            {% else %}
+                <div class="flex-1 p-4 font-[inherit] break-words whitespace-pre-wrap">{{ message.textBody ?? message.snippet }}</div>
+            {% endif %}
+
+            {% if message.visibleAttachments is not empty %}
+                <section aria-labelledby="attachments-heading" class="border-t border-slate-200 p-4">
+                    <h3 id="attachments-heading" class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'mail.attachments'|trans }}</h3>
+                    <ul role="list" class="flex flex-wrap gap-2">
+                        {% for a in message.visibleAttachments %}
+                            <li>
+                                <a href="{{ path('mail_attachment', {id: message.id, attachment: a.id}) }}" class="card flex items-center gap-2 px-3 py-2 hover:bg-slate-50" data-turbo="false">
+                                    {{ ux_icon('lucide:file', {class: 'size-4 text-slate-400', 'aria-hidden': 'true'}) }}
+                                    <span class="max-w-48 truncate">{{ a.filename }}</span>
+                                    <span class="text-xs text-slate-500">{{ a.size|filesize }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
+        </article>
+
+        {% block aside %}{% endblock %}
+    </div>
+{% endblock %}

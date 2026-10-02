@@ -1,0 +1,36 @@
+Return-Path: <eva@example.org>
+Message-ID: <abc123@example.org>
+Date: Thu, 01 Oct 2026 09:15:00 +0200
+From: =?utf-8?Q?Eva_M=C3=BCller?= <Eva@Example.org>
+To: Stadtelternvertretung <sev@example.org>, info@example.org
+Cc: Bert <bert@example.org>
+Subject: =?utf-8?Q?Frage_zur_Schulwegsicherheit?=
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mixed"
+
+--mixed
+Content-Type: multipart/alternative; boundary="alt"
+
+--alt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hallo zusammen,
+
+wie ist der Stand beim Zebrastreifen an der Grundschule?
+
+Viele Gr=C3=BC=C3=9Fe
+Eva
+--alt
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>Hallo zusammen,</p><p>wie ist der Stand beim <b>Zebrastreifen</b>?</p><script>alert(1)</script><img src="https://tracker.example.com/pixel.gif"></body></html>
+--alt--
+
+--mixed
+Content-Type: application/pdf; name="plan.pdf"
+Content-Disposition: attachment; filename="plan.pdf"
+Content-Transfer-Encoding: base64
+
+JVBERi0xLjQKJcOkw7zDtsOfCg==
+--mixed--

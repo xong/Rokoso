@@ -1,0 +1,87 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set folder_title = {inbox: 'nav.mail_inbox', sent: 'nav.mail_sent', trash: 'nav.mail_trash'}[folder] %}
+{% set list_route = {inbox: 'mail_inbox', sent: 'mail_sent', trash: 'mail_trash'}[folder] %}
+
+{% block title %}{{ folder_title|trans }}{% endblock %}
+{% block list_title %}{{ folder_title|trans }}{% endblock %}
+{% block back_url %}{{ path(list_route, filter.params) }}{% endblock %}
+
+{% block list_actions %}
+    {% if folder == 'inbox' and accounts is not empty %}
+        {{ ui.post_button(path('mail_sync'), 'mail-sync', 'mail.sync', {class: 'btn-icon', icon: 'lucide:refresh-cw', icon_only: true}) }}
+    {% endif %}
+    <a href="{{ path('mail_compose') }}" class="btn-icon" aria-label="{{ 'nav.mail_compose'|trans }}" title="{{ 'nav.mail_compose'|trans }}">
+        {{ ux_icon('lucide:square-pen', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block list %}
+    {# Filter über der Liste (GET, sendet bei Änderung automatisch ab) #}
+    <form method="get" action="{{ path(list_route) }}" role="search" aria-label="{{ 'mail.filter.label'|trans }}"
+          class="sticky top-0 z-10 space-y-2 border-b border-slate-200 bg-white/95 p-2 backdrop-blur" data-controller="autosubmit">
+        <div class="relative">
+            {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-2.5 left-2.5 size-4 text-slate-400', 'aria-hidden': 'true'}) }}
+            <label for="mail-q" class="sr-only">{{ 'action.search'|trans }}</label>
+            <input type="search" id="mail-q" name="q" value="{{ filter.query }}" placeholder="{{ 'mail.filter.search'|trans }}" class="input pl-8">
+        </div>
+        <div class="flex gap-2">
+            <label for="mail-show" class="sr-only">{{ 'mail.filter.show'|trans }}</label>
+            <select id="mail-show" name="show" class="input min-w-0 flex-1 py-1.5" data-action="autosubmit#submit">
+                {% for option in ['all', 'unassigned', 'mine', 'unread', 'internal'] %}
+                    <option value="{{ option }}" {{ filter.show == option ? 'selected' }}>{{ ('mail.filter.' ~ option)|trans }}</option>
+                {% endfor %}
+            </select>
+            {% if projects is not empty %}
+                <label for="mail-project" class="sr-only">{{ 'nav.projects'|trans }}</label>
+                <select id="mail-project" name="project" class="input min-w-0 flex-1 py-1.5" data-action="autosubmit#submit">
+                    <option value="">{{ 'mail.filter.all_projects'|trans }}</option>
+                    {% for p in projects %}
+                        <option value="{{ p.id }}" {{ filter.project == p.id ? 'selected' }}>{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+            {% if accounts|length > 1 %}
+                <label for="mail-account" class="sr-only">{{ 'mail_account.title'|trans }}</label>
+                <select id="mail-account" name="account" class="input min-w-0 flex-1 py-1.5" data-action="autosubmit#submit">
+                    <option value="">{{ 'mail.filter.all_accounts'|trans }}</option>
+                    {% for a in accounts %}
+                        <option value="{{ a.id }}" {{ filter.account == a.id ? 'selected' }}>{{ a.name }}</option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+            <noscript><button type="submit" class="btn-secondary">{{ 'action.search'|trans }}</button></noscript>
+        </div>
+        {% if filter.active %}
+            <a href="{{ path(list_route) }}" class="link text-xs">{{ 'mail.filter.reset'|trans }}</a>
+        {% endif %}
+    </form>
+
+    {% if messages is empty %}
+        {{ ui.empty(accounts is empty and folder == 'inbox' and not filter.active ? 'mail.no_accounts' : 'mail.empty', 'lucide:inbox') }}
+        {% if accounts is empty and folder == 'inbox' %}
+            <p class="-mt-8 px-6 pb-8 text-center"><a class="link" href="{{ path('organization_index') }}">{{ 'mail.setup_account'|trans }}</a></p>
+        {% endif %}
+    {% else %}
+        {% set current_group = null %}
+        <ul role="list">
+            {% for m in messages %}
+                {% set group = date_group(m.date) %}
+                {% if group != current_group %}
+                    {% set current_group = group %}
+                    <li role="presentation" class="border-b border-slate-100 bg-slate-50 px-4 py-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                        {{ ('mail.group.' ~ group)|trans }}
+                    </li>
+                {% endif %}
+                <li>{{ include('mail/_item.html.twig', {m: m, unread: read_ids[m.id] is not defined, active: message is defined and message.id == m.id}) }}</li>
+            {% endfor %}
+        </ul>
+        {% if has_more or filter.page > 1 %}
+            <nav aria-label="{{ 'mail.pagination'|trans }}" class="flex justify-between p-3">
+                {% if filter.page > 1 %}<a class="btn-secondary" href="{{ path(list_route, filter.params|merge({page: filter.page - 1})) }}">{{ 'mail.newer'|trans }}</a>{% else %}<span></span>{% endif %}
+                {% if has_more %}<a class="btn-secondary" href="{{ path(list_route, filter.params|merge({page: filter.page + 1})) }}">{{ 'mail.older'|trans }}</a>{% endif %}
+            </nav>
+        {% endif %}
+    {% endif %}
+{% endblock %}

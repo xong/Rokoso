@@ -1,0 +1,40 @@
+{# Eintrag der Nachrichtenliste. Variablen: m, unread, active, folder, filter #}
+{% set sender = m.internal and m.author ? m.author.name : m.fromLabel %}
+{% set org_color = m.organization ? m.organization.color : '#94a3b8' %}
+<div class="group/msg relative border-b border-slate-100 {{ active ? 'bg-brand-50' : 'hover:bg-slate-50' }}">
+    <a href="{{ path('mail_show', {folder: folder, id: m.id}|merge(filter.params)) }}" {% if active %}aria-current="page"{% endif %}
+       class="flex gap-3 border-l-4 py-2.5 pr-3 pl-2" style="border-left-color: {{ org_color }}">
+        {% if m.internal and m.author %}
+            <twig:Avatar name="{{ m.author.name }}" image="{{ m.author.avatar }}" size="size-9 text-xs" />
+        {% else %}
+            <twig:SenderAvatar address="{{ m.fromAddress }}" name="{{ m.fromLabel }}" />
+        {% endif %}
+        <span class="min-w-0 flex-1">
+            <span class="flex items-baseline gap-2">
+                {% if unread %}<span class="size-2 shrink-0 self-center rounded-full bg-brand-600" aria-hidden="true"></span><span class="sr-only">{{ 'mail.unread'|trans }}:</span>{% endif %}
+                <span class="min-w-0 flex-1 truncate {{ unread ? 'font-semibold text-slate-900' : 'text-slate-700' }}">
+                    {% if folder == 'sent' and not m.internal %}{{ 'mail.to_prefix'|trans }} {{ (m.toRecipients|first).name|default((m.toRecipients|first).address|default('–')) }}{% else %}{{ sender }}{% endif %}
+                </span>
+                <time datetime="{{ m.date|date('c') }}" class="shrink-0 text-xs text-slate-500">{{ m.date|short_date }}</time>
+            </span>
+            <span class="block truncate {{ unread ? 'font-semibold' : '' }}">{{ m.subject ?: 'mail.no_subject'|trans }}</span>
+            <span class="flex items-center gap-1.5">
+                <span class="min-w-0 flex-1 truncate text-xs text-slate-500">{{ m.snippet }}</span>
+                {% if m.internal %}
+                    <span title="{{ 'mail.icon.internal'|trans }}">{{ ux_icon('lucide:message-square', {class: 'size-3.5 text-slate-400', 'aria-label': 'mail.icon.internal'|trans, role: 'img'}) }}</span>
+                {% endif %}
+                {% if m.hasAttachments %}
+                    <span title="{{ 'mail.icon.attachment'|trans }}">{{ ux_icon('lucide:paperclip', {class: 'size-3.5 text-slate-400', 'aria-label': 'mail.icon.attachment'|trans, role: 'img'}) }}</span>
+                {% endif %}
+                {% if m.assignees is empty %}
+                    <span title="{{ 'mail.icon.unassigned'|trans }}">{{ ux_icon('lucide:user-x', {class: 'size-3.5 text-amber-500', 'aria-label': 'mail.icon.unassigned'|trans, role: 'img'}) }}</span>
+                {% elseif m.isAssignedTo(app.user) %}
+                    <span title="{{ 'mail.icon.mine'|trans }}">{{ ux_icon('lucide:user-check', {class: 'size-3.5 text-emerald-600', 'aria-label': 'mail.icon.mine'|trans, role: 'img'}) }}</span>
+                {% endif %}
+                {% if m.project %}
+                    <span class="badge max-w-24 truncate bg-slate-100 text-slate-600"><span class="size-2 shrink-0 rounded-full" style="background-color: {{ m.project.color }}" aria-hidden="true"></span>{{ m.project.name }}</span>
+                {% endif %}
+            </span>
+        </span>
+    </a>
+</div>

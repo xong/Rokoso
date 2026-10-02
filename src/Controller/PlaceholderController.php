@@ -20,9 +20,6 @@ final class PlaceholderController extends AbstractController
         return $this->redirectToRoute('mail_inbox');
     }
 
-    #[Route('/mail', name: 'mail_inbox', defaults: ['title' => 'nav.mail_inbox', 'phase' => 5])]
-    #[Route('/mail/sent', name: 'mail_sent', defaults: ['title' => 'nav.mail_sent', 'phase' => 5])]
-    #[Route('/mail/trash', name: 'mail_trash', defaults: ['title' => 'nav.mail_trash', 'phase' => 5])]
     #[Route('/mail/new', name: 'mail_compose', defaults: ['title' => 'nav.mail_compose', 'phase' => 7])]
     #[Route('/mail/message/new', name: 'mail_message_new', defaults: ['title' => 'nav.mail_message', 'phase' => 8])]
     #[Route('/calendar', name: 'calendar_month', defaults: ['title' => 'nav.calendar', 'phase' => 10])]
