@@ -82,9 +82,9 @@
                     <span class="text-slate-500" id="view-label">{{ 'mail.view'|trans }}</span>
                     <div class="inline-flex rounded-md ring-1 ring-slate-200" role="group" aria-labelledby="view-label">
                         <a href="{{ path('mail_show', {folder: folder, id: message.id, view: 'html'}|merge(filter.params)) }}" aria-pressed="{{ show_html ? 'true' : 'false' }}" role="button"
-                           class="rounded-l-md px-2 py-1 {{ show_html ? 'bg-slate-800 text-white' : 'hover:bg-slate-50' }}">HTML</a>
+                           class="rounded-l-md px-2 py-1 {{ show_html ? 'bg-brand-600 text-white' : 'hover:bg-slate-50' }}">HTML</a>
                         <a href="{{ path('mail_show', {folder: folder, id: message.id, view: 'text'}|merge(filter.params)) }}" aria-pressed="{{ show_html ? 'false' : 'true' }}" role="button"
-                           class="rounded-r-md px-2 py-1 {{ show_html ? 'hover:bg-slate-50' : 'bg-slate-800 text-white' }}">{{ 'mail.text'|trans }}</a>
+                           class="rounded-r-md px-2 py-1 {{ show_html ? 'hover:bg-slate-50' : 'bg-brand-600 text-white' }}">{{ 'mail.text'|trans }}</a>
                     </div>
                     {% if show_html and has_external_images and not load_images %}
                         <span class="ml-auto text-slate-500">{{ 'mail.images_blocked'|trans }}</span>
@@ -96,7 +96,7 @@
             {% if show_html %}
                 <iframe src="{{ path('mail_html', {id: message.id, images: load_images ? 1 : 0}) }}" title="{{ 'mail.html_frame'|trans }}"
                         sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"
-                        class="min-h-[60vh] w-full flex-1 border-0"></iframe>
+                        class="min-h-[60vh] w-full flex-1 border-0 bg-white [color-scheme:light]"></iframe>
             {% else %}
                 <div class="flex-1 p-4 font-[inherit] break-words whitespace-pre-wrap">{{ message.textBody ?? message.snippet }}</div>
             {% endif %}

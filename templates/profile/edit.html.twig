@@ -13,6 +13,7 @@
                 {% if app.user.avatar %}{{ form_row(form.removeAvatar, {row_attr: {class: 'mb-0'}}) }}{% endif %}
             </div>
         </div>
+        {{ form_row(form.theme) }}
         {{ form_rest(form) }}
         <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
     {{ form_end(form) }}

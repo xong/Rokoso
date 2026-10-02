@@ -20,7 +20,7 @@
 {% block list %}
     {# Filter über der Liste (GET, sendet bei Änderung automatisch ab) #}
     <form method="get" action="{{ path(list_route) }}" role="search" aria-label="{{ 'mail.filter.label'|trans }}"
-          class="sticky top-0 z-10 space-y-2 border-b border-slate-200 bg-white/95 p-2 backdrop-blur" data-controller="autosubmit">
+          class="sticky top-0 z-10 space-y-2 border-b border-slate-200 bg-surface/95 p-2 backdrop-blur" data-controller="autosubmit">
         <div class="relative">
             {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-2.5 left-2.5 size-4 text-slate-400', 'aria-hidden': 'true'}) }}
             <label for="mail-q" class="sr-only">{{ 'action.search'|trans }}</label>

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\User;
+use App\Enum\Theme;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -37,6 +39,12 @@ final class ProfileFormType extends AbstractType
                 'label' => 'user.remove_avatar',
                 'mapped' => false,
                 'required' => false,
+            ])
+            ->add('theme', EnumType::class, [
+                'label' => 'user.theme.label',
+                'class' => Theme::class,
+                'choice_label' => static fn (Theme $t): string => $t->label(),
+                'expanded' => true,
             ]);
     }
 

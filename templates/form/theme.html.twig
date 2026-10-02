@@ -15,6 +15,22 @@
     </div>
 {%- endblock form_row -%}
 
+{# Radio-/Checkbox-Gruppen als fieldset mit legend #}
+{%- block choice_row -%}
+    {%- if expanded -%}
+        <fieldset{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' mb-4')|trim})} %}{{ block('attributes') }}{% endwith %}{% if help is not empty %} aria-describedby="{{ id }}_help"{% endif %}>
+            {%- if label is not same as(false) -%}
+                <legend class="label">{{ label is empty ? name|humanize : label|trans(label_translation_parameters, translation_domain) }}</legend>
+            {%- endif -%}
+            {{- form_widget(form) -}}
+            {{- form_help(form) -}}
+            {{- form_errors(form) -}}
+        </fieldset>
+    {%- else -%}
+        {{- block('form_row') -}}
+    {%- endif -%}
+{%- endblock choice_row -%}
+
 {%- block checkbox_row -%}
     <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' mb-4')|trim})} %}{{ block('attributes') }}{% endwith %}>
         <div class="flex items-center gap-2">

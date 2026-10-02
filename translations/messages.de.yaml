@@ -60,6 +60,11 @@ user:
     current_password: Aktuelles Passwort
     password_help: Mindestens 10 Zeichen.
     email_taken: Diese E-Mail-Adresse ist bereits registriert.
+    theme:
+        label: Farbschema
+        system: Wie Betriebssystem
+        light: Hell
+        dark: Dunkel
 
 security:
     login: Anmelden

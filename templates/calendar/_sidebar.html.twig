@@ -19,7 +19,7 @@
             <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-center font-semibold hover:bg-slate-100 [&::-webkit-details-marker]:hidden"
                      aria-label="{{ 'calendar.choose_month'|trans }}: {{ month_label }}">{{ month_label }}</summary>
             {% set year = mini_month|date('Y') %}
-            <div class="absolute left-1/2 z-20 mt-1 w-60 -translate-x-1/2 rounded-lg bg-white p-3 shadow-lg ring-1 ring-slate-200">
+            <div class="absolute left-1/2 z-20 mt-1 w-60 -translate-x-1/2 rounded-lg bg-surface p-3 shadow-lg ring-1 ring-slate-200">
                 <div class="mb-2 flex items-center justify-between">
                     <a href="{{ path(here, here_params|merge({month: (year - 1) ~ '-' ~ mini_month|date('m'), pick: 1})) }}" class="btn-icon size-8" aria-label="{{ 'calendar.prev_year'|trans }}">{{ ux_icon('lucide:chevron-left', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
                     <span class="font-semibold tabular-nums">{{ year }}</span>

@@ -33,4 +33,20 @@ final class NavigationTest extends AppTestCase
         self::assertSelectorExists('[data-controller="shell"][data-collapsed="true"]');
         self::assertSelectorTextContains('#main-nav', 'Anna Schulz');
     }
+
+    public function testColourThemeIsChosenInProfile(): void
+    {
+        $this->login();
+        $this->client->request('GET', '/profile');
+        self::assertSelectorExists('html[data-theme="system"]');
+        self::assertSelectorTextContains('fieldset legend', 'Farbschema');
+
+        $this->client->submitForm('Speichern', ['profile_form[theme]' => 'dark']);
+        self::assertResponseRedirects('/profile');
+        $this->client->followRedirect();
+
+        self::assertSelectorExists('html[data-theme="dark"]');
+        self::assertSelectorExists('meta[name="color-scheme"][content="dark"]');
+        self::assertSelectorExists('input[name="profile_form[theme]"][value="dark"][checked]');
+    }
 }

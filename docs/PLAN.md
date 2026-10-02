@@ -9,7 +9,7 @@
 |---|---|
 | **Aktuelle Phase** | Ausbau nach App.md 38–48 (Phasen 13–18) |
 | **Nächster Schritt** | Im Browser durchklicken (Layout, Mobil, Tastatur), Feedback sammeln, offene Fragen in `OFFENE-FRAGEN.md` klären, dann Ausbau aus dem Ideen-Parkplatz |
-| **Letzte Sitzung** | 2026-10-02 (Tag): App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
+| **Letzte Sitzung** | 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
 **Starten:** `docker compose up -d` · `php bin/console doctrine:migrations:migrate -n` · `php bin/console app:demo --mails` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000 (Login `demo@coop.test` / `demo-passwort`)
 
@@ -116,6 +116,10 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 18.1 Bereiche (Hierarchie, Organisation/Projekt), Themen, Beiträge
 - [x] 18.2 Markdown mit Bildern (Drag&Drop) und Dateianhängen
 - [x] 18.3 Bearbeiten/Löschen, ungelesene Themen, Projektzuordnung
+
+## Phase 19 – Dunkelmodus
+- [x] 19.1 Farbschema im Profil wählbar (Hell, Dunkel, System)
+- [x] 19.2 Dunkle Farbpalette über CSS-Variablen, Flächen `bg-surface`
 
 ---
 

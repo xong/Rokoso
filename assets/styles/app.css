@@ -8,27 +8,79 @@
 @custom-variant collapsed (&:where([data-collapsed="true"] *));
 @custom-variant nav-open (&:where([data-nav-open="true"] *));
 
+/* Dunkles Farbschema: data-theme="dark" oder data-theme="system" bei dunklem Betriebssystem (gesetzt in base.html.twig) */
+@custom-variant dark {
+    &:where([data-theme="dark"], [data-theme="dark"] *) { @slot; }
+    @media (prefers-color-scheme: dark) {
+        &:where([data-theme="system"], [data-theme="system"] *) { @slot; }
+    }
+}
+
 @theme {
     --color-brand-50: oklch(0.97 0.02 250);
     --color-brand-100: oklch(0.93 0.04 250);
+    --color-brand-500: oklch(0.6 0.16 252);
     --color-brand-600: oklch(0.52 0.17 255);
     --color-brand-700: oklch(0.45 0.16 255);
+    --color-brand-800: oklch(0.38 0.13 255);
+    /* Flächen (Karten, Spalten, Eingabefelder); im Dunkelmodus dunkel – bg-white bleibt immer weiß */
+    --color-surface: #fff;
+}
+
+/*
+ * Dunkelmodus ohne dark:-Varianten in jedem Template: die verwendeten Farbskalen werden umgedreht.
+ * Hintergrundtöne (50–200) werden dunkel, Texttöne (500–900) hell. Vollfarben (brand-600, red-600 …)
+ * bleiben, damit weiße Schrift auf Buttons lesbar bleibt.
+ */
+@layer theme {
+    :root {
+        @variant dark {
+        color-scheme: dark;
+        --color-surface: oklch(0.2 0.03 262);
+        --color-slate-50: oklch(0.155 0.028 264);
+        --color-slate-100: oklch(0.255 0.035 262);
+        --color-slate-200: oklch(0.31 0.035 260);
+        --color-slate-300: oklch(0.4 0.035 258);
+        --color-slate-400: oklch(0.58 0.035 257);
+        --color-slate-500: oklch(0.7 0.03 257);
+        --color-slate-600: oklch(0.78 0.025 256);
+        --color-slate-700: oklch(0.85 0.02 255);
+        --color-slate-800: oklch(0.91 0.015 255);
+        --color-slate-900: oklch(0.95 0.01 255);
+        --color-brand-50: oklch(0.29 0.07 258);
+        --color-brand-100: oklch(0.35 0.09 258);
+        --color-brand-600: oklch(0.56 0.17 255);
+        --color-brand-700: oklch(0.8 0.1 250);
+        --color-brand-800: oklch(0.88 0.07 250);
+        --color-red-50: oklch(0.29 0.07 25);
+        --color-red-200: oklch(0.42 0.11 25);
+        --color-red-700: oklch(0.76 0.14 22);
+        --color-red-800: oklch(0.85 0.09 20);
+        --color-amber-50: oklch(0.3 0.05 75);
+        --color-amber-800: oklch(0.87 0.11 85);
+        --color-emerald-50: oklch(0.29 0.05 165);
+        --color-emerald-200: oklch(0.42 0.08 165);
+        --color-emerald-800: oklch(0.86 0.11 165);
+        --color-violet-50: oklch(0.3 0.08 293);
+        --color-violet-700: oklch(0.8 0.12 293);
+        }
+    }
 }
 
 /* Wiederkehrende Bausteine – Formulare, Buttons, Karten */
 @layer components {
-    .btn-primary { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 bg-brand-600 text-white hover:bg-brand-700; }
-    .btn-secondary { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 bg-white text-slate-700 ring-1 ring-slate-300 ring-inset hover:bg-slate-50; }
-    .btn-danger { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 bg-red-600 text-white hover:bg-red-700; }
+    .btn-primary { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 bg-brand-600 text-white hover:bg-brand-700 dark:hover:bg-brand-500; }
+    .btn-secondary { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 bg-surface text-slate-700 ring-1 ring-slate-300 ring-inset hover:bg-slate-50; }
+    .btn-danger { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 bg-red-600 text-white hover:bg-red-700 dark:hover:bg-red-500; }
     .btn-ghost { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 text-slate-600 hover:bg-slate-100; }
     .btn-icon { @apply grid size-9 shrink-0 place-items-center rounded-md text-slate-600 hover:bg-slate-100 hover:text-slate-900; }
     .input {
-        @apply block w-full rounded-md border-0 bg-white px-3 py-2 text-sm text-slate-900 ring-1 ring-slate-300 ring-inset placeholder:text-slate-400 focus:ring-2 focus:ring-brand-600 focus:outline-none aria-invalid:ring-red-500;
+        @apply block w-full rounded-md border-0 bg-surface px-3 py-2 text-sm text-slate-900 ring-1 ring-slate-300 ring-inset placeholder:text-slate-400 focus:ring-2 focus:ring-brand-600 focus:outline-none aria-invalid:ring-red-500;
     }
     .label { @apply mb-1 block text-sm font-medium text-slate-700; }
     .help { @apply mt-1 text-xs text-slate-500; }
     .error { @apply mt-1 text-xs font-medium text-red-600; }
-    .card { @apply rounded-lg bg-white ring-1 ring-slate-200; }
+    .card { @apply rounded-lg bg-surface ring-1 ring-slate-200; }
     .link { @apply font-medium text-brand-700 underline-offset-2 hover:underline; }
     .avatar { @apply grid shrink-0 place-items-center overflow-hidden rounded-full bg-slate-200 font-semibold text-slate-600; }
     .badge { @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium; }

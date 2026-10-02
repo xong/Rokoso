@@ -10,7 +10,7 @@
                 {{ 'mail.project.none'|trans }}
             {% endif %}
         </summary>
-        <form method="post" action="{{ path('mail_project', {id: message.id}) }}" class="absolute left-0 z-20 mt-1 w-64 rounded-lg bg-white p-2 shadow-lg ring-1 ring-slate-200">
+        <form method="post" action="{{ path('mail_project', {id: message.id}) }}" class="absolute left-0 z-20 mt-1 w-64 rounded-lg bg-surface p-2 shadow-lg ring-1 ring-slate-200">
             <input type="hidden" name="_token" value="{{ csrf_token('mail-action') }}">
             <input type="hidden" name="folder" value="{{ folder }}">
             <label for="project-search-{{ message.id }}" class="sr-only">{{ 'mail.project.search'|trans }}</label>
@@ -41,12 +41,12 @@
                 {{ 'mail.assignees.none'|trans }}
             {% else %}
                 <span class="flex -space-x-1">
-                    {% for u in message.assignees|slice(0, 3) %}<twig:Avatar name="{{ u.name }}" image="{{ u.avatar }}" size="size-5 text-[9px] ring-2 ring-white" />{% endfor %}
+                    {% for u in message.assignees|slice(0, 3) %}<twig:Avatar name="{{ u.name }}" image="{{ u.avatar }}" size="size-5 text-[9px] ring-2 ring-surface" />{% endfor %}
                 </span>
                 {{ message.assignees|map(u => u.name)|join(', ') }}
             {% endif %}
         </summary>
-        <form method="post" action="{{ path('mail_assignees', {id: message.id}) }}" class="absolute left-0 z-20 mt-1 w-64 rounded-lg bg-white p-2 shadow-lg ring-1 ring-slate-200">
+        <form method="post" action="{{ path('mail_assignees', {id: message.id}) }}" class="absolute left-0 z-20 mt-1 w-64 rounded-lg bg-surface p-2 shadow-lg ring-1 ring-slate-200">
             <input type="hidden" name="_token" value="{{ csrf_token('mail-action') }}">
             <input type="hidden" name="folder" value="{{ folder }}">
             <label for="assignee-search-{{ message.id }}" class="sr-only">{{ 'mail.assignees.search'|trans }}</label>

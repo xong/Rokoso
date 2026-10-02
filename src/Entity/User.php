@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\Theme;
 use App\Repository\UserRepository;
 use App\Util\Initials;
 use Doctrine\ORM\Mapping as ORM;
@@ -38,6 +39,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $avatar = null;
+
+    #[ORM\Column(length: 10, enumType: Theme::class, options: ['default' => 'system'])]
+    private Theme $theme = Theme::System;
 
     #[ORM\Column]
     private bool $verified = false;
@@ -130,6 +134,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setAvatar(?string $avatar): static
     {
         $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function getTheme(): Theme
+    {
+        return $this->theme;
+    }
+
+    public function setTheme(Theme $theme): static
+    {
+        $this->theme = $theme;
 
         return $this;
     }

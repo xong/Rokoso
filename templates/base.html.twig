@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="{{ app.request.locale }}" class="h-full">
+{# Farbschema aus dem Profil; "system" folgt prefers-color-scheme (siehe app.css) #}
+{% set theme = app.user.theme.value ?? 'system' %}
+<html lang="{{ app.request.locale }}" class="h-full" data-theme="{{ theme }}">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>{% block title %}{% endblock %}{% if block('title') is not empty %} · {% endif %}{{ 'app.name'|trans }}</title>
+        <meta name="color-scheme" content="{{ theme == 'system' ? 'light dark' : theme }}">
         <meta name="theme-color" content="#2563eb">
         <meta name="description" content="{{ 'pwa.description'|trans }}">
         <link rel="manifest" href="{{ path('pwa_manifest') }}">

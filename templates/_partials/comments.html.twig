@@ -12,7 +12,7 @@
         {% for c in comments %}
             <li class="flex gap-2">
                 <twig:Avatar name="{{ c.author ? c.author.name : '?' }}" image="{{ c.author ? c.author.avatar : null }}" size="size-7 text-[10px]" />
-                <div class="min-w-0 flex-1 rounded-lg bg-white p-2.5 shadow-sm ring-1 ring-slate-200">
+                <div class="min-w-0 flex-1 rounded-lg bg-surface p-2.5 shadow-sm ring-1 ring-slate-200">
                     <p class="flex items-baseline gap-2 text-xs">
                         <span class="font-semibold">{{ c.author ? c.author.name : 'mail.comments.deleted_user'|trans }}</span>
                         <time datetime="{{ c.createdAt|date('c') }}" class="text-slate-500">{{ c.createdAt|short_date }}</time>

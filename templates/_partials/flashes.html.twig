@@ -6,10 +6,10 @@
         {% for type, messages in flashes %}
             {% for message in messages %}
                 <div class="pointer-events-auto flex max-w-md items-start gap-2 rounded-lg px-4 py-3 text-sm shadow-lg ring-1
-                            {{ type == 'error' ? 'bg-red-50 text-red-800 ring-red-200' : (type == 'success' ? 'bg-emerald-50 text-emerald-800 ring-emerald-200' : 'bg-white text-slate-800 ring-slate-200') }}">
+                            {{ type == 'error' ? 'bg-red-50 text-red-800 ring-red-200' : (type == 'success' ? 'bg-emerald-50 text-emerald-800 ring-emerald-200' : 'bg-surface text-slate-800 ring-slate-200') }}">
                     {{ ux_icon(type == 'error' ? 'lucide:circle-alert' : (type == 'success' ? 'lucide:circle-check' : 'lucide:info'), {class: 'mt-0.5 size-4 shrink-0', 'aria-hidden': 'true'}) }}
                     <p>{{ message|trans }}</p>
-                    <button type="button" class="-my-1 -mr-2 ml-2 grid size-7 place-items-center rounded hover:bg-black/5" data-action="flash#dismiss" aria-label="{{ 'action.close'|trans }}">
+                    <button type="button" class="-my-1 -mr-2 ml-2 grid size-7 place-items-center rounded hover:bg-slate-900/10" data-action="flash#dismiss" aria-label="{{ 'action.close'|trans }}">
                         {{ ux_icon('lucide:x', {class: 'size-4', 'aria-hidden': 'true'}) }}
                     </button>
                 </div>
