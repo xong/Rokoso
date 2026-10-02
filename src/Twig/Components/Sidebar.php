@@ -30,6 +30,7 @@ final class Sidebar
             'match' => ['mail_'],
             'children' => [
                 ['label' => 'nav.mail_inbox', 'icon' => 'lucide:inbox', 'route' => 'mail_inbox'],
+                ['label' => 'nav.mail_all', 'icon' => 'lucide:mails', 'route' => 'mail_all'],
                 ['label' => 'nav.mail_sent', 'icon' => 'lucide:send', 'route' => 'mail_sent'],
                 ['label' => 'nav.mail_trash', 'icon' => 'lucide:trash-2', 'route' => 'mail_trash'],
                 ['label' => 'nav.mail_compose', 'icon' => 'lucide:square-pen', 'route' => 'mail_compose'],

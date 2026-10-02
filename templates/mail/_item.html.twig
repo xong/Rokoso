@@ -42,7 +42,7 @@
     {% set fields = {folder: folder, return: 'list'} %}
     {% for key, value in filter.params %}{% set fields = fields|merge({('params[' ~ key ~ ']'): value}) %}{% endfor %}
     {% set compose_route = m.internal ? 'mail_message_new' : 'mail_compose' %}
-    <div class="absolute top-1.5 right-2 hidden items-center gap-0.5 rounded-md bg-white p-0.5 shadow-sm ring-1 ring-slate-200 group-focus-within/msg:flex group-hover/msg:flex">
+    <div class="absolute bottom-1 left-14 hidden items-center gap-0.5 rounded-md bg-white p-0.5 shadow-sm ring-1 ring-slate-200 group-focus-within/msg:flex group-hover/msg:flex">
         <a href="{{ path('mail_show', {folder: folder, id: m.id, open: 'project'}|merge(filter.params)) }}" class="btn-icon size-7" aria-label="{{ 'mail.toolbar.project'|trans }}" title="{{ 'mail.toolbar.project'|trans }}">{{ ux_icon('lucide:folder-kanban', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
         <a href="{{ path('mail_show', {folder: folder, id: m.id, open: 'assignees'}|merge(filter.params)) }}" class="btn-icon size-7" aria-label="{{ 'mail.toolbar.assignees'|trans }}" title="{{ 'mail.toolbar.assignees'|trans }}">{{ ux_icon('lucide:users', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
         {{ ui.post_button(path('mail_assign_me', {id: m.id}), 'mail-action', m.isAssignedTo(app.user) ? 'mail.assignees.unassign_me' : 'mail.assignees.assign_me',

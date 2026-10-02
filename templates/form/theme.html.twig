@@ -52,6 +52,24 @@
     {{- parent() -}}
 {%- endblock form_widget_simple -%}
 
+{# Mehrfach-Upload: Dateien zusätzlich per Drag&Drop; das native Feld bleibt bedienbar #}
+{%- block file_widget -%}
+    {%- if multiple|default(false) -%}
+        <div data-controller="dropzone" data-dropzone-remove-label-value="{{ 'upload.remove'|trans }}"
+             data-action="dragenter->dropzone#over dragover->dropzone#over dragleave->dropzone#leave drop->dropzone#drop"
+             class="rounded-lg border-2 border-dashed border-slate-300 p-3 transition-colors data-[over]:border-brand-500 data-[over]:bg-brand-50">
+            <p class="mb-2 flex items-center gap-2 text-sm text-slate-500">
+                {{ ux_icon('lucide:upload', {class: 'size-4', 'aria-hidden': 'true'}) }}{{ 'upload.drop_hint'|trans }}
+            </p>
+            {%- set attr = attr|merge({'data-dropzone-target': 'input', 'data-action': 'change->dropzone#render'}) -%}
+            {{- block('form_widget_simple') -}}
+            <ul role="list" class="mt-2 space-y-1 text-sm empty:hidden" data-dropzone-target="list" aria-live="polite"></ul>
+        </div>
+    {%- else -%}
+        {{- block('form_widget_simple') -}}
+    {%- endif -%}
+{%- endblock file_widget -%}
+
 {%- block textarea_widget -%}
     {%- set attr = attr|merge({class: (attr.class|default('') ~ ' input')|trim, rows: attr.rows|default(4)}) -%}
     {%- if not valid -%}{%- set attr = attr|merge({'aria-invalid': 'true'}) -%}{%- endif -%}

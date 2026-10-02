@@ -12,6 +12,7 @@ nav:
     back: Zurück zur Liste
     mail: E-Mails
     mail_inbox: Eingang
+    mail_all: Alle E-Mails
     mail_sent: Ausgang
     mail_trash: Papierkorb
     mail_compose: Neue E-Mail
@@ -195,6 +196,8 @@ project:
     personal: Persönlich
     messages: Nachrichten im Projekt
     calendar: Termine im Projekt
+    recent_messages: Neueste Nachrichten
+    no_messages: Diesem Projekt sind noch keine Nachrichten zugeordnet.
 
 mail_account:
     title: E-Mail-Konten
@@ -269,6 +272,7 @@ mail:
     project:
         none: Kein Projekt
         change: Projekt ändern
+        moved: Die Nachricht wurde dem Projekt zugeordnet und steht jetzt unter „Alle E-Mails“ und beim Projekt.
         search: Projekt suchen …
     assignees:
         label: Verantwortliche
@@ -467,3 +471,7 @@ pwa:
     offline_title: Keine Verbindung
     offline_text: Coop braucht eine Internetverbindung. Bitte prüfe deine Verbindung und versuche es erneut.
     retry: Erneut versuchen
+
+upload:
+    drop_hint: Dateien hierher ziehen oder auswählen
+    remove: Entfernen

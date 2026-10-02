@@ -87,9 +87,15 @@ final class MailCollaborationTest extends AppTestCase
         $values['project'] = (string) $this->project->getId();
         $this->client->request('POST', $form->getUri(), $values);
         self::assertSame('Schulwege', $this->reload()->getProject()?->getName());
+        self::assertResponseRedirects('/mail/all/'.$this->message->getId());
 
-        $this->client->request('GET', '/mail?project='.$this->project->getId());
+        // Leaves the inbox, stays reachable under "all" and on the project page
+        $this->client->request('GET', '/mail');
+        self::assertSelectorTextNotContains('main', 'Zebrastreifen');
+        $this->client->request('GET', '/mail/all?project='.$this->project->getId());
         self::assertSelectorTextContains('main', 'Zebrastreifen');
+        $this->client->request('GET', '/projects/'.$this->project->getId());
+        self::assertSelectorTextContains('#project-messages-heading + ul', 'Zebrastreifen');
     }
 
     public function testToolbarTrashReturnsToFilteredList(): void

@@ -1,8 +1,8 @@
 {% extends 'layout/app.html.twig' %}
 {% import '_partials/ui.html.twig' as ui %}
 
-{% set folder_title = {inbox: 'nav.mail_inbox', sent: 'nav.mail_sent', trash: 'nav.mail_trash'}[folder] %}
-{% set list_route = {inbox: 'mail_inbox', sent: 'mail_sent', trash: 'mail_trash'}[folder] %}
+{% set folder_title = {inbox: 'nav.mail_inbox', all: 'nav.mail_all', sent: 'nav.mail_sent', trash: 'nav.mail_trash'}[folder] %}
+{% set list_route = {inbox: 'mail_inbox', all: 'mail_all', sent: 'mail_sent', trash: 'mail_trash'}[folder] %}
 
 {% block title %}{{ folder_title|trans }}{% endblock %}
 {% block list_title %}{{ folder_title|trans }}{% endblock %}

@@ -91,10 +91,10 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 12.2 Backup, Updates, Admin-Doku; Demodaten-Befehl `app:demo`
 
 ## Phase 13 – E-Mail-Feinschliff (38, 39, 40, 46, 47)
-- [ ] 13.1 Anhänge per Drag&Drop (E-Mail schreiben, interne Nachricht)
-- [ ] 13.2 Hover-Funktionsleiste unten links
-- [ ] 13.3 Auswahllisten (Projekt, Verantwortliche) schließen bei Klick außerhalb und mit Esc
-- [ ] 13.4 Nachrichten mit Projekt nicht mehr im Eingang; neuer Unterpunkt „Alle E-Mails“; Nachrichten beim Projekt sichtbar
+- [x] 13.1 Anhänge per Drag&Drop (E-Mail schreiben, interne Nachricht)
+- [x] 13.2 Hover-Funktionsleiste unten links
+- [x] 13.3 Auswahllisten (Projekt, Verantwortliche) schließen bei Klick außerhalb und mit Esc
+- [x] 13.4 Nachrichten mit Projekt nicht mehr im Eingang; neuer Unterpunkt „Alle E-Mails“; Nachrichten beim Projekt sichtbar
 
 ## Phase 14 – Kalender-Layout (48)
 - [ ] 14.1 Mittlere Spalte: Mini-Monat mit KW und Punkten, darunter „Demnächst“

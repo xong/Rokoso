@@ -35,9 +35,28 @@
 
         {% block project_sections %}
             <div class="flex flex-wrap gap-2">
-                <a class="btn-secondary" href="{{ path('mail_inbox', {project: project.id}) }}">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'project.messages'|trans }}</a>
+                <a class="btn-secondary" href="{{ path('mail_all', {project: project.id}) }}">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'project.messages'|trans }}</a>
                 <a class="btn-secondary" href="{{ path('calendar_month', {project: project.id}) }}">{{ ux_icon('lucide:calendar', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'project.calendar'|trans }}</a>
             </div>
         {% endblock %}
+
+        <section aria-labelledby="project-messages-heading">
+            <h2 id="project-messages-heading" class="mb-2 text-sm font-semibold">{{ 'project.recent_messages'|trans }}</h2>
+            {% if recent_messages is empty %}
+                <p class="text-sm text-slate-500">{{ 'project.no_messages'|trans }}</p>
+            {% else %}
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for m in recent_messages %}
+                        <li>
+                            <a href="{{ path('mail_show', {folder: 'all', id: m.id, project: project.id}) }}" class="flex items-baseline gap-3 px-3 py-2 hover:bg-slate-50">
+                                <span class="w-32 shrink-0 truncate text-slate-600">{{ m.internal and m.author ? m.author.name : m.fromLabel }}</span>
+                                <span class="min-w-0 flex-1 truncate">{{ m.subject ?: 'mail.no_subject'|trans }}</span>
+                                <time datetime="{{ m.date|date('c') }}" class="shrink-0 text-xs text-slate-500">{{ m.date|short_date }}</time>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
     </div>
 {% endblock %}

@@ -4,7 +4,9 @@ import { Controller } from '@hotwired/stimulus';
  * Durchsuchbare Auswahl auf Basis von <details>:
  * - Suchfeld filtert die Optionen (data-picker-target="option", Text in data-label)
  * - Esc schließt und gibt den Fokus an den Auslöser (<summary>) zurück
- * - Klick außerhalb schließt
+ * - Klick außerhalb schließt – auch in ein iframe (HTML-Mail), dort kommt kein Klick-Ereignis an,
+ *   das Fenster verliert aber den Fokus
+ * - Fokus verlässt die Auswahl per Tab → schließt
  */
 export default class extends Controller {
     static targets = ['search', 'option', 'empty'];
@@ -15,14 +17,31 @@ export default class extends Controller {
                 this.element.open = false;
             }
         };
-        document.addEventListener('click', this.outside);
-        if (this.element.open) {
-            this.searchTarget?.focus();
+        this.windowBlur = () => {
+            // Fokus wandert in ein iframe der Seite
+            setTimeout(() => {
+                if (this.element.open && document.activeElement?.tagName === 'IFRAME') {
+                    this.element.open = false;
+                }
+            }, 0);
+        };
+        this.focusOut = (event) => {
+            if (this.element.open && event.relatedTarget && !this.element.contains(event.relatedTarget)) {
+                this.element.open = false;
+            }
+        };
+        document.addEventListener('pointerdown', this.outside);
+        window.addEventListener('blur', this.windowBlur);
+        this.element.addEventListener('focusout', this.focusOut);
+        if (this.element.open && this.hasSearchTarget) {
+            this.searchTarget.focus();
         }
     }
 
     disconnect() {
-        document.removeEventListener('click', this.outside);
+        document.removeEventListener('pointerdown', this.outside);
+        window.removeEventListener('blur', this.windowBlur);
+        this.element.removeEventListener('focusout', this.focusOut);
     }
 
     toggled() {

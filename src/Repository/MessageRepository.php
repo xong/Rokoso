@@ -68,12 +68,14 @@ class MessageRepository extends ServiceEntityRepository
 
         match ($filter->folder) {
             'trash' => $qb->andWhere('m.trashedAt IS NOT NULL'),
+            'all' => $qb->andWhere('m.trashedAt IS NULL'),
             'sent' => $qb->andWhere('m.trashedAt IS NULL')
                 ->andWhere('m.folder = :sent OR (m.type = :internal AND m.author = :viewer)')
                 ->setParameter('sent', MessageFolder::Sent->value)
                 ->setParameter('internal', MessageType::Internal->value),
             default => $qb->andWhere('m.trashedAt IS NULL')
                 ->andWhere('m.folder = :inbox')
+                ->andWhere('m.project IS NULL')
                 ->andWhere('m.type = :email OR m.author IS NULL OR m.author != :viewer')
                 ->setParameter('inbox', MessageFolder::Inbox->value)
                 ->setParameter('email', MessageType::Email->value),
@@ -134,6 +136,7 @@ class MessageRepository extends ServiceEntityRepository
             ->select('COUNT(m.id)')
             ->andWhere('m.trashedAt IS NULL')
             ->andWhere('m.folder = :inbox')
+            ->andWhere('m.project IS NULL')
             ->andWhere('m.type = :email OR m.author IS NULL OR m.author != :viewer')
             ->andWhere('NOT EXISTS (SELECT 1 FROM '.MessageRead::class.' ur WHERE ur.message = m AND ur.user = :viewer)')
             ->setParameter('inbox', MessageFolder::Inbox->value)

@@ -7,6 +7,8 @@ namespace App\Controller;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Form\ProjectFormType;
+use App\Mail\MessageFilter;
+use App\Repository\MessageRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
 use App\Security\Voter\OrganizationVoter;
@@ -72,11 +74,12 @@ final class ProjectController extends AbstractController
 
     #[Route('/{id<\d+>}', name: 'project_show')]
     #[IsGranted(ProjectVoter::VIEW, 'project')]
-    public function show(Project $project, #[CurrentUser] User $user): Response
+    public function show(Project $project, #[CurrentUser] User $user, MessageRepository $messages): Response
     {
         return $this->render('project/show.html.twig', [
             'projects' => $this->projects->findVisibleFor($user),
             'project' => $project,
+            'recent_messages' => \array_slice($messages->findForList($user, new MessageFilter('all', project: $project->getId())), 0, 5),
         ]);
     }
 

@@ -32,7 +32,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/mail')]
 final class MailController extends AbstractController
 {
-    public const array FOLDERS = ['inbox', 'sent', 'trash'];
+    public const array FOLDERS = ['inbox', 'all', 'sent', 'trash'];
 
     public function __construct(
         private readonly MessageRepository $messages,
@@ -44,6 +44,7 @@ final class MailController extends AbstractController
     }
 
     #[Route('', name: 'mail_inbox', defaults: ['folder' => 'inbox'])]
+    #[Route('/all', name: 'mail_all', defaults: ['folder' => 'all'])]
     #[Route('/sent', name: 'mail_sent', defaults: ['folder' => 'sent'])]
     #[Route('/trash', name: 'mail_trash', defaults: ['folder' => 'trash'])]
     public function list(Request $request, string $folder, #[CurrentUser] User $user): Response
@@ -51,7 +52,7 @@ final class MailController extends AbstractController
         return $this->render('mail/index.html.twig', $this->listContext($request, $folder, $user));
     }
 
-    #[Route('/{folder<inbox|sent|trash>}/{id<\d+>}', name: 'mail_show')]
+    #[Route('/{folder<inbox|all|sent|trash>}/{id<\d+>}', name: 'mail_show')]
     #[IsGranted(MessageVoter::VIEW, 'message')]
     public function show(Request $request, string $folder, Message $message, #[CurrentUser] User $user, MessageHtmlRenderer $renderer, ParticipantResolver $participants): Response
     {
@@ -205,6 +206,13 @@ final class MailController extends AbstractController
         $message->setProject($project);
         $this->em->flush();
 
+        // Messages with a project leave the inbox (App.md 46) – keep showing it under "all".
+        if (null !== $project && 'inbox' === $request->getPayload()->getString('folder', 'inbox')) {
+            $this->addFlash('success', 'mail.project.moved');
+
+            return $this->redirectToRoute('mail_show', ['folder' => 'all', 'id' => $message->getId()]);
+        }
+
         return $this->redirectBack($request, $message);
     }
 
@@ -274,6 +282,7 @@ final class MailController extends AbstractController
     {
         $folder = $request->getPayload()->getString('folder', 'inbox');
         $route = match ($folder) {
+            'all' => 'mail_all',
             'sent' => 'mail_sent',
             'trash' => 'mail_trash',
             default => 'mail_inbox',
