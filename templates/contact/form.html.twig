@@ -1,0 +1,68 @@
+{% extends 'contact/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ (contact ? 'contact.edit' : 'contact.new')|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'contact.section_person'|trans }}</legend>
+                <div class="grid gap-x-4 sm:grid-cols-[6rem_1fr_1fr]">
+                    {{ form_row(form.salutation) }}
+                    {{ form_row(form.firstName) }}
+                    {{ form_row(form.lastName) }}
+                </div>
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.company) }}
+                    {{ form_row(form.position) }}
+                </div>
+                <div class="flex items-center gap-4">
+                    {% if contact %}<twig:Avatar name="{{ contact.displayName }}" image="{{ contact.photo }}" size="size-14 text-lg" />{% endif %}
+                    <div class="flex-1">
+                        {{ form_row(form.photoFile, {row_attr: {class: 'mb-2'}}) }}
+                        {% if contact and contact.photo %}{{ form_row(form.removePhoto, {row_attr: {class: 'mb-0'}}) }}{% else %}{% do form.removePhoto.setRendered %}{% endif %}
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'contact.section_reach'|trans }}</legend>
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.email) }}
+                    {{ form_row(form.email2) }}
+                    {{ form_row(form.phone) }}
+                    {{ form_row(form.mobile) }}
+                </div>
+                {{ form_row(form.website, {row_attr: {class: 'mb-0'}}) }}
+            </fieldset>
+
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'contact.section_address'|trans }}</legend>
+                {{ form_row(form.street) }}
+                <div class="grid gap-x-4 sm:grid-cols-[8rem_1fr]">
+                    {{ form_row(form.postalCode, {row_attr: {class: 'mb-0'}}) }}
+                    {{ form_row(form.city, {row_attr: {class: 'mb-0'}}) }}
+                </div>
+            </fieldset>
+
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'contact.section_more'|trans }}</legend>
+                {{ form_row(form.organization) }}
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.birthday) }}
+                    {{ form_row(form.tags) }}
+                </div>
+                {{ form_row(form.notes, {row_attr: {class: 'mb-0'}}) }}
+            </fieldset>
+
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ contact ? path('contact_show', {id: contact.id}) : path('contact_index') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

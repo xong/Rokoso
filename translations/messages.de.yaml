@@ -347,3 +347,43 @@ internal:
     project: Projekt
     project_help: Alle, die das Projekt sehen, erhalten die Nachricht.
     sent: Nachricht gesendet.
+
+contact:
+    new: Kontakt anlegen
+    edit: Kontakt bearbeiten
+    delete: Kontakt löschen
+    delete_confirm: Kontakt wirklich löschen?
+    created: Kontakt angelegt.
+    none: Noch keine Kontakte.
+    no_match: Keine passenden Kontakte.
+    intro: Kontakte gehören einer Organisation und sind für alle Mitglieder sichtbar. Bekannte Absender erscheinen in der Nachrichtenliste mit Foto bzw. Initialen.
+    search: Kontakte durchsuchen …
+    save_sender: Als Kontakt speichern
+    write_mail: E-Mail schreiben
+    messages: Nachrichten mit diesem Kontakt
+    organization: Organisation
+    organization_help: Kontakte einer Organisation sehen und bearbeiten alle Mitglieder.
+    private: Privat (nur für mich)
+    section_person: Person
+    section_reach: Erreichbarkeit
+    section_address: Adresse
+    section_more: Weiteres
+    salutation: Anrede
+    first_name: Vorname
+    last_name: Nachname
+    company: Organisation / Firma / Schule
+    position: Funktion
+    email: E-Mail
+    email2: E-Mail (weitere)
+    phone: Telefon
+    mobile: Mobil
+    street: Straße und Hausnummer
+    postal_code: PLZ
+    city: Ort
+    website: Webseite
+    birthday: Geburtstag
+    tags: Schlagworte
+    tags_help: Mit Komma trennen, z. B. „Schulleitung, Grundschule“.
+    notes: Notizen
+    photo: Foto
+    remove_photo: Foto entfernen

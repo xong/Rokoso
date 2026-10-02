@@ -72,8 +72,8 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 - [x] 8.2 Anzeige/Behandlung wie E-Mails in derselben Liste
 
 ## Phase 9 – Kontakte (36, 37)
-- [ ] 9.1 `Contact` mit umfangreichen, aber gruppierten Feldern
-- [ ] 9.2 Avatar bzw. Initialen in E-Mail-Liste und -Detail
+- [x] 9.1 `Contact` mit umfangreichen, aber gruppierten Feldern
+- [x] 9.2 Avatar bzw. Initialen in E-Mail-Liste und -Detail
 
 ## Phase 10 – Kalender (26–33)
 - [ ] 10.1 `CalendarItem` (Termin/Aufgabe): Titel, Projekt, Ort, Von-Bis/ganztägig, Beschreibung, Verantwortliche, Teilnehmer, URL, erledigt
@@ -97,3 +97,4 @@ Neue Ideen, die noch keiner Phase zugeordnet sind:
 
 - Gesendete Mails zusätzlich per IMAP in den Gesendet-Ordner des Servers kopieren
 - Unterhaltungen (Threads) in der Liste zusammenfassen
+- Kontakte als vCard importieren/exportieren

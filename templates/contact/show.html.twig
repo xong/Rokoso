@@ -1,0 +1,79 @@
+{% extends 'contact/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ contact.displayName }}{% endblock %}
+{% block detail_title %}{{ contact.displayName }}{% endblock %}
+
+{% block detail_actions %}
+    {% if contact.email %}
+        <a href="{{ path('mail_compose') }}?to={{ contact.email|url_encode }}" class="btn-icon" aria-label="{{ 'contact.write_mail'|trans }}" title="{{ 'contact.write_mail'|trans }}">
+            {{ ux_icon('lucide:mail-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+        </a>
+    {% endif %}
+    <a href="{{ path('contact_edit', {id: contact.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">
+        {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+    {{ ui.post_button(path('contact_delete', {id: contact.id}), 'delete-contact-' ~ contact.id, 'contact.delete',
+        {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'contact.delete_confirm'}) }}
+{% endblock %}
+
+{% macro field(label, value, href = null) %}
+    {% if value %}
+        <div class="grid grid-cols-[8rem_1fr] gap-2 py-1.5">
+            <dt class="text-slate-500">{{ label|trans }}</dt>
+            <dd class="min-w-0 break-words">{% if href %}<a class="link" href="{{ href }}">{{ value }}</a>{% else %}{{ value }}{% endif %}</dd>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{% block detail %}
+    <div class="max-w-2xl space-y-6 p-4 lg:p-6">
+        <div class="flex items-center gap-4">
+            <twig:Avatar name="{{ contact.displayName }}" image="{{ contact.photo }}" size="size-20 text-2xl" />
+            <div class="min-w-0">
+                <p class="text-xl font-semibold">{{ contact.salutation }} {{ contact.displayName }}</p>
+                {% if contact.position or (contact.company and (contact.firstName or contact.lastName)) %}
+                    <p class="text-slate-600">{{ [contact.position, contact.firstName or contact.lastName ? contact.company : null]|filter(v => v)|join(', ') }}</p>
+                {% endif %}
+                <p class="mt-1 text-xs text-slate-500">{{ contact.organization ? contact.organization.name : 'contact.private'|trans }}</p>
+                {% if contact.tagList is not empty %}
+                    <p class="mt-2 flex flex-wrap gap-1">{% for tag in contact.tagList %}<span class="badge bg-slate-100 text-slate-600">{{ tag }}</span>{% endfor %}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <section aria-labelledby="reach-heading">
+            <h3 id="reach-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.section_reach'|trans }}</h3>
+            <dl class="card divide-y divide-slate-100 px-4">
+                {{ _self.field('contact.email', contact.email, 'mailto:' ~ contact.email) }}
+                {{ _self.field('contact.email2', contact.email2, 'mailto:' ~ contact.email2) }}
+                {{ _self.field('contact.phone', contact.phone, 'tel:' ~ contact.phone) }}
+                {{ _self.field('contact.mobile', contact.mobile, 'tel:' ~ contact.mobile) }}
+                {{ _self.field('contact.website', contact.website, contact.website) }}
+            </dl>
+        </section>
+
+        {% if contact.street or contact.city %}
+            <section aria-labelledby="address-heading">
+                <h3 id="address-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.section_address'|trans }}</h3>
+                <address class="card px-4 py-3 not-italic">{{ contact.street }}<br>{{ contact.postalCode }} {{ contact.city }}</address>
+            </section>
+        {% endif %}
+
+        {% if contact.birthday or contact.notes %}
+            <section aria-labelledby="more-heading">
+                <h3 id="more-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.section_more'|trans }}</h3>
+                <dl class="card divide-y divide-slate-100 px-4">
+                    {{ _self.field('contact.birthday', contact.birthday ? contact.birthday|date('d.m.Y') : null) }}
+                </dl>
+                {% if contact.notes %}<p class="card mt-2 px-4 py-3 whitespace-pre-line">{{ contact.notes }}</p>{% endif %}
+            </section>
+        {% endif %}
+
+        {% if contact.email %}
+            <a class="btn-secondary" href="{{ path('mail_inbox', {q: contact.email}) }}">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'contact.messages'|trans }}</a>
+        {% endif %}
+    </div>
+{% endblock %}

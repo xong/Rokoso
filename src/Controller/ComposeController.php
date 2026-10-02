@@ -50,6 +50,7 @@ final class ComposeController extends AbstractController
 
         $data = new ComposeData();
         $data->account = $available[0];
+        $data->to = $request->query->getString('to');
         $originalId = $request->query->getInt('reply') ?: $request->query->getInt('forward');
         if ($originalId > 0) {
             $original = $messages->find($originalId);

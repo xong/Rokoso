@@ -38,6 +38,9 @@
                         <p class="font-semibold">
                             {% if message.internal and message.author %}{{ message.author.name }}{% else %}{{ message.fromLabel }}{% endif %}
                             {% if message.fromAddress and message.fromName %}<span class="font-normal text-slate-500">&lt;{{ message.fromAddress }}&gt;</span>{% endif %}
+                            {% if not message.internal and message.folder.value == 'inbox' and not contact_for(message.fromAddress) %}
+                                <a class="link ml-1 text-xs font-normal" href="{{ path('contact_new', {email: message.fromAddress, name: message.fromName}) }}">{{ 'contact.save_sender'|trans }}</a>
+                            {% endif %}
                         </p>
                         <dl class="mt-0.5 grid grid-cols-[auto_1fr] gap-x-2 text-xs text-slate-600">
                             {% if message.toRecipients is not empty %}

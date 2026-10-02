@@ -1,0 +1,48 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.contacts'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.contacts'|trans }}{% endblock %}
+{% block back_url %}{{ path('contact_index', query ? {q: query} : {}) }}{% endblock %}
+
+{% block list_actions %}
+    <a href="{{ path('contact_new') }}" class="btn-icon" aria-label="{{ 'contact.new'|trans }}" title="{{ 'contact.new'|trans }}">
+        {{ ux_icon('lucide:user-plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block list %}
+    <form method="get" action="{{ path('contact_index') }}" role="search" class="sticky top-0 z-10 border-b border-slate-200 bg-white p-2">
+        <div class="relative">
+            {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-2.5 left-2.5 size-4 text-slate-400', 'aria-hidden': 'true'}) }}
+            <label for="contact-q" class="sr-only">{{ 'action.search'|trans }}</label>
+            <input type="search" id="contact-q" name="q" value="{{ query }}" placeholder="{{ 'contact.search'|trans }}" class="input pl-8">
+        </div>
+    </form>
+    {% if contacts is empty %}
+        {{ ui.empty(query ? 'contact.no_match' : 'contact.none', 'lucide:contact') }}
+    {% else %}
+        {% set letter = null %}
+        <ul role="list">
+            {% for c in contacts %}
+                {% set first = (c.lastName ?: c.company ?: c.firstName)|first|upper %}
+                {% if first != letter %}
+                    {% set letter = first %}
+                    <li role="presentation" class="border-b border-slate-100 bg-slate-50 px-4 py-0.5 text-xs font-semibold text-slate-500">{{ letter }}</li>
+                {% endif %}
+                {% set active = contact is defined and contact and contact.id == c.id %}
+                <li>
+                    <a href="{{ path('contact_show', {id: c.id}|merge(query ? {q: query} : {})) }}" {% if active %}aria-current="page"{% endif %}
+                       class="flex items-center gap-3 border-b border-slate-100 px-4 py-2.5 {{ active ? 'bg-brand-50' : 'hover:bg-slate-50' }}">
+                        <twig:Avatar name="{{ c.displayName }}" image="{{ c.photo }}" size="size-9 text-xs" />
+                        <span class="min-w-0 flex-1">
+                            <span class="block truncate font-medium {{ active ? 'text-brand-700' : '' }}">{{ c.displayName }}</span>
+                            <span class="block truncate text-xs text-slate-500">{{ [c.position, c.firstName or c.lastName ? c.company : null, c.email]|filter(v => v)|join(' · ') }}</span>
+                        </span>
+                        {% if c.organization %}<span class="size-2 shrink-0 rounded-full" style="background-color: {{ c.organization.color }}" title="{{ c.organization.name }}"></span>{% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
