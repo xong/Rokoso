@@ -15,6 +15,7 @@
 
 ## Layout
 - Seiten mit 3-Spalten-Ansicht erweitern `templates/layout/app.html.twig` (Blöcke `list_title`, `list`, `detail_title`, `detail`; `has_detail` + `back_url` für Mobil).
+- Dunkelmodus über umgedrehte Farbvariablen (`assets/styles/app.css`): Flächen mit `bg-surface` statt `bg-white`; `bg-white` nur, wo es immer weiß bleiben soll.
 - Menüpunkte in `src/Twig/Components/Sidebar.php`. Tailwind-Varianten `collapsed:` und `nav-open:` hängen am `shell`-Stimulus-Controller.
 
 ## Architektur-Notizen
