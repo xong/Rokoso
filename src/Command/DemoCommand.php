@@ -6,6 +6,10 @@ namespace App\Command;
 
 use App\Entity\CalendarItem;
 use App\Entity\Contact;
+use App\Entity\Folder;
+use App\Entity\ForumBoard;
+use App\Entity\ForumPost;
+use App\Entity\ForumTopic;
 use App\Entity\MailAccount;
 use App\Entity\Message;
 use App\Entity\Organization;
@@ -84,6 +88,19 @@ final readonly class DemoCommand
                 ->setOrganization($org)->setSubject('Willkommen in Coop')
                 ->setBody("Hallo zusammen,\n\nhier können wir Mails gemeinsam bearbeiten, kommentieren und Verantwortliche festlegen.\n\nKim");
             $this->em->persist($note);
+
+            $minutes = (new Folder($org, $user))->setName('Protokolle');
+            $this->em->persist($minutes);
+            $this->em->persist((new Folder($org, $user, $minutes))->setName('2026'));
+            $this->em->persist((new Folder($org, $user))->setName('Schulwege')->setProject($projects[0]));
+
+            $general = (new ForumBoard($org, $user))->setName('Allgemeines')->setDescription('Alles, was nicht in einen anderen Bereich passt');
+            $this->em->persist($general);
+            $this->em->persist((new ForumBoard($org, $user))->setName('Schulwege')->setProject($projects[0]));
+            $topic = (new ForumTopic($general, $colleague))->setTitle('Termine für das neue Schuljahr');
+            $topic->addPost((new ForumPost($topic, $colleague))->setBody("Hallo zusammen,\n\nwelche Termine stehen schon fest?\n\n- Gesamtelternbeirat\n- **Elternabend** im Herbst\n\nKim"));
+            $topic->addPost((new ForumPost($topic, $user))->setBody('Der Elternabend ist eingetragen, siehe *Kalender*.'));
+            $this->em->persist($topic);
 
             $account = (new MailAccount($org))
                 ->setName('Postfach SEV')

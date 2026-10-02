@@ -9,7 +9,7 @@
 |---|---|
 | **Aktuelle Phase** | Ausbau nach App.md 38–48 (Phasen 13–18) |
 | **Nächster Schritt** | Im Browser durchklicken (Layout, Mobil, Tastatur), Feedback sammeln, offene Fragen in `OFFENE-FRAGEN.md` klären, dann Ausbau aus dem Ideen-Parkplatz |
-| **Letzte Sitzung** | 2026-10-02 (Nacht): alle Phasen ohne Rückfragen umgesetzt, je Phase ein Commit; 46 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
+| **Letzte Sitzung** | 2026-10-02 (Tag): App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
 **Starten:** `docker compose up -d` · `php bin/console doctrine:migrations:migrate -n` · `php bin/console app:demo --mails` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000 (Login `demo@coop.test` / `demo-passwort`)
 
