@@ -8,6 +8,7 @@
 
 {% block detail_actions %}
     {{ include('_partials/watch_button.html.twig', {target: topic, kind: 'topic'}) }}
+    <a href="{{ path('calendar_item_new', {topic: topic.id}) }}" class="btn-icon" aria-label="{{ 'task.create_from'|trans }}" title="{{ 'task.create_from'|trans }}">{{ ux_icon('lucide:list-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
     {% if is_granted('FORUM_MANAGE', topic) %}
         <a href="{{ path('forum_topic_edit', {id: topic.id}) }}" class="btn-icon" aria-label="{{ 'forum.topic_edit'|trans }}" title="{{ 'forum.topic_edit'|trans }}">
             {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}

@@ -10,6 +10,7 @@ use App\Entity\Project;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
 use App\Enum\Recurrence;
+use App\Enum\TaskStatus;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -48,7 +49,7 @@ final class CalendarItemFormType extends AbstractType
             ])
             ->add('title', TextType::class, ['label' => 'calendar.title'])
             ->add('allDay', CheckboxType::class, ['label' => 'calendar.all_day', 'required' => false])
-            ->add('startsAt', DateTimeType::class, ['label' => 'calendar.starts_at', 'widget' => 'single_text', 'input' => 'datetime_immutable'])
+            ->add('startsAt', DateTimeType::class, ['label' => 'calendar.starts_at', 'widget' => 'single_text', 'input' => 'datetime_immutable', 'required' => false, 'help' => 'calendar.starts_at_help'])
             ->add('endsAt', DateTimeType::class, ['label' => 'calendar.ends_at', 'widget' => 'single_text', 'input' => 'datetime_immutable', 'required' => false])
             ->add('location', TextType::class, ['label' => 'calendar.location', 'required' => false])
             ->add('organization', EntityType::class, [
@@ -79,7 +80,11 @@ final class CalendarItemFormType extends AbstractType
             ])
             ->add('recurrenceInterval', IntegerType::class, ['label' => 'calendar.recurrence.interval', 'attr' => ['min' => 1, 'max' => 99]])
             ->add('recurrenceUntil', DateType::class, ['label' => 'calendar.recurrence.until', 'widget' => 'single_text', 'input' => 'datetime_immutable', 'required' => false])
-            ->add('done', CheckboxType::class, ['label' => 'calendar.done', 'required' => false]);
+            ->add('status', EnumType::class, [
+                'label' => 'task.status.label',
+                'class' => TaskStatus::class,
+                'choice_label' => static fn (TaskStatus $s): string => $s->label(),
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

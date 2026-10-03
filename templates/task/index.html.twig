@@ -1,0 +1,103 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set show_list = false %}
+{% set params = {scope: mine ? 'mine' : 'all', view: board ? 'board' : 'list'}|merge(project_filter ? {project: project_filter} : {})|merge(with_done and not board ? {done: 1} : {}) %}
+{% set return_url = app.request.requestUri %}
+
+{% block title %}{{ 'task.title'|trans }}{% endblock %}
+{% block detail_title %}{{ 'task.title'|trans }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('calendar_item_new', {type: 'task'}|merge(project_filter ? {project: project_filter} : {})) }}" class="btn-primary">
+        {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'task.new'|trans }}
+    </a>
+{% endblock %}
+
+{% macro segment(href, active, label) %}
+    <a href="{{ href }}" {% if active %}aria-current="page"{% endif %}
+       class="rounded-md px-3 py-1 {{ active ? 'bg-surface font-medium shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">{{ label|trans }}</a>
+{% endmacro %}
+
+{% macro move(task, status, label, icon, return_url) %}
+    {% import '_partials/ui.html.twig' as ui %}
+    {{ ui.post_button(path('task_status', {id: task.id}), 'task-status', label|trans({'%title%': task.title}),
+        {class: 'btn-icon', icon: icon, icon_only: true, fields: {status: status, return: return_url}}) }}
+{% endmacro %}
+
+{% block detail %}
+    <div class="p-4 lg:p-6">
+        <div class="mb-4 flex flex-wrap items-center gap-2">
+            <nav aria-label="{{ 'task.scope'|trans }}" class="flex gap-1 rounded-lg bg-slate-100 p-1 text-sm">
+                {{ _self.segment(path('task_index', params|merge({scope: 'mine'})), mine, 'task.mine') }}
+                {{ _self.segment(path('task_index', params|merge({scope: 'all'})), not mine, 'task.all') }}
+            </nav>
+            <nav aria-label="{{ 'task.view'|trans }}" class="flex gap-1 rounded-lg bg-slate-100 p-1 text-sm">
+                {{ _self.segment(path('task_index', params|merge({view: 'list'})), not board, 'task.view_list') }}
+                {{ _self.segment(path('task_index', params|merge({view: 'board'})), board, 'task.view_board') }}
+            </nav>
+            <form method="get" action="{{ path('task_index') }}" class="flex flex-wrap items-center gap-2 text-sm">
+                <input type="hidden" name="scope" value="{{ params.scope }}">
+                <input type="hidden" name="view" value="{{ params.view }}">
+                <label for="task-project" class="sr-only">{{ 'nav.projects'|trans }}</label>
+                <select id="task-project" name="project" class="input w-auto py-1.5">
+                    <option value="">{{ 'task.all_projects'|trans }}</option>
+                    {% for p in projects %}
+                        <option value="{{ p.id }}" {% if p.id == project_filter %}selected{% endif %}>{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+                {% if not board %}
+                    <label class="flex items-center gap-2"><input type="checkbox" name="done" value="1" {% if with_done %}checked{% endif %}> {{ 'task.show_done'|trans }}</label>
+                {% endif %}
+                <button type="submit" class="btn-secondary py-1.5">{{ 'task.filter'|trans }}</button>
+            </form>
+        </div>
+
+        {% if board %}
+            <div class="grid gap-4 md:grid-cols-3">
+                {% for column in columns %}
+                    {% set status = column.status %}
+                    {% set prev = loop.first ? null : (columns|keys)[loop.index0 - 1] %}
+                    {% set next = loop.last ? null : (columns|keys)[loop.index0 + 1] %}
+                    <section aria-labelledby="col-{{ status.value }}" class="rounded-lg bg-slate-50 p-3">
+                        <h2 id="col-{{ status.value }}" class="mb-3 flex items-center justify-between text-sm font-semibold">
+                            {{ status.label|trans }}
+                            <span class="{{ include('task/_status_class.html.twig', {status: status}) }}">{{ column.tasks|length }}</span>
+                        </h2>
+                        {% if column.tasks is empty %}
+                            <p class="px-1 py-4 text-center text-sm text-slate-500">{{ 'task.column_empty'|trans }}</p>
+                        {% else %}
+                            <ul role="list" class="space-y-2">
+                                {% for task in column.tasks %}
+                                    <li class="card flex items-start gap-2 p-3">
+                                        {{ include('task/_row.html.twig') }}
+                                        <div class="flex shrink-0">
+                                            {% if prev %}{{ _self.move(task, prev, 'task.move_to.' ~ prev, 'lucide:arrow-left', return_url) }}{% endif %}
+                                            {% if next %}{{ _self.move(task, next, 'task.move_to.' ~ next, 'lucide:arrow-right', return_url) }}{% endif %}
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </section>
+                {% endfor %}
+            </div>
+        {% elseif tasks is empty %}
+            {{ ui.empty(mine ? 'task.empty_mine' : 'task.empty', 'lucide:list-checks') }}
+        {% else %}
+            <ul role="list" class="card divide-y divide-slate-100">
+                {% for task in tasks %}
+                    <li class="flex items-start gap-3 px-3 py-2.5">
+                        {% if task.done %}
+                            {{ _self.move(task, 'open', 'task.reopen', 'lucide:circle-check', return_url) }}
+                        {% else %}
+                            {{ _self.move(task, 'done', 'task.complete', 'lucide:circle', return_url) }}
+                        {% endif %}
+                        {{ include('task/_row.html.twig') }}
+                        <span class="{{ include('task/_status_class.html.twig', {status: task.status}) }} shrink-0">{{ task.status.label|trans }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock %}

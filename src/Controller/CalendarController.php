@@ -11,10 +11,14 @@ use App\Entity\User;
 use App\Enum\CalendarItemType;
 use App\Form\CalendarItemFormType;
 use App\Notification\ActivityNotifier;
+use App\Repository\ForumTopicRepository;
 use App\Repository\MembershipRepository;
+use App\Repository\MessageRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
 use App\Security\Voter\CalendarItemVoter;
+use App\Security\Voter\ForumVoter;
+use App\Security\Voter\MessageVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
@@ -65,7 +69,7 @@ final class CalendarController extends AbstractController
     }
 
     #[Route('/new', name: 'calendar_item_new')]
-    public function new(Request $request, #[CurrentUser] User $user, OrganizationRepository $organizations): Response
+    public function new(Request $request, #[CurrentUser] User $user, OrganizationRepository $organizations, MessageRepository $messages, ForumTopicRepository $topics): Response
     {
         $item = new CalendarItem($user);
         $date = self::parseDate($request->query->getString('date'));
@@ -74,14 +78,34 @@ final class CalendarController extends AbstractController
         }
         if ('task' === $request->query->getString('type')) {
             $item->setType(CalendarItemType::Task);
+            // Tasks are undated unless a day was chosen
+            if (null === $date) {
+                $item->setStartsAt(null);
+            }
         }
         $item->setOrganization($organizations->findForUser($user)[0] ?? null);
         $project = $this->projects->find($request->query->getInt('project'));
+        $source = null;
+        // Task from a message or forum topic: title, organization and project are taken over
+        $message = $messages->find($request->query->getInt('message'));
+        if (null !== $message && $this->isGranted(MessageVoter::VIEW, $message)) {
+            $source = $message->getSubject();
+            $item->setType(CalendarItemType::Task)->setStartsAt($date?->setTime(9, 0))->setTitle(mb_substr($message->getSubject(), 0, 200))
+                ->setSourceMessage($message)->setOrganization($message->getOrganization() ?? $item->getOrganization());
+            $project ??= $message->getProject();
+        }
+        $topic = $topics->find($request->query->getInt('topic'));
+        if (null !== $topic && $this->isGranted(ForumVoter::VIEW, $topic)) {
+            $source = $topic->getTitle();
+            $item->setType(CalendarItemType::Task)->setStartsAt($date?->setTime(9, 0))->setTitle($topic->getTitle())
+                ->setSourceTopic($topic)->setOrganization($topic->getOrganization());
+            $project ??= $topic->getProject();
+        }
         if (null !== $project && $this->isGranted('PROJECT_VIEW', $project)) {
             $item->setProject($project)->setOrganization($project->getOrganization());
         }
 
-        return $this->handleForm($request, $user, $item, $organizations);
+        return $this->handleForm($request, $user, $item, $organizations, $source);
     }
 
     #[Route('/item/{id<\d+>}', name: 'calendar_item_show')]
@@ -93,7 +117,7 @@ final class CalendarController extends AbstractController
         return $this->render('calendar/show.html.twig', [
             'item' => $item,
             'occurrence_date' => $date,
-        ] + $this->sidebarContext($request, $user, $date ?? $item->getStartsAt()));
+        ] + $this->sidebarContext($request, $user, $date ?? $item->getDate()));
     }
 
     #[Route('/item/{id<\d+>}/edit', name: 'calendar_item_edit')]
@@ -119,7 +143,7 @@ final class CalendarController extends AbstractController
     #[IsCsrfTokenValid(new Expression('"delete-calendar-item-" ~ args["item"].getId()'))]
     public function delete(CalendarItem $item): Response
     {
-        $month = $item->getStartsAt()->format('Y-m');
+        $month = $item->getDate()->format('Y-m');
         $this->em->remove($item);
         $this->em->flush();
         $this->addFlash('success', 'flash.deleted');
@@ -127,7 +151,7 @@ final class CalendarController extends AbstractController
         return $this->redirectToRoute('calendar_month', ['month' => $month]);
     }
 
-    private function handleForm(Request $request, User $user, CalendarItem $item, OrganizationRepository $organizations): Response
+    private function handleForm(Request $request, User $user, CalendarItem $item, OrganizationRepository $organizations, ?string $source = null): Response
     {
         $isNew = null === $item->getId();
         $previousAssignees = $item->getAssignees()->toArray();
@@ -155,8 +179,8 @@ final class CalendarController extends AbstractController
             $this->em->refresh($item);
         }
 
-        return $this->render('calendar/form.html.twig', ['form' => $form, 'item' => $isNew ? null : $item]
-            + $this->sidebarContext($request, $user, $item->getStartsAt()));
+        return $this->render('calendar/form.html.twig', ['form' => $form, 'item' => $isNew ? null : $item, 'source' => $source]
+            + $this->sidebarContext($request, $user, $item->getDate()));
     }
 
     /**

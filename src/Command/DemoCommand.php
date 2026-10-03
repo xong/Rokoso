@@ -25,6 +25,7 @@ use App\Enum\MessageType;
 use App\Enum\NotificationType;
 use App\Enum\OrganizationRole;
 use App\Enum\Recurrence;
+use App\Enum\TaskStatus;
 use App\Mail\MailSynchronizer;
 use App\Repository\UserRepository;
 use App\Service\SecretBox;
@@ -108,6 +109,14 @@ final readonly class DemoCommand
             $topic->addPost((new ForumPost($topic, $colleague))->setBody("Hallo zusammen,\n\nwelche Termine stehen schon fest?\n\n- Gesamtelternbeirat\n- **Elternabend** im Herbst\n\nKim"));
             $topic->addPost((new ForumPost($topic, $user))->setBody('Der Elternabend ist eingetragen, siehe *Kalender*.'));
             $this->em->persist($topic);
+            $this->em->persist((new CalendarItem($user))->setTitle('Sitzungsraum für den Herbst anfragen')->setType(CalendarItemType::Task)
+                ->setOrganization($org)->setStartsAt(null)->setStatus(TaskStatus::InProgress)->addAssignee($user)->setSourceTopic($topic));
+            $this->em->persist((new CalendarItem($user))->setTitle('Gefahrenstellen sammeln')->setType(CalendarItemType::Task)
+                ->setOrganization($org)->setProject($projects[0])->setStartsAt(null)->addAssignee($user)->addAssignee($colleague));
+            $this->em->persist((new CalendarItem($user))->setTitle('Einladung Elternabend verschicken')->setType(CalendarItemType::Task)
+                ->setOrganization($org)->setProject($projects[1])->setStartsAt($monday->modify('+2 days')->setTime(18, 0))->addAssignee($user));
+            $this->em->persist((new CalendarItem($colleague))->setTitle('Raum für den Elternabend buchen')->setType(CalendarItemType::Task)
+                ->setOrganization($org)->setProject($projects[1])->setStartsAt($monday->modify('-2 days')->setTime(12, 0))->setStatus(TaskStatus::Done));
             $this->em->persist(new Watch($user, $general));
             $this->em->persist(new Watch($user, $projects[0]));
             $this->em->persist(new Watch($colleague, $topic));

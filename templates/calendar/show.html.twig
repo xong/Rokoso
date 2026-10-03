@@ -1,7 +1,7 @@
 {% extends 'calendar/_layout.html.twig' %}
 {% import '_partials/ui.html.twig' as ui %}
 
-{% set ref = occurrence_date ?? item.startsAt %}
+{% set ref = occurrence_date ?? item.date %}
 {% set sel_from = ref|date('Y-m-d') %}
 
 {% block detail_title %}{{ item.title }}{% endblock %}
@@ -20,13 +20,19 @@
                 <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">{{ item.type.label|trans }}</p>
                 <p class="text-xl font-semibold {{ item.done ? 'line-through text-slate-500' : '' }}">{{ item.title }}</p>
                 <p class="mt-1 text-slate-700">
-                    {% set start = occurrence_date ? occurrence_date|date('Y-m-d') ~ ' ' ~ item.startsAt|date('H:i') : item.startsAt %}
-                    {% if item.allDay %}
+                    {% set start = occurrence_date ? occurrence_date|date('Y-m-d') ~ ' ' ~ item.date|date('H:i') : item.startsAt %}
+                    {% if not item.startsAt %}
+                        {{ 'task.no_due'|trans }}
+                    {% elseif item.allDay %}
                         {{ start|date('d.m.Y') }}{% if item.endsAt and item.endsAt|date('Y-m-d') != item.startsAt|date('Y-m-d') %} – {{ item.endsAt|date('d.m.Y') }}{% endif %} · {{ 'calendar.all_day'|trans }}
                     {% else %}
                         {{ start|date('d.m.Y H:i') }}{% if item.endsAt %} – {{ item.endsAt|date(item.endsAt|date('Y-m-d') == item.startsAt|date('Y-m-d') ? 'H:i' : 'd.m.Y H:i') }}{% endif %}
                     {% endif %}
+                    {% if item.overdue %}<span class="ml-1 font-medium text-red-700">· {{ 'task.overdue'|trans }}</span>{% endif %}
                 </p>
+                {% if item.task %}
+                    <p class="mt-1 text-sm"><span class="{{ include('task/_status_class.html.twig', {status: item.status}) }}">{{ item.status.label|trans }}</span></p>
+                {% endif %}
                 {% if item.recurring %}
                     <p class="mt-1 flex items-center gap-1 text-sm text-slate-600">
                         {{ ux_icon('lucide:repeat', {class: 'size-4', 'aria-hidden': 'true'}) }}
@@ -43,6 +49,12 @@
             {% if item.url %}<div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'calendar.url'|trans }}</dt><dd class="break-all"><a class="link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.url }}</a></dd></div>{% endif %}
             <div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'calendar.organization'|trans }}</dt><dd>{{ item.organization ? item.organization.name : 'calendar.personal'|trans }}</dd></div>
             {% if item.project %}<div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'nav.projects'|trans }}</dt><dd><a class="link" href="{{ path('project_show', {id: item.project.id}) }}">{{ item.project.name }}</a></dd></div>{% endif %}
+            {% if item.sourceMessage and is_granted('MESSAGE_VIEW', item.sourceMessage) %}
+                <div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'task.source'|trans }}</dt><dd><a class="link" href="{{ path('mail_show', {folder: 'all', id: item.sourceMessage.id}) }}">{{ item.sourceMessage.subject ?: 'mail.no_subject'|trans }}</a></dd></div>
+            {% endif %}
+            {% if item.sourceTopic and is_granted('FORUM_VIEW', item.sourceTopic) %}
+                <div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'task.source'|trans }}</dt><dd><a class="link" href="{{ path('forum_topic_show', {id: item.sourceTopic.id}) }}">{{ item.sourceTopic.title }}</a></dd></div>
+            {% endif %}
             {% for field in ['assignees', 'participants'] %}
                 {% set people = attribute(item, field) %}
                 {% if people is not empty %}

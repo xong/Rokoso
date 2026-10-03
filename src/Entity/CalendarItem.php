@@ -6,16 +6,19 @@ namespace App\Entity;
 
 use App\Enum\CalendarItemType;
 use App\Enum\Recurrence;
+use App\Enum\TaskStatus;
 use App\Repository\CalendarItemRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Event or task. Visibility like projects: organization members, otherwise only the creator.
  * Recurring items repeat by a simple rule (frequency, interval, optional end date).
+ * Tasks may have no date (start = due date) and carry a status.
  */
 #[ORM\Entity(repositoryClass: CalendarItemRepository::class)]
 #[ORM\Index(columns: ['starts_at'])]
@@ -46,9 +49,8 @@ class CalendarItem
     #[Assert\Url(requireTld: true)]
     private ?string $url = null;
 
-    #[ORM\Column]
-    #[Assert\NotNull]
-    private \DateTimeImmutable $startsAt;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $startsAt;
 
     #[ORM\Column(nullable: true)]
     #[Assert\GreaterThanOrEqual(propertyPath: 'startsAt', message: 'calendar.end_before_start')]
@@ -57,8 +59,16 @@ class CalendarItem
     #[ORM\Column]
     private bool $allDay = false;
 
-    #[ORM\Column]
-    private bool $done = false;
+    #[ORM\Column(length: 20, enumType: TaskStatus::class, options: ['default' => 'open'])]
+    private TaskStatus $status = TaskStatus::Open;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?Message $sourceMessage = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?ForumTopic $sourceTopic = null;
 
     #[ORM\Column(length: 20, enumType: Recurrence::class)]
     private Recurrence $recurrence = Recurrence::None;
@@ -172,18 +182,35 @@ class CalendarItem
         return $this;
     }
 
-    public function getStartsAt(): \DateTimeImmutable
+    public function getStartsAt(): ?\DateTimeImmutable
     {
         return $this->startsAt;
     }
 
     public function setStartsAt(?\DateTimeImmutable $startsAt): static
     {
-        if (null !== $startsAt) {
-            $this->startsAt = $startsAt;
-        }
+        $this->startsAt = $startsAt;
 
         return $this;
+    }
+
+    /**
+     * Date for calendar purposes; undated tasks fall back to their creation (they never show in the calendar).
+     */
+    public function getDate(): \DateTimeImmutable
+    {
+        return $this->startsAt ?? $this->createdAt;
+    }
+
+    #[Assert\Callback]
+    public function validateStart(ExecutionContextInterface $context): void
+    {
+        if (null === $this->startsAt && !$this->isTask()) {
+            $context->buildViolation('calendar.start_required')->atPath('startsAt')->addViolation();
+        }
+        if (null === $this->startsAt && $this->isRecurring()) {
+            $context->buildViolation('task.recurrence_needs_date')->atPath('startsAt')->addViolation();
+        }
     }
 
     public function getEndsAt(): ?\DateTimeImmutable
@@ -203,16 +230,17 @@ class CalendarItem
      */
     public function getEffectiveEnd(): \DateTimeImmutable
     {
+        $start = $this->getDate();
         if ($this->allDay) {
-            return ($this->endsAt ?? $this->startsAt)->setTime(23, 59, 59);
+            return ($this->endsAt ?? $start)->setTime(23, 59, 59);
         }
 
-        return $this->endsAt ?? ($this->isTask() ? $this->startsAt : $this->startsAt->modify('+1 hour'));
+        return $this->endsAt ?? ($this->isTask() ? $start : $start->modify('+1 hour'));
     }
 
     public function getDuration(): \DateInterval
     {
-        return $this->startsAt->diff($this->getEffectiveEnd());
+        return $this->getDate()->diff($this->getEffectiveEnd());
     }
 
     public function isAllDay(): bool
@@ -227,14 +255,59 @@ class CalendarItem
         return $this;
     }
 
+    public function getStatus(): TaskStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(TaskStatus $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
     public function isDone(): bool
     {
-        return $this->done;
+        return TaskStatus::Done === $this->status;
     }
 
     public function setDone(bool $done): static
     {
-        $this->done = $done;
+        $this->status = $done ? TaskStatus::Done : TaskStatus::Open;
+
+        return $this;
+    }
+
+    /**
+     * Open task whose due date has passed.
+     */
+    public function isOverdue(): bool
+    {
+        return $this->isTask() && !$this->isDone() && null !== $this->startsAt
+            && $this->getEffectiveEnd() < new \DateTimeImmutable();
+    }
+
+    public function getSourceMessage(): ?Message
+    {
+        return $this->sourceMessage;
+    }
+
+    public function setSourceMessage(?Message $sourceMessage): static
+    {
+        $this->sourceMessage = $sourceMessage;
+
+        return $this;
+    }
+
+    public function getSourceTopic(): ?ForumTopic
+    {
+        return $this->sourceTopic;
+    }
+
+    public function setSourceTopic(?ForumTopic $sourceTopic): static
+    {
+        $this->sourceTopic = $sourceTopic;
 
         return $this;
     }

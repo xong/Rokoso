@@ -29,14 +29,14 @@ final readonly class CalendarService
             $duration = $item->getDuration();
             $rrule = $item->getRrule();
             if (null === $rrule) {
-                $occurrence = new Occurrence($item, $item->getStartsAt(), $item->getEffectiveEnd());
+                $occurrence = new Occurrence($item, $item->getDate(), $item->getEffectiveEnd());
                 if ($occurrence->start < $to && $occurrence->end >= $from) {
                     $result[] = $occurrence;
                 }
                 continue;
             }
 
-            $rule = new RRule($rrule, $item->getStartsAt());
+            $rule = new RRule($rrule, $item->getDate());
             // Auch Termine einbeziehen, die vor dem Zeitraum beginnen und hineinragen
             foreach ($rule->getOccurrencesBetween($from->sub($duration), $to) as $start) {
                 $start = \DateTimeImmutable::createFromInterface($start);

@@ -10,6 +10,9 @@ contact:
     name_required: Bitte gib einen Namen oder eine Organisation an.
 calendar:
     end_before_start: Das Ende muss nach dem Beginn liegen.
+    start_required: Termine brauchen einen Beginn.
+task:
+    recurrence_needs_date: Wiederkehrende Aufgaben brauchen eine Frist.
 folder:
     invalid_name: Der Name darf keinen Schrägstrich enthalten.
     project_mismatch: Das Projekt gehört zu einer anderen Organisation.

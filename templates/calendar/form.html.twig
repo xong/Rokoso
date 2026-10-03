@@ -23,6 +23,12 @@
     <div class="mx-auto max-w-2xl p-4 lg:p-6">
         {{ form_start(form) }}
             {{ form_errors(form) }}
+            {% if source is defined and source %}
+                <p class="mb-4 flex items-center gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                    {{ ux_icon('lucide:link', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'task.from_source'|trans({'%title%': source}) }}
+                </p>
+            {% endif %}
             <fieldset class="mb-4">
                 <legend class="label">{{ 'calendar.type.label'|trans }}</legend>
                 <div class="flex gap-4">
@@ -57,7 +63,7 @@
                     {{ form_row(form.recurrenceUntil, {row_attr: {class: 'mb-0'}}) }}
                 </div>
             </fieldset>
-            {{ form_row(form.done) }}
+            {{ form_row(form.status, {help: 'task.status.help'}) }}
             {{ form_rest(form) }}
             <div class="flex gap-2">
                 <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>

@@ -1,0 +1,27 @@
+{#- Eine Aufgabe in Liste, Board oder Projektseite. Variablen: task, compact (ohne Projekt) -#}
+<div class="min-w-0 flex-1">
+    <a href="{{ path('calendar_item_show', {id: task.id}) }}" class="font-medium hover:underline {{ task.done ? 'line-through text-slate-500' : '' }}">{{ task.title }}</a>
+    <p class="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+        {% if task.startsAt %}
+            <span class="flex items-center gap-1 {{ task.overdue ? 'font-medium text-red-700' : '' }}">
+                {{ ux_icon('lucide:calendar-clock', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                <span class="sr-only">{{ 'task.due'|trans }}</span>
+                <time datetime="{{ task.startsAt|date('c') }}">{{ task.startsAt|date(task.allDay ? 'd.m.Y' : 'd.m.Y H:i') }}</time>
+                {% if task.overdue %}({{ 'task.overdue'|trans }}){% endif %}
+            </span>
+        {% endif %}
+        {% if task.project and not compact|default(false) %}
+            <span class="flex items-center gap-1">{{ ux_icon('lucide:folder-kanban', {class: 'size-3.5', 'aria-hidden': 'true'}) }}<span class="sr-only">{{ 'nav.projects'|trans }}:</span> {{ task.project.name }}</span>
+        {% endif %}
+        {% if task.assignees is not empty %}
+            <span class="flex items-center gap-1">
+                {{ ux_icon('lucide:user', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                <span class="sr-only">{{ 'calendar.assignees'|trans }}:</span>
+                {{ task.assignees|map(u => u.name)|join(', ') }}
+            </span>
+        {% endif %}
+        {% if task.sourceMessage or task.sourceTopic %}
+            <span class="flex items-center gap-1">{{ ux_icon('lucide:link', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'task.has_source'|trans }}</span>
+        {% endif %}
+    </p>
+</div>

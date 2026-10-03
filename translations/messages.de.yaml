@@ -5,6 +5,7 @@ app:
 nav:
     label: Hauptnavigation
     notifications: Benachrichtigungen
+    tasks: Aufgaben
     skip_to_content: Zum Inhalt springen
     open: Navigation öffnen
     close: Navigation schließen
@@ -220,6 +221,12 @@ project:
     messages: Nachrichten im Projekt
     calendar: Termine im Projekt
     recent_messages: Neueste Nachrichten
+    upcoming_events: Nächste Termine
+    no_events: Keine anstehenden Termine.
+    open_tasks: Offene Aufgaben
+    no_tasks: Keine offenen Aufgaben.
+    all_tasks: Alle Aufgaben
+    task_board: Aufgaben-Board
     no_messages: Diesem Projekt sind noch keine Nachrichten zugeordnet.
     files: Dateien
     no_files: Diesem Projekt sind noch keine Dateien zugeordnet.
@@ -528,7 +535,8 @@ calendar:
     delete_confirm: Eintrag wirklich löschen?
     delete_series_confirm: Die ganze Serie löschen?
     title: Titel
-    starts_at: Beginn (bei Aufgaben Fälligkeit)
+    starts_at: Beginn (bei Aufgaben Frist)
+    starts_at_help: Bei Aufgaben optional.
     ends_at: Ende
     ends_at_help: Leer lassen für eine Stunde bzw. bei Aufgaben.
     location: Ort
@@ -756,3 +764,38 @@ watch:
     unwatch: Nicht mehr beobachten
     added: Du wirst jetzt bei Neuigkeiten benachrichtigt.
     removed: Du wirst nicht mehr benachrichtigt.
+task:
+    title: Aufgaben
+    new: Neue Aufgabe
+    scope: Aufgaben anzeigen
+    mine: Meine
+    all: Alle
+    view: Darstellung
+    view_list: Liste
+    view_board: Board
+    all_projects: Alle Projekte
+    show_done: Erledigte zeigen
+    filter: Anzeigen
+    empty: Keine Aufgaben gefunden.
+    empty_mine: Du hast keine offenen Aufgaben.
+    column_empty: Keine Aufgaben
+    due: Frist
+    no_due: Ohne Frist
+    overdue: überfällig
+    complete: '„%title%“ als erledigt markieren'
+    reopen: '„%title%“ wieder öffnen'
+    moved: Status geändert.
+    move_to:
+        open: '„%title%“ nach „Offen“ verschieben'
+        in_progress: '„%title%“ nach „In Arbeit“ verschieben'
+        done: '„%title%“ nach „Erledigt“ verschieben'
+    create_from: Aufgabe daraus erstellen
+    from_source: 'Aufgabe zu „%title%“ – der Verweis wird gespeichert.'
+    source: Herkunft
+    has_source: mit Verweis
+    status:
+        label: Status
+        help: Nur für Aufgaben.
+        open: Offen
+        in_progress: In Arbeit
+        done: Erledigt

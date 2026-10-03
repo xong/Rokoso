@@ -8,8 +8,8 @@
 | | |
 |---|---|
 | **Aktuelle Phase** | Ausbau 2 nach Systemvergleich (Phasen 20–34) |
-| **Nächster Schritt** | Phase 22 (Aufgaben) |
-| **Letzte Sitzung** | 2026-10-04: Phase 21 (Benachrichtigungen mit Glocke, @-Erwähnungen, Beobachten, E-Mail sofort/täglich/aus, Web-Push; Cron `app:notify`; Entscheidung 49); davor Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
+| **Nächster Schritt** | Phase 23 (Sitzungen und Beschlüsse) |
+| **Letzte Sitzung** | 2026-10-04: Phase 22 (Aufgaben ohne Pflichtfrist, Status offen/in Arbeit/erledigt, Liste Meine/Alle/Projekt, Board, Aufgabe aus Nachricht/Forenthema, Projektseite mit Terminen und Aufgaben; Entscheidung 50); davor Phase 21 (Benachrichtigungen mit Glocke, @-Erwähnungen, Beobachten, E-Mail sofort/täglich/aus, Web-Push; Cron `app:notify`; Entscheidung 49); davor Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
 **Starten:** `docker compose up -d` · `php bin/console doctrine:migrations:migrate -n` · `php bin/console app:demo --mails` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000 (Login `demo@coop.test` / `demo-passwort`)
 
@@ -143,10 +143,10 @@ Grundlage: Vergleich mit Front/Help Scout/Zammad (gemeinsames Postfach), Nextclo
 - [x] 21.5 **Web-Push** für die PWA (VAPID, minishlink/web-push)
 
 ## Phase 22 – Aufgaben
-- [ ] 22.1 Aufgaben ohne Pflichtdatum (Frist optional), **Aufgabenliste** „Meine“/„Alle“/pro Projekt
-- [ ] 22.2 **Board** (offen / in Arbeit / erledigt)
-- [ ] 22.3 **Aufgabe aus Nachricht oder Forenthema** erstellen (mit Verweis)
-- [ ] 22.4 Projektseite zeigt Termine und Aufgaben
+- [x] 22.1 Aufgaben ohne Pflichtdatum (Frist optional), **Aufgabenliste** „Meine“/„Alle“/pro Projekt
+- [x] 22.2 **Board** (offen / in Arbeit / erledigt)
+- [x] 22.3 **Aufgabe aus Nachricht oder Forenthema** erstellen (mit Verweis)
+- [x] 22.4 Projektseite zeigt Termine und Aufgaben
 
 ## Phase 23 – Gremienarbeit: Sitzungen und Beschlüsse
 - [ ] 23.1 **Sitzung** (Gremium = Organisation, Termin, Ort/Videolink, Status geplant/eingeladen/durchgeführt/Protokoll freigegeben)

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Calendar\CalendarService;
+use App\Calendar\Occurrence;
 use App\Entity\Comment;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Form\ProjectFormType;
 use App\Mail\MessageFilter;
 use App\Notification\ActivityNotifier;
+use App\Repository\CalendarItemRepository;
 use App\Repository\CommentRepository;
 use App\Repository\ForumTopicRepository;
 use App\Repository\MessageRepository;
@@ -79,11 +82,18 @@ final class ProjectController extends AbstractController
 
     #[Route('/{id<\d+>}', name: 'project_show')]
     #[IsGranted(ProjectVoter::VIEW, 'project')]
-    public function show(Project $project, #[CurrentUser] User $user, MessageRepository $messages, CommentRepository $comments, StoredFileRepository $files, ForumTopicRepository $topics): Response
+    public function show(Project $project, #[CurrentUser] User $user, MessageRepository $messages, CommentRepository $comments, StoredFileRepository $files, ForumTopicRepository $topics, CalendarService $calendar, CalendarItemRepository $items): Response
     {
         $forumTopics = $topics->forProject($project, $user);
+        $now = new \DateTimeImmutable();
+        $events = array_values(array_filter(
+            $calendar->occurrences($user, $now->setTime(0, 0), $now->modify('+60 days'), $project->getId()),
+            static fn (Occurrence $o): bool => !$o->item->isTask() && $o->end >= $now,
+        ));
 
         return $this->render('project/show.html.twig', [
+            'upcoming_events' => \array_slice($events, 0, 5),
+            'open_tasks' => $items->findTasks($user, false, $project->getId(), false, 8),
             'topics' => $forumTopics,
             'unread_ids' => $topics->unreadIds($user, $forumTopics),
             'projects' => $this->projects->findVisibleFor($user),

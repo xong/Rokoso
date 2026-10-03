@@ -20,6 +20,7 @@
             {{ ui.post_button(path('mail_action'), 'mail-action', message.done ? 'mail.reopen' : 'mail.done',
                 {class: 'btn-icon hover:text-emerald-600', icon: message.done ? 'lucide:rotate-ccw' : 'lucide:check', icon_only: true,
                  fields: action_fields|merge({action: message.done ? 'reopen' : 'done', 'ids[]': message.id, return: message.done ? 'message' : 'list'})}) }}
+            <a href="{{ path('calendar_item_new', {message: message.id}) }}" class="btn-icon" aria-label="{{ 'task.create_from'|trans }}" title="{{ 'task.create_from'|trans }}">{{ ux_icon('lucide:list-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
             {# Wiedervorlage #}
             <details class="relative" data-controller="dropdown" data-action="keydown.esc->dropdown#close">
                 <summary class="btn-icon list-none" aria-label="{{ 'mail.snooze.label'|trans }}" title="{{ 'mail.snooze.label'|trans }}">{{ ux_icon('lucide:alarm-clock', {class: 'size-4', 'aria-hidden': 'true'}) }}</summary>
