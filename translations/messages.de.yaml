@@ -8,6 +8,7 @@ nav:
     tasks: Aufgaben
     meetings: Sitzungen
     resolutions: Beschlüsse
+    polls: Abstimmungen
     skip_to_content: Zum Inhalt springen
     open: Navigation öffnen
     close: Navigation schließen
@@ -933,3 +934,96 @@ resolution:
     all_organizations: Alle Gremien
     reset: Zurücksetzen
     count: '{0}Keine Beschlüsse|{1}1 Beschluss|]1,Inf[%count% Beschlüsse'
+
+poll:
+    single: Abstimmung
+    new: Neue Abstimmung
+    start: Abstimmung starten
+    start_here: Abstimmung starten
+    start_schedule: Termin finden
+    schedule_title: 'Terminfindung: %title%'
+    choose: Wähle links eine Abstimmung aus.
+    period: Zeitraum
+    running: Laufend
+    ended: Beendet
+    none_running: Keine laufenden Abstimmungen
+    none_ended: Keine beendeten Abstimmungen
+    until: 'bis %date%'
+    deadline_was: 'Frist war %date%'
+    awaiting: Deine Stimme fehlt
+    no_organization: Du bist noch in keinem Gremium und kannst daher keine Abstimmung starten.
+    for_topic: 'Zum Forenthema „%title%“'
+    for_agenda: 'Zum TOP „%title%“ der Sitzung „%meeting%“'
+    for_meeting: 'Zur Sitzung „%title%“'
+    kind:
+        label: Art
+        decision: Entscheidung (Ja/Nein/Enthaltung)
+        choice: Auswahl
+        schedule: Terminfindung
+    title: Frage bzw. Titel
+    description: Erläuterung
+    organization: Gremium
+    options: Antwortmöglichkeiten
+    options_help: Eine Möglichkeit pro Zeile, mindestens zwei.
+    options_min: Bitte gib mindestens zwei Antwortmöglichkeiten an.
+    multiple: Mehrfachwahl erlauben
+    slots: Terminvorschläge
+    slot_n: 'Vorschlag %n%'
+    slot_minutes: Dauer in Minuten
+    slots_min: Bitte gib mindestens einen Terminvorschlag an.
+    settings: Einstellungen
+    secret: Geheime Abstimmung
+    secret_help: Gespeichert wird nur, dass jemand abgestimmt hat, nicht wie. Die Stimme kann nicht geändert werden; das Ergebnis ist erst nach dem Ende sichtbar.
+    voting_only: Nur Stimmberechtigte
+    voting_only_help: Nur Mitglieder mit Stimmrecht dürfen abstimmen.
+    circular: Umlaufbeschluss
+    circular_help: Beim Beenden wird das Ergebnis als Beschluss in die Beschlussliste übernommen.
+    deadline: Frist
+    created_flash: Die Abstimmung wurde gestartet.
+    status_running: Läuft
+    status_ended: Beendet
+    secret_badge: Geheim
+    voting_only_badge: Nur Stimmberechtigte
+    circular_badge: Umlaufbeschluss
+    created_by: 'von %name% am %date%'
+    chosen_date: 'Gewählter Termin: %date%'
+    your_vote: Deine Stimme
+    your_vote_multiple: Deine Stimme (mehrere möglich)
+    your_answers: Wann kannst du?
+    answer_yes: Ja
+    answer_maybe: Vielleicht
+    answer_no: Nein
+    secret_hint: Deine Stimme wird geheim gespeichert und kann danach nicht mehr geändert werden.
+    submit_vote: Abstimmen
+    change_vote: Stimme ändern
+    voted_flash: Deine Stimme wurde gespeichert.
+    vote_invalid: Bitte wähle mindestens eine Möglichkeit.
+    vote_invalid_single: Bitte wähle genau eine Möglichkeit.
+    voted_secret: Du hast bereits abgestimmt. Bei geheimen Abstimmungen kann die Stimme nicht geändert werden.
+    not_eligible: Du bist bei dieser Abstimmung nicht stimmberechtigt.
+    result: Ergebnis
+    participation: '%count% von %total% haben abgestimmt'
+    leading: vorn
+    score: '{0}keine Stimme (%percent% %)|{1}1 Stimme (%percent% %)|]1,Inf[%count% Stimmen (%percent% %)'
+    maybe_count: '%count% vielleicht'
+    maybe_names: 'vielleicht: %names%'
+    results_after_end: Das Ergebnis wird nach dem Ende der Abstimmung angezeigt.
+    results_after_vote: Das Ergebnis siehst du, sobald du abgestimmt hast.
+    missing: 'Noch nicht abgestimmt: %names%'
+    manage: Verwalten
+    close: Abstimmung beenden
+    close_confirm: Abstimmung jetzt beenden?
+    close_circular_confirm: Abstimmung jetzt beenden und das Ergebnis als Beschluss eintragen?
+    close_circular_hint: Beim Beenden wird das Ergebnis als Beschluss in die Beschlussliste eingetragen (angenommen bei mehr Ja- als Nein-Stimmen).
+    choose_date: Gewählter Termin
+    choose_none: Keinen Termin festlegen
+    close_meeting_hint: Der gewählte Termin wird als Datum der Sitzung übernommen.
+    close_event_hint: Für den gewählten Termin wird ein Kalendereintrag angelegt; wer zugesagt hat, wird als Teilnehmende eingetragen.
+    closed_flash: Die Abstimmung wurde beendet.
+    closed_date_flash: Die Abstimmung wurde beendet und der Termin in den Kalender übernommen.
+    closed_resolution_flash: 'Die Abstimmung wurde beendet und als Beschluss %number% eingetragen.'
+    closed_final: Die Abstimmung ist abgeschlossen; das Ergebnis wurde übernommen.
+    reopen: Wieder öffnen
+    reopened_flash: Die Abstimmung läuft wieder.
+    delete: Abstimmung löschen
+    delete_confirm: Abstimmung mit allen Stimmen löschen?

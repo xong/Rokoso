@@ -1,0 +1,6 @@
+{% extends 'poll/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block detail %}
+    {{ ui.empty('poll.choose', 'lucide:vote') }}
+{% endblock %}

@@ -18,6 +18,10 @@ use App\Entity\Meeting;
 use App\Entity\Message;
 use App\Entity\Notification;
 use App\Entity\Organization;
+use App\Entity\Poll;
+use App\Entity\PollAnswer;
+use App\Entity\PollBallot;
+use App\Entity\PollOption;
 use App\Entity\Project;
 use App\Entity\Resolution;
 use App\Entity\User;
@@ -29,6 +33,7 @@ use App\Enum\MailRuleField;
 use App\Enum\MessageType;
 use App\Enum\NotificationType;
 use App\Enum\OrganizationRole;
+use App\Enum\PollKind;
 use App\Enum\Recurrence;
 use App\Enum\TaskStatus;
 use App\Mail\MailSynchronizer;
@@ -129,6 +134,7 @@ final readonly class DemoCommand
             $this->em->persist((new CalendarItem($colleague))->setTitle('Raum für den Elternabend buchen')->setType(CalendarItemType::Task)
                 ->setOrganization($org)->setProject($projects[1])->setStartsAt($monday->modify('-2 days')->setTime(12, 0))->setStatus(TaskStatus::Done));
             $this->createMeetings($org, $user, $colleague, $guest, $projects);
+            $this->createPolls($org, $user, $colleague, $topic, $projects);
             $this->em->persist(new Watch($user, $general));
             $this->em->persist(new Watch($user, $projects[0]));
             $this->em->persist(new Watch($colleague, $topic));
@@ -232,5 +238,51 @@ final readonly class DemoCommand
         $next->addAgendaItem((new AgendaItem($next))->setTitle('Schulobst-Programm')->setDescription('Können wir uns dafür einsetzen?')->propose($colleague));
         $this->em->persist($next);
         $this->meetings->syncCalendar($next);
+    }
+
+    /** @param list<Project> $projects */
+    private function createPolls(Organization $org, User $user, User $colleague, ForumTopic $topic, array $projects): void
+    {
+        /**
+         * @param list<string>                   $labels
+         * @param array<string, array<int, int>> $votes  voter email => [option index => answer]
+         */
+        $poll = function (Poll $poll, array $labels, array $votes = [], array $slots = []) use ($user, $colleague): Poll {
+            foreach ($labels as $i => $label) {
+                $option = new PollOption($poll)->setLabel($label);
+                if (isset($slots[$i])) {
+                    $option->setPeriod($slots[$i], $slots[$i]->modify('+2 hours'));
+                }
+                $poll->addOption($option);
+            }
+            foreach ([$user, $colleague] as $voter) {
+                if (!isset($votes[$voter->getEmail()])) {
+                    continue;
+                }
+                $poll->addBallot($ballot = new PollBallot($poll, $voter));
+                foreach ($votes[$voter->getEmail()] as $index => $value) {
+                    $option = $poll->getOptions()[$index];
+                    $option->addAnswer(new PollAnswer($option, $poll->isSecret() ? null : $ballot, $value));
+                }
+            }
+            $this->em->persist($poll);
+
+            return $poll;
+        };
+
+        $poll(new Poll($org, $colleague)->setTitle('Beitritt zum Bündnis „Sicherer Schulweg“')->setCircular(true)->setVotingOnly(true)
+            ->setDescription('Die SEV tritt dem stadtweiten Bündnis bei und benennt eine Ansprechperson.')
+            ->setProject($projects[0])->setDeadline(new \DateTimeImmutable('+5 days 18:00')),
+            ['Ja', 'Nein', 'Enthaltung'], ['kim@coop.test' => [0 => PollAnswer::YES]]);
+        $poll(new Poll($org, $user)->setTitle('Welche Themen für den Elternabend?')->setKind(PollKind::Choice)->setMultiple(true)
+            ->setTopic($topic)->setProject($projects[1])->setDeadline(new \DateTimeImmutable('+2 weeks 20:00')),
+            ['Schulwegsicherheit', 'Ganztag', 'Digitalisierung', 'Schulobst'],
+            ['demo@coop.test' => [0 => PollAnswer::YES, 1 => PollAnswer::YES], 'kim@coop.test' => [0 => PollAnswer::YES, 2 => PollAnswer::YES]]);
+        $slots = [new \DateTimeImmutable('+8 days 10:00'), new \DateTimeImmutable('+9 days 15:00'), new \DateTimeImmutable('+12 days 10:00')];
+        $poll(new Poll($org, $colleague)->setTitle('Ortsbegehung mit der Stadt')->setKind(PollKind::Schedule)->setProject($projects[0]),
+            array_map(static fn (\DateTimeImmutable $d): string => $d->format('d.m.Y H:i'), $slots),
+            ['kim@coop.test' => [0 => PollAnswer::YES, 1 => PollAnswer::MAYBE, 2 => PollAnswer::YES]], $slots);
+        $poll(new Poll($org, $user)->setTitle('Delegierte für den Landeselternrat')->setKind(PollKind::Choice)->setSecret(true)->close(),
+            ['Dana Demo', 'Kim Kollegin'], ['demo@coop.test' => [1 => PollAnswer::YES], 'kim@coop.test' => [0 => PollAnswer::YES]]);
     }
 }

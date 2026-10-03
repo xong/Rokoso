@@ -46,6 +46,7 @@ final class Sidebar
         ['label' => 'nav.tasks', 'icon' => 'lucide:list-checks', 'route' => 'task_index', 'match' => ['task_']],
         ['label' => 'nav.meetings', 'icon' => 'lucide:presentation', 'route' => 'meeting_index', 'match' => ['meeting_']],
         ['label' => 'nav.resolutions', 'icon' => 'lucide:gavel', 'route' => 'resolution_index', 'match' => ['resolution_']],
+        ['label' => 'nav.polls', 'icon' => 'lucide:vote', 'route' => 'poll_index', 'match' => ['poll_']],
         ['label' => 'nav.files', 'icon' => 'lucide:folder', 'route' => 'file_index', 'match' => ['file_', 'folder_']],
         ['label' => 'nav.shelf', 'icon' => 'lucide:bookmark', 'route' => 'shelf_index', 'match' => ['shelf_']],
         ['label' => 'nav.forum', 'icon' => 'lucide:messages-square', 'route' => 'forum_index', 'match' => ['forum_']],

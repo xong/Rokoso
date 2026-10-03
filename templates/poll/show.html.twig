@@ -1,0 +1,178 @@
+{% extends 'poll/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+{% set ended_poll = poll.ended %}
+{% set schedule = poll.kind.value == 'schedule' %}
+{% set ballots = poll.ballots|length %}
+{% set eligible = poll.eligible %}
+{% set top = poll.topScore %}
+
+{% block title %}{{ poll.title }} · {{ parent() }}{% endblock %}
+{% block detail_title %}{{ poll.title }}{% endblock %}
+
+{% block detail_actions %}
+    {% if can_manage %}
+        {{ ui.post_button(path('poll_delete', {id: poll.id}), 'poll-delete', 'poll.delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'poll.delete_confirm'}) }}
+    {% endif %}
+{% endblock %}
+
+{% macro when(option) %}
+    {%- if option.startsAt -%}
+        {{ ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][option.startsAt|date('w')] }}, {{ option.startsAt|date('d.m.Y H:i') }}{% if option.endsAt %}–{{ option.endsAt|date('H:i') }}{% endif %}
+    {%- else -%}{{ option.label }}{%- endif -%}
+{% endmacro %}
+
+{% block detail %}
+    <div class="mx-auto max-w-3xl space-y-6 p-4 lg:p-6">
+        <header class="space-y-2">
+            <p class="flex flex-wrap items-center gap-2 text-sm">
+                <span class="badge bg-brand-50 text-brand-700">{{ ux_icon(poll.kind.icon, {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ poll.kind.label|trans }}</span>
+                <span class="badge {{ ended_poll ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700' }}">{{ (ended_poll ? 'poll.status_ended' : 'poll.status_running')|trans }}</span>
+                {% if poll.secret %}<span class="badge bg-slate-100 text-slate-700">{{ ux_icon('lucide:eye-off', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'poll.secret_badge'|trans }}</span>{% endif %}
+                {% if poll.votingOnly %}<span class="badge bg-slate-100 text-slate-700">{{ 'poll.voting_only_badge'|trans }}</span>{% endif %}
+                {% if poll.circular %}<span class="badge bg-amber-50 text-amber-800">{{ 'poll.circular_badge'|trans }}</span>{% endif %}
+            </p>
+            <p class="text-sm text-slate-600">
+                {{ poll.organization.name }} · {{ 'poll.created_by'|trans({'%name%': poll.createdBy.name, '%date%': poll.createdAt|date('d.m.Y')}) }}
+                {% if poll.deadline %} · {{ (ended_poll ? 'poll.deadline_was' : 'poll.until')|trans({'%date%': poll.deadline|date('d.m.Y H:i')}) }}{% endif %}
+            </p>
+        </header>
+
+        {% if poll.description %}<div class="markdown">{{ poll.description|markdown }}</div>{% endif %}
+
+        {% if poll.topic or poll.meeting or poll.project or poll.resolution or poll.calendarItem %}
+            <ul role="list" class="space-y-1 text-sm">
+                {% if poll.topic %}<li class="flex items-center gap-2">{{ ux_icon('lucide:messages-square', {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}<a class="link" href="{{ path('forum_topic_show', {id: poll.topic.id}) }}">{{ poll.topic.title }}</a></li>{% endif %}
+                {% if poll.meeting %}<li class="flex items-center gap-2">{{ ux_icon('lucide:presentation', {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}<a class="link" href="{{ path('meeting_show', {id: poll.meeting.id, _fragment: poll.agendaItem ? 'agenda-' ~ poll.agendaItem.id : null}) }}">{{ poll.meeting.title }}{% if poll.agendaItem %} – {{ poll.agendaItem.title }}{% endif %}</a></li>{% endif %}
+                {% if poll.project %}<li class="flex items-center gap-2">{{ ux_icon('lucide:folder-kanban', {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}<a class="link" href="{{ path('project_show', {id: poll.project.id}) }}">{{ poll.project.name }}</a></li>{% endif %}
+                {% if poll.resolution %}<li class="flex items-center gap-2">{{ ux_icon('lucide:gavel', {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}<a class="link" href="{{ path('resolution_show', {id: poll.resolution.id}) }}">{{ 'resolution.single'|trans }} {{ poll.resolution.number }}</a></li>{% endif %}
+                {% if poll.calendarItem %}<li class="flex items-center gap-2">{{ ux_icon('lucide:calendar-check', {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}<a class="link" href="{{ path('calendar_item_show', {id: poll.calendarItem.id}) }}">{{ 'poll.chosen_date'|trans({'%date%': poll.chosenStartsAt|date('d.m.Y H:i')}) }}</a></li>{% endif %}
+            </ul>
+        {% endif %}
+
+        {# Abstimmen #}
+        {% if can_vote %}
+            <form method="post" action="{{ path('poll_vote', {id: poll.id}) }}" class="card space-y-4 p-4">
+                <input type="hidden" name="_token" value="{{ csrf_token('poll-vote') }}">
+                {% if schedule %}
+                    <h3 class="font-semibold">{{ 'poll.your_answers'|trans }}</h3>
+                    <ul role="list" class="divide-y divide-slate-100">
+                        {% for option in poll.options %}
+                            {% set mine = option.answerOf(app.user) %}
+                            <li>
+                                <fieldset class="flex flex-wrap items-center gap-x-4 gap-y-2 py-2">
+                                    <legend class="float-left min-w-48 flex-1 font-medium">{{ _self.when(option) }}</legend>
+                                    {% for value, label in {1: 'poll.answer_yes', 2: 'poll.answer_maybe', 0: 'poll.answer_no'} %}
+                                        <label class="inline-flex items-center gap-1.5 text-sm">
+                                            <input type="radio" name="slot[{{ option.id }}]" value="{{ value }}" {% if (mine ?? 0) == value %}checked{% endif %}>
+                                            {{ label|trans }}
+                                        </label>
+                                    {% endfor %}
+                                </fieldset>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <fieldset class="space-y-2">
+                        <legend class="mb-2 font-semibold">{{ (poll.multiple ? 'poll.your_vote_multiple' : 'poll.your_vote')|trans }}</legend>
+                        {% for option in poll.options %}
+                            <label class="flex items-center gap-2">
+                                <input type="{{ poll.multiple ? 'checkbox' : 'radio' }}" name="choice[]" value="{{ option.id }}" {% if option.answerOf(app.user) %}checked{% endif %} {% if not poll.multiple %}required{% endif %}>
+                                {{ option.label }}
+                            </label>
+                        {% endfor %}
+                    </fieldset>
+                {% endif %}
+                {% if poll.secret %}<p class="text-sm text-slate-600">{{ 'poll.secret_hint'|trans }}</p>{% endif %}
+                <button type="submit" class="btn-primary">{{ (poll.hasVoted(app.user) ? 'poll.change_vote' : 'poll.submit_vote')|trans }}</button>
+            </form>
+        {% elseif not ended_poll %}
+            <p class="card flex items-start gap-2 p-4 text-sm text-slate-600" role="note">
+                {{ ux_icon('lucide:info', {class: 'mt-0.5 size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ (poll.hasVoted(app.user) ? 'poll.voted_secret' : 'poll.not_eligible')|trans }}
+            </p>
+        {% endif %}
+
+        {# Ergebnis #}
+        <section aria-labelledby="result-heading" class="space-y-3">
+            <div class="flex flex-wrap items-baseline gap-2">
+                <h3 id="result-heading" class="font-semibold">{{ 'poll.result'|trans }}</h3>
+                <p class="text-sm text-slate-600">{{ 'poll.participation'|trans({'%count%': ballots, '%total%': eligible|length}) }}</p>
+            </div>
+            {% if show_results %}
+                <ul role="list" class="space-y-3">
+                    {% for option in poll.options %}
+                        {% set score = option.score %}
+                        {% set percent = ballots > 0 ? (score * 100 / ballots)|round : 0 %}
+                        {% set leading = score > 0 and score == top %}
+                        <li class="card p-3 {{ leading ? 'ring-1 ring-brand-300' : '' }}">
+                            <div class="flex flex-wrap items-baseline gap-2">
+                                <span class="min-w-0 flex-1 font-medium">{{ _self.when(option) }}{% if leading %} <span class="badge bg-brand-50 text-brand-700">{{ 'poll.leading'|trans }}</span>{% endif %}</span>
+                                <span class="text-sm tabular-nums">
+                                    {{ 'poll.score'|trans({'%count%': score, '%percent%': percent}) }}
+                                    {% if schedule and option.maybeCount > 0 %} · {{ 'poll.maybe_count'|trans({'%count%': option.maybeCount}) }}{% endif %}
+                                </span>
+                            </div>
+                            <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
+                                <div class="h-full rounded-full bg-brand-500" style="width: {{ percent }}%"></div>
+                            </div>
+                            {% if not poll.secret %}
+                                {% set yes = option.voterNames %}
+                                {% set maybe = schedule ? option.voterNames(2) : [] %}
+                                {% if yes is not empty or maybe is not empty %}
+                                    <p class="mt-2 text-sm text-slate-600">
+                                        {{ yes|join(', ') }}{% if maybe is not empty %}{% if yes is not empty %} · {% endif %}{{ 'poll.maybe_names'|trans({'%names%': maybe|join(', ')}) }}{% endif %}
+                                    </p>
+                                {% endif %}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="card p-4 text-sm text-slate-600">{{ (poll.secret ? 'poll.results_after_end' : 'poll.results_after_vote')|trans }}</p>
+            {% endif %}
+            {% if can_manage and not ended_poll %}
+                {% set missing = eligible|filter(u => not poll.hasVoted(u)) %}
+                {% if missing is not empty %}
+                    <p class="text-sm text-slate-600">{{ 'poll.missing'|trans({'%names%': missing|map(u => u.name)|join(', ')}) }}</p>
+                {% endif %}
+            {% endif %}
+        </section>
+
+        {# Verwaltung #}
+        {% if can_manage %}
+            <section aria-labelledby="manage-heading" class="card space-y-3 p-4">
+                <h3 id="manage-heading" class="font-semibold">{{ 'poll.manage'|trans }}</h3>
+                {% if not poll.closedAt %}
+                    {% if schedule %}
+                        <form method="post" action="{{ path('poll_close', {id: poll.id}) }}" class="flex flex-wrap items-end gap-2">
+                            <input type="hidden" name="_token" value="{{ csrf_token('poll-close') }}">
+                            <div>
+                                <label for="poll-chosen" class="block text-sm font-medium">{{ 'poll.choose_date'|trans }}</label>
+                                <select id="poll-chosen" name="option" class="mt-1">
+                                    <option value="">{{ 'poll.choose_none'|trans }}</option>
+                                    {% set best = poll.options|filter(o => top > 0 and o.score == top)|first %}
+                                    {% for option in poll.options %}
+                                        <option value="{{ option.id }}" {% if best and best.id == option.id %}selected{% endif %}>{{ _self.when(option) }} ({{ option.score }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary">{{ 'poll.close'|trans }}</button>
+                        </form>
+                        <p class="text-sm text-slate-600">{{ (poll.meeting ? 'poll.close_meeting_hint' : 'poll.close_event_hint')|trans }}</p>
+                    {% else %}
+                        {{ ui.post_button(path('poll_close', {id: poll.id}), 'poll-close', 'poll.close',
+                            {class: 'btn-primary', icon: 'lucide:lock', confirm: poll.circular ? 'poll.close_circular_confirm' : 'poll.close_confirm'}) }}
+                        {% if poll.circular %}<p class="text-sm text-slate-600">{{ 'poll.close_circular_hint'|trans }}</p>{% endif %}
+                    {% endif %}
+                {% elseif not poll.resolution and not poll.calendarItem %}
+                    {{ ui.post_button(path('poll_reopen', {id: poll.id}), 'poll-reopen', 'poll.reopen', {icon: 'lucide:lock-open'}) }}
+                {% else %}
+                    <p class="text-sm text-slate-600">{{ 'poll.closed_final'|trans }}</p>
+                {% endif %}
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

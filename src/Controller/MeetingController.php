@@ -15,6 +15,7 @@ use App\Meeting\MeetingService;
 use App\Repository\MeetingRepository;
 use App\Repository\MembershipRepository;
 use App\Repository\OrganizationRepository;
+use App\Repository\PollRepository;
 use App\Repository\ProjectRepository;
 use App\Repository\StoredFileRepository;
 use App\Security\Voter\MeetingVoter;
@@ -73,10 +74,11 @@ final class MeetingController extends AbstractController
 
     #[Route('/{id<\d+>}', name: 'meeting_show')]
     #[IsGranted(MeetingVoter::VIEW, 'meeting')]
-    public function show(Request $request, Meeting $meeting, #[CurrentUser] User $user): Response
+    public function show(Request $request, Meeting $meeting, #[CurrentUser] User $user, PollRepository $polls): Response
     {
         return $this->render('meeting/show.html.twig', [
             'meeting' => $meeting,
+            'polls' => $polls->forMeeting($meeting),
             'can_manage' => $this->isGranted(MeetingVoter::MANAGE, $meeting),
         ] + $this->listContext($request, $user, $meeting));
     }

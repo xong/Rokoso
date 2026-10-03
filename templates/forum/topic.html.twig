@@ -73,6 +73,8 @@
             {% endfor %}
         </ol>
 
+        {{ include('poll/_list.html.twig', {polls: polls, heading: 'h2', new_links: {'poll.start_here': path('poll_new', {topic: topic.id})}}) }}
+
         <section id="reply" aria-labelledby="reply-heading" class="card scroll-mt-4 p-4">
             <h2 id="reply-heading" class="mb-3 font-semibold">{{ 'forum.reply'|trans }}</h2>
             {{ form_start(form) }}

@@ -1,0 +1,25 @@
+{# Abstimmungen zu einem Thema oder einer Sitzung. Variablen: polls, new_links ({label: url}), heading (h2/h3) #}
+{% set h = heading|default('h3') %}
+<section aria-labelledby="polls-heading" class="space-y-2">
+    <div class="flex flex-wrap items-center gap-2">
+        <{{ h }} id="polls-heading" class="font-semibold">{{ 'nav.polls'|trans }}</{{ h }}>
+        <div class="ml-auto flex flex-wrap gap-2">
+            {% for label, url in new_links %}
+                <a href="{{ url }}" class="btn-secondary py-1 text-xs">{{ ux_icon('lucide:vote', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ label|trans }}</a>
+            {% endfor %}
+        </div>
+    </div>
+    {% if polls is not empty %}
+        <ul role="list" class="card divide-y divide-slate-100">
+            {% for p in polls %}
+                <li class="flex flex-wrap items-center gap-2 px-4 py-2 text-sm">
+                    {{ ux_icon(p.kind.icon, {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}
+                    <a class="link min-w-0 flex-1" href="{{ path('poll_show', {id: p.id}) }}">{{ p.title }}</a>
+                    {% if p.agendaItem %}<span class="text-slate-500">{{ p.agendaItem.title }}</span>{% endif %}
+                    <span class="badge {{ p.ended ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700' }}">{{ (p.ended ? 'poll.status_ended' : 'poll.status_running')|trans }}</span>
+                    {% if not p.ended and p.isEligible(app.user) and not p.hasVoted(app.user) %}<span class="badge bg-amber-50 text-amber-800">{{ 'poll.awaiting'|trans }}</span>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</section>

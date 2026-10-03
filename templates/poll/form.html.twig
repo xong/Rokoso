@@ -1,0 +1,56 @@
+{% extends 'poll/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ 'poll.new'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        {% if poll.topic or poll.meeting %}
+            <p class="mb-4 flex items-center gap-2 text-sm text-slate-600">
+                {{ ux_icon(poll.topic ? 'lucide:messages-square' : 'lucide:presentation', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                {% if poll.topic %}{{ 'poll.for_topic'|trans({'%title%': poll.topic.title}) }}
+                {% elseif poll.agendaItem %}{{ 'poll.for_agenda'|trans({'%title%': poll.agendaItem.title, '%meeting%': poll.meeting.title}) }}
+                {% else %}{{ 'poll.for_meeting'|trans({'%title%': poll.meeting.title}) }}{% endif %}
+            </p>
+        {% endif %}
+        {{ form_start(form, {attr: {'data-controller': 'poll-form'}}) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.title) }}
+            {{ form_row(form.kind) }}
+            {{ form_row(form.description) }}
+            {{ form_row(form.organization) }}
+
+            <fieldset data-poll-form-target="section" data-kinds="choice" class="mb-4 rounded-lg border border-slate-200 p-4">
+                <legend class="px-1 text-sm font-medium">{{ 'poll.kind.choice'|trans }}</legend>
+                {{ form_row(form.options) }}
+                {{ form_row(form.multiple) }}
+            </fieldset>
+
+            <fieldset data-poll-form-target="section" data-kinds="schedule" class="mb-4 rounded-lg border border-slate-200 p-4">
+                <legend class="px-1 text-sm font-medium">{{ 'poll.slots'|trans }}</legend>
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {% for i in 1..6 %}{{ form_row(form['slot' ~ i]) }}{% endfor %}
+                </div>
+                {{ form_row(form.slotMinutes) }}
+            </fieldset>
+
+            <fieldset class="mb-4 rounded-lg border border-slate-200 p-4">
+                <legend class="px-1 text-sm font-medium">{{ 'poll.settings'|trans }}</legend>
+                <div data-poll-form-target="section" data-kinds="decision choice">{{ form_row(form.secret) }}</div>
+                {{ form_row(form.votingOnly) }}
+                <div data-poll-form-target="section" data-kinds="decision">{{ form_row(form.circular) }}</div>
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.deadline) }}
+                    {{ form_row(form.project) }}
+                </div>
+            </fieldset>
+
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'poll.start'|trans }}</button>
+                <a href="{{ path('poll_index') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

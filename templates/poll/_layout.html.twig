@@ -1,0 +1,35 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.polls'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.polls'|trans }}{% endblock %}
+{% block back_url %}{{ path('poll_index', ended ? {ended: 1} : {}) }}{% endblock %}
+
+{% block list_actions %}
+    <a href="{{ path('poll_new') }}" class="btn-icon" aria-label="{{ 'poll.new'|trans }}" title="{{ 'poll.new'|trans }}">
+        {{ ux_icon('lucide:plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block list %}
+    <nav aria-label="{{ 'poll.period'|trans }}" class="m-3 flex gap-1 rounded-lg bg-slate-100 p-1 text-sm">
+        {% for value, label in {0: 'poll.running', 1: 'poll.ended'} %}
+            {% set active = (value == 1) == ended %}
+            <a href="{{ path('poll_index', value ? {ended: 1} : {}) }}" {% if active %}aria-current="page"{% endif %}
+               class="flex-1 rounded-md px-3 py-1 text-center {{ active ? 'bg-surface font-medium shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">{{ label|trans }}</a>
+        {% endfor %}
+    </nav>
+    {% if polls is empty %}
+        {{ ui.empty(ended ? 'poll.none_ended' : 'poll.none_running', 'lucide:vote') }}
+    {% else %}
+        <ul role="list">
+            {% for p in polls %}
+                {% set subtitle = p.kind.label|trans ~ ' · ' ~ p.organization.name
+                    ~ (p.deadline and not ended ? ' · ' ~ 'poll.until'|trans({'%date%': p.deadline|date('d.m.Y H:i')}) : '')
+                    ~ (not ended and p.isEligible(app.user) and not p.hasVoted(app.user) ? ' · ' ~ 'poll.awaiting'|trans : '') %}
+                <li>{{ ui.list_link(path('poll_show', {id: p.id}), current and current.id == p.id, p.title, subtitle,
+                        ui.tile(p.organization.name, p.organization.logo, p.organization.color)) }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

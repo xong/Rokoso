@@ -19,6 +19,7 @@ use App\Notification\ActivityNotifier;
 use App\Repository\ForumBoardRepository;
 use App\Repository\ForumTopicRepository;
 use App\Repository\OrganizationRepository;
+use App\Repository\PollRepository;
 use App\Repository\ProjectRepository;
 use App\Security\Voter\ForumVoter;
 use App\Service\FileStorage;
@@ -212,7 +213,7 @@ final class ForumController extends AbstractController
 
     #[Route('/topic/{id<\d+>}', name: 'forum_topic_show')]
     #[IsGranted(ForumVoter::VIEW, 'topic')]
-    public function showTopic(Request $request, ForumTopic $topic, ActivityNotifier $notifier, #[CurrentUser] User $user): Response
+    public function showTopic(Request $request, ForumTopic $topic, ActivityNotifier $notifier, PollRepository $polls, #[CurrentUser] User $user): Response
     {
         $post = new ForumPost($topic, $user);
         $form = $this->createForm(ForumPostFormType::class, $post, [
@@ -237,6 +238,7 @@ final class ForumController extends AbstractController
         return $this->render('forum/topic.html.twig', $this->treeContext($user, $topic->getBoard()) + [
             'topic' => $topic,
             'form' => $form,
+            'polls' => $polls->forTopic($topic),
         ]);
     }
 
