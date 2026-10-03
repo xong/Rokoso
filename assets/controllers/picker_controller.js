@@ -26,7 +26,10 @@ export default class extends Controller {
             }, 0);
         };
         this.focusOut = (event) => {
-            if (this.element.open && event.relatedTarget && !this.element.contains(event.relatedTarget)) {
+            const target = event.relatedTarget;
+            // Klick auf nicht fokussierbaren Inhalt (z. B. Text eines <label>) fokussiert kurz einen
+            // umgebenden Container wie <main tabindex="-1"> – das ist kein Verlassen der Auswahl
+            if (this.element.open && target && !this.element.contains(target) && !target.contains(this.element)) {
                 this.element.open = false;
             }
         };
