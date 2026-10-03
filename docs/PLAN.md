@@ -7,8 +7,8 @@
 
 | | |
 |---|---|
-| **Aktuelle Phase** | Ausbau nach App.md 38–48 (Phasen 13–18) |
-| **Nächster Schritt** | Im Browser durchklicken (Layout, Mobil, Tastatur), Feedback sammeln, offene Fragen in `OFFENE-FRAGEN.md` klären, dann Ausbau aus dem Ideen-Parkplatz |
+| **Aktuelle Phase** | Ausbau 2 nach Systemvergleich (Phasen 20–34) |
+| **Nächster Schritt** | Phase 20 (Status-Modell) |
 | **Letzte Sitzung** | 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
 **Starten:** `docker compose up -d` · `php bin/console doctrine:migrations:migrate -n` · `php bin/console app:demo --mails` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000 (Login `demo@coop.test` / `demo-passwort`)
@@ -123,12 +123,127 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 
 ---
 
+## Ausbau 2 – Ergebnis des Systemvergleichs (2026-10-03)
+Grundlage: Vergleich mit Front/Help Scout/Zammad (gemeinsames Postfach), Nextcloud (Groupware), Discourse (Forum), OpenSlides/Loomio (Gremienarbeit), SchoolFox/Sdui (Elternkommunikation). Entscheidungen des Projektinhabers: #39–#47 in `ENTSCHEIDUNGEN.md`. Reihenfolge: Gremienarbeit früh, weil sie den Großteil der Arbeitszeit ausmacht.
+
+## Phase 20 – Postfach: Status-Modell
+- [ ] 20.1 Status **offen/erledigt** pro Nachricht (wer, wann); Eingang = offen, unabhängig vom Projekt (ersetzt Entscheidung 34; Projektzuordnung bleibt); Ordner „Erledigt“; neue Antwort in der Unterhaltung öffnet wieder
+- [ ] 20.2 **Rückgängig-Meldung** (Toast) für erledigt, Papierkorb, Projekt
+- [ ] 20.3 **Wiedervorlage** („Snooze“ bis Datum) mit Ordner „Wiedervorlage“; fällige tauchen wieder im Eingang auf
+- [ ] 20.4 **Verlauf** pro Nachricht (zugewiesen, Projekt, erledigt, beantwortet, weitergeleitet)
+- [ ] 20.5 **Mehrfachauswahl** in der Liste mit Sammelaktionen (erledigt, Papierkorb, Projekt, zuweisen, gelesen)
+- [ ] 20.6 **Unterhaltungen (Threads)** über `In-Reply-To`/`References`, im Detail als Verlauf
+- [ ] 20.7 **Regeln** pro Konto (Absender/Betreff enthält … → Projekt, Verantwortliche, erledigt)
+
+## Phase 21 – Benachrichtigungen
+- [ ] 21.1 `Notification` + **Glocke** in der Navigation (zugewiesen, erwähnt, Kommentar, neues Thema/Beitrag in beobachtetem Bereich, Termin/Aufgabe fällig, Abstimmung offen, Kontaktanfrage)
+- [ ] 21.2 **@-Erwähnungen** in Kommentaren und Forum (Autovervollständigung)
+- [ ] 21.3 **Beobachten** von Forenbereichen/Themen und Projekten
+- [ ] 21.4 **E-Mail-Benachrichtigung** sofort/täglich/aus pro Person (Cron `app:notify`)
+- [ ] 21.5 **Web-Push** für die PWA (VAPID, minishlink/web-push)
+
+## Phase 22 – Aufgaben
+- [ ] 22.1 Aufgaben ohne Pflichtdatum (Frist optional), **Aufgabenliste** „Meine“/„Alle“/pro Projekt
+- [ ] 22.2 **Board** (offen / in Arbeit / erledigt)
+- [ ] 22.3 **Aufgabe aus Nachricht oder Forenthema** erstellen (mit Verweis)
+- [ ] 22.4 Projektseite zeigt Termine und Aufgaben
+
+## Phase 23 – Gremienarbeit: Sitzungen und Beschlüsse
+- [ ] 23.1 **Sitzung** (Gremium = Organisation, Termin, Ort/Videolink, Status geplant/eingeladen/durchgeführt/Protokoll freigegeben)
+- [ ] 23.2 **Tagesordnung**: TOPs sortierbar, Verantwortliche, Dauer, Anlagen; TOP-Vorschläge der Mitglieder
+- [ ] 23.3 **Einladung** per E-Mail (Mitglieder + externe Gäste) mit Tagesordnung und .ics; Warnung bei unterschrittener Einladungsfrist (pro Organisation einstellbar)
+- [ ] 23.4 **Anwesenheit** und Beschlussfähigkeit (Quorum pro Organisation, zählt Stimmberechtigte)
+- [ ] 23.5 **Protokoll** je TOP, Freigabe, Druckansicht (Browser „Als PDF speichern“)
+- [ ] 23.6 **Beschlüsse** mit Abstimmungsergebnis; **Beschlussliste** (durchsuchbar, filterbar nach Jahr/Projekt)
+- [ ] 23.7 Aufgaben aus dem Protokoll (Verantwortliche, Frist) → Aufgabenliste
+
+## Phase 24 – Abstimmungen und Terminfindung
+- [ ] 24.1 **Stimmrecht** als Kennzeichen pro Mitgliedschaft (Standard: ja)
+- [ ] 24.2 **Abstimmung** (Ja/Nein/Enthaltung oder Auswahl, Einfach-/Mehrfachwahl), Frist, Ergebnis; **offen (namentlich) oder geheim** (gespeichert wird nur, dass jemand abgestimmt hat)
+- [ ] 24.3 **Umlaufbeschluss** (Abstimmung mit Frist außerhalb einer Sitzung → Beschlussliste)
+- [ ] 24.4 **Terminfindung** (Vorschläge ja/vielleicht/nein; gewählter Termin → Kalender bzw. Sitzung)
+- [ ] 24.5 Abstimmungen in Forenthemen und Sitzungen
+
+## Phase 25 – Mitgliedschaften: Amtszeiten, Gäste, Übergabe, Wissen
+- [ ] 25.1 Mitgliedschaft mit **Funktion** (Vorsitz, Kasse, Schriftführung …) und **Amtszeit** bis; abgelaufene werden „ehemalig“ (kein Zugriff mehr)
+- [ ] 25.2 **Gastzugang pro Projekt**: Rolle „Gast“ sieht nur freigegebene Projekte (Forum, Dateien, Termine, Aufgaben), keine E-Mails, Kontakte oder Mitgliederdaten
+- [ ] 25.3 **Übergabe**: Zuweisungen, Aufgaben, Projekte einer Person an eine andere übertragen
+- [ ] 25.4 **Wissen/Handbuch** pro Organisation: Seiten (Markdown, Hierarchie, Versionen)
+- [ ] 25.5 **Projekte archivieren** (abgeschlossen, aus Auswahllisten ausgeblendet)
+
+## Phase 26 – Postfach: Schreiben
+- [ ] 26.1 **Entwürfe** (automatisch gespeichert, Ordner „Entwürfe“)
+- [ ] 26.2 **Kollisionshinweis** „X schreibt gerade eine Antwort“ (offener Entwurf zur selben Nachricht)
+- [ ] 26.3 **Empfänger-Autovervollständigung** aus Kontakten und Kontaktgruppen
+- [ ] 26.4 **Signaturen** (pro Person und Konto) und **Textbausteine** (pro Organisation)
+- [ ] 26.5 **Senden rückgängig** (kurze Verzögerung mit Abbrechen)
+- [ ] 26.6 **Rich-Text** per Markdown-Editor mit Werkzeugleiste; Versand als HTML + Text
+- [ ] 26.7 Gesendete Mails zusätzlich per IMAP in den **Gesendet-Ordner** des Servers kopieren (pro Konto abschaltbar)
+
+## Phase 27 – Verteiler und Kontakte
+- [ ] 27.1 Kontakt: **Institution** (z. B. Schule) und **Funktion** (Schulleitung, Elternbeirat, Schulamt …)
+- [ ] 27.2 **Kontaktgruppen** (Verteiler)
+- [ ] 27.3 **Rundschreiben** an Gruppen über ein Org-Konto (einzeln adressiert, keine offenen Empfängerlisten), im Ausgang nachvollziehbar
+- [ ] 27.4 **Kontakt-Verlauf**: Nachrichten, Termine, Notizen zum Kontakt
+- [ ] 27.5 **vCard** importieren/exportieren
+
+## Phase 28 – Öffentliche Mitwirkung (ohne Konto, je Funktion in der Organisationsverwaltung an-/abschaltbar)
+- [ ] 28.1 Öffentliche Seite pro Organisation (eigene URL, einbettbar), Spamschutz **konfigurierbar** durch Org-Admins: unsichtbar (Lockfeld, Mindestzeit, Drosselung) und optional E-Mail-Bestätigung
+- [ ] 28.2 **Kontaktformular** → landet im Eingang (Konto wählbar): Schule/Einrichtung, Dateianhänge (begrenzt), **Themenauswahl nur wenn Themen aktiviert** (Thema → Projekt/Verantwortliche), **Eingangsbestätigung nur wenn vom Absender gewünscht**, Datenschutzhinweis
+- [ ] 28.3 **Öffentliche Umfragen** (Elternbefragung per Link; Fragetypen Auswahl/Mehrfach/Skala/Freitext; anonym oder mit Kontakt; Auswertung + CSV)
+- [ ] 28.4 **Veranstaltungs-Anmeldung** (Termin öffentlich, Anmeldung mit Platzbegrenzung, Teilnehmerliste)
+- [ ] 28.5 **Verteiler-Selbstanmeldung** (Bestätigungslink, jederzeit abmeldbar → Kontaktgruppe)
+- [ ] 28.6 **Öffentliche Infoseite** (Neuigkeiten, ausgewählte Beschlüsse, öffentliche Termine)
+
+## Phase 29 – Kalender-Ausbau
+- [ ] 29.1 **Einzeltermine einer Serie** ändern oder absagen
+- [ ] 29.2 **iCal-Abo** (persönlicher geheimer Link) für Handy-Kalender
+- [ ] 29.3 **Erinnerungen** vor Terminen/Fristen (über Benachrichtigungen)
+- [ ] 29.4 **Einladungen an Externe** als .ics per E-Mail
+
+## Phase 30 – Dateien-Ausbau und Ablage
+- [ ] 30.1 **Vorschau** (PDF/Bilder) im Datei-Detail
+- [ ] 30.2 **Versionen** beim erneuten Hochladen
+- [ ] 30.3 **Freigabelinks** für Externe mit Ablaufdatum
+- [ ] 30.4 **Ablage als „Merken“**: Stern an Dateien, Anhängen, Nachrichten, Forenthemen; beim Schreiben aus allen Dateien anhängen
+- [ ] 30.5 **PWA-Teilen-Ziel** (Dateien aus anderen Apps an Coop teilen)
+
+## Phase 31 – Start, Suche, Tastatur
+- [ ] 31.1 **Startseite „Heute“**: meine offenen Nachrichten, fällige Aufgaben, nächste Termine/Sitzungen, offene Abstimmungen, neue Forenthemen, Erwähnungen
+- [ ] 31.2 **Globale Suche** über Nachrichten, Dateien, Forum, Kontakte, Termine, Beschlüsse, Wissen
+- [ ] 31.3 **Befehlspalette** (Strg+K) und **Tastenkürzel** mit Übersicht (`?`)
+- [ ] 31.4 **Ungelesen-Zähler** an Eingang/Ordnern; Hinweis auf neue Nachrichten ohne Neuladen
+
+## Phase 32 – Navigation und Usability
+- [ ] 32.1 **Interne Nachrichten nur noch an Personen**; Gruppen-Nachrichten werden zu Forenthemen (Migration bestehender Daten)
+- [ ] 32.2 **„Verfassen“-Knopf** (E-Mail, Direktnachricht, Forenthema, Termin, Aufgabe) statt Menüpunkten
+- [ ] 32.3 Bereich **„Verwaltung“** (Organisationen, Mitglieder, E-Mail-Konten, Regeln, Textbausteine, öffentliche Mitwirkung); Navigation neu gruppiert
+- [ ] 32.4 **Mobile Navigationsleiste** unten; Wischgesten in der Nachrichtenliste
+- [ ] 32.5 **Turbo Frames/Streams** für Aktionen ohne Neuladen der Seite
+- [ ] 32.6 **Leere Zustände** mit Handlungsaufforderung, **Einrichtungsassistent**, Hilfetexte
+
+## Phase 33 – Sicherheit und Datenschutz
+- [ ] 33.1 **Zwei-Faktor-Anmeldung** (TOTP, scheb/2fa-bundle)
+- [ ] 33.2 **Überall abmelden** (Sitzungen ungültig machen)
+- [ ] 33.3 **Konto löschen** und **Datenexport** (DSGVO)
+- [ ] 33.4 **Löschfristen**: Papierkorb nach X Tagen, Nachrichten und öffentliche Einsendungen nach X Jahren (pro Organisation)
+- [ ] 33.5 **Sicherheitsprotokoll** (Anmeldungen, Rollenänderungen, Löschungen)
+- [ ] 33.6 **Plattform-Admin** (Benutzer sperren/löschen, Organisationen einsehen)
+- [ ] 33.7 Muster für das Verzeichnis der Verarbeitungstätigkeiten in `docs/BETRIEB.md`
+
+## Phase 34 – Betrieb und Qualität
+- [ ] 34.1 **Abrufstatus** pro Konto (letzter Abruf, Fehler) für Admins sichtbar, Hinweis bei Fehlern
+- [ ] 34.2 Abruf beim Öffnen der App (gedrosselt) zusätzlich zum Cron
+- [ ] 34.3 **Browser-Tests** mit symfony/panther für Kernabläufe
+- [ ] 34.4 **Docker-Image** für den Betrieb
+- [ ] 34.5 Barrierefreiheit: automatische Prüfung (axe) + Screenreader-Stichprobe (NVDA, manuell durch den Projektinhaber)
+
+**Bewusst nicht geplant:** eigener Chat/Video (Videolink bei Termin/Sitzung genügt), gemeinsames Bearbeiten von Office-Dokumenten, Newsletter mit Öffnungs-Tracking, vollwertiges CRM, automatische Übersetzung von Eltern-Mails (Datenschutz).
+
+---
+
 ## Ideen-Parkplatz
 Neue Ideen, die noch keiner Phase zugeordnet sind:
 
-- Gesendete Mails zusätzlich per IMAP in den Gesendet-Ordner des Servers kopieren
-- Unterhaltungen (Threads) in der Liste zusammenfassen
-- Kontakte als vCard importieren/exportieren
-- Web-Push bzw. E-Mail-Benachrichtigungen (neue Nachricht, Zuweisung, Kommentar)
-- Einzelne Termine einer Serie ändern; iCal-Abo für Handy-Kalender; Erinnerungen
-- Plattform-Admin, Konto selbst löschen (DSGVO)
+- Weitere UI-Sprachen (Texte liegen bereits in Übersetzungsdateien)
+- Weitere Mitwirkungsmöglichkeiten für Eltern und Pädagog*innen (Vorschläge willkommen)
