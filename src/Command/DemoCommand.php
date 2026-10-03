@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\AgendaItem;
+use App\Entity\Attendance;
 use App\Entity\CalendarItem;
 use App\Entity\Contact;
 use App\Entity\Folder;
@@ -12,12 +14,15 @@ use App\Entity\ForumPost;
 use App\Entity\ForumTopic;
 use App\Entity\MailAccount;
 use App\Entity\MailRule;
+use App\Entity\Meeting;
 use App\Entity\Message;
 use App\Entity\Notification;
 use App\Entity\Organization;
 use App\Entity\Project;
+use App\Entity\Resolution;
 use App\Entity\User;
 use App\Entity\Watch;
+use App\Enum\AttendanceStatus;
 use App\Enum\CalendarItemType;
 use App\Enum\MailEncryption;
 use App\Enum\MailRuleField;
@@ -27,6 +32,7 @@ use App\Enum\OrganizationRole;
 use App\Enum\Recurrence;
 use App\Enum\TaskStatus;
 use App\Mail\MailSynchronizer;
+use App\Meeting\MeetingService;
 use App\Repository\UserRepository;
 use App\Service\SecretBox;
 use Doctrine\ORM\EntityManagerInterface;
@@ -52,6 +58,7 @@ final readonly class DemoCommand
         private SecretBox $secretBox,
         private MailSynchronizer $synchronizer,
         private UrlGeneratorInterface $urls,
+        private MeetingService $meetings,
     ) {
     }
 
@@ -71,6 +78,10 @@ final readonly class DemoCommand
                 ->setDescription('Stadtelternvertretung der Musterstädter Schulen');
             $org->addMember($user, OrganizationRole::Admin);
             $org->addMember($colleague, OrganizationRole::Member);
+            $guest = (new User())->setEmail('gast@coop.test')->setName('Gerd Gastmitglied')->setVerified(true);
+            $guest->setPassword($this->hasher->hashPassword($guest, 'demo-passwort'));
+            $this->em->persist($guest);
+            $org->addMember($guest, OrganizationRole::Member)->setVotingRight(false);
             $this->em->persist($org);
 
             $projects = [];
@@ -117,6 +128,7 @@ final readonly class DemoCommand
                 ->setOrganization($org)->setProject($projects[1])->setStartsAt($monday->modify('+2 days')->setTime(18, 0))->addAssignee($user));
             $this->em->persist((new CalendarItem($colleague))->setTitle('Raum für den Elternabend buchen')->setType(CalendarItemType::Task)
                 ->setOrganization($org)->setProject($projects[1])->setStartsAt($monday->modify('-2 days')->setTime(12, 0))->setStatus(TaskStatus::Done));
+            $this->createMeetings($org, $user, $colleague, $guest, $projects);
             $this->em->persist(new Watch($user, $general));
             $this->em->persist(new Watch($user, $projects[0]));
             $this->em->persist(new Watch($colleague, $topic));
@@ -172,5 +184,53 @@ final readonly class DemoCommand
         }
 
         return 0;
+    }
+
+    /** @param list<Project> $projects */
+    private function createMeetings(Organization $org, User $user, User $colleague, User $guest, array $projects): void
+    {
+        $past = (new Meeting($org, $user))->setTitle('Vollversammlung September')->setLocation('Rathaus, Sitzungssaal')
+            ->setStartsAt(new \DateTimeImmutable('-3 weeks 19:00'))->setMinuteTaker($colleague)
+            ->setMinutesNotes('Beginn 19:05 Uhr, Ende 20:50 Uhr.');
+        $items = [];
+        foreach ([
+            ['Begrüßung und Genehmigung der Tagesordnung', 5, $user, null, 'Tagesordnung einstimmig genehmigt.'],
+            ['Schulwegsicherheit: Zebrastreifen Grundschule Nord', 30, $colleague, $projects[0], 'Die Stadt prüft den Standort, eine Ortsbegehung ist geplant.'],
+            ['Planung Elternabend Herbst', 20, $user, $projects[1], 'Termin und Aula stehen fest.'],
+            ['Verschiedenes', 10, null, null, null],
+        ] as [$title, $minutes, $responsible, $project, $notes]) {
+            $past->addAgendaItem($items[] = $item = (new AgendaItem($past))->setTitle($title)->setDurationMinutes($minutes)
+                ->setResponsible($responsible)->setMinutes($notes));
+            if (null !== $project) {
+                $item->setDescription('Projekt: '.$project->getName());
+            }
+        }
+        $past->addAttendance(new Attendance($past, $user));
+        $past->addAttendance(new Attendance($past, $colleague));
+        $past->addAttendance(new Attendance($past, $guest, AttendanceStatus::Excused));
+        $past->markInvited()->markHeld()->approveMinutes($user);
+        $this->em->persist($past);
+        $this->meetings->syncCalendar($past);
+
+        $year = (int) $past->getStartsAt()->format('Y');
+        $this->em->persist((new Resolution($org, $user))->setNumber($year.'/1')->setAgendaItem($items[1])->setProject($projects[0])
+            ->setTitle('Antrag auf Zebrastreifen')->setDecidedOn($past->getStartsAt())->setAdopted(true)
+            ->setText('Die SEV beantragt bei der Stadt einen Zebrastreifen vor der **Grundschule Nord**.')
+            ->setVotesYes(2)->setVotesNo(0)->setVotesAbstain(0));
+        $this->em->persist((new Resolution($org, $user))->setNumber($year.'/2')->setAgendaItem($items[2])->setProject($projects[1])
+            ->setTitle('Budget Elternabend')->setDecidedOn($past->getStartsAt())->setAdopted(true)
+            ->setText('Für Getränke und Material werden bis zu 150 Euro freigegeben.'));
+        $this->em->persist((new CalendarItem($user))->setTitle('Ortsbegehung mit der Stadt vereinbaren')->setType(CalendarItemType::Task)
+            ->setOrganization($org)->setProject($projects[0])->setAgendaItem($items[1])->setStartsAt(null)->addAssignee($colleague));
+
+        $next = (new Meeting($org, $user))->setTitle('Vollversammlung Oktober')->setLocation('Rathaus, Sitzungssaal')
+            ->setVideoUrl('https://meet.example.org/sev')->setStartsAt(new \DateTimeImmutable('+10 days 19:00'))->setMinuteTaker($user)
+            ->setGuestEmails('info@schulamt.example.org');
+        foreach ([['Begrüßung', 5, $user], ['Bericht Ortsbegehung', 15, $colleague], ['Rückblick Elternabend', 15, $user], ['Verschiedenes', 10, null]] as [$title, $minutes, $responsible]) {
+            $next->addAgendaItem((new AgendaItem($next))->setTitle($title)->setDurationMinutes($minutes)->setResponsible($responsible));
+        }
+        $next->addAgendaItem((new AgendaItem($next))->setTitle('Schulobst-Programm')->setDescription('Können wir uns dafür einsetzen?')->propose($colleague));
+        $this->em->persist($next);
+        $this->meetings->syncCalendar($next);
     }
 }

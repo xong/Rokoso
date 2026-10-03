@@ -1,0 +1,28 @@
+{% extends 'meeting/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ proposal ? 'meeting.agenda.propose'|trans : (item ? 'meeting.agenda.edit'|trans : 'meeting.agenda.new'|trans) }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        <p class="mb-4 text-slate-600">{{ meeting.title }} · {{ meeting.startsAt|date('d.m.Y H:i') }}</p>
+        {% if proposal %}<p class="mb-4 rounded-lg bg-slate-100 p-3 text-sm">{{ 'meeting.agenda.propose_hint'|trans }}</p>{% endif %}
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.title) }}
+            {{ form_row(form.description) }}
+            {% if form.responsible is defined %}
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.responsible) }}
+                    {{ form_row(form.durationMinutes) }}
+                </div>
+            {% endif %}
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ proposal ? 'meeting.agenda.propose'|trans : 'action.save'|trans }}</button>
+                <a href="{{ path('meeting_show', {id: meeting.id, _fragment: 'agenda'}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

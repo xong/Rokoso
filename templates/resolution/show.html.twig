@@ -1,0 +1,42 @@
+{% extends 'resolution/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ resolution.number }} · {{ parent() }}{% endblock %}
+{% block detail_title %}{{ 'resolution.single'|trans }} {{ resolution.number }}{% endblock %}
+
+{% block detail_actions %}
+    {% if can_manage %}
+        <a href="{{ path('resolution_edit', {id: resolution.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">{{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+        {{ ui.post_button(path('resolution_delete', {id: resolution.id}), 'resolution-delete', 'resolution.delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'resolution.delete_confirm'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block detail %}
+    <article class="mx-auto max-w-2xl space-y-5 p-4 lg:p-6">
+        <header>
+            <p class="text-xl font-semibold">{{ resolution.title }}</p>
+            <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+                <span class="badge {{ resolution.adopted ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">{{ (resolution.adopted ? 'resolution.adopted' : 'resolution.rejected')|trans }}</span>
+                {{ resolution.decidedOn|date('d.m.Y') }} · {{ resolution.organization.name }}
+            </p>
+        </header>
+        <div class="markdown">{{ resolution.text|markdown }}</div>
+        <dl class="card divide-y divide-slate-100 px-4">
+            {% if resolution.hasVotes %}
+                <div class="grid grid-cols-[9rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'resolution.votes'|trans }}</dt>
+                    <dd>{{ 'resolution.votes_summary'|trans({'%yes%': resolution.votesYes ?? 0, '%no%': resolution.votesNo ?? 0, '%abstain%': resolution.votesAbstain ?? 0}) }}</dd></div>
+            {% endif %}
+            {% if resolution.meeting %}
+                <div class="grid grid-cols-[9rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'meeting.single'|trans }}</dt>
+                    <dd><a class="link" href="{{ path('meeting_show', {id: resolution.meeting.id, _fragment: resolution.agendaItem ? 'agenda-' ~ resolution.agendaItem.id : 'agenda'}) }}">{{ resolution.meeting.title }} ({{ resolution.meeting.startsAt|date('d.m.Y') }}){% if resolution.agendaItem %} – {{ resolution.agendaItem.title }}{% endif %}</a></dd></div>
+            {% endif %}
+            {% if resolution.project %}
+                <div class="grid grid-cols-[9rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'nav.projects'|trans }}</dt><dd><a class="link" href="{{ path('project_show', {id: resolution.project.id}) }}">{{ resolution.project.name }}</a></dd></div>
+            {% endif %}
+            <div class="grid grid-cols-[9rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'resolution.recorded_by'|trans }}</dt><dd>{{ resolution.createdBy.name }}</dd></div>
+        </dl>
+    </article>
+{% endblock %}

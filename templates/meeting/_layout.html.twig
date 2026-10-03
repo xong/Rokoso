@@ -1,0 +1,33 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.meetings'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.meetings'|trans }}{% endblock %}
+{% block back_url %}{{ path('meeting_index', past ? {past: 1} : {}) }}{% endblock %}
+
+{% block list_actions %}
+    <a href="{{ path('meeting_new') }}" class="btn-icon" aria-label="{{ 'meeting.new'|trans }}" title="{{ 'meeting.new'|trans }}">
+        {{ ux_icon('lucide:plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block list %}
+    <nav aria-label="{{ 'meeting.period'|trans }}" class="m-3 flex gap-1 rounded-lg bg-slate-100 p-1 text-sm">
+        {% for value, label in {0: 'meeting.upcoming', 1: 'meeting.past'} %}
+            {% set active = (value == 1) == past %}
+            <a href="{{ path('meeting_index', value ? {past: 1} : {}) }}" {% if active %}aria-current="page"{% endif %}
+               class="flex-1 rounded-md px-3 py-1 text-center {{ active ? 'bg-surface font-medium shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">{{ label|trans }}</a>
+        {% endfor %}
+    </nav>
+    {% if meetings is empty %}
+        {{ ui.empty(past ? 'meeting.none_past' : 'meeting.none_upcoming', 'lucide:presentation') }}
+    {% else %}
+        <ul role="list">
+            {% for m in meetings %}
+                <li>{{ ui.list_link(path('meeting_show', {id: m.id}), current and current.id == m.id,
+                        m.title, m.startsAt|date('d.m.Y H:i') ~ ' · ' ~ m.organization.name ~ ' · ' ~ m.status.label|trans,
+                        ui.tile(m.organization.name, m.organization.logo, m.organization.color)) }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

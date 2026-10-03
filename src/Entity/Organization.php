@@ -36,6 +36,16 @@ class Organization
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $logo = null;
 
+    /** Share of members with voting right that must be present for a quorum */
+    #[ORM\Column(options: ['default' => 50])]
+    #[Assert\Range(min: 1, max: 100)]
+    private int $quorumPercent = 50;
+
+    /** Minimum notice in days between invitation and meeting */
+    #[ORM\Column(options: ['default' => 7])]
+    #[Assert\Range(min: 0, max: 90)]
+    private int $invitationDays = 7;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -101,6 +111,41 @@ class Organization
         $this->logo = $logo;
 
         return $this;
+    }
+
+    public function getQuorumPercent(): int
+    {
+        return $this->quorumPercent;
+    }
+
+    public function setQuorumPercent(?int $quorumPercent): static
+    {
+        $this->quorumPercent = $quorumPercent ?? 50;
+
+        return $this;
+    }
+
+    public function getInvitationDays(): int
+    {
+        return $this->invitationDays;
+    }
+
+    public function setInvitationDays(?int $invitationDays): static
+    {
+        $this->invitationDays = $invitationDays ?? 0;
+
+        return $this;
+    }
+
+    /**
+     * Members with voting right.
+     *
+     * @return list<User>
+     */
+    public function getVotingMembers(): array
+    {
+        return array_values(array_map(static fn (Membership $m): User => $m->getUser(),
+            array_filter($this->memberships->toArray(), static fn (Membership $m): bool => $m->hasVotingRight())));
     }
 
     public function getCreatedAt(): \DateTimeImmutable

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Folder;
+use App\Entity\Organization;
 use App\Entity\Project;
 use App\Entity\StoredFile;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -30,6 +31,22 @@ class StoredFileRepository extends ServiceEntityRepository
             ->andWhere('f.project = :project')
             ->setParameter('project', $project)
             ->orderBy('f.createdAt', 'DESC')
+            ->getQuery()->getResult();
+    }
+
+    /**
+     * All files of an organization by name (e.g. to attach them to an agenda item).
+     *
+     * @return list<StoredFile>
+     */
+    public function forOrganization(Organization $organization): array
+    {
+        /* @var list<StoredFile> */
+        return $this->createQueryBuilder('f')
+            ->join('f.folder', 'fo')
+            ->andWhere('fo.organization = :org')
+            ->setParameter('org', $organization)
+            ->orderBy('f.filename')
             ->getQuery()->getResult();
     }
 

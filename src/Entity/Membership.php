@@ -20,6 +20,9 @@ class Membership
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\Column(options: ['default' => true])]
+    private bool $votingRight = true;
+
     public function __construct(
         #[ORM\ManyToOne(inversedBy: 'memberships')]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -63,6 +66,18 @@ class Membership
     public function isAdmin(): bool
     {
         return OrganizationRole::Admin === $this->role;
+    }
+
+    public function hasVotingRight(): bool
+    {
+        return $this->votingRight;
+    }
+
+    public function setVotingRight(bool $votingRight): static
+    {
+        $this->votingRight = $votingRight;
+
+        return $this;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

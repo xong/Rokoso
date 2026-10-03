@@ -6,6 +6,8 @@ nav:
     label: Hauptnavigation
     notifications: Benachrichtigungen
     tasks: Aufgaben
+    meetings: Sitzungen
+    resolutions: Beschlüsse
     skip_to_content: Zum Inhalt springen
     open: Navigation öffnen
     close: Navigation schließen
@@ -54,6 +56,7 @@ flash:
 form:
     image_help: JPG, PNG, GIF oder WebP, höchstens 2 MB.
     none: '– keine –'
+    optional: optional
 
 user:
     name: Name
@@ -151,6 +154,10 @@ email:
         text: 'Hallo, %inviter% lädt dich in die Organisation „%organization%“ in Coop ein.'
         button: Einladung ansehen
         expires: Die Einladung ist 14 Tage gültig.
+    meeting:
+        text: '%sender% lädt dich im Namen von „%organization%“ zur Sitzung „%title%“ ein.'
+        button: Sitzung ansehen
+        ics_hint: Den Termin kannst du über den Anhang in deinen Kalender übernehmen. Antworten auf diese E-Mail gehen an die einladende Person.
 
 organization:
     new: Organisation anlegen
@@ -188,6 +195,13 @@ organization:
     invitation_expired: abgelaufen
     revoke: Einladung zurückziehen
     invitation_revoked: Einladung zurückgezogen.
+    meetings_legend: Sitzungen
+    quorum_percent: Beschlussfähigkeit (%)
+    quorum_percent_help: Anteil der stimmberechtigten Mitglieder, die anwesend sein müssen.
+    invitation_days: Ladungsfrist (Tage)
+    invitation_days_help: Mindestabstand zwischen Einladung und Sitzung. 0 = keine Frist.
+    voting_right: stimmberechtigt
+    voting_right_toggle: 'Stimmrecht von %name% umschalten'
 
 invitation:
     title: Einladung
@@ -799,3 +813,123 @@ task:
         open: Offen
         in_progress: In Arbeit
         done: Erledigt
+
+meeting:
+    single: Sitzung
+    open: Sitzung öffnen
+    new: Sitzung anlegen
+    edit: Sitzung bearbeiten
+    delete: Sitzung löschen
+    delete_confirm: Sitzung mit Tagesordnung, Anwesenheit und Protokoll löschen? Beschlüsse bleiben erhalten.
+    title: Titel
+    organization: Gremium
+    starts_at: Beginn
+    ends_at: Ende
+    ends_at_help: Leer lassen, um die geplante Dauer der Tagesordnung zu verwenden.
+    location: Ort
+    video_url: Videokonferenz-Link
+    minute_taker: Protokoll
+    minute_taker_none: '– noch offen –'
+    description: Hinweise
+    guests: Gäste (E-Mail)
+    guests_help: Eine Adresse pro Zeile. Gäste erhalten die Einladung ohne Zugang zu Coop.
+    planned_duration: Geplante Dauer
+    minutes_count: '{1}1 Minute|]1,Inf[%count% Minuten'
+    period: Zeitraum
+    upcoming: Anstehend
+    past: Vergangen
+    none_upcoming: Keine anstehenden Sitzungen.
+    none_past: Keine vergangenen Sitzungen.
+    intro: Plane Sitzungen deiner Gremien mit Tagesordnung, lade per E-Mail ein, erfasse Anwesenheit und Protokoll und halte Beschlüsse fest.
+    no_organization: Für Sitzungen musst du Mitglied einer Organisation sein.
+    print: Drucken
+    ics: Kalenderdatei
+    workflow: Ablauf
+    invite: Einladung verschicken
+    invite_again: Einladung erneut verschicken
+    invite_confirm: Einladung jetzt an alle Mitglieder und Gäste verschicken?
+    invite_confirm_short: 'Die Ladungsfrist von %days% Tagen wird unterschritten. Trotzdem einladen?'
+    notice_too_short: 'Achtung: Die Ladungsfrist von %days% Tagen ist nicht mehr einzuhalten.'
+    invited_at: 'Eingeladen am %date%'
+    invited_flash: '{0}Niemand eingeladen.|{1}Einladung an 1 Person verschickt.|]1,Inf[Einladung an %count% Personen verschickt.'
+    invitation:
+        subject: 'Einladung: %title% am %date%'
+    minutes_locked: Das Protokoll ist genehmigt und kann nicht mehr geändert werden.
+    status:
+        planned: geplant
+        invited: eingeladen
+        held: durchgeführt
+        approved: Protokoll genehmigt
+    attendance:
+        title: Anwesenheit
+        present: anwesend
+        excused: entschuldigt
+        absent: abwesend
+        unknown: offen
+        no_vote: ohne Stimmrecht
+    quorum:
+        label: Beschlussfähigkeit
+        reached: 'Beschlussfähig: %present% von %voting% Stimmberechtigten anwesend (mindestens %required%).'
+        missed: 'Nicht beschlussfähig: %present% von %voting% Stimmberechtigten anwesend (mindestens %required%).'
+    agenda:
+        title: Titel
+        title_plural: Tagesordnung
+        description: Beschreibung
+        responsible: Verantwortlich
+        responsible_none: '– niemand –'
+        duration: Dauer (Minuten)
+        attachments: Unterlagen
+        attachments_help: Dateien aus der Ablage der Organisation.
+        number: 'TOP %n%'
+        new: Tagesordnungspunkt hinzufügen
+        edit: Tagesordnungspunkt bearbeiten
+        edit_named: '„%title%“ bearbeiten'
+        delete_named: '„%title%“ löschen'
+        delete_confirm: Tagesordnungspunkt löschen?
+        move_up: '„%title%“ nach oben'
+        move_down: '„%title%“ nach unten'
+        propose: Thema vorschlagen
+        propose_hint: Dein Vorschlag wird von der Sitzungsleitung geprüft und in die Tagesordnung übernommen.
+        proposals: Vorschläge
+        proposed_by: 'Vorgeschlagen von %name%'
+        proposed_flash: Vorschlag eingereicht.
+        accept: Übernehmen
+        accepted: In die Tagesordnung übernommen.
+        reject: Ablehnen
+        empty: Noch keine Tagesordnungspunkte.
+    minutes:
+        title: Protokoll
+        write: Protokoll schreiben
+        notes: Allgemeine Notizen
+        help: Markdown möglich. Beschlüsse und Aufgaben legst du direkt am Tagesordnungspunkt an.
+        approve: Protokoll genehmigen
+        approve_confirm: Protokoll genehmigen? Danach ist es schreibgeschützt.
+        reopen: Genehmigung aufheben
+        approved_by: 'Genehmigt von %name% am %date%'
+
+resolution:
+    single: Beschluss
+    new: Beschluss erfassen
+    edit: Beschluss bearbeiten
+    delete: Beschluss löschen
+    delete_confirm: Beschluss endgültig löschen?
+    title: Titel
+    text: Beschlusstext
+    decided_on: Beschlossen am
+    result: Ergebnis
+    adopted: angenommen
+    rejected: abgelehnt
+    votes: Abstimmungsergebnis
+    votes_yes: Ja
+    votes_no: Nein
+    votes_abstain: Enthaltung
+    votes_summary: '%yes% Ja · %no% Nein · %abstain% Enthaltungen'
+    recorded_by: Erfasst von
+    intro: Die Beschlusssammlung enthält alle Beschlüsse deiner Gremien – durchsuchbar nach Text, Jahr und Projekt.
+    none: Keine Beschlüsse gefunden.
+    search: Beschlüsse durchsuchen
+    year: Jahr
+    all_years: Alle Jahre
+    all_organizations: Alle Gremien
+    reset: Zurücksetzen
+    count: '{0}Keine Beschlüsse|{1}1 Beschluss|]1,Inf[%count% Beschlüsse'

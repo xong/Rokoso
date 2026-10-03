@@ -1,0 +1,14 @@
+{% extends 'meeting/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'nav.meetings'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-xl p-6 text-center text-slate-600">
+        {{ ux_icon('lucide:presentation', {class: 'mx-auto mb-3 size-10 text-slate-300', 'aria-hidden': 'true'}) }}
+        <p class="mb-4">{{ 'meeting.intro'|trans }}</p>
+        <div class="flex flex-wrap justify-center gap-2">
+            <a href="{{ path('meeting_new') }}" class="btn-primary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'meeting.new'|trans }}</a>
+            <a href="{{ path('resolution_index') }}" class="btn-secondary">{{ ux_icon('lucide:gavel', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'nav.resolutions'|trans }}</a>
+        </div>
+    </div>
+{% endblock %}

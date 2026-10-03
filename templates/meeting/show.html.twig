@@ -1,0 +1,214 @@
+{% extends 'meeting/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+{% set quorum = meeting.quorum %}
+{% set agenda = meeting.agenda %}
+
+{% block title %}{{ meeting.title }} · {{ parent() }}{% endblock %}
+{% block detail_title %}{{ meeting.title }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('meeting_print', {id: meeting.id}) }}" class="btn-icon" aria-label="{{ 'meeting.print'|trans }}" title="{{ 'meeting.print'|trans }}" data-turbo="false">{{ ux_icon('lucide:printer', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+    <a href="{{ path('meeting_ics', {id: meeting.id}) }}" class="btn-icon" aria-label="{{ 'meeting.ics'|trans }}" title="{{ 'meeting.ics'|trans }}" data-turbo="false">{{ ux_icon('lucide:calendar-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+    {% if can_manage %}
+        <a href="{{ path('meeting_edit', {id: meeting.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">{{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+        {{ ui.post_button(path('meeting_delete', {id: meeting.id}), 'meeting-delete', 'meeting.delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'meeting.delete_confirm'}) }}
+    {% endif %}
+{% endblock %}
+
+{% macro row(label, value) %}
+    <div class="grid grid-cols-[9rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ label|trans }}</dt><dd class="min-w-0">{{ value }}</dd></div>
+{% endmacro %}
+
+{% block detail %}
+    <div class="mx-auto max-w-3xl space-y-6 p-4 lg:p-6">
+        <div>
+            <p class="flex flex-wrap items-center gap-2 text-sm">
+                <span class="badge bg-brand-50 text-brand-700">{{ meeting.status.label|trans }}</span>
+                {% if meeting.invitedAt %}<span class="text-slate-500">{{ 'meeting.invited_at'|trans({'%date%': meeting.invitedAt|date('d.m.Y H:i')}) }}</span>{% endif %}
+            </p>
+            <p class="mt-2 text-lg font-semibold">{{ ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][meeting.startsAt|date('w')] }}, {{ meeting.startsAt|date('d.m.Y H:i') }}{% if meeting.endsAt %} – {{ meeting.endsAt|date(meeting.endsAt|date('Y-m-d') == meeting.startsAt|date('Y-m-d') ? 'H:i' : 'd.m.Y H:i') }}{% endif %}</p>
+        </div>
+
+        <dl class="card divide-y divide-slate-100 px-4">
+            {{ _self.row('meeting.organization', meeting.organization.name) }}
+            {% if meeting.location %}{{ _self.row('meeting.location', meeting.location) }}{% endif %}
+            {% if meeting.videoUrl %}
+                <div class="grid grid-cols-[9rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'meeting.video_url'|trans }}</dt><dd class="break-all"><a class="link" href="{{ meeting.videoUrl }}" target="_blank" rel="noopener noreferrer">{{ meeting.videoUrl }}</a></dd></div>
+            {% endif %}
+            {% if meeting.project %}
+                <div class="grid grid-cols-[9rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'nav.projects'|trans }}</dt><dd><a class="link" href="{{ path('project_show', {id: meeting.project.id}) }}">{{ meeting.project.name }}</a></dd></div>
+            {% endif %}
+            {{ _self.row('meeting.minute_taker', meeting.minuteTaker ? meeting.minuteTaker.name : 'meeting.minute_taker_none'|trans) }}
+            {% if meeting.guestEmailList is not empty %}{{ _self.row('meeting.guests', meeting.guestEmailList|join(', ')) }}{% endif %}
+            {% if meeting.plannedMinutes > 0 %}{{ _self.row('meeting.planned_duration', 'meeting.minutes_count'|trans({'%count%': meeting.plannedMinutes})) }}{% endif %}
+        </dl>
+
+        {% if meeting.description %}<div class="markdown">{{ meeting.description|markdown }}</div>{% endif %}
+
+        {% if can_manage %}
+            <section aria-labelledby="workflow-heading" class="card space-y-3 p-4">
+                <h3 id="workflow-heading" class="font-semibold">{{ 'meeting.workflow'|trans }}</h3>
+                {% set open = meeting.status.value in ['planned', 'invited'] %}
+                {% set short = meeting.noticeTooShort %}
+                {% if open and short and not meeting.invitedAt %}
+                    <p class="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-800" role="note">
+                        {{ ux_icon('lucide:triangle-alert', {class: 'mt-0.5 size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'meeting.notice_too_short'|trans({'%days%': meeting.organization.invitationDays}) }}
+                    </p>
+                {% endif %}
+                <div class="flex flex-wrap gap-2">
+                    {% if open %}
+                    <form method="post" action="{{ path('meeting_invite', {id: meeting.id}) }}"
+                          data-turbo-confirm="{{ short ? 'meeting.invite_confirm_short'|trans({'%days%': meeting.organization.invitationDays}) : 'meeting.invite_confirm'|trans }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('meeting-invite') }}">
+                        <button type="submit" class="{{ meeting.invitedAt ? 'btn-secondary' : 'btn-primary' }}">
+                            {{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            {{ meeting.invitedAt ? 'meeting.invite_again'|trans : 'meeting.invite'|trans }}
+                        </button>
+                    </form>
+                    {% endif %}
+                    <a href="{{ path('meeting_attendance', {id: meeting.id}) }}" class="btn-secondary">{{ ux_icon('lucide:user-check', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'meeting.attendance.title'|trans }}</a>
+                    {% if not meeting.minutesApproved %}
+                        <a href="{{ path('meeting_minutes', {id: meeting.id}) }}" class="btn-secondary">{{ ux_icon('lucide:notebook-pen', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'meeting.minutes.write'|trans }}</a>
+                    {% endif %}
+                    {% if meeting.status.value in ['held', 'approved'] %}
+                        {{ ui.post_button(path('meeting_approve', {id: meeting.id}), 'meeting-approve',
+                            meeting.minutesApproved ? 'meeting.minutes.reopen' : 'meeting.minutes.approve',
+                            {icon: meeting.minutesApproved ? 'lucide:lock-open' : 'lucide:stamp', confirm: meeting.minutesApproved ? null : 'meeting.minutes.approve_confirm'}) }}
+                    {% endif %}
+                </div>
+            </section>
+        {% endif %}
+
+        {% if meeting.attendances is not empty %}
+            <section aria-labelledby="attendance-heading">
+                <h3 id="attendance-heading" class="mb-2 font-semibold">{{ 'meeting.attendance.title'|trans }}</h3>
+                <p class="mb-3 flex items-center gap-2 text-sm {{ quorum.reached ? 'text-emerald-700' : 'text-red-700' }}">
+                    {{ ux_icon(quorum.reached ? 'lucide:circle-check' : 'lucide:circle-x', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    {{ (quorum.reached ? 'meeting.quorum.reached' : 'meeting.quorum.missed')|trans({'%present%': quorum.present, '%voting%': quorum.voting, '%required%': quorum.required}) }}
+                </p>
+                <ul role="list" class="flex flex-wrap gap-2 text-sm">
+                    {% for attendance in meeting.attendances %}
+                        <li class="badge {{ attendance.status.value == 'present' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                            {{ attendance.user.name }} · {{ attendance.status.label|trans }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        <section id="agenda" aria-labelledby="agenda-heading">
+            <div class="mb-3 flex items-center gap-2">
+                <h3 id="agenda-heading" class="font-semibold">{{ 'meeting.agenda.title_plural'|trans }}</h3>
+                <a href="{{ path('meeting_agenda_new', {id: meeting.id}) }}" class="btn-secondary ml-auto py-1 text-xs">
+                    {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ can_manage ? 'meeting.agenda.new'|trans : 'meeting.agenda.propose'|trans }}
+                </a>
+            </div>
+            {% if agenda is empty %}
+                <p class="card p-4 text-slate-500">{{ 'meeting.agenda.empty'|trans }}</p>
+            {% else %}
+                <ol class="space-y-3">
+                    {% for item in agenda %}
+                        <li id="agenda-{{ item.id }}" class="card scroll-mt-4 p-4">
+                            <div class="flex flex-wrap items-start gap-2">
+                                <h4 class="min-w-0 flex-1 font-semibold">{{ 'meeting.agenda.number'|trans({'%n%': loop.index}) }}: {{ item.title }}</h4>
+                                {% if can_manage %}
+                                    <div class="flex shrink-0">
+                                        {% if not loop.first %}{{ ui.post_button(path('meeting_agenda_move', {id: item.id}), 'meeting-agenda', 'meeting.agenda.move_up'|trans({'%title%': item.title}), {class: 'btn-icon', icon: 'lucide:arrow-up', icon_only: true, fields: {direction: 'up'}}) }}{% endif %}
+                                        {% if not loop.last %}{{ ui.post_button(path('meeting_agenda_move', {id: item.id}), 'meeting-agenda', 'meeting.agenda.move_down'|trans({'%title%': item.title}), {class: 'btn-icon', icon: 'lucide:arrow-down', icon_only: true, fields: {direction: 'down'}}) }}{% endif %}
+                                        <a href="{{ path('meeting_agenda_edit', {id: item.id}) }}" class="btn-icon" aria-label="{{ 'meeting.agenda.edit_named'|trans({'%title%': item.title}) }}" title="{{ 'action.edit'|trans }}">{{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+                                        {{ ui.post_button(path('meeting_agenda_delete', {id: item.id}), 'meeting-agenda', 'meeting.agenda.delete_named'|trans({'%title%': item.title}),
+                                            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'meeting.agenda.delete_confirm'}) }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% if item.responsible or item.durationMinutes %}
+                                <p class="mt-1 text-sm text-slate-600">
+                                    {% if item.responsible %}{{ 'meeting.agenda.responsible'|trans }}: {{ item.responsible.name }}{% endif %}
+                                    {% if item.responsible and item.durationMinutes %} · {% endif %}
+                                    {% if item.durationMinutes %}{{ 'meeting.minutes_count'|trans({'%count%': item.durationMinutes}) }}{% endif %}
+                                </p>
+                            {% endif %}
+                            {% if item.description %}<div class="markdown mt-2 text-sm">{{ item.description|markdown }}</div>{% endif %}
+                            {% if item.attachments is not empty %}
+                                <ul role="list" class="mt-2 flex flex-wrap gap-2 text-sm" aria-label="{{ 'meeting.agenda.attachments'|trans }}">
+                                    {% for file in item.attachments %}
+                                        <li><a class="link inline-flex items-center gap-1" href="{{ path('file_show', {id: file.id}) }}">{{ ux_icon('lucide:paperclip', {class: 'size-3.5', 'aria-hidden': 'true'}) }}{{ file.filename }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {% if item.minutes %}
+                                <div class="mt-3 border-l-2 border-brand-200 pl-3">
+                                    <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">{{ 'meeting.minutes.title'|trans }}</p>
+                                    <div class="markdown text-sm">{{ item.minutes|markdown }}</div>
+                                </div>
+                            {% endif %}
+                            {% if item.resolutions is not empty or item.tasks is not empty %}
+                                <ul role="list" class="mt-3 space-y-1 text-sm">
+                                    {% for r in item.resolutions %}
+                                        <li class="flex items-center gap-2">
+                                            {{ ux_icon('lucide:gavel', {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}
+                                            <a class="link" href="{{ path('resolution_show', {id: r.id}) }}">{{ 'resolution.single'|trans }} {{ r.number }}: {{ r.title }}</a>
+                                            <span class="badge {{ r.adopted ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">{{ (r.adopted ? 'resolution.adopted' : 'resolution.rejected')|trans }}</span>
+                                        </li>
+                                    {% endfor %}
+                                    {% for task in item.tasks %}
+                                        <li class="flex items-center gap-2">
+                                            {{ ux_icon('lucide:list-checks', {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}
+                                            <a class="link" href="{{ path('calendar_item_show', {id: task.id}) }}">{{ task.title }}</a>
+                                            <span class="{{ include('task/_status_class.html.twig', {status: task.status}) }}">{{ task.status.label|trans }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                {% if can_manage %}
+                                    <a href="{{ path('resolution_new', {agenda: item.id}) }}" class="btn-secondary py-1 text-xs">{{ ux_icon('lucide:gavel', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'resolution.new'|trans }}<span class="sr-only"> – {{ item.title }}</span></a>
+                                {% endif %}
+                                <a href="{{ path('calendar_item_new', {agenda: item.id}) }}" class="btn-secondary py-1 text-xs">{{ ux_icon('lucide:list-plus', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'task.create_from'|trans }}<span class="sr-only"> – {{ item.title }}</span></a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ol>
+            {% endif %}
+        </section>
+
+        {% set proposals = meeting.proposals %}
+        {% if proposals is not empty %}
+            <section aria-labelledby="proposals-heading">
+                <h3 id="proposals-heading" class="mb-3 font-semibold">{{ 'meeting.agenda.proposals'|trans }}</h3>
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for item in proposals %}
+                        <li class="flex flex-wrap items-start gap-2 px-4 py-3">
+                            <div class="min-w-0 flex-1">
+                                <p class="font-medium">{{ item.title }}</p>
+                                <p class="text-xs text-slate-500">{{ 'meeting.agenda.proposed_by'|trans({'%name%': item.proposedBy ? item.proposedBy.name : '–'}) }}</p>
+                                {% if item.description %}<div class="markdown mt-1 text-sm">{{ item.description|markdown }}</div>{% endif %}
+                            </div>
+                            {% if can_manage %}
+                                {{ ui.post_button(path('meeting_agenda_accept', {id: item.id}), 'meeting-agenda', 'meeting.agenda.accept', {icon: 'lucide:check', class: 'btn-secondary py-1 text-xs'}) }}
+                                {{ ui.post_button(path('meeting_agenda_delete', {id: item.id}), 'meeting-agenda', 'meeting.agenda.reject', {icon: 'lucide:x', class: 'btn-secondary py-1 text-xs', confirm: 'meeting.agenda.delete_confirm'}) }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        {% if meeting.minutesNotes %}
+            <section aria-labelledby="notes-heading">
+                <h3 id="notes-heading" class="mb-2 font-semibold">{{ 'meeting.minutes.notes'|trans }}</h3>
+                <div class="markdown">{{ meeting.minutesNotes|markdown }}</div>
+            </section>
+        {% endif %}
+        {% if meeting.minutesApproved %}
+            <p class="flex items-center gap-2 text-sm text-emerald-700">
+                {{ ux_icon('lucide:stamp', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                {{ 'meeting.minutes.approved_by'|trans({'%name%': meeting.minutesApprovedBy ? meeting.minutesApprovedBy.name : '–', '%date%': meeting.minutesApprovedAt|date('d.m.Y')}) }}
+            </p>
+        {% endif %}
+    </div>
+{% endblock %}

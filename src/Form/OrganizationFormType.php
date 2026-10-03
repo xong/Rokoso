@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ColorType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -38,6 +39,16 @@ final class OrganizationFormType extends AbstractType
                 'label' => 'organization.remove_logo',
                 'mapped' => false,
                 'required' => false,
+            ])
+            ->add('quorumPercent', IntegerType::class, [
+                'label' => 'organization.quorum_percent',
+                'help' => 'organization.quorum_percent_help',
+                'attr' => ['min' => 1, 'max' => 100],
+            ])
+            ->add('invitationDays', IntegerType::class, [
+                'label' => 'organization.invitation_days',
+                'help' => 'organization.invitation_days_help',
+                'attr' => ['min' => 0, 'max' => 90],
             ]);
     }
 

@@ -8,8 +8,8 @@
 | | |
 |---|---|
 | **Aktuelle Phase** | Ausbau 2 nach Systemvergleich (Phasen 20–34) |
-| **Nächster Schritt** | Phase 23 (Sitzungen und Beschlüsse) |
-| **Letzte Sitzung** | 2026-10-04: Phase 22 (Aufgaben ohne Pflichtfrist, Status offen/in Arbeit/erledigt, Liste Meine/Alle/Projekt, Board, Aufgabe aus Nachricht/Forenthema, Projektseite mit Terminen und Aufgaben; Entscheidung 50); davor Phase 21 (Benachrichtigungen mit Glocke, @-Erwähnungen, Beobachten, E-Mail sofort/täglich/aus, Web-Push; Cron `app:notify`; Entscheidung 49); davor Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
+| **Nächster Schritt** | Phase 24 (Abstimmungen und Terminfindung) |
+| **Letzte Sitzung** | 2026-10-04: Phase 23 (Sitzungen mit Tagesordnung, TOP-Vorschlägen, Einladung per E-Mail mit .ics, Anwesenheit/Beschlussfähigkeit, Protokoll mit Freigabe und Druckansicht, Beschlussliste, Aufgaben aus TOPs, Stimmrecht pro Mitgliedschaft; Entscheidung 51); davor Phase 22 (Aufgaben ohne Pflichtfrist, Status offen/in Arbeit/erledigt, Liste Meine/Alle/Projekt, Board, Aufgabe aus Nachricht/Forenthema, Projektseite mit Terminen und Aufgaben; Entscheidung 50); davor Phase 21 (Benachrichtigungen mit Glocke, @-Erwähnungen, Beobachten, E-Mail sofort/täglich/aus, Web-Push; Cron `app:notify`; Entscheidung 49); davor Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
 **Starten:** `docker compose up -d` · `php bin/console doctrine:migrations:migrate -n` · `php bin/console app:demo --mails` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000 (Login `demo@coop.test` / `demo-passwort`)
 
@@ -149,16 +149,16 @@ Grundlage: Vergleich mit Front/Help Scout/Zammad (gemeinsames Postfach), Nextclo
 - [x] 22.4 Projektseite zeigt Termine und Aufgaben
 
 ## Phase 23 – Gremienarbeit: Sitzungen und Beschlüsse
-- [ ] 23.1 **Sitzung** (Gremium = Organisation, Termin, Ort/Videolink, Status geplant/eingeladen/durchgeführt/Protokoll freigegeben)
-- [ ] 23.2 **Tagesordnung**: TOPs sortierbar, Verantwortliche, Dauer, Anlagen; TOP-Vorschläge der Mitglieder
-- [ ] 23.3 **Einladung** per E-Mail (Mitglieder + externe Gäste) mit Tagesordnung und .ics; Warnung bei unterschrittener Einladungsfrist (pro Organisation einstellbar)
-- [ ] 23.4 **Anwesenheit** und Beschlussfähigkeit (Quorum pro Organisation, zählt Stimmberechtigte)
-- [ ] 23.5 **Protokoll** je TOP, Freigabe, Druckansicht (Browser „Als PDF speichern“)
-- [ ] 23.6 **Beschlüsse** mit Abstimmungsergebnis; **Beschlussliste** (durchsuchbar, filterbar nach Jahr/Projekt)
-- [ ] 23.7 Aufgaben aus dem Protokoll (Verantwortliche, Frist) → Aufgabenliste
+- [x] 23.1 **Sitzung** (Gremium = Organisation, Termin, Ort/Videolink, Status geplant/eingeladen/durchgeführt/Protokoll freigegeben)
+- [x] 23.2 **Tagesordnung**: TOPs sortierbar, Verantwortliche, Dauer, Anlagen; TOP-Vorschläge der Mitglieder
+- [x] 23.3 **Einladung** per E-Mail (Mitglieder + externe Gäste) mit Tagesordnung und .ics; Warnung bei unterschrittener Einladungsfrist (pro Organisation einstellbar)
+- [x] 23.4 **Anwesenheit** und Beschlussfähigkeit (Quorum pro Organisation, zählt Stimmberechtigte)
+- [x] 23.5 **Protokoll** je TOP, Freigabe, Druckansicht (Browser „Als PDF speichern“)
+- [x] 23.6 **Beschlüsse** mit Abstimmungsergebnis; **Beschlussliste** (durchsuchbar, filterbar nach Jahr/Projekt)
+- [x] 23.7 Aufgaben aus dem Protokoll (Verantwortliche, Frist) → Aufgabenliste
 
 ## Phase 24 – Abstimmungen und Terminfindung
-- [ ] 24.1 **Stimmrecht** als Kennzeichen pro Mitgliedschaft (Standard: ja)
+- [x] 24.1 **Stimmrecht** als Kennzeichen pro Mitgliedschaft (Standard: ja)
 - [ ] 24.2 **Abstimmung** (Ja/Nein/Enthaltung oder Auswahl, Einfach-/Mehrfachwahl), Frist, Ergebnis; **offen (namentlich) oder geheim** (gespeichert wird nur, dass jemand abgestimmt hat)
 - [ ] 24.3 **Umlaufbeschluss** (Abstimmung mit Frist außerhalb einer Sitzung → Beschlussliste)
 - [ ] 24.4 **Terminfindung** (Vorschläge ja/vielleicht/nein; gewählter Termin → Kalender bzw. Sitzung)

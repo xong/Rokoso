@@ -1,0 +1,31 @@
+{% extends 'meeting/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ 'meeting.minutes.write'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-3xl p-4 lg:p-6">
+        <p class="mb-4 text-slate-600">{{ meeting.title }} · {{ meeting.startsAt|date('d.m.Y H:i') }}</p>
+        <form method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token('meeting-minutes') }}">
+            {% for item in meeting.agenda %}
+                <div class="mb-4">
+                    <label for="minutes-{{ item.id }}" class="mb-1 block font-medium">{{ 'meeting.agenda.number'|trans({'%n%': loop.index}) }}: {{ item.title }}</label>
+                    <textarea id="minutes-{{ item.id }}" name="minutes[{{ item.id }}]" rows="5" class="input">{{ item.minutes }}</textarea>
+                </div>
+            {% else %}
+                <p class="mb-4 text-slate-500">{{ 'meeting.agenda.empty'|trans }}</p>
+            {% endfor %}
+            <div class="mb-4">
+                <label for="minutes-notes" class="mb-1 block font-medium">{{ 'meeting.minutes.notes'|trans }}</label>
+                <textarea id="minutes-notes" name="notes" rows="4" class="input" aria-describedby="minutes-help">{{ meeting.minutesNotes }}</textarea>
+                <p id="minutes-help" class="mt-1 text-xs text-slate-500">{{ 'meeting.minutes.help'|trans }}</p>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ path('meeting_show', {id: meeting.id}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

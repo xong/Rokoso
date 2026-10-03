@@ -1,0 +1,36 @@
+{% extends 'resolution/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ is_new ? 'resolution.new'|trans : 'resolution.edit'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        <p class="mb-4 text-slate-600">
+            {{ resolution.organization.name }}{% if resolution.agendaItem %} · {{ resolution.meeting.title }} – {{ resolution.agendaItem.title }}{% endif %}
+        </p>
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.title) }}
+            {{ form_row(form.text) }}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.decidedOn) }}
+                {{ form_row(form.project) }}
+            </div>
+            {{ form_row(form.adopted) }}
+            <fieldset class="mb-4">
+                <legend class="mb-2 text-sm font-semibold">{{ 'resolution.votes'|trans }} <span class="font-normal text-slate-500">({{ 'form.optional'|trans }})</span></legend>
+                <div class="grid grid-cols-3 gap-x-4">
+                    {{ form_row(form.votesYes) }}
+                    {{ form_row(form.votesNo) }}
+                    {{ form_row(form.votesAbstain) }}
+                </div>
+            </fieldset>
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ resolution.meeting ? path('meeting_show', {id: resolution.meeting.id, _fragment: 'agenda'}) : (is_new ? path('resolution_index') : path('resolution_show', {id: resolution.id})) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

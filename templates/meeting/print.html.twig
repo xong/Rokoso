@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ meeting.title }} · {{ 'app.name'|trans }}</title>
+    <style>
+        body { font: 11pt/1.45 system-ui, sans-serif; color: #111; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; }
+        h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
+        h2 { font-size: 1.15rem; margin: 1.5rem 0 .5rem; border-bottom: 1px solid #ccc; padding-bottom: .2rem; }
+        h3 { font-size: 1rem; margin: 1rem 0 .25rem; }
+        dl { display: grid; grid-template-columns: 10rem 1fr; gap: .2rem .75rem; margin: 1rem 0; }
+        dt { color: #555; }
+        dd { margin: 0; }
+        .muted { color: #555; font-size: .9em; }
+        .box { border-left: 3px solid #999; padding-left: .75rem; margin: .5rem 0; }
+        .no-print { margin-bottom: 1rem; }
+        @media print { .no-print { display: none; } body { margin: 0; } a { color: inherit; text-decoration: none; } }
+    </style>
+</head>
+<body>
+    <p class="no-print"><a href="{{ path('meeting_show', {id: meeting.id}) }}">{{ 'nav.back'|trans }}</a></p>
+    <main>
+        <h1>{{ meeting.title }}</h1>
+        <p class="muted">{{ meeting.organization.name }} · {{ meeting.status.label|trans }}</p>
+        <dl>
+            <dt>{{ 'meeting.starts_at'|trans }}</dt><dd>{{ meeting.startsAt|date('d.m.Y H:i') }}{% if meeting.endsAt %} – {{ meeting.endsAt|date('H:i') }}{% endif %}</dd>
+            {% if meeting.location %}<dt>{{ 'meeting.location'|trans }}</dt><dd>{{ meeting.location }}</dd>{% endif %}
+            {% if meeting.videoUrl %}<dt>{{ 'meeting.video_url'|trans }}</dt><dd>{{ meeting.videoUrl }}</dd>{% endif %}
+            {% if meeting.minuteTaker %}<dt>{{ 'meeting.minute_taker'|trans }}</dt><dd>{{ meeting.minuteTaker.name }}</dd>{% endif %}
+            {% if meeting.attendances is not empty %}
+                {% set quorum = meeting.quorum %}
+                {% for status in ['present', 'excused', 'absent'] %}
+                    {% set people = meeting.attendances|filter(a => a.status.value == status) %}
+                    {% if people is not empty %}<dt>{{ ('meeting.attendance.' ~ status)|trans }}</dt><dd>{{ people|map(a => a.user.name)|join(', ') }}</dd>{% endif %}
+                {% endfor %}
+                <dt>{{ 'meeting.quorum.label'|trans }}</dt>
+                <dd>{{ (quorum.reached ? 'meeting.quorum.reached' : 'meeting.quorum.missed')|trans({'%present%': quorum.present, '%voting%': quorum.voting, '%required%': quorum.required}) }}</dd>
+            {% endif %}
+        </dl>
+        {% if meeting.description %}{{ meeting.description|markdown }}{% endif %}
+
+        <h2>{{ 'meeting.agenda.title_plural'|trans }}</h2>
+        {% for item in meeting.agenda %}
+            <section>
+                <h3>{{ 'meeting.agenda.number'|trans({'%n%': loop.index}) }}: {{ item.title }}</h3>
+                {% if item.responsible or item.durationMinutes %}
+                    <p class="muted">{% if item.responsible %}{{ item.responsible.name }}{% endif %}{% if item.responsible and item.durationMinutes %} · {% endif %}{% if item.durationMinutes %}{{ 'meeting.minutes_count'|trans({'%count%': item.durationMinutes}) }}{% endif %}</p>
+                {% endif %}
+                {% if item.description %}{{ item.description|markdown }}{% endif %}
+                {% if item.minutes %}<div class="box">{{ item.minutes|markdown }}</div>{% endif %}
+                {% for r in item.resolutions %}
+                    <div class="box">
+                        <strong>{{ 'resolution.single'|trans }} {{ r.number }}: {{ r.title }}</strong> – {{ (r.adopted ? 'resolution.adopted' : 'resolution.rejected')|trans }}
+                        {% if r.hasVotes %}({{ 'resolution.votes_summary'|trans({'%yes%': r.votesYes ?? 0, '%no%': r.votesNo ?? 0, '%abstain%': r.votesAbstain ?? 0}) }}){% endif %}
+                        {{ r.text|markdown }}
+                    </div>
+                {% endfor %}
+                {% if item.tasks is not empty %}
+                    <ul>{% for task in item.tasks %}<li>{{ task.title }}{% if task.assignees is not empty %} ({{ task.assignees|map(u => u.name)|join(', ') }}){% endif %}{% if task.startsAt %} – {{ task.startsAt|date('d.m.Y') }}{% endif %}</li>{% endfor %}</ul>
+                {% endif %}
+            </section>
+        {% else %}
+            <p>{{ 'meeting.agenda.empty'|trans }}</p>
+        {% endfor %}
+
+        {% if meeting.minutesNotes %}
+            <h2>{{ 'meeting.minutes.notes'|trans }}</h2>
+            {{ meeting.minutesNotes|markdown }}
+        {% endif %}
+        {% if meeting.minutesApproved %}
+            <p class="muted">{{ 'meeting.minutes.approved_by'|trans({'%name%': meeting.minutesApprovedBy ? meeting.minutesApprovedBy.name : '–', '%date%': meeting.minutesApprovedAt|date('d.m.Y')}) }}</p>
+        {% endif %}
+    </main>
+</body>
+</html>

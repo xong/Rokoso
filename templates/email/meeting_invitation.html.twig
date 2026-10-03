@@ -1,0 +1,20 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ 'email.meeting.text'|trans({'%sender%': sender, '%organization%': meeting.organization.name, '%title%': meeting.title}) }}</p>
+    <p>
+        <strong>{{ meeting.startsAt|date('d.m.Y H:i') }}{% if meeting.endsAt %} – {{ meeting.endsAt|date('H:i') }}{% endif %}</strong><br>
+        {% if meeting.location %}{{ meeting.location }}<br>{% endif %}
+        {% if meeting.videoUrl %}<a href="{{ meeting.videoUrl }}">{{ meeting.videoUrl }}</a>{% endif %}
+    </p>
+    {% if meeting.description %}<p style="white-space:pre-line;">{{ meeting.description }}</p>{% endif %}
+    <p><strong>{{ 'meeting.agenda.title_plural'|trans }}</strong></p>
+    <ol>
+        {% for item in meeting.agenda %}
+            <li>{{ item.title }}{% if item.responsible %} ({{ item.responsible.name }}){% endif %}</li>
+        {% else %}
+            <li>{{ 'meeting.agenda.empty'|trans }}</li>
+        {% endfor %}
+    </ol>
+    {% if url %}{{ include('email/_button.html.twig', {url: url, label: 'email.meeting.button'|trans}) }}{% endif %}
+    <p style="font-size:13px;color:#64748b;">{{ 'email.meeting.ics_hint'|trans }}</p>
+{% endblock %}

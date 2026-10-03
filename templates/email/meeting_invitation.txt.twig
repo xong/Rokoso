@@ -1,0 +1,16 @@
+{{ 'email.meeting.text'|trans({'%sender%': sender, '%organization%': meeting.organization.name, '%title%': meeting.title}) }}
+
+{{ meeting.startsAt|date('d.m.Y H:i') }}{% if meeting.endsAt %} – {{ meeting.endsAt|date('H:i') }}{% endif %}
+
+{% if meeting.location %}{{ meeting.location }}
+{% endif %}{% if meeting.videoUrl %}{{ meeting.videoUrl }}
+{% endif %}
+{% if meeting.description %}{{ meeting.description }}
+
+{% endif %}{{ 'meeting.agenda.title_plural'|trans }}:
+{% for item in meeting.agenda %}{{ loop.index }}. {{ item.title }}{% if item.responsible %} ({{ item.responsible.name }}){% endif %}
+
+{% endfor %}
+{% if url %}{{ url }}
+
+{% endif %}{{ 'email.meeting.ics_hint'|trans }}

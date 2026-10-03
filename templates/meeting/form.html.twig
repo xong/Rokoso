@@ -1,0 +1,28 @@
+{% extends 'meeting/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ meeting ? 'meeting.edit'|trans : 'meeting.new'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.title) }}
+            {{ form_row(form.organization) }}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.startsAt) }}
+                {{ form_row(form.endsAt) }}
+                {{ form_row(form.location) }}
+                {{ form_row(form.videoUrl) }}
+                {{ form_row(form.project) }}
+                {{ form_row(form.minuteTaker) }}
+            </div>
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ meeting ? path('meeting_show', {id: meeting.id}) : path('meeting_index') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

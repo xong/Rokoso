@@ -19,6 +19,11 @@
                     {% if organization and organization.logo %}{{ form_row(form.removeLogo, {row_attr: {class: 'mb-0'}}) }}{% else %}{% do form.removeLogo.setRendered %}{% endif %}
                 </div>
             </div>
+            <fieldset class="mb-4 grid gap-x-4 sm:grid-cols-2">
+                <legend class="mb-2 text-sm font-semibold">{{ 'organization.meetings_legend'|trans }}</legend>
+                {{ form_row(form.quorumPercent) }}
+                {{ form_row(form.invitationDays) }}
+            </fieldset>
             {{ form_rest(form) }}
             <div class="flex gap-2">
                 <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>

@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Calendar\CalendarService;
 use App\Calendar\Occurrence;
+use App\Entity\AgendaItem;
 use App\Entity\CalendarItem;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
@@ -18,6 +19,7 @@ use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
 use App\Security\Voter\CalendarItemVoter;
 use App\Security\Voter\ForumVoter;
+use App\Security\Voter\MeetingVoter;
 use App\Security\Voter\MessageVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -100,6 +102,14 @@ final class CalendarController extends AbstractController
             $item->setType(CalendarItemType::Task)->setStartsAt($date?->setTime(9, 0))->setTitle($topic->getTitle())
                 ->setSourceTopic($topic)->setOrganization($topic->getOrganization());
             $project ??= $topic->getProject();
+        }
+        // Task from the minutes of an agenda item
+        $agendaItem = $this->em->find(AgendaItem::class, $request->query->getInt('agenda'));
+        if (null !== $agendaItem && $this->isGranted(MeetingVoter::VIEW, $agendaItem)) {
+            $source = $agendaItem->getMeeting()->getTitle().' – '.$agendaItem->getTitle();
+            $item->setType(CalendarItemType::Task)->setStartsAt($date?->setTime(9, 0))->setTitle($agendaItem->getTitle())
+                ->setAgendaItem($agendaItem)->setOrganization($agendaItem->getOrganization());
+            $project ??= $agendaItem->getMeeting()->getProject();
         }
         if (null !== $project && $this->isGranted('PROJECT_VIEW', $project)) {
             $item->setProject($project)->setOrganization($project->getOrganization());

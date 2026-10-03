@@ -11,7 +11,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Sends Coop's own system mails (confirmation, password reset, invitations).
+ * Sends Coop's own system mails (confirmation, password reset, invitations, meeting invitations).
  */
 final readonly class SystemMailer
 {
@@ -24,9 +24,10 @@ final readonly class SystemMailer
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param array<string, mixed>                                          $context
+     * @param list<array{body: string, filename: string, mimeType: string}> $attachments
      */
-    public function send(string $to, string $subjectKey, string $template, array $context = [], ?string $toName = null): void
+    public function send(string $to, string $subjectKey, string $template, array $context = [], ?string $toName = null, array $attachments = [], ?string $replyTo = null): void
     {
         $subject = $this->translator->trans($subjectKey, $context['subject_params'] ?? []);
         $email = (new TemplatedEmail())
@@ -36,6 +37,12 @@ final readonly class SystemMailer
             ->htmlTemplate('email/'.$template.'.html.twig')
             ->textTemplate('email/'.$template.'.txt.twig')
             ->context($context + ['subject' => $subject]);
+        foreach ($attachments as $attachment) {
+            $email->attach($attachment['body'], $attachment['filename'], $attachment['mimeType']);
+        }
+        if (null !== $replyTo) {
+            $email->replyTo($replyTo);
+        }
 
         $this->mailer->send($email);
     }

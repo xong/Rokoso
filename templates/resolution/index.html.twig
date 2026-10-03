@@ -1,0 +1,10 @@
+{% extends 'resolution/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'nav.resolutions'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-xl p-6 text-center text-slate-600">
+        {{ ux_icon('lucide:gavel', {class: 'mx-auto mb-3 size-10 text-slate-300', 'aria-hidden': 'true'}) }}
+        <p>{{ 'resolution.intro'|trans }}</p>
+    </div>
+{% endblock %}

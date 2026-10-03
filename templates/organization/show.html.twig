@@ -123,6 +123,18 @@
                             <p class="truncate text-xs text-slate-500">{{ member.email }}</p>
                         </div>
                         {% if is_admin %}
+                            <form method="post" action="{{ path('organization_member_voting', {id: organization.id, membership: membership.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('member-voting') }}">
+                                <button type="submit" class="btn-secondary py-1 text-xs" aria-pressed="{{ membership.votingRight ? 'true' : 'false' }}"
+                                        title="{{ 'organization.voting_right_toggle'|trans({'%name%': member.name}) }}">
+                                    {{ ux_icon(membership.votingRight ? 'lucide:check' : 'lucide:x', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                                    {{ 'organization.voting_right'|trans }}
+                                </button>
+                            </form>
+                        {% elseif membership.votingRight %}
+                            <span class="badge bg-emerald-50 text-emerald-700">{{ 'organization.voting_right'|trans }}</span>
+                        {% endif %}
+                        {% if is_admin %}
                             <form method="post" action="{{ path('organization_member_role', {id: organization.id, membership: membership.id}) }}" class="flex items-center gap-1" data-controller="autosubmit">
                                 <input type="hidden" name="_token" value="{{ csrf_token('member-role') }}">
                                 <label for="role-{{ membership.id }}" class="sr-only">{{ 'organization.role.label'|trans }}</label>

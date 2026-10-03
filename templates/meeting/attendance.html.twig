@@ -1,0 +1,42 @@
+{% extends 'meeting/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ 'meeting.attendance.title'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        <p class="mb-4 text-slate-600">{{ meeting.title }} · {{ meeting.startsAt|date('d.m.Y H:i') }}</p>
+        <form method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token('meeting-attendance') }}">
+            <ul role="list" class="card mb-4 divide-y divide-slate-100">
+                {% for membership in meeting.organization.memberships %}
+                    {% set member = membership.user %}
+                    {% set att = meeting.attendance(member) %}
+                    <li class="px-4 py-3">
+                        <fieldset class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                            <legend class="float-left mr-auto min-w-40 font-medium">
+                                {{ member.name }}
+                                {% if not membership.votingRight %}<span class="ml-1 text-xs font-normal text-slate-500">({{ 'meeting.attendance.no_vote'|trans }})</span>{% endif %}
+                            </legend>
+                            {% for status in statuses %}
+                                <label class="flex items-center gap-1.5 text-sm">
+                                    <input type="radio" name="attendance[{{ member.id }}]" value="{{ status.value }}" {% if att and att.status == status %}checked{% endif %}>
+                                    {{ status.label|trans }}
+                                </label>
+                            {% endfor %}
+                            <label class="flex items-center gap-1.5 text-sm text-slate-500">
+                                <input type="radio" name="attendance[{{ member.id }}]" value="" {% if not att %}checked{% endif %}>
+                                {{ 'meeting.attendance.unknown'|trans }}
+                            </label>
+                        </fieldset>
+                    </li>
+                {% endfor %}
+            </ul>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ path('meeting_show', {id: meeting.id}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

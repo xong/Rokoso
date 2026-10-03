@@ -52,6 +52,12 @@
             {% if item.sourceMessage and is_granted('MESSAGE_VIEW', item.sourceMessage) %}
                 <div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'task.source'|trans }}</dt><dd><a class="link" href="{{ path('mail_show', {folder: 'all', id: item.sourceMessage.id}) }}">{{ item.sourceMessage.subject ?: 'mail.no_subject'|trans }}</a></dd></div>
             {% endif %}
+            {% if item.meeting %}
+                <div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'meeting.single'|trans }}</dt><dd><a class="link" href="{{ path('meeting_show', {id: item.meeting.id}) }}">{{ 'meeting.open'|trans }}</a></dd></div>
+            {% endif %}
+            {% if item.agendaItem %}
+                <div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'task.source'|trans }}</dt><dd><a class="link" href="{{ path('meeting_show', {id: item.agendaItem.meeting.id, _fragment: 'agenda-' ~ item.agendaItem.id}) }}">{{ item.agendaItem.meeting.title }} – {{ item.agendaItem.title }}</a></dd></div>
+            {% endif %}
             {% if item.sourceTopic and is_granted('FORUM_VIEW', item.sourceTopic) %}
                 <div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'task.source'|trans }}</dt><dd><a class="link" href="{{ path('forum_topic_show', {id: item.sourceTopic.id}) }}">{{ item.sourceTopic.title }}</a></dd></div>
             {% endif %}

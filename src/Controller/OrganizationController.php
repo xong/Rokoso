@@ -153,6 +153,19 @@ final class OrganizationController extends AbstractController
         return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
     }
 
+    #[Route('/{id<\d+>}/members/{membership<\d+>}/voting', name: 'organization_member_voting', methods: ['POST'])]
+    #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
+    #[IsCsrfTokenValid('member-voting')]
+    public function toggleVotingRight(Organization $organization, Membership $membership): Response
+    {
+        $this->assertBelongs($organization, $membership);
+        $membership->setVotingRight(!$membership->hasVotingRight());
+        $this->em->flush();
+        $this->addFlash('success', 'flash.saved');
+
+        return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+    }
+
     /**
      * Remove a member (admins) or leave the organization (any member for themselves).
      */

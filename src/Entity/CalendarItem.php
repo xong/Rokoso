@@ -70,6 +70,16 @@ class CalendarItem
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?ForumTopic $sourceTopic = null;
 
+    /** Task from the minutes of an agenda item */
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?AgendaItem $agendaItem = null;
+
+    /** Calendar entry of a meeting (kept in sync by the meeting) */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    private ?Meeting $meeting = null;
+
     #[ORM\Column(length: 20, enumType: Recurrence::class)]
     private Recurrence $recurrence = Recurrence::None;
 
@@ -296,6 +306,30 @@ class CalendarItem
     public function setSourceMessage(?Message $sourceMessage): static
     {
         $this->sourceMessage = $sourceMessage;
+
+        return $this;
+    }
+
+    public function getAgendaItem(): ?AgendaItem
+    {
+        return $this->agendaItem;
+    }
+
+    public function setAgendaItem(?AgendaItem $agendaItem): static
+    {
+        $this->agendaItem = $agendaItem;
+
+        return $this;
+    }
+
+    public function getMeeting(): ?Meeting
+    {
+        return $this->meeting;
+    }
+
+    public function setMeeting(?Meeting $meeting): static
+    {
+        $this->meeting = $meeting;
 
         return $this;
     }

@@ -1,0 +1,58 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.resolutions'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.resolutions'|trans }}{% endblock %}
+{% block back_url %}{{ path('resolution_index', filter_params) }}{% endblock %}
+
+{% block list_actions %}
+    <a href="{{ path('resolution_new') }}" class="btn-icon" aria-label="{{ 'resolution.new'|trans }}" title="{{ 'resolution.new'|trans }}">
+        {{ ux_icon('lucide:plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block list %}
+    <form method="get" action="{{ path('resolution_index') }}" role="search" class="space-y-2 border-b border-slate-100 p-3 text-sm">
+        <label for="res-q" class="sr-only">{{ 'resolution.search'|trans }}</label>
+        <input id="res-q" type="search" name="q" value="{{ filters.q }}" class="input" placeholder="{{ 'resolution.search'|trans }}">
+        <div class="grid grid-cols-2 gap-2">
+            <div>
+                <label for="res-year" class="sr-only">{{ 'resolution.year'|trans }}</label>
+                <select id="res-year" name="year" class="input py-1.5">
+                    <option value="">{{ 'resolution.all_years'|trans }}</option>
+                    {% for y in years %}<option value="{{ y }}" {% if y == filters.year %}selected{% endif %}>{{ y }}</option>{% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="res-project" class="sr-only">{{ 'nav.projects'|trans }}</label>
+                <select id="res-project" name="project" class="input py-1.5">
+                    <option value="">{{ 'task.all_projects'|trans }}</option>
+                    {% for p in projects %}<option value="{{ p.id }}" {% if p.id == filters.project %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        {% if organizations|length > 1 %}
+            <label for="res-org" class="sr-only">{{ 'meeting.organization'|trans }}</label>
+            <select id="res-org" name="organization" class="input py-1.5">
+                <option value="">{{ 'resolution.all_organizations'|trans }}</option>
+                {% for o in organizations %}<option value="{{ o.id }}" {% if o.id == filters.organization %}selected{% endif %}>{{ o.name }}</option>{% endfor %}
+            </select>
+        {% endif %}
+        <div class="flex gap-2">
+            <button type="submit" class="btn-secondary py-1.5">{{ 'task.filter'|trans }}</button>
+            {% if filter_params is not empty %}<a href="{{ path('resolution_index') }}" class="btn-secondary py-1.5">{{ 'resolution.reset'|trans }}</a>{% endif %}
+        </div>
+    </form>
+    <p class="sr-only" role="status">{{ 'resolution.count'|trans({'%count%': resolutions|length}) }}</p>
+    {% if resolutions is empty %}
+        {{ ui.empty('resolution.none', 'lucide:gavel') }}
+    {% else %}
+        <ul role="list">
+            {% for r in resolutions %}
+                <li>{{ ui.list_link(path('resolution_show', {id: r.id}|merge(filter_params)), current and current.id == r.id,
+                        r.number ~ ' · ' ~ r.title,
+                        r.decidedOn|date('d.m.Y') ~ ' · ' ~ r.organization.name ~ ' · ' ~ (r.adopted ? 'resolution.adopted' : 'resolution.rejected')|trans) }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
