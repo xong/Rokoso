@@ -4,6 +4,7 @@ app:
 
 nav:
     label: Hauptnavigation
+    notifications: Benachrichtigungen
     skip_to_content: Zum Inhalt springen
     open: Navigation öffnen
     close: Navigation schließen
@@ -105,6 +106,7 @@ profile:
     section_profile: Name und Bild
     section_password: Passwort
     section_email: E-Mail-Adresse
+    section_notifications: Benachrichtigungen
     change_password: Passwort ändern
     password_changed: Dein Passwort wurde geändert.
     current_email: 'Aktuelle Adresse:'
@@ -118,6 +120,15 @@ profile:
 
 email:
     footer: Diese E-Mail wurde automatisch von Coop verschickt.
+    notification:
+        subject: '%text%'
+        button: Ansehen
+        settings: 'Wie und wann du Benachrichtigungen bekommst, stellst du in deinem Profil ein:'
+        settings_link: Einstellungen
+    digest:
+        subject: '{1} Coop: 1 neue Benachrichtigung|]1,Inf[ Coop: %count% neue Benachrichtigungen'
+        intro: '{1} Seit der letzten Zusammenfassung gibt es eine neue Benachrichtigung:|]1,Inf[ Seit der letzten Zusammenfassung gibt es %count% neue Benachrichtigungen:'
+        button: Alle Benachrichtigungen
     hello: Hallo %name%,
     link_fallback: 'Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:'
     verify:
@@ -694,3 +705,54 @@ pwa:
 upload:
     drop_hint: Dateien hierher ziehen oder auswählen
     remove: Entfernen
+notification:
+    title: Benachrichtigungen
+    settings: Einstellungen für Benachrichtigungen
+    filter: Benachrichtigungen filtern
+    all: Alle
+    unread_filter: Ungelesen (%count%)
+    unread: ungelesene Benachrichtigungen
+    unread_marker: ungelesen
+    mark_all_read: Alle als gelesen markieren
+    all_read: Alle Benachrichtigungen sind als gelesen markiert.
+    empty: Noch keine Benachrichtigungen.
+    empty_unread: Keine ungelesenen Benachrichtigungen.
+    system: Coop
+    type:
+        assigned: '%actor% hat dir „%subject%“ zugewiesen'
+        mentioned: '%actor% hat dich in „%subject%“ erwähnt'
+        comment: '%actor% hat „%subject%“ kommentiert'
+        topic: '%actor% hat das Thema „%subject%“ eröffnet'
+        post: '%actor% hat in „%subject%“ geantwortet'
+        due: '„%subject%“ steht in den nächsten 24 Stunden an'
+        poll: '%actor% bittet um deine Stimme: „%subject%“'
+        contact: 'Neue Anfrage über das Kontaktformular: „%subject%“'
+    email:
+        legend: Benachrichtigungen per E-Mail
+        instant: Sofort
+        instant_help: Eine E-Mail je Benachrichtigung, sobald sie entsteht.
+        daily: Täglich
+        daily_help: Eine Zusammenfassung am Morgen mit allem, was du noch nicht gelesen hast.
+        'off': Nie
+        off_help: Benachrichtigungen erscheinen nur in Coop.
+    push:
+        title: Push-Benachrichtigungen
+        help: Zeigt neue Benachrichtigungen auch dann an, wenn Coop nicht geöffnet ist – auf diesem Gerät und in diesem Browser.
+        enable: Auf diesem Gerät einschalten
+        disable: Auf diesem Gerät ausschalten
+        enabled: Push-Benachrichtigungen sind eingeschaltet.
+        disabled: Push-Benachrichtigungen sind ausgeschaltet.
+        denied: Der Browser hat Benachrichtigungen blockiert. Du kannst das in den Website-Einstellungen ändern.
+        unsupported: Dieser Browser unterstützt keine Push-Benachrichtigungen.
+        error: Das hat nicht geklappt. Bitte versuche es später noch einmal.
+        not_configured: Push-Benachrichtigungen sind auf diesem Server nicht eingerichtet.
+    mention:
+        list: Personen erwähnen
+        help: Mit @ und dem Namen erwähnst du jemanden; die Person wird benachrichtigt.
+        count: '%count% Vorschläge, Pfeiltasten zum Auswählen'
+watch:
+    label: Beobachten
+    watch: Beobachten – bei Neuigkeiten benachrichtigen
+    unwatch: Nicht mehr beobachten
+    added: Du wirst jetzt bei Neuigkeiten benachrichtigt.
+    removed: Du wirst nicht mehr benachrichtigt.

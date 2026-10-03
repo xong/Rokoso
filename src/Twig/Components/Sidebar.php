@@ -7,6 +7,7 @@ namespace App\Twig\Components;
 use App\Entity\User;
 use App\Repository\ForumTopicRepository;
 use App\Repository\MessageRepository;
+use App\Repository\NotificationRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
@@ -24,6 +25,7 @@ final class Sidebar
      * @var list<array{label: string, icon: string, route: string, match: list<string>, children?: list<array{label: string, icon: string, route: string}>}>
      */
     private const array ITEMS = [
+        ['label' => 'nav.notifications', 'icon' => 'lucide:bell', 'route' => 'notification_index', 'match' => ['notification_']],
         [
             'label' => 'nav.mail',
             'icon' => 'lucide:mail',
@@ -54,6 +56,7 @@ final class Sidebar
         private readonly MessageRepository $messages,
         private readonly ForumTopicRepository $topics,
         private readonly Security $security,
+        private readonly NotificationRepository $notifications,
     ) {
     }
 
@@ -77,6 +80,13 @@ final class Sidebar
         return $user instanceof User ? $this->topics->countUnread($user) : 0;
     }
 
+    public function getUnreadNotificationCount(): int
+    {
+        $user = $this->security->getUser();
+
+        return $user instanceof User ? $this->notifications->countUnread($user) : 0;
+    }
+
     /**
      * @return list<array<string, mixed>>
      */
@@ -95,7 +105,12 @@ final class Sidebar
                 $children[] = $child + ['active' => $child['route'] === $nav];
             }
             $item['children'] = $children;
-            $item['badge'] = 'forum_index' === $item['route'] ? $this->getUnreadTopicCount() : 0;
+            $item['badge'] = match ($item['route']) {
+                'forum_index' => $this->getUnreadTopicCount(),
+                'notification_index' => $this->getUnreadNotificationCount(),
+                default => 0,
+            };
+            $item['badge_label'] = 'notification_index' === $item['route'] ? 'notification.unread' : 'forum.unread';
             $items[] = $item;
         }
 

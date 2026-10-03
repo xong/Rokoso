@@ -23,7 +23,7 @@
                     {{ ux_icon(item.icon, {class: 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
                     <span class="truncate lg:collapsed:sr-only">{{ item.label|trans }}</span>
                     {% if item.badge > 0 %}
-                        <span class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white lg:collapsed:absolute lg:collapsed:top-0.5 lg:collapsed:right-0.5">{{ item.badge > 99 ? '99+' : item.badge }}<span class="sr-only"> {{ 'forum.unread'|trans }}</span></span>
+                        <span class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white lg:collapsed:absolute lg:collapsed:top-0.5 lg:collapsed:right-0.5">{{ item.badge > 99 ? '99+' : item.badge }}<span class="sr-only"> {{ item.badge_label|trans }}</span></span>
                     {% endif %}
                 </a>
 

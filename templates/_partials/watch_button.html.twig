@@ -1,0 +1,10 @@
+{# Beobachten an/aus; Variablen: target (Bereich, Thema oder Projekt), kind (board|topic|project) #}
+{% set watching = is_watching(target) %}
+<form method="post" action="{{ path('watch_toggle', {type: kind, id: target.id}) }}" class="inline">
+    <input type="hidden" name="_token" value="{{ csrf_token('watch') }}">
+    <input type="hidden" name="redirect" value="{{ app.request.requestUri }}">
+    <button type="submit" class="btn-icon {{ watching ? 'text-brand-600' : '' }}" aria-pressed="{{ watching ? 'true' : 'false' }}"
+            aria-label="{{ 'watch.label'|trans }}" title="{{ (watching ? 'watch.unwatch' : 'watch.watch')|trans }}">
+        {{ ux_icon(watching ? 'lucide:bell-ring' : 'lucide:bell', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </button>
+</form>

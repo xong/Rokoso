@@ -9,6 +9,7 @@ use App\Entity\Project;
 use App\Entity\User;
 use App\Form\ProjectFormType;
 use App\Mail\MessageFilter;
+use App\Notification\ActivityNotifier;
 use App\Repository\CommentRepository;
 use App\Repository\ForumTopicRepository;
 use App\Repository\MessageRepository;
@@ -96,11 +97,13 @@ final class ProjectController extends AbstractController
     #[Route('/{id<\d+>}/comment', name: 'project_comment', methods: ['POST'])]
     #[IsGranted(ProjectVoter::VIEW, 'project')]
     #[IsCsrfTokenValid('project-comment')]
-    public function comment(Request $request, Project $project, #[CurrentUser] User $user): Response
+    public function comment(Request $request, Project $project, ActivityNotifier $notifier, #[CurrentUser] User $user): Response
     {
         $comment = Comment::onProject($project, $user)->setBody($request->getPayload()->getString('body'));
         if ('' !== $comment->getBody()) {
             $this->em->persist($comment);
+            $this->em->flush();
+            $notifier->commentAdded($comment, $user);
             $this->em->flush();
         }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\NotificationEmail;
 use App\Enum\Theme;
 use App\Repository\UserRepository;
 use App\Util\Initials;
@@ -42,6 +43,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 10, enumType: Theme::class, options: ['default' => 'system'])]
     private Theme $theme = Theme::System;
+
+    #[ORM\Column(length: 10, enumType: NotificationEmail::class, options: ['default' => 'instant'])]
+    private NotificationEmail $notificationEmail = NotificationEmail::Instant;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastDigestAt = null;
 
     #[ORM\Column]
     private bool $verified = false;
@@ -134,6 +141,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setAvatar(?string $avatar): static
     {
         $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function getNotificationEmail(): NotificationEmail
+    {
+        return $this->notificationEmail;
+    }
+
+    public function setNotificationEmail(NotificationEmail $notificationEmail): static
+    {
+        $this->notificationEmail = $notificationEmail;
+
+        return $this;
+    }
+
+    public function getLastDigestAt(): ?\DateTimeImmutable
+    {
+        return $this->lastDigestAt;
+    }
+
+    public function setLastDigestAt(?\DateTimeImmutable $lastDigestAt): static
+    {
+        $this->lastDigestAt = $lastDigestAt;
 
         return $this;
     }

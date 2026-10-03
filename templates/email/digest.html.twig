@@ -1,0 +1,11 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ 'email.digest.intro'|trans({'%count%': items|length}) }}</p>
+    <ul style="padding-left:18px;">
+        {% for item in items %}
+            <li style="margin-bottom:8px;"><a href="{{ item.url }}" style="color:#0f172a;">{{ item.text }}</a><br><span style="font-size:12px;color:#64748b;">{{ item.date|date('d.m.Y H:i') }}</span></li>
+        {% endfor %}
+    </ul>
+    {{ include('email/_button.html.twig', {url: url, label: 'email.digest.button'|trans}) }}
+    <p style="font-size:12px;color:#64748b;">{{ 'email.notification.settings'|trans }} <a href="{{ settings_url }}" style="color:#2563eb;">{{ 'email.notification.settings_link'|trans }}</a></p>
+{% endblock %}

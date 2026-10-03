@@ -8,8 +8,8 @@
 | | |
 |---|---|
 | **Aktuelle Phase** | Ausbau 2 nach Systemvergleich (Phasen 20–34) |
-| **Nächster Schritt** | Phase 21 (Benachrichtigungen) |
-| **Letzte Sitzung** | 2026-10-04: Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
+| **Nächster Schritt** | Phase 22 (Aufgaben) |
+| **Letzte Sitzung** | 2026-10-04: Phase 21 (Benachrichtigungen mit Glocke, @-Erwähnungen, Beobachten, E-Mail sofort/täglich/aus, Web-Push; Cron `app:notify`; Entscheidung 49); davor Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
 **Starten:** `docker compose up -d` · `php bin/console doctrine:migrations:migrate -n` · `php bin/console app:demo --mails` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000 (Login `demo@coop.test` / `demo-passwort`)
 
@@ -136,11 +136,11 @@ Grundlage: Vergleich mit Front/Help Scout/Zammad (gemeinsames Postfach), Nextclo
 - [x] 20.7 **Regeln** pro Konto (Absender/Betreff enthält … → Projekt, Verantwortliche, erledigt)
 
 ## Phase 21 – Benachrichtigungen
-- [ ] 21.1 `Notification` + **Glocke** in der Navigation (zugewiesen, erwähnt, Kommentar, neues Thema/Beitrag in beobachtetem Bereich, Termin/Aufgabe fällig, Abstimmung offen, Kontaktanfrage)
-- [ ] 21.2 **@-Erwähnungen** in Kommentaren und Forum (Autovervollständigung)
-- [ ] 21.3 **Beobachten** von Forenbereichen/Themen und Projekten
-- [ ] 21.4 **E-Mail-Benachrichtigung** sofort/täglich/aus pro Person (Cron `app:notify`)
-- [ ] 21.5 **Web-Push** für die PWA (VAPID, minishlink/web-push)
+- [x] 21.1 `Notification` + **Glocke** in der Navigation (zugewiesen, erwähnt, Kommentar, neues Thema/Beitrag in beobachtetem Bereich, Termin/Aufgabe fällig, Abstimmung offen, Kontaktanfrage)
+- [x] 21.2 **@-Erwähnungen** in Kommentaren und Forum (Autovervollständigung)
+- [x] 21.3 **Beobachten** von Forenbereichen/Themen und Projekten
+- [x] 21.4 **E-Mail-Benachrichtigung** sofort/täglich/aus pro Person (Cron `app:notify`)
+- [x] 21.5 **Web-Push** für die PWA (VAPID, minishlink/web-push)
 
 ## Phase 22 – Aufgaben
 - [ ] 22.1 Aufgaben ohne Pflichtdatum (Frist optional), **Aufgabenliste** „Meine“/„Alle“/pro Projekt

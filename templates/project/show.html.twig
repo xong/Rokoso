@@ -7,6 +7,7 @@
 {% block detail_title %}{{ project.name }}{% endblock %}
 
 {% block detail_actions %}
+    {{ include('_partials/watch_button.html.twig', {target: project, kind: 'project'}) }}
     {% if is_granted('PROJECT_MANAGE', project) %}
         <a href="{{ path('project_edit', {id: project.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">
             {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
@@ -106,6 +107,7 @@
             delete_route: 'project_comment_delete',
             delete_params: {id: project.id},
             token: 'project-comment',
+            mention_org: project.organization,
         }) }}
     </div>
 {% endblock %}

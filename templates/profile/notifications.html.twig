@@ -1,0 +1,51 @@
+{% extends 'profile/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'profile.section_notifications'|trans }}{% endblock %}
+
+{% block form %}
+    <form method="post" class="space-y-4">
+        <input type="hidden" name="_token" value="{{ csrf_token('notification-settings') }}">
+        <fieldset class="space-y-2">
+            <legend class="mb-2 font-medium">{{ 'notification.email.legend'|trans }}</legend>
+            {% for mode in modes %}
+                <label class="flex items-start gap-2">
+                    <input type="radio" name="email" value="{{ mode.value }}" class="mt-1" {{ app.user.notificationEmail == mode ? 'checked' }}
+                           aria-describedby="email-{{ mode.value }}-help">
+                    <span>
+                        <span class="block">{{ mode.label|trans }}</span>
+                        <span id="email-{{ mode.value }}-help" class="block text-xs text-slate-500">{{ ('notification.email.' ~ mode.value ~ '_help')|trans }}</span>
+                    </span>
+                </label>
+            {% endfor %}
+        </fieldset>
+        <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+    </form>
+
+    <section aria-labelledby="push-heading" class="mt-8 border-t border-slate-200 pt-6">
+        <h3 id="push-heading" class="mb-2 font-medium">{{ 'notification.push.title'|trans }}</h3>
+        {% if push_key %}
+            <div data-controller="push"
+                 data-push-key-value="{{ push_key }}"
+                 data-push-url-value="{{ path('profile_push') }}"
+                 data-push-token-value="{{ csrf_token('push') }}"
+                 data-push-enabled-value="{{ 'notification.push.enabled'|trans }}"
+                 data-push-disabled-value="{{ 'notification.push.disabled'|trans }}"
+                 data-push-denied-value="{{ 'notification.push.denied'|trans }}"
+                 data-push-unsupported-value="{{ 'notification.push.unsupported'|trans }}"
+                 data-push-error-value="{{ 'notification.push.error'|trans }}">
+                <p class="mb-3 text-sm text-slate-600">{{ 'notification.push.help'|trans }}</p>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" class="btn-secondary" data-push-target="enable" data-action="push#enable">
+                        {{ ux_icon('lucide:bell-ring', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'notification.push.enable'|trans }}
+                    </button>
+                    <button type="button" class="btn-secondary" data-push-target="disable" data-action="push#disable" hidden>
+                        {{ ux_icon('lucide:bell-off', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'notification.push.disable'|trans }}
+                    </button>
+                </div>
+                <p class="mt-2 text-sm text-slate-600" role="status" data-push-target="status"></p>
+            </div>
+        {% else %}
+            <p class="text-sm text-slate-600">{{ 'notification.push.not_configured'|trans }}</p>
+        {% endif %}
+    </section>
+{% endblock %}

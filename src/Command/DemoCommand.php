@@ -13,13 +13,16 @@ use App\Entity\ForumTopic;
 use App\Entity\MailAccount;
 use App\Entity\MailRule;
 use App\Entity\Message;
+use App\Entity\Notification;
 use App\Entity\Organization;
 use App\Entity\Project;
 use App\Entity\User;
+use App\Entity\Watch;
 use App\Enum\CalendarItemType;
 use App\Enum\MailEncryption;
 use App\Enum\MailRuleField;
 use App\Enum\MessageType;
+use App\Enum\NotificationType;
 use App\Enum\OrganizationRole;
 use App\Enum\Recurrence;
 use App\Mail\MailSynchronizer;
@@ -32,6 +35,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Local demo data: user demo@coop.test (password "demo-passwort"), organization, projects and a mail
@@ -46,6 +50,7 @@ final readonly class DemoCommand
         private UserPasswordHasherInterface $hasher,
         private SecretBox $secretBox,
         private MailSynchronizer $synchronizer,
+        private UrlGeneratorInterface $urls,
     ) {
     }
 
@@ -103,6 +108,13 @@ final readonly class DemoCommand
             $topic->addPost((new ForumPost($topic, $colleague))->setBody("Hallo zusammen,\n\nwelche Termine stehen schon fest?\n\n- Gesamtelternbeirat\n- **Elternabend** im Herbst\n\nKim"));
             $topic->addPost((new ForumPost($topic, $user))->setBody('Der Elternabend ist eingetragen, siehe *Kalender*.'));
             $this->em->persist($topic);
+            $this->em->persist(new Watch($user, $general));
+            $this->em->persist(new Watch($user, $projects[0]));
+            $this->em->persist(new Watch($colleague, $topic));
+            $this->em->flush();
+            $topicUrl = $this->urls->generate('forum_topic_show', ['id' => $topic->getId()]);
+            $this->em->persist(new Notification($user, NotificationType::Post, $topic->getTitle(), $topicUrl, $colleague));
+            $this->em->persist(new Notification($colleague, NotificationType::Mentioned, $topic->getTitle(), $topicUrl, $user));
 
             $account = (new MailAccount($org))
                 ->setName('Postfach SEV')

@@ -9,6 +9,7 @@ use App\Entity\MailAccount;
 use App\Entity\Message;
 use App\Enum\MessageEventType;
 use App\Enum\MessageFolder;
+use App\Notification\ActivityNotifier;
 use App\Repository\MailRuleRepository;
 use App\Repository\MessageRepository;
 use App\Service\AttachmentStorage;
@@ -21,6 +22,7 @@ use Psr\Log\LoggerInterface;
 final readonly class MailSynchronizer
 {
     public function __construct(
+        private ActivityNotifier $notifier,
         private MailboxReader $reader,
         private MessageParser $parser,
         private MessageRepository $messages,
@@ -107,6 +109,10 @@ final readonly class MailSynchronizer
 
         $this->em->persist($message);
         $this->em->flush();
+        if (!$message->isDone() && !$message->getAssignees()->isEmpty()) {
+            $this->notifier->messageAssigned($message, $message->getAssignees(), null);
+            $this->em->flush();
+        }
 
         return true;
     }

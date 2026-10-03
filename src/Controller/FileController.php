@@ -13,6 +13,7 @@ use App\Entity\User;
 use App\Form\FileFormType;
 use App\Form\FolderFormType;
 use App\Form\UploadFormType;
+use App\Notification\ActivityNotifier;
 use App\Repository\CommentRepository;
 use App\Repository\FolderRepository;
 use App\Repository\OrganizationRepository;
@@ -248,11 +249,13 @@ final class FileController extends AbstractController
     #[Route('/{id<\d+>}/comment', name: 'file_comment', methods: ['POST'])]
     #[IsGranted(FolderVoter::VIEW, 'file')]
     #[IsCsrfTokenValid('file-comment')]
-    public function comment(Request $request, StoredFile $file, #[CurrentUser] User $user): Response
+    public function comment(Request $request, StoredFile $file, ActivityNotifier $notifier, #[CurrentUser] User $user): Response
     {
         $comment = Comment::onFile($file, $user)->setBody($request->getPayload()->getString('body'));
         if ('' !== $comment->getBody()) {
             $this->em->persist($comment);
+            $this->em->flush();
+            $notifier->commentAdded($comment, $user);
             $this->em->flush();
         }
 

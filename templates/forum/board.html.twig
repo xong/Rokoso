@@ -6,6 +6,7 @@
 {% block detail_title %}{{ board.name }}{% endblock %}
 
 {% block detail_actions %}
+    {{ include('_partials/watch_button.html.twig', {target: board, kind: 'board'}) }}
     <a href="{{ path('forum_board_new', {parent: board.id}) }}" class="btn-icon" aria-label="{{ 'forum.board_new_sub'|trans({'%name%': board.name}) }}" title="{{ 'forum.board_new_sub'|trans({'%name%': board.name}) }}">
         {{ ux_icon('lucide:folder-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
     </a>

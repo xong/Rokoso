@@ -10,6 +10,7 @@ use App\Entity\CalendarItem;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
 use App\Form\CalendarItemFormType;
+use App\Notification\ActivityNotifier;
 use App\Repository\MembershipRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
@@ -32,6 +33,7 @@ final class CalendarController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly ProjectRepository $projects,
         private readonly MembershipRepository $memberships,
+        private readonly ActivityNotifier $notifier,
     ) {
     }
 
@@ -128,6 +130,7 @@ final class CalendarController extends AbstractController
     private function handleForm(Request $request, User $user, CalendarItem $item, OrganizationRepository $organizations): Response
     {
         $isNew = null === $item->getId();
+        $previousAssignees = $item->getAssignees()->toArray();
         $form = $this->createForm(CalendarItemFormType::class, $item, [
             'users' => $this->memberships->colleaguesOf($user),
             'organizations' => $organizations->findForUser($user),
@@ -141,6 +144,8 @@ final class CalendarController extends AbstractController
                 $item->setOrganization($item->getProject()->getOrganization());
             }
             $this->em->persist($item);
+            $this->em->flush();
+            $this->notifier->calendarAssigned($item, array_filter($item->getAssignees()->toArray(), static fn (User $u): bool => !\in_array($u, $previousAssignees, true)), $user);
             $this->em->flush();
             $this->addFlash('success', $isNew ? 'calendar.created' : 'flash.saved');
 

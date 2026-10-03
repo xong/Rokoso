@@ -1,0 +1,52 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set show_list = false %}
+
+{% block title %}{{ 'notification.title'|trans }}{% endblock %}
+{% block detail_title %}{{ 'notification.title'|trans }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('profile_notifications') }}" class="btn-icon" aria-label="{{ 'notification.settings'|trans }}" title="{{ 'notification.settings'|trans }}">
+        {{ ux_icon('lucide:settings', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-3xl p-4 lg:p-6">
+        <div class="mb-4 flex flex-wrap items-center gap-2">
+            <nav aria-label="{{ 'notification.filter'|trans }}" class="flex gap-1 rounded-lg bg-slate-100 p-1 text-sm">
+                <a href="{{ path('notification_index') }}" {% if not unread_only %}aria-current="page"{% endif %}
+                   class="rounded-md px-3 py-1 {{ not unread_only ? 'bg-surface font-medium shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">{{ 'notification.all'|trans }}</a>
+                <a href="{{ path('notification_index', {unread: 1}) }}" {% if unread_only %}aria-current="page"{% endif %}
+                   class="rounded-md px-3 py-1 {{ unread_only ? 'bg-surface font-medium shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">{{ 'notification.unread_filter'|trans({'%count%': unread_count}) }}</a>
+            </nav>
+            {% if unread_count > 0 %}
+                {{ ui.post_button(path('notification_read_all'), 'notifications', 'notification.mark_all_read', {form_class: 'ml-auto', icon: 'lucide:check-check'}) }}
+            {% endif %}
+        </div>
+
+        {% if notifications is empty %}
+            {{ ui.empty(unread_only ? 'notification.empty_unread' : 'notification.empty', 'lucide:bell-off') }}
+        {% else %}
+            <ul role="list" class="divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-200 bg-surface">
+                {% for n in notifications %}
+                    <li>
+                        <a href="{{ path('notification_open', {id: n.id}) }}"
+                           class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 {{ n.read ? 'text-slate-600' : 'bg-brand-50/40' }}">
+                            {{ ux_icon(n.type.icon, {class: 'mt-0.5 size-4 shrink-0 ' ~ (n.read ? 'text-slate-400' : 'text-brand-600'), 'aria-hidden': 'true'}) }}
+                            <span class="min-w-0 flex-1">
+                                <span class="block {{ n.read ? '' : 'font-semibold' }}">{{ n|notification_text }}</span>
+                                <time datetime="{{ n.createdAt|date('c') }}" class="text-xs text-slate-500">{{ n.createdAt|short_date }}</time>
+                            </span>
+                            {% if not n.read %}
+                                <span class="mt-1.5 size-2 shrink-0 rounded-full bg-brand-600" aria-hidden="true"></span>
+                                <span class="sr-only">{{ 'notification.unread_marker'|trans }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock %}

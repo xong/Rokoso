@@ -1,0 +1,10 @@
+{{ 'email.digest.intro'|trans({'%count%': items|length}) }}
+
+{% for item in items %}
+- {{ item.text }} ({{ item.date|date('d.m.Y H:i') }})
+  {{ item.url }}
+{% endfor %}
+
+{{ url }}
+
+{{ 'email.notification.settings'|trans }} {{ settings_url }}

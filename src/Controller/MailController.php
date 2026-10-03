@@ -15,6 +15,7 @@ use App\Mail\MessageFilter;
 use App\Mail\MessageHtmlRenderer;
 use App\Mail\ParticipantResolver;
 use App\Mail\ReadTracker;
+use App\Notification\ActivityNotifier;
 use App\Repository\MailAccountRepository;
 use App\Repository\MessageRepository;
 use App\Repository\ProjectRepository;
@@ -181,11 +182,13 @@ final class MailController extends AbstractController
     #[Route('/{id<\d+>}/comment', name: 'mail_comment', methods: ['POST'])]
     #[IsGranted(MessageVoter::VIEW, 'message')]
     #[IsCsrfTokenValid('mail-comment')]
-    public function comment(Request $request, Message $message, #[CurrentUser] User $user): Response
+    public function comment(Request $request, Message $message, ActivityNotifier $notifier, #[CurrentUser] User $user): Response
     {
         $comment = Comment::onMessage($message, $user)->setBody($request->getPayload()->getString('body'));
         if ('' !== $comment->getBody()) {
             $this->em->persist($comment);
+            $this->em->flush();
+            $notifier->commentAdded($comment, $user);
             $this->em->flush();
         }
 
@@ -212,8 +215,9 @@ final class MailController extends AbstractController
     #[Route('/{id<\d+>}/assignees', name: 'mail_assignees', methods: ['POST'])]
     #[IsGranted(MessageVoter::VIEW, 'message')]
     #[IsCsrfTokenValid('mail-action')]
-    public function assignees(Request $request, Message $message, ParticipantResolver $participants, #[CurrentUser] User $user): Response
+    public function assignees(Request $request, Message $message, ParticipantResolver $participants, ActivityNotifier $notifier, #[CurrentUser] User $user): Response
     {
+        $added = [];
         $ids = array_map(intval(...), $request->getPayload()->all('assignees'));
         $candidates = $participants->candidates($message);
         foreach ($message->getAssignees()->toArray() as $assignee) {
@@ -224,8 +228,10 @@ final class MailController extends AbstractController
         foreach ($candidates as $candidate) {
             if (\in_array($candidate->getId(), $ids, true) && !$message->isAssignedTo($candidate)) {
                 $message->addAssignee($candidate)->log(MessageEventType::Assigned, $user, $candidate->getName());
+                $added[] = $candidate;
             }
         }
+        $notifier->messageAssigned($message, $added, $user);
         $this->em->flush();
 
         return $this->redirectBack($request, $message);

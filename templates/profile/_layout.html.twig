@@ -19,6 +19,7 @@
             {key: 'profile', route: 'profile_edit', icon: 'lucide:user-round', label: 'profile.section_profile'},
             {key: 'password', route: 'profile_password', icon: 'lucide:key-round', label: 'profile.section_password'},
             {key: 'email', route: 'profile_email', icon: 'lucide:at-sign', label: 'profile.section_email'},
+            {key: 'notifications', route: 'profile_notifications', icon: 'lucide:bell', label: 'profile.section_notifications'},
         ] %}
             {% set active = section|default('') == item.key %}
             <li>

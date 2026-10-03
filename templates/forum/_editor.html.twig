@@ -1,16 +1,20 @@
 {# Markdown-Textfeld mit Bild-Upload (Drag&Drop, Einfügen, Knopf) und Anhängen; post_form = ForumPostFormType #}
-<div class="space-y-4" data-controller="markdown-editor"
+<div class="space-y-4" data-controller="markdown-editor mention"
+     data-mention-names-value="{{ mention_names(board.organization)|json_encode }}"
+     data-mention-count-value="{{ 'notification.mention.count'|trans }}"
      data-markdown-editor-url-value="{{ path('forum_image_upload', {id: board.id}) }}"
      data-markdown-editor-token-value="{{ csrf_token('forum-image') }}"
      data-markdown-editor-uploading-value="{{ 'forum.image_uploading'|trans }}"
      data-markdown-editor-done-value="{{ 'forum.image_inserted'|trans }}"
      data-markdown-editor-error-value="{{ 'forum.image_invalid'|trans }}">
-    <div>
+    <div class="relative">
         {{ form_label(post_form.body) }}
         {{ form_widget(post_form.body, {attr: {
             'data-markdown-editor-target': 'input',
-            'data-action': 'dragover->markdown-editor#over drop->markdown-editor#drop paste->markdown-editor#paste',
+            'data-mention-target': 'input',
+            'data-action': 'dragover->markdown-editor#over drop->markdown-editor#drop paste->markdown-editor#paste input->mention#update keydown->mention#key blur->mention#close',
         }}) }}
+        {{ include('_partials/mention_list.html.twig') }}
         <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
             {{ form_help(post_form.body) }}
             <label class="link cursor-pointer text-xs">

@@ -15,6 +15,7 @@ use App\Entity\User;
 use App\Form\ForumBoardFormType;
 use App\Form\ForumPostFormType;
 use App\Form\ForumTopicFormType;
+use App\Notification\ActivityNotifier;
 use App\Repository\ForumBoardRepository;
 use App\Repository\ForumTopicRepository;
 use App\Repository\OrganizationRepository;
@@ -181,7 +182,7 @@ final class ForumController extends AbstractController
 
     #[Route('/board/{id<\d+>}/topic/new', name: 'forum_topic_new')]
     #[IsGranted(ForumVoter::VIEW, 'board')]
-    public function newTopic(Request $request, ForumBoard $board, #[CurrentUser] User $user): Response
+    public function newTopic(Request $request, ForumBoard $board, ActivityNotifier $notifier, #[CurrentUser] User $user): Response
     {
         $topic = new ForumTopic($board, $user);
         $post = new ForumPost($topic, $user);
@@ -196,6 +197,8 @@ final class ForumController extends AbstractController
             $this->attachUploads($form->get('post'), $post, $user);
             $this->markRead($user, $topic);
             $this->em->flush();
+            $notifier->topicCreated($topic, $post, $user);
+            $this->em->flush();
 
             return $this->redirectToRoute('forum_topic_show', ['id' => $topic->getId()]);
         }
@@ -209,7 +212,7 @@ final class ForumController extends AbstractController
 
     #[Route('/topic/{id<\d+>}', name: 'forum_topic_show')]
     #[IsGranted(ForumVoter::VIEW, 'topic')]
-    public function showTopic(Request $request, ForumTopic $topic, #[CurrentUser] User $user): Response
+    public function showTopic(Request $request, ForumTopic $topic, ActivityNotifier $notifier, #[CurrentUser] User $user): Response
     {
         $post = new ForumPost($topic, $user);
         $form = $this->createForm(ForumPostFormType::class, $post, [
@@ -221,6 +224,8 @@ final class ForumController extends AbstractController
             $this->em->persist($post);
             $this->attachUploads($form, $post, $user);
             $this->markRead($user, $topic);
+            $this->em->flush();
+            $notifier->postAdded($post, $user);
             $this->em->flush();
 
             return $this->redirect($this->generateUrl('forum_topic_show', ['id' => $topic->getId()]).'#post-'.$post->getId());

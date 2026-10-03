@@ -1,0 +1,6 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ text }}</p>
+    {{ include('email/_button.html.twig', {url: url, label: 'email.notification.button'|trans}) }}
+    <p style="font-size:12px;color:#64748b;">{{ 'email.notification.settings'|trans }} <a href="{{ settings_url }}" style="color:#2563eb;">{{ 'email.notification.settings_link'|trans }}</a></p>
+{% endblock %}

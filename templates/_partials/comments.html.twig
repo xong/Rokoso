@@ -1,6 +1,7 @@
 {#
     Kommentarspalte (Nachricht, Projekt, Datei …). Variablen:
-    comments, add_url, delete_route, delete_params (ohne comment), token (CSRF-ID), fields (zusätzliche versteckte Felder, optional)
+    comments, add_url, delete_route, delete_params (ohne comment), token (CSRF-ID), fields (zusätzliche versteckte Felder, optional),
+    mention_org (Organisation für @-Erwähnungen, optional)
 #}
 {% set fields = fields ?? {} %}
 <aside id="comments" aria-labelledby="comments-heading" tabindex="-1"
@@ -37,7 +38,14 @@
         <input type="hidden" name="_token" value="{{ csrf_token(token) }}">
         {% for name, value in fields %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
         <label for="comment-body" class="sr-only">{{ 'mail.comments.new'|trans }}</label>
-        <textarea id="comment-body" name="body" rows="2" required class="input mb-2 resize-y" placeholder="{{ 'mail.comments.placeholder'|trans }}"></textarea>
+        <div class="relative mb-2" data-controller="mention" data-mention-names-value="{{ mention_names(mention_org ?? null)|json_encode }}"
+             data-mention-count-value="{{ 'notification.mention.count'|trans }}">
+            <textarea id="comment-body" name="body" rows="2" required class="input resize-y" placeholder="{{ 'mail.comments.placeholder'|trans }}"
+                      aria-describedby="comment-mention-help"
+                      data-mention-target="input" data-action="input->mention#update keydown->mention#key blur->mention#close"></textarea>
+            <p id="comment-mention-help" class="sr-only">{{ 'notification.mention.help'|trans }}</p>
+            {{ include('_partials/mention_list.html.twig') }}
+        </div>
         <button type="submit" class="btn-primary w-full">{{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'mail.comments.submit'|trans }}</button>
     </form>
 </aside>
