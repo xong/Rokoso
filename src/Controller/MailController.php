@@ -20,10 +20,12 @@ use App\Security\Voter\MessageVoter;
 use App\Service\AttachmentStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
@@ -78,9 +80,12 @@ final class MailController extends AbstractController
      */
     #[Route('/{id<\d+>}/html', name: 'mail_html')]
     #[IsGranted(MessageVoter::VIEW, 'message')]
-    public function html(Request $request, Message $message, MessageHtmlRenderer $renderer): Response
+    public function html(Request $request, Message $message, MessageHtmlRenderer $renderer, #[CurrentUser] User $user, #[Autowire(service: 'profiler')] ?Profiler $profiler): Response
     {
-        $response = new Response($renderer->render($message));
+        // Otherwise the dev toolbar is injected into the mail document (its scripts are blocked by the CSP)
+        $profiler?->disable();
+
+        $response = new Response($renderer->render($message, $user->getTheme()));
         $response->headers->set('Content-Security-Policy', $renderer->contentSecurityPolicy($request->query->getBoolean('images')));
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'no-referrer');

@@ -96,7 +96,7 @@
             {% if show_html %}
                 <iframe src="{{ path('mail_html', {id: message.id, images: load_images ? 1 : 0}) }}" title="{{ 'mail.html_frame'|trans }}"
                         sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"
-                        class="min-h-[60vh] w-full flex-1 border-0 bg-white [color-scheme:light]"></iframe>
+                        class="min-h-[60vh] w-full flex-1 border-0 bg-surface"></iframe>
             {% else %}
                 <div class="flex-1 p-4 font-[inherit] break-words whitespace-pre-wrap">{{ message.textBody ?? message.snippet }}</div>
             {% endif %}

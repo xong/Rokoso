@@ -9,6 +9,7 @@ use App\Entity\Message;
 use App\Entity\Organization;
 use App\Entity\User;
 use App\Enum\OrganizationRole;
+use App\Enum\Theme;
 use App\Mail\MailboxReader;
 use App\Mail\MailSynchronizer;
 use App\Tests\AppTestCase;
@@ -73,6 +74,12 @@ final class MailTest extends AppTestCase
         self::assertStringNotContainsString('<script', $html);
         self::assertStringContainsString('Zebrastreifen', $html);
         self::assertStringContainsString('img-src data:;', (string) $this->client->getResponse()->headers->get('Content-Security-Policy'));
+        self::assertStringContainsString('@media (prefers-color-scheme: dark){html{', $html);
+
+        $this->em()->getRepository(User::class)->find($this->user->getId())?->setTheme(Theme::Light);
+        $this->em()->flush();
+        $this->client->request('GET', '/mail/'.$message->getId().'/html');
+        self::assertStringNotContainsString('invert', (string) $this->client->getResponse()->getContent());
 
         $this->client->request('GET', '/mail/inbox/'.$message->getId().'?view=text');
         self::assertSelectorTextContains('main', 'Viele Grüße');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Mail;
 
 use App\Entity\Message;
+use App\Enum\Theme;
 use App\Service\AttachmentStorage;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
@@ -24,7 +25,14 @@ final readonly class MessageHtmlRenderer
     ) {
     }
 
-    public function render(Message $message): string
+    /**
+     * Dark mode inverts the whole mail (its inline colours stay readable) and inverts media back.
+     * The light background #e2eaf8 ends up as the app's dark surface colour after the filter.
+     */
+    private const string DARK_CSS = 'html{background:#e2eaf8;filter:invert(1) hue-rotate(180deg)}'
+        .'img,video,picture,[style*="background-image"],[background]{filter:invert(1) hue-rotate(180deg)}';
+
+    public function render(Message $message, Theme $theme = Theme::Light): string
     {
         $html = (string) $message->getHtmlBody();
 
@@ -38,8 +46,14 @@ final readonly class MessageHtmlRenderer
 
         $body = $this->sanitizer->sanitize($html);
 
+        $dark = match ($theme) {
+            Theme::Light => '',
+            Theme::Dark => self::DARK_CSS,
+            Theme::System => '@media (prefers-color-scheme: dark){'.self::DARK_CSS.'}',
+        };
+
         return '<!DOCTYPE html><html><head><meta charset="utf-8"><base target="_blank">'
-            .'<style>body{margin:0;padding:16px;font:14px/1.5 system-ui,sans-serif;color:#0f172a;word-wrap:break-word}img{max-width:100%;height:auto}table{max-width:100%}</style>'
+            .'<style>html{background:#fff}body{margin:0;padding:16px;font:14px/1.5 system-ui,sans-serif;color:#0f172a;word-wrap:break-word}img{max-width:100%;height:auto}table{max-width:100%}'.$dark.'</style>'
             .'</head><body>'.$body.'</body></html>';
     }
 
