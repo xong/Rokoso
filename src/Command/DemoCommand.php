@@ -11,12 +11,14 @@ use App\Entity\ForumBoard;
 use App\Entity\ForumPost;
 use App\Entity\ForumTopic;
 use App\Entity\MailAccount;
+use App\Entity\MailRule;
 use App\Entity\Message;
 use App\Entity\Organization;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
 use App\Enum\MailEncryption;
+use App\Enum\MailRuleField;
 use App\Enum\MessageType;
 use App\Enum\OrganizationRole;
 use App\Enum\Recurrence;
@@ -110,6 +112,8 @@ final readonly class DemoCommand
                 ->setImapUsername('sev@coop.test')->setImapPassword($this->secretBox->encrypt('demo'))
                 ->setSmtpHost('127.0.0.1')->setSmtpPort(3025)->setSmtpEncryption(MailEncryption::None);
             $this->em->persist($account);
+            $this->em->persist((new MailRule($org))->setName('Rundbrief Landeselternrat')->setField(MailRuleField::From)
+                ->setNeedle('newsletter@')->setMarkDone(true));
             $this->em->flush();
             $io->success('Demo angelegt: demo@coop.test / demo-passwort (und kim@coop.test)');
         }
@@ -119,11 +123,21 @@ final readonly class DemoCommand
             $samples = [
                 ['Eva Elternteil <eva@example.org>', 'Zebrastreifen an der Grundschule Nord', "Hallo zusammen,\n\nwie ist der Stand beim Zebrastreifen? Die Kinder müssen dort jeden Morgen über die Straße.\n\nViele Grüße\nEva"],
                 ['Schulamt Musterstadt <info@schulamt.example.org>', 'Einladung: Gesamtelternbeirat am 15.10.', "Sehr geehrte Damen und Herren,\n\nanbei die Einladung und Tagesordnung.\n\nMit freundlichen Grüßen\nSchulamt"],
-                ['Bert Beispiel <bert@example.org>', 'Re: Elternabend Herbst', "Ich kann den Raum in der Aula organisieren.\n\nBert"],
+                ['Bert Beispiel <bert@example.org>', 'Elternabend Herbst', "Wer kümmert sich um den Raum?\n\nBert", 'elternabend@example.org'],
+                ['Eva Elternteil <eva@example.org>', 'Re: Elternabend Herbst', "Ich kann die Aula organisieren.\n\nEva", null, 'elternabend@example.org'],
+                ['Landeselternrat <newsletter@ler.example.org>', 'Rundbrief Oktober', "Liebe Elternvertretungen,\n\nhier unsere Neuigkeiten.\n\nLandeselternrat"],
             ];
-            foreach ($samples as [$from, $subject, $text]) {
+            foreach ($samples as $sample) {
+                [$from, $subject, $text] = $sample;
                 $email = (new Email())->from($from)->to('sev@coop.test')->subject($subject)->text($text)
                     ->html('<p>'.nl2br(htmlspecialchars($text)).'</p>');
+                if (isset($sample[3])) {
+                    $email->getHeaders()->addIdHeader('Message-ID', $sample[3]);
+                }
+                if (isset($sample[4])) {
+                    $email->getHeaders()->addIdHeader('In-Reply-To', $sample[4]);
+                    $email->getHeaders()->addIdHeader('References', $sample[4]);
+                }
                 if (str_contains($subject, 'Einladung')) {
                     $email->attach("Tagesordnung\n1. Begrüßung\n2. Schulwege\n", 'tagesordnung.txt', 'text/plain');
                 }

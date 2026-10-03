@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Membership;
 use App\Entity\Message;
 use App\Entity\MessageRead;
+use App\Entity\Organization;
 use App\Entity\User;
 use App\Enum\MessageFolder;
 use App\Enum\MessageType;
@@ -73,13 +74,18 @@ class MessageRepository extends ServiceEntityRepository
                 ->andWhere('m.folder = :sent OR (m.type = :internal AND m.author = :viewer)')
                 ->setParameter('sent', MessageFolder::Sent->value)
                 ->setParameter('internal', MessageType::Internal->value),
-            default => $qb->andWhere('m.trashedAt IS NULL')
-                ->andWhere('m.folder = :inbox')
-                ->andWhere('m.project IS NULL')
-                ->andWhere('m.type = :email OR m.author IS NULL OR m.author != :viewer')
-                ->setParameter('inbox', MessageFolder::Inbox->value)
-                ->setParameter('email', MessageType::Email->value),
+            'done' => $qb->andWhere('m.trashedAt IS NULL')->andWhere('m.doneAt IS NOT NULL'),
+            'snoozed' => $qb->andWhere('m.trashedAt IS NULL')
+                ->andWhere('m.doneAt IS NULL')
+                ->andWhere('m.snoozedUntil > :now')
+                ->setParameter('now', new \DateTimeImmutable()),
+            default => $this->applyInbox($qb),
         };
+        if ('snoozed' === $filter->folder) {
+            $qb->orderBy('m.snoozedUntil', 'ASC');
+        } elseif ('done' === $filter->folder) {
+            $qb->orderBy('m.doneAt', 'DESC');
+        }
 
         match ($filter->show) {
             'unassigned' => $qb->andWhere('m.assignees IS EMPTY'),
@@ -132,17 +138,71 @@ class MessageRepository extends ServiceEntityRepository
 
     public function countUnreadInbox(User $user): int
     {
-        return (int) $this->visibleQuery($user)
+        $qb = $this->visibleQuery($user)
             ->select('COUNT(m.id)')
-            ->andWhere('m.trashedAt IS NULL')
-            ->andWhere('m.folder = :inbox')
-            ->andWhere('m.project IS NULL')
-            ->andWhere('m.type = :email OR m.author IS NULL OR m.author != :viewer')
             ->andWhere('NOT EXISTS (SELECT 1 FROM '.MessageRead::class.' ur WHERE ur.message = m AND ur.user = :viewer)')
+        ;
+        $qb = $this->applyInbox($qb);
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * Inbox = everything open: not trashed, not done, not snoozed, not written by the viewer.
+     * The project does not matter (Entscheidung 39).
+     */
+    private function applyInbox(QueryBuilder $qb): QueryBuilder
+    {
+        return $qb->andWhere('m.trashedAt IS NULL')
+            ->andWhere('m.folder = :inbox')
+            ->andWhere('m.doneAt IS NULL')
+            ->andWhere('m.snoozedUntil IS NULL OR m.snoozedUntil <= :now')
+            ->andWhere('m.type = :email OR m.author IS NULL OR m.author != :viewer')
             ->setParameter('inbox', MessageFolder::Inbox->value)
             ->setParameter('email', MessageType::Email->value)
+            ->setParameter('now', new \DateTimeImmutable());
+    }
+
+    /**
+     * Visible messages of the same conversation, oldest first.
+     *
+     * @return list<Message>
+     */
+    public function findThread(Message $message, User $user): array
+    {
+        if (null === $message->getThreadKey()) {
+            return [$message];
+        }
+
+        /* @var list<Message> */
+        return $this->visibleQuery($user)
+            ->andWhere('m.threadKey = :key')
+            ->andWhere('m.trashedAt IS NULL OR m = :self')
+            ->setParameter('key', $message->getThreadKey())
+            ->setParameter('self', $message)
+            ->orderBy('m.date', 'ASC')
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getResult();
+    }
+
+    /**
+     * Thread key of an already stored message with this Message-ID (same organization).
+     */
+    public function findThreadKey(?Organization $organization, string $messageIdHeader): ?string
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->select('m.threadKey')
+            ->andWhere('m.messageIdHeader = :mid')
+            ->andWhere('m.threadKey IS NOT NULL')
+            ->setParameter('mid', $messageIdHeader)
+            ->setMaxResults(1);
+        if (null !== $organization) {
+            $qb->andWhere('m.organization = :org')->setParameter('org', $organization);
+        }
+        /** @var list<array{threadKey: string}> $rows */
+        $rows = $qb->getQuery()->getArrayResult();
+
+        return $rows[0]['threadKey'] ?? null;
     }
 
     public function existsForAccount(int $accountId, ?string $messageIdHeader, int $uid): bool

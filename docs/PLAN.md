@@ -8,8 +8,8 @@
 | | |
 |---|---|
 | **Aktuelle Phase** | Ausbau 2 nach Systemvergleich (Phasen 20–34) |
-| **Nächster Schritt** | Phase 20 (Status-Modell) |
-| **Letzte Sitzung** | 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
+| **Nächster Schritt** | Phase 21 (Benachrichtigungen) |
+| **Letzte Sitzung** | 2026-10-04: Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
 **Starten:** `docker compose up -d` · `php bin/console doctrine:migrations:migrate -n` · `php bin/console app:demo --mails` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000 (Login `demo@coop.test` / `demo-passwort`)
 
@@ -127,13 +127,13 @@ Ziel: lauffähige, leere Anwendung mit Layout-Gerüst.
 Grundlage: Vergleich mit Front/Help Scout/Zammad (gemeinsames Postfach), Nextcloud (Groupware), Discourse (Forum), OpenSlides/Loomio (Gremienarbeit), SchoolFox/Sdui (Elternkommunikation). Entscheidungen des Projektinhabers: #39–#47 in `ENTSCHEIDUNGEN.md`. Reihenfolge: Gremienarbeit früh, weil sie den Großteil der Arbeitszeit ausmacht.
 
 ## Phase 20 – Postfach: Status-Modell
-- [ ] 20.1 Status **offen/erledigt** pro Nachricht (wer, wann); Eingang = offen, unabhängig vom Projekt (ersetzt Entscheidung 34; Projektzuordnung bleibt); Ordner „Erledigt“; neue Antwort in der Unterhaltung öffnet wieder
-- [ ] 20.2 **Rückgängig-Meldung** (Toast) für erledigt, Papierkorb, Projekt
-- [ ] 20.3 **Wiedervorlage** („Snooze“ bis Datum) mit Ordner „Wiedervorlage“; fällige tauchen wieder im Eingang auf
-- [ ] 20.4 **Verlauf** pro Nachricht (zugewiesen, Projekt, erledigt, beantwortet, weitergeleitet)
-- [ ] 20.5 **Mehrfachauswahl** in der Liste mit Sammelaktionen (erledigt, Papierkorb, Projekt, zuweisen, gelesen)
-- [ ] 20.6 **Unterhaltungen (Threads)** über `In-Reply-To`/`References`, im Detail als Verlauf
-- [ ] 20.7 **Regeln** pro Konto (Absender/Betreff enthält … → Projekt, Verantwortliche, erledigt)
+- [x] 20.1 Status **offen/erledigt** pro Nachricht (wer, wann); Eingang = offen, unabhängig vom Projekt (ersetzt Entscheidung 34; Projektzuordnung bleibt); Ordner „Erledigt“; neue Antwort in der Unterhaltung öffnet wieder
+- [x] 20.2 **Rückgängig-Meldung** (Toast) für erledigt, Papierkorb, Projekt
+- [x] 20.3 **Wiedervorlage** („Snooze“ bis Datum) mit Ordner „Wiedervorlage“; fällige tauchen wieder im Eingang auf
+- [x] 20.4 **Verlauf** pro Nachricht (zugewiesen, Projekt, erledigt, beantwortet, weitergeleitet)
+- [x] 20.5 **Mehrfachauswahl** in der Liste mit Sammelaktionen (erledigt, Papierkorb, Projekt, zuweisen, gelesen)
+- [x] 20.6 **Unterhaltungen (Threads)** über `In-Reply-To`/`References`, im Detail als Verlauf
+- [x] 20.7 **Regeln** pro Konto (Absender/Betreff enthält … → Projekt, Verantwortliche, erledigt)
 
 ## Phase 21 – Benachrichtigungen
 - [ ] 21.1 `Notification` + **Glocke** in der Navigation (zugewiesen, erwähnt, Kommentar, neues Thema/Beitrag in beobachtetem Bereich, Termin/Aufgabe fällig, Abstimmung offen, Kontaktanfrage)

@@ -14,6 +14,8 @@ nav:
     mail_inbox: Eingang
     mail_all: Alle E-Mails
     mail_sent: Ausgang
+    mail_done: Erledigt
+    mail_snoozed: Wiedervorlage
     mail_trash: Papierkorb
     mail_compose: Neue E-Mail
     mail_message: Neue Nachricht
@@ -38,6 +40,8 @@ action:
     search: Suchen
     show: Anzeigen
     confirm_delete: Wirklich löschen?
+    undo: Rückgängig
+    ok: OK
 
 flash:
     saved: Gespeichert.
@@ -249,9 +253,87 @@ mail_account:
         starttls: STARTTLS
         none: keine
 
+mail_rule:
+    title: Postfach-Regeln
+    new: Neue Regel
+    none: Noch keine Regeln. Regeln ordnen neue E-Mails automatisch Projekten oder Verantwortlichen zu.
+    intro: Regeln werden auf neu abgerufene E-Mails angewendet.
+    name: Bezeichnung
+    account: E-Mail-Konto
+    all_accounts: Alle Konten der Organisation
+    needle: enthält
+    needle_help: Groß-/Kleinschreibung spielt keine Rolle.
+    project: Projekt zuordnen
+    mark_done: Direkt als erledigt markieren
+    mark_done_help: z. B. für Newsletter, die nur zur Information dienen.
+    enabled: Aktiv
+    disabled: inaktiv
+    delete: Regel löschen
+    delete_confirm: Regel wirklich löschen?
+    section_condition: Wenn …
+    section_action: … dann
+    summary: '%field% enthält „%needle%“'
+    field:
+        label: Feld
+        from: Absender
+        subject: Betreff
+        to: Empfänger (An/Cc)
+        body: Text
+
 mail:
     choose: Wähle eine Nachricht aus der Liste.
     empty: Keine Nachrichten.
+    inbox_zero: Alles erledigt – der Eingang ist leer.
+    open: Offen
+    done: Erledigt
+    reopen: Wieder öffnen
+    done_by: 'Erledigt von %name% am %date%'
+    rule_or_system: Regel/System
+    snoozed_until: Wiedervorlage
+    snoozed_until_date: 'Wiedervorlage am %date%'
+    mark_read: Als gelesen markieren
+    undone: Rückgängig gemacht.
+    nothing_changed: Es gab nichts zu ändern.
+    thread: 'Unterhaltung (%count% Nachrichten)'
+    history: Verlauf
+    snooze:
+        label: Wiedervorlage
+        tomorrow: Morgen, 8:00 Uhr
+        monday: Nächster Montag, 8:00 Uhr
+        week: In einer Woche, 8:00 Uhr
+        custom: Eigener Zeitpunkt
+        cancel: Wiedervorlage aufheben
+    action_done:
+        done: '{1}Als erledigt markiert.|]1,Inf[%count% Nachrichten als erledigt markiert.'
+        reopen: '{1}Wieder geöffnet.|]1,Inf[%count% Nachrichten wieder geöffnet.'
+        trash: '{1}In den Papierkorb verschoben.|]1,Inf[%count% Nachrichten in den Papierkorb verschoben.'
+        restore: '{1}Wiederhergestellt.|]1,Inf[%count% Nachrichten wiederhergestellt.'
+        read: Als gelesen markiert.
+        unread: Als ungelesen markiert.
+        assign_me: Dir zugeordnet.
+        unassign_me: Zuordnung entfernt.
+        snooze: 'Auf Wiedervorlage gelegt.'
+        unsnooze: Wiedervorlage aufgehoben.
+        project: Projekt geändert.
+    bulk:
+        label: Sammelaktionen für ausgewählte Nachrichten
+        select: 'Auswählen: %subject%'
+        select_all: Alle auswählen
+        selected: ausgewählt
+        set_project: Projekt setzen
+        none: Keine Nachricht ausgewählt.
+    event:
+        assigned: '%user% hat %detail% als verantwortlich eingetragen'
+        unassigned: '%user% hat %detail% als verantwortlich entfernt'
+        project: '%user% hat das Projekt auf „%detail%“ gesetzt'
+        done: '%user% hat die Nachricht erledigt'
+        reopened: '%user% hat die Nachricht wieder geöffnet'
+        snoozed: '%user% hat die Wiedervorlage auf %detail% gesetzt'
+        replied: '%user% hat geantwortet (an %detail%)'
+        forwarded: '%user% hat weitergeleitet (an %detail%)'
+        trashed: '%user% hat die Nachricht in den Papierkorb gelegt'
+        restored: '%user% hat die Nachricht wiederhergestellt'
+        rule: 'Regel „%detail%“ wurde angewendet'
     no_accounts: Noch kein E-Mail-Konto verbunden.
     setup_account: E-Mail-Konto in einer Organisation einrichten
     no_subject: (kein Betreff)
@@ -284,7 +366,9 @@ mail:
     project:
         none: Kein Projekt
         change: Projekt ändern
-        moved: Die Nachricht wurde dem Projekt zugeordnet und steht jetzt unter „Alle E-Mails“ und beim Projekt.
+        label: Projekt
+        set: Projekt zugeordnet. Die Nachricht bleibt offen im Eingang, bis sie erledigt ist.
+        removed: Projektzuordnung entfernt.
         search: Projekt suchen …
     assignees:
         label: Verantwortliche
@@ -318,6 +402,7 @@ mail:
         attachment: Mit Anhang
         unassigned: Niemand verantwortlich
         mine: Mir zugeordnet
+        done: Erledigt
     filter:
         label: Nachrichten filtern
         search: Suchen …

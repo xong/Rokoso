@@ -60,6 +60,33 @@
             {% endif %}
         </section>
 
+        {% if is_admin and mail_accounts is not empty %}
+            <section aria-labelledby="rules-heading">
+                <div class="mb-3 flex items-center justify-between gap-2">
+                    <h3 id="rules-heading" class="font-semibold">{{ 'mail_rule.title'|trans }}</h3>
+                    <a href="{{ path('mail_rule_new', {id: organization.id}) }}" class="btn-secondary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'mail_rule.new'|trans }}</a>
+                </div>
+                {% if mail_rules is empty %}
+                    <p class="text-slate-500">{{ 'mail_rule.none'|trans }}</p>
+                {% else %}
+                    <ul role="list" class="card divide-y divide-slate-100">
+                        {% for rule in mail_rules %}
+                            <li class="flex items-center gap-3 px-4 py-3">
+                                {{ ux_icon('lucide:wand-sparkles', {class: 'size-5 text-slate-400', 'aria-hidden': 'true'}) }}
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate font-medium">{{ rule.name }}{% if not rule.enabled %} <span class="text-xs font-normal text-slate-500">({{ 'mail_rule.disabled'|trans }})</span>{% endif %}</p>
+                                    <p class="truncate text-xs text-slate-500">{{ 'mail_rule.summary'|trans({'%field%': rule.field.label|trans, '%needle%': rule.needle}) }}</p>
+                                </div>
+                                <a href="{{ path('mail_rule_edit', {id: rule.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}: {{ rule.name }}" title="{{ 'action.edit'|trans }}">
+                                    {{ ux_icon('lucide:settings', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
+        {% endif %}
+
         <section aria-labelledby="projects-heading">
             <div class="mb-3 flex items-center justify-between gap-2">
                 <h3 id="projects-heading" class="font-semibold">{{ 'nav.projects'|trans }}</h3>

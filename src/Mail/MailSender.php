@@ -7,6 +7,7 @@ namespace App\Mail;
 use App\Entity\Attachment;
 use App\Entity\Message;
 use App\Entity\User;
+use App\Enum\MessageEventType;
 use App\Enum\MessageFolder;
 use App\Service\AttachmentStorage;
 use App\Service\Shelf;
@@ -70,6 +71,9 @@ final readonly class MailSender
             ->setBody($data->body)
             ->setProject($data->project)
             ->setInReplyTo($data->forward ? null : $original?->getMessageIdHeader());
+        if (null !== $original && !$data->forward && null !== $original->getMessageIdHeader()) {
+            $message->setReferencesHeader(trim(($original->getReferencesHeader() ?? '').' <'.$original->getMessageIdHeader().'>'));
+        }
 
         foreach ($files as $file) {
             $content = (string) file_get_contents($file->getPathname());
@@ -93,6 +97,8 @@ final readonly class MailSender
 
         $sent = $this->transports->create($account)->send($email);
         $message->setMessageIdHeader($sent?->getMessageId());
+        $message->setThreadKey(null !== $original && !$data->forward ? ($original->getThreadKey() ?? $message->deriveThreadKey()) : $message->deriveThreadKey());
+        $original?->log($data->forward ? MessageEventType::Forwarded : MessageEventType::Replied, $author, $data->to);
 
         $this->em->persist($message);
         $this->em->flush();

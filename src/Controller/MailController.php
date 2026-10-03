@@ -8,7 +8,9 @@ use App\Entity\Attachment;
 use App\Entity\Comment;
 use App\Entity\Message;
 use App\Entity\User;
+use App\Enum\MessageEventType;
 use App\Mail\MailSynchronizer;
+use App\Mail\MessageActions;
 use App\Mail\MessageFilter;
 use App\Mail\MessageHtmlRenderer;
 use App\Mail\ParticipantResolver;
@@ -34,13 +36,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/mail')]
 final class MailController extends AbstractController
 {
-    public const array FOLDERS = ['inbox', 'all', 'sent', 'trash'];
+    public const array FOLDERS = ['inbox', 'all', 'sent', 'done', 'snoozed', 'trash'];
 
     public function __construct(
         private readonly MessageRepository $messages,
         private readonly MailAccountRepository $accounts,
         private readonly ProjectRepository $projects,
         private readonly ReadTracker $readTracker,
+        private readonly MessageActions $actions,
         private readonly EntityManagerInterface $em,
     ) {
     }
@@ -48,13 +51,15 @@ final class MailController extends AbstractController
     #[Route('', name: 'mail_inbox', defaults: ['folder' => 'inbox'])]
     #[Route('/all', name: 'mail_all', defaults: ['folder' => 'all'])]
     #[Route('/sent', name: 'mail_sent', defaults: ['folder' => 'sent'])]
+    #[Route('/done', name: 'mail_done', defaults: ['folder' => 'done'])]
+    #[Route('/snoozed', name: 'mail_snoozed', defaults: ['folder' => 'snoozed'])]
     #[Route('/trash', name: 'mail_trash', defaults: ['folder' => 'trash'])]
     public function list(Request $request, string $folder, #[CurrentUser] User $user): Response
     {
         return $this->render('mail/index.html.twig', $this->listContext($request, $folder, $user));
     }
 
-    #[Route('/{folder<inbox|all|sent|trash>}/{id<\d+>}', name: 'mail_show')]
+    #[Route('/{folder<inbox|all|sent|done|snoozed|trash>}/{id<\d+>}', name: 'mail_show')]
     #[IsGranted(MessageVoter::VIEW, 'message')]
     public function show(Request $request, string $folder, Message $message, #[CurrentUser] User $user, MessageHtmlRenderer $renderer, ParticipantResolver $participants): Response
     {
@@ -72,6 +77,7 @@ final class MailController extends AbstractController
             'candidates' => $participants->candidates($message),
             'message_projects' => $participants->projects($message),
             'open' => $request->query->getString('open'),
+            'thread' => $this->messages->findThread($message, $user),
         ]);
     }
 
@@ -112,13 +118,54 @@ final class MailController extends AbstractController
     #[Route('/{id<\d+>}/trash', name: 'mail_trash_message', methods: ['POST'])]
     #[IsGranted(MessageVoter::VIEW, 'message')]
     #[IsCsrfTokenValid('mail-action')]
-    public function trash(Request $request, Message $message): Response
+    public function trash(Request $request, Message $message, #[CurrentUser] User $user): Response
     {
-        $message->setTrashed(!$message->isTrashed());
-        $this->em->flush();
-        $this->addFlash('success', $message->isTrashed() ? 'mail.trashed' : 'mail.restored');
+        $action = $message->isTrashed() ? 'restore' : 'trash';
+        $changed = $this->actions->apply($action, [$message], $user);
+        $this->undoFlash('trash' === $action ? 'mail.trashed' : 'mail.restored', $action, $changed);
 
         return $this->redirectToList($request);
+    }
+
+    /**
+     * Status actions on one or several messages (toolbar, bulk selection, undo).
+     */
+    #[Route('/action', name: 'mail_action', methods: ['POST'])]
+    #[IsCsrfTokenValid('mail-action')]
+    public function action(Request $request, #[CurrentUser] User $user): Response
+    {
+        $payload = $request->getPayload();
+        $action = $payload->getString('action');
+        if (!\in_array($action, MessageActions::ACTIONS, true)) {
+            throw $this->createNotFoundException();
+        }
+        $selected = [];
+        foreach (\array_slice(array_unique(array_map(intval(...), $payload->all('ids'))), 0, 500) as $id) {
+            $message = $this->messages->find($id);
+            if (null !== $message && $this->isGranted(MessageVoter::VIEW, $message)) {
+                $selected[] = $message;
+            }
+        }
+        if ([] === $selected) {
+            $this->addFlash('info', 'mail.bulk.none');
+
+            return $this->redirectAfterAction($request, null);
+        }
+
+        $projectId = $payload->getInt('project') ?: null;
+        $previousProject = $selected[0]->getProject()?->getId();
+        $samePrevious = [] === array_filter($selected, static fn (Message $m): bool => $m->getProject()?->getId() !== $previousProject);
+        $changed = $this->actions->apply($action, $selected, $user, $projectId, $this->snoozeUntil($payload->getString('until') ?: $payload->getString('until_custom')));
+
+        if ($payload->getBoolean('undo')) {
+            $this->addFlash('success', 'mail.undone');
+        } elseif ('project' === $action) {
+            $this->undoFlash(null === $projectId ? 'mail.project.removed' : 'mail.project.set', 'project', $samePrevious ? $changed : [], $previousProject);
+        } else {
+            $this->undoFlash('mail.action_done.'.$action, $action, $changed);
+        }
+
+        return $this->redirectAfterAction($request, 1 === \count($selected) ? $selected[0] : null);
     }
 
     #[Route('/{id<\d+>}/unread', name: 'mail_unread', methods: ['POST'])]
@@ -165,16 +212,18 @@ final class MailController extends AbstractController
     #[Route('/{id<\d+>}/assignees', name: 'mail_assignees', methods: ['POST'])]
     #[IsGranted(MessageVoter::VIEW, 'message')]
     #[IsCsrfTokenValid('mail-action')]
-    public function assignees(Request $request, Message $message, ParticipantResolver $participants): Response
+    public function assignees(Request $request, Message $message, ParticipantResolver $participants, #[CurrentUser] User $user): Response
     {
         $ids = array_map(intval(...), $request->getPayload()->all('assignees'));
         $candidates = $participants->candidates($message);
         foreach ($message->getAssignees()->toArray() as $assignee) {
-            $message->removeAssignee($assignee);
+            if (!\in_array($assignee->getId(), $ids, true)) {
+                $message->removeAssignee($assignee)->log(MessageEventType::Unassigned, $user, $assignee->getName());
+            }
         }
         foreach ($candidates as $candidate) {
-            if (\in_array($candidate->getId(), $ids, true)) {
-                $message->addAssignee($candidate);
+            if (\in_array($candidate->getId(), $ids, true) && !$message->isAssignedTo($candidate)) {
+                $message->addAssignee($candidate)->log(MessageEventType::Assigned, $user, $candidate->getName());
             }
         }
         $this->em->flush();
@@ -190,8 +239,7 @@ final class MailController extends AbstractController
     #[IsCsrfTokenValid('mail-action')]
     public function assignMe(Request $request, Message $message, #[CurrentUser] User $user): Response
     {
-        $message->isAssignedTo($user) ? $message->removeAssignee($user) : $message->addAssignee($user);
-        $this->em->flush();
+        $this->actions->apply($message->isAssignedTo($user) ? 'unassign_me' : 'assign_me', [$message], $user);
 
         return $this->redirectBack($request, $message);
     }
@@ -199,24 +247,13 @@ final class MailController extends AbstractController
     #[Route('/{id<\d+>}/project', name: 'mail_project', methods: ['POST'])]
     #[IsGranted(MessageVoter::VIEW, 'message')]
     #[IsCsrfTokenValid('mail-action')]
-    public function project(Request $request, Message $message, ParticipantResolver $participants): Response
+    public function project(Request $request, Message $message, #[CurrentUser] User $user): Response
     {
-        $id = $request->getPayload()->getInt('project');
-        $project = null;
-        foreach ($participants->projects($message) as $candidate) {
-            if ($candidate->getId() === $id) {
-                $project = $candidate;
-            }
-        }
-        $message->setProject($project);
-        $this->em->flush();
-
-        // Messages with a project leave the inbox (App.md 46) – keep showing it under "all".
-        if (null !== $project && 'inbox' === $request->getPayload()->getString('folder', 'inbox')) {
-            $this->addFlash('success', 'mail.project.moved');
-
-            return $this->redirectToRoute('mail_show', ['folder' => 'all', 'id' => $message->getId()]);
-        }
+        // The project no longer moves the message out of the inbox (Entscheidung 39).
+        $previous = $message->getProject()?->getId();
+        $projectId = $request->getPayload()->getInt('project') ?: null;
+        $changed = $this->actions->apply('project', [$message], $user, $projectId);
+        $this->undoFlash(null === $message->getProject() ? 'mail.project.removed' : 'mail.project.set', 'project', $changed, $previous);
 
         return $this->redirectBack($request, $message);
     }
@@ -283,15 +320,66 @@ final class MailController extends AbstractController
         return $this->redirect($url.(null === $fragment ? '' : '#'.$fragment));
     }
 
+    /**
+     * Toast with an "Rückgängig" button that posts the inverse action for the changed messages.
+     *
+     * @param list<Message> $changed
+     */
+    private function undoFlash(string $text, string $action, array $changed, ?int $previousProject = null): void
+    {
+        $inverse = 'project' === $action ? 'project' : (MessageActions::INVERSE[$action] ?? null);
+        if ([] === $changed) {
+            $this->addFlash('info', 'mail.nothing_changed');
+
+            return;
+        }
+        if (null === $inverse || \in_array($action, ['read', 'unread'], true)) {
+            $this->addFlash('success', $text);
+
+            return;
+        }
+        $this->addFlash('undo', [
+            'text' => $text,
+            'count' => \count($changed),
+            'action' => $inverse,
+            'ids' => array_map(static fn (Message $m): ?int => $m->getId(), $changed),
+            'project' => $previousProject,
+        ]);
+    }
+
+    /**
+     * Presets of the "Wiedervorlage" menu or a datetime-local value.
+     */
+    private function snoozeUntil(string $value): ?\DateTimeImmutable
+    {
+        $today = new \DateTimeImmutable('today 08:00');
+
+        return match ($value) {
+            '' => null,
+            'tomorrow' => $today->modify('+1 day'),
+            'monday' => $today->modify('next monday'),
+            'week' => $today->modify('+7 days'),
+            default => \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $value) ?: null,
+        };
+    }
+
+    private function redirectAfterAction(Request $request, ?Message $message): Response
+    {
+        $redirect = $request->getPayload()->getString('redirect');
+        if (str_starts_with($redirect, '/') && !str_starts_with($redirect, '//') && !str_contains($redirect, '\\')) {
+            return $this->redirect($redirect);
+        }
+        if (null !== $message && 'list' !== $request->getPayload()->getString('return')) {
+            return $this->redirectToMessage($request, $message);
+        }
+
+        return $this->redirectToList($request);
+    }
+
     private function redirectToList(Request $request): Response
     {
         $folder = $request->getPayload()->getString('folder', 'inbox');
-        $route = match ($folder) {
-            'all' => 'mail_all',
-            'sent' => 'mail_sent',
-            'trash' => 'mail_trash',
-            default => 'mail_inbox',
-        };
+        $route = \in_array($folder, self::FOLDERS, true) && 'inbox' !== $folder ? 'mail_'.$folder : 'mail_inbox';
         /** @var array<string, string> $params */
         $params = $request->getPayload()->all('params');
 

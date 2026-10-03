@@ -7,7 +7,9 @@ namespace App\Mail;
 use App\Entity\Attachment;
 use App\Entity\MailAccount;
 use App\Entity\Message;
+use App\Enum\MessageEventType;
 use App\Enum\MessageFolder;
+use App\Repository\MailRuleRepository;
 use App\Repository\MessageRepository;
 use App\Service\AttachmentStorage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,6 +24,7 @@ final readonly class MailSynchronizer
         private MailboxReader $reader,
         private MessageParser $parser,
         private MessageRepository $messages,
+        private MailRuleRepository $rules,
         private AttachmentStorage $storage,
         private EntityManagerInterface $em,
         private LoggerInterface $logger,
@@ -96,9 +99,37 @@ final readonly class MailSynchronizer
             ));
         }
 
+        // Conversation: join the thread of the message this one answers, if known
+        $parentKey = null === $parsed->inReplyTo ? null : $this->messages->findThreadKey($account->getOrganization(), $parsed->inReplyTo);
+        $message->setThreadKey($parentKey ?? $message->deriveThreadKey());
+
+        $this->applyRules($account, $message);
+
         $this->em->persist($message);
         $this->em->flush();
 
         return true;
+    }
+
+    /**
+     * Rules of the organization (Postfach-Regeln): first matching rule per property wins.
+     */
+    private function applyRules(MailAccount $account, Message $message): void
+    {
+        foreach ($this->rules->findForOrganization($account->getOrganization(), true) as $rule) {
+            if (!$rule->matches($message)) {
+                continue;
+            }
+            if (null !== $rule->getProject() && null === $message->getProject()) {
+                $message->setProject($rule->getProject());
+            }
+            foreach ($rule->getAssignees() as $assignee) {
+                $message->addAssignee($assignee);
+            }
+            if ($rule->isMarkDone() && !$message->isDone()) {
+                $message->markDone(null);
+            }
+            $message->log(MessageEventType::Rule, null, $rule->getName());
+        }
     }
 }

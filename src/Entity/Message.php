@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\MessageEventType;
 use App\Enum\MessageFolder;
 use App\Enum\MessageType;
 use App\Repository\MessageRepository;
@@ -19,6 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: MessageRepository::class)]
 #[ORM\Index(columns: ['date'])]
 #[ORM\Index(columns: ['message_id_header'])]
+#[ORM\Index(columns: ['thread_key'])]
 class Message
 {
     #[ORM\Id]
@@ -88,6 +90,22 @@ class Message
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $trashedAt = null;
 
+    /** Status model: open (null) or done since … (Entscheidung 39). */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $doneAt = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?User $doneBy = null;
+
+    /** Hidden from the inbox until this time ("Wiedervorlage"). */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $snoozedUntil = null;
+
+    /** Conversation: Message-ID of the first message of the thread. */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $threadKey = null;
+
     /** Coop user who wrote the message (internal messages, mails sent from Coop). */
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
@@ -116,6 +134,11 @@ class Message
     #[ORM\OrderBy(['createdAt' => 'ASC'])]
     private Collection $comments;
 
+    /** @var Collection<int, MessageEvent> */
+    #[ORM\OneToMany(targetEntity: MessageEvent::class, mappedBy: 'message', cascade: ['persist', 'remove'])]
+    #[ORM\OrderBy(['createdAt' => 'ASC', 'id' => 'ASC'])]
+    private Collection $events;
+
     public function __construct(
         #[ORM\Column(length: 20, enumType: MessageType::class)]
         private MessageType $type = MessageType::Email,
@@ -126,6 +149,7 @@ class Message
         $this->recipientUsers = new ArrayCollection();
         $this->attachments = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->events = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -376,6 +400,82 @@ class Message
         return $this;
     }
 
+    public function getDoneAt(): ?\DateTimeImmutable
+    {
+        return $this->doneAt;
+    }
+
+    public function getDoneBy(): ?User
+    {
+        return $this->doneBy;
+    }
+
+    public function isDone(): bool
+    {
+        return null !== $this->doneAt;
+    }
+
+    public function markDone(?User $user): static
+    {
+        $this->doneAt = new \DateTimeImmutable();
+        $this->doneBy = $user;
+        $this->snoozedUntil = null;
+
+        return $this;
+    }
+
+    public function reopen(): static
+    {
+        $this->doneAt = null;
+        $this->doneBy = null;
+
+        return $this;
+    }
+
+    public function getSnoozedUntil(): ?\DateTimeImmutable
+    {
+        return $this->snoozedUntil;
+    }
+
+    public function isSnoozed(): bool
+    {
+        return null !== $this->snoozedUntil && $this->snoozedUntil > new \DateTimeImmutable();
+    }
+
+    public function snooze(?\DateTimeImmutable $until): static
+    {
+        $this->snoozedUntil = $until;
+        if (null !== $until) {
+            $this->reopen();
+        }
+
+        return $this;
+    }
+
+    public function getThreadKey(): ?string
+    {
+        return $this->threadKey;
+    }
+
+    public function setThreadKey(?string $threadKey): static
+    {
+        $this->threadKey = null === $threadKey ? null : mb_substr($threadKey, 0, 255);
+
+        return $this;
+    }
+
+    /**
+     * Thread from the headers: first Message-ID in References, else In-Reply-To, else the own Message-ID.
+     */
+    public function deriveThreadKey(): ?string
+    {
+        if (null !== $this->referencesHeader && 1 === preg_match('/<([^>]+)>/', $this->referencesHeader, $m)) {
+            return $m[1];
+        }
+
+        return $this->inReplyTo ?? $this->messageIdHeader;
+    }
+
     public function getAuthor(): ?User
     {
         return $this->author;
@@ -474,5 +574,21 @@ class Message
     public function getComments(): Collection
     {
         return $this->comments;
+    }
+
+    /** @return Collection<int, MessageEvent> */
+    public function getEvents(): Collection
+    {
+        return $this->events;
+    }
+
+    /**
+     * Records an entry in the message history (Verlauf).
+     */
+    public function log(MessageEventType $type, ?User $user, ?string $detail = null): static
+    {
+        $this->events->add(new MessageEvent($this, $type, $user, $detail));
+
+        return $this;
     }
 }

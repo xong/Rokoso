@@ -1,8 +1,8 @@
 {% extends 'layout/app.html.twig' %}
 {% import '_partials/ui.html.twig' as ui %}
 
-{% set folder_title = {inbox: 'nav.mail_inbox', all: 'nav.mail_all', sent: 'nav.mail_sent', trash: 'nav.mail_trash'}[folder] %}
-{% set list_route = {inbox: 'mail_inbox', all: 'mail_all', sent: 'mail_sent', trash: 'mail_trash'}[folder] %}
+{% set folder_title = ('nav.mail_' ~ folder) %}
+{% set list_route = folder == 'inbox' ? 'mail_inbox' : 'mail_' ~ folder %}
 
 {% block title %}{{ folder_title|trans }}{% endblock %}
 {% block list_title %}{{ folder_title|trans }}{% endblock %}
@@ -59,11 +59,48 @@
     </form>
 
     {% if messages is empty %}
-        {{ ui.empty(accounts is empty and folder == 'inbox' and not filter.active ? 'mail.no_accounts' : 'mail.empty', 'lucide:inbox') }}
+        {{ ui.empty(accounts is empty and folder == 'inbox' and not filter.active ? 'mail.no_accounts' : (folder == 'inbox' and not filter.active ? 'mail.inbox_zero' : 'mail.empty'), folder == 'inbox' and not filter.active ? 'lucide:party-popper' : 'lucide:inbox') }}
         {% if accounts is empty and folder == 'inbox' %}
             <p class="-mt-8 px-6 pb-8 text-center"><a class="link" href="{{ path('organization_index') }}">{{ 'mail.setup_account'|trans }}</a></p>
         {% endif %}
     {% else %}
+        {# Mehrfachauswahl: Kontrollkästchen der Einträge gehören zum Formular bulk-form #}
+        <div data-controller="bulk" data-bulk-selected-label="{{ 'mail.bulk.selected'|trans }}">
+        <form id="bulk-form" method="post" action="{{ path('mail_action') }}" hidden data-bulk-target="bar"
+              class="sticky top-[5.5rem] z-10 flex flex-wrap items-center gap-1 border-b border-brand-200 bg-brand-50 px-2 py-1.5 text-sm" aria-label="{{ 'mail.bulk.label'|trans }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('mail-action') }}">
+            <input type="hidden" name="folder" value="{{ folder }}">
+            <input type="hidden" name="return" value="list">
+            {% for key, value in filter.params %}<input type="hidden" name="params[{{ key }}]" value="{{ value }}">{% endfor %}
+            <label class="flex items-center gap-1.5 px-1">
+                <input type="checkbox" class="size-4" data-bulk-target="all" data-action="bulk#toggleAll">
+                <span class="sr-only">{{ 'mail.bulk.select_all'|trans }}</span>
+            </label>
+            <span class="mr-auto font-medium" data-bulk-target="count" aria-live="polite"></span>
+            {% if folder == 'done' %}
+                <button type="submit" name="action" value="reopen" class="btn-icon size-8" title="{{ 'mail.reopen'|trans }}" aria-label="{{ 'mail.reopen'|trans }}">{{ ux_icon('lucide:rotate-ccw', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+            {% elseif folder != 'trash' %}
+                <button type="submit" name="action" value="done" class="btn-icon size-8" title="{{ 'mail.done'|trans }}" aria-label="{{ 'mail.done'|trans }}">{{ ux_icon('lucide:check', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+            {% endif %}
+            <button type="submit" name="action" value="read" class="btn-icon size-8" title="{{ 'mail.mark_read'|trans }}" aria-label="{{ 'mail.mark_read'|trans }}">{{ ux_icon('lucide:mail-open', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+            <button type="submit" name="action" value="unread" class="btn-icon size-8" title="{{ 'mail.mark_unread'|trans }}" aria-label="{{ 'mail.mark_unread'|trans }}">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+            <button type="submit" name="action" value="assign_me" class="btn-icon size-8" title="{{ 'mail.assignees.assign_me'|trans }}" aria-label="{{ 'mail.assignees.assign_me'|trans }}">{{ ux_icon('lucide:user-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+            {% if folder == 'trash' %}
+                <button type="submit" name="action" value="restore" class="btn-icon size-8" title="{{ 'mail.restore'|trans }}" aria-label="{{ 'mail.restore'|trans }}">{{ ux_icon('lucide:archive-restore', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+            {% else %}
+                <button type="submit" name="action" value="trash" class="btn-icon size-8 hover:text-red-600" title="{{ 'mail.trash'|trans }}" aria-label="{{ 'mail.trash'|trans }}">{{ ux_icon('lucide:trash-2', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+            {% endif %}
+            {% if projects is not empty %}
+                <span class="flex w-full items-center gap-1">
+                    <label for="bulk-project" class="sr-only">{{ 'mail.project.label'|trans }}</label>
+                    <select id="bulk-project" name="project" class="input min-w-0 flex-1 py-1">
+                        <option value="">{{ 'mail.project.none'|trans }}</option>
+                        {% for p in projects %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+                    </select>
+                    <button type="submit" name="action" value="project" class="btn-secondary py-1">{{ 'mail.bulk.set_project'|trans }}</button>
+                </span>
+            {% endif %}
+        </form>
         {% set current_group = null %}
         <ul role="list">
             {% for m in messages %}
@@ -83,5 +120,6 @@
                 {% if has_more %}<a class="btn-secondary" href="{{ path(list_route, filter.params|merge({page: filter.page + 1})) }}">{{ 'mail.older'|trans }}</a>{% endif %}
             </nav>
         {% endif %}
+        </div>
     {% endif %}
 {% endblock %}

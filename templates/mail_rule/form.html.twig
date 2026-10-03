@@ -1,0 +1,48 @@
+{% extends 'organization/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ rule ? rule.name : 'mail_rule.new'|trans }}{% endblock %}
+{% block back_url %}{{ path('organization_show', {id: organization.id}) }}{% endblock %}
+{% block detail_title %}{{ rule ? rule.name : 'mail_rule.new'|trans }}{% endblock %}
+
+{% block detail_actions %}
+    {% if rule %}
+        {{ ui.post_button(path('mail_rule_delete', {id: rule.id}), 'delete-mail-rule-' ~ rule.id, 'mail_rule.delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'mail_rule.delete_confirm'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        <p class="mb-4 text-sm text-slate-500">
+            <a class="link" href="{{ path('organization_show', {id: organization.id}) }}">{{ organization.name }}</a>
+            · {{ 'mail_rule.intro'|trans }}
+        </p>
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'mail_rule.section_condition'|trans }}</legend>
+                {{ form_row(form.name) }}
+                {{ form_row(form.mailAccount) }}
+                <div class="grid gap-x-4 sm:grid-cols-[12rem_1fr]">
+                    {{ form_row(form.field) }}
+                    {{ form_row(form.needle) }}
+                </div>
+            </fieldset>
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'mail_rule.section_action'|trans }}</legend>
+                {{ form_row(form.project) }}
+                {{ form_row(form.assignees) }}
+                {{ form_row(form.markDone) }}
+                {{ form_row(form.enabled, {row_attr: {class: 'mb-0'}}) }}
+            </fieldset>
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ path('organization_show', {id: organization.id}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

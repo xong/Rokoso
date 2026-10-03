@@ -87,11 +87,13 @@ final class MailCollaborationTest extends AppTestCase
         $values['project'] = (string) $this->project->getId();
         $this->client->request('POST', $form->getUri(), $values);
         self::assertSame('Schulwege', $this->reload()->getProject()?->getName());
-        self::assertResponseRedirects('/mail/all/'.$this->message->getId());
+        self::assertResponseRedirects($this->showUrl());
 
-        // Leaves the inbox, stays reachable under "all" and on the project page
+        // Status model: stays open in the inbox until done, also reachable on the project page
+        $this->client->followRedirect();
+        self::assertSelectorExists('form[action="/mail/action"] input[name="undo"]');
         $this->client->request('GET', '/mail');
-        self::assertSelectorTextNotContains('main', 'Zebrastreifen');
+        self::assertSelectorTextContains('main', 'Zebrastreifen');
         $this->client->request('GET', '/mail/all?project='.$this->project->getId());
         self::assertSelectorTextContains('main', 'Zebrastreifen');
         $this->client->request('GET', '/projects/'.$this->project->getId());
