@@ -11,7 +11,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
- * Items of an organization: all members view and edit. Without organization: only the creator.
+ * Items of an organization: all members (guests: items of their projects) view and edit. Without organization: only the creator.
  *
  * @extends Voter<string, CalendarItem>
  */
@@ -32,6 +32,6 @@ final class CalendarItemVoter extends Voter
         }
         $organization = $subject->getOrganization();
 
-        return null === $organization ? $subject->getCreatedBy() === $user : null !== $organization->getMembership($user);
+        return null === $organization ? $subject->getCreatedBy() === $user : $organization->canSeeProject($user, $subject->getProject());
     }
 }

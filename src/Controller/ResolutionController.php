@@ -101,7 +101,7 @@ final class ResolutionController extends AbstractController
     private function handleForm(Request $request, User $user, Resolution $resolution): Response
     {
         $isNew = null === $resolution->getId();
-        $projects = array_values(array_filter($this->projects->findVisibleFor($user),
+        $projects = array_values(array_filter($this->projects->findVisibleFor($user, $resolution->getProject()),
             static fn ($p): bool => null === $p->getOrganization() || $p->getOrganization() === $resolution->getOrganization()));
         $form = $this->createForm(ResolutionFormType::class, $resolution, ['projects' => $projects]);
         $form->handleRequest($request);

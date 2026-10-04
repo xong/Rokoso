@@ -27,8 +27,8 @@ class FolderRepository extends ServiceEntityRepository
      */
     public function findVisibleFor(User $user): array
     {
-        /* @var list<Folder> */
-        return $this->createQueryBuilder('f')
+        /** @var list<Folder> $all */
+        $all = $this->createQueryBuilder('f')
             ->addSelect('o')
             ->join('f.organization', 'o')
             ->join(Membership::class, 'm', 'WITH', 'm.organization = o AND m.user = :user')
@@ -36,6 +36,8 @@ class FolderRepository extends ServiceEntityRepository
             ->orderBy('o.name')
             ->addOrderBy('f.name')
             ->getQuery()->getResult();
+
+        return array_values(array_filter($all, static fn (Folder $x): bool => $x->isVisibleTo($user)));
     }
 
     /**

@@ -11,7 +11,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
- * Projects of an organization: members view, administrators manage.
+ * Projects of an organization: members (and guests of the project) view, administrators manage.
  * Projects without organization: only their creator.
  *
  * @extends Voter<string, Project>
@@ -36,8 +36,7 @@ final class ProjectVoter extends Voter
         if (null === $organization) {
             return $subject->getCreatedBy() === $user;
         }
-        $membership = $organization->getMembership($user);
 
-        return self::VIEW === $attribute ? null !== $membership : ($membership?->isAdmin() ?? false);
+        return self::VIEW === $attribute ? $organization->canSeeProject($user, $subject) : ($organization->getMembership($user)?->isAdmin() ?? false);
     }
 }

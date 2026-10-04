@@ -71,7 +71,7 @@ class PollRepository extends ServiceEntityRepository
     public function visibleQuery(User $user, string $alias = 'p'): QueryBuilder
     {
         return $this->createQueryBuilder($alias)
-            ->join(Membership::class, $alias.'_vm', 'WITH', $alias.'_vm.organization = '.$alias.'.organization AND '.$alias.'_vm.user = :viewer')
+            ->join(Membership::class, $alias.'_vm', 'WITH', $alias.'_vm.organization = '.$alias.'.organization AND '.$alias.'_vm.user = :viewer AND '.Membership::fullDql($alias.'_vm'))
             ->setParameter('viewer', $user);
     }
 }

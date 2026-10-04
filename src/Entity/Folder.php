@@ -119,6 +119,17 @@ class Folder
         return $this->organization;
     }
 
+    /**
+     * Full members see all folders; guests the folders assigned (directly or via a parent folder) to their projects.
+     */
+    public function isVisibleTo(User $user): bool
+    {
+        $membership = $this->organization->findMembership($user);
+
+        return null !== $membership && ($membership->isFull()
+            || array_any($this->getPath(), static fn (Folder $f): bool => $membership->grantsGuestAccessTo($f->getProject())));
+    }
+
     public function setOrganization(Organization $organization): static
     {
         $this->organization = $organization;

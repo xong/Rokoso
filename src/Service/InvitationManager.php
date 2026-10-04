@@ -29,13 +29,17 @@ final readonly class InvitationManager
     }
 
     /**
-     * Adds the user to the invited organization and consumes the invitation.
+     * Adds the user to the invited organization and consumes the invitation. Former members and guests
+     * get the invited role and a new open term.
      */
     public function join(Invitation $invitation, User $user): Organization
     {
         $organization = $invitation->getOrganization();
-        if (null === $organization->getMembership($user)) {
+        $membership = $organization->findMembership($user);
+        if (null === $membership) {
             $organization->addMember($user, $invitation->getRole());
+        } elseif (!$membership->isFull()) {
+            $membership->setRole($invitation->getRole())->setTermEndsOn(null);
         }
         $this->em->remove($invitation);
         $this->em->flush();

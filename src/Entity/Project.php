@@ -40,6 +40,15 @@ class Project
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    /** Responsible person (contact for the project, transferable on handover). */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?User $lead = null;
+
+    /** Completed project: hidden from selection lists, still readable. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $archivedAt = null;
+
     public function __construct(
         #[ORM\ManyToOne]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -121,6 +130,42 @@ class Project
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getLead(): ?User
+    {
+        return $this->lead;
+    }
+
+    public function setLead(?User $lead): static
+    {
+        $this->lead = $lead;
+
+        return $this;
+    }
+
+    public function getArchivedAt(): ?\DateTimeImmutable
+    {
+        return $this->archivedAt;
+    }
+
+    public function isArchived(): bool
+    {
+        return null !== $this->archivedAt;
+    }
+
+    public function archive(): static
+    {
+        $this->archivedAt ??= new \DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function unarchive(): static
+    {
+        $this->archivedAt = null;
+
+        return $this;
     }
 
     public function __toString(): string

@@ -184,9 +184,10 @@ final class MeetingTest extends AppTestCase
         $this->client->request('GET', '/meetings/'.$meeting->getId());
         self::assertSelectorTextContains('main', 'Nicht beschlussfähig: 1 von 3');
 
-        // Toggle voting right on the organization page
-        $crawler = $this->client->request('GET', '/organizations/'.$this->org->getId());
-        $this->client->submit($crawler->filter('button[title="Stimmrecht von Gabi Gast umschalten"]')->form());
+        // Grant the voting right on the membership page
+        $membership = $this->org->findMembership($guest);
+        $this->client->request('GET', '/organizations/'.$this->org->getId().'/members/'.$membership?->getId().'/edit');
+        $this->client->submitForm('Speichern', ['membership_form[votingRight]' => '1']);
         self::assertResponseRedirects();
         $this->em()->clear();
         $meeting = $this->em()->find(Meeting::class, $meeting->getId());

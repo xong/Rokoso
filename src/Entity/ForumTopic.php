@@ -86,6 +86,11 @@ class ForumTopic
         return $this->board->getOrganization();
     }
 
+    public function isVisibleTo(User $user): bool
+    {
+        return $this->board->isVisibleTo($user) || ($this->getOrganization()->findMembership($user)?->grantsGuestAccessTo($this->project) ?? false);
+    }
+
     public function getTitle(): string
     {
         return $this->title;

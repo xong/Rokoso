@@ -1,0 +1,74 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+{% import _self as wiki %}
+
+{# Seitenbaum als verschachtelte Liste #}
+{% macro branch(pages, current, depth) %}
+    {% import _self as wiki %}
+    <ul role="list">
+        {% for p in pages %}
+            {% set active = current and current.id == p.id %}
+            <li>
+                <a href="{{ path('wiki_show', {id: p.id}) }}" {% if active %}aria-current="page"{% endif %}
+                   class="flex items-center gap-2 border-b border-slate-100 py-2.5 pr-4 {{ active ? 'bg-brand-50 font-medium text-brand-700' : 'hover:bg-slate-50' }}"
+                   style="padding-left: {{ 1 + depth * 1.25 }}rem">
+                    {{ ux_icon(p.children is empty ? 'lucide:file-text' : 'lucide:book-open', {class: 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                    <span class="truncate">{{ p.title }}</span>
+                </a>
+                {% if p.children is not empty %}{{ wiki.branch(p.children, current, depth + 1) }}{% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+{% block title %}{{ 'nav.knowledge'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.knowledge'|trans }}{% endblock %}
+{% block back_url %}{{ path('wiki_index', q ? {q: q} : {}) }}{% endblock %}
+
+{% block list_actions %}
+    {% if trees is not empty %}
+        <a href="{{ path('wiki_new') }}" class="btn-icon" aria-label="{{ 'wiki.new'|trans }}" title="{{ 'wiki.new'|trans }}">
+            {{ ux_icon('lucide:plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block list %}
+    <form method="get" action="{{ path('wiki_index') }}" role="search" class="border-b border-slate-100 p-3 text-sm">
+        <label for="wiki-q" class="sr-only">{{ 'wiki.search'|trans }}</label>
+        <input id="wiki-q" type="search" name="q" value="{{ q }}" class="input" placeholder="{{ 'wiki.search'|trans }}">
+    </form>
+    {% if hits is not null %}
+        <p class="sr-only" role="status">{{ 'wiki.count'|trans({'%count%': hits|length}) }}</p>
+        {% if hits is empty %}
+            {{ ui.empty('wiki.no_hits', 'lucide:search') }}
+        {% else %}
+            <ul role="list">
+                {% for p in hits %}
+                    <li>{{ ui.list_link(path('wiki_show', {id: p.id, q: q}), current and current.id == p.id, p.title,
+                            p.path|slice(0, -1)|map(a => a.title)|merge([p.organization.name])|join(' · ')) }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% elseif trees is empty %}
+        {{ ui.empty('wiki.no_organization', 'lucide:book-open') }}
+    {% else %}
+        {% for tree in trees %}
+            <section aria-labelledby="wiki-org-{{ tree.organization.id }}">
+                <div class="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2">
+                    <h2 id="wiki-org-{{ tree.organization.id }}" class="min-w-0 flex-1 truncate text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ tree.organization.name }}</h2>
+                    <a href="{{ path('wiki_new', {organization: tree.organization.id}) }}" class="btn-icon"
+                       aria-label="{{ 'wiki.new_in'|trans({'%name%': tree.organization.name}) }}" title="{{ 'wiki.new_in'|trans({'%name%': tree.organization.name}) }}">
+                        {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    </a>
+                </div>
+                {% set roots = tree.pages|filter(p => p.parent is null) %}
+                {% if roots is empty %}
+                    <p class="px-4 py-3 text-sm text-slate-500">{{ 'wiki.none'|trans }}</p>
+                {% else %}
+                    {{ wiki.branch(roots, current, 0) }}
+                {% endif %}
+            </section>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

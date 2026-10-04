@@ -1,0 +1,49 @@
+{% extends 'wiki/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ page.title }} · {{ parent() }}{% endblock %}
+{% block detail_title %}{{ page.title }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('wiki_new', {parent: page.id}) }}" class="btn-icon" aria-label="{{ 'wiki.new_child'|trans }}" title="{{ 'wiki.new_child'|trans }}">{{ ux_icon('lucide:file-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+    <a href="{{ path('wiki_revisions', {id: page.id}) }}" class="btn-icon" aria-label="{{ 'wiki.revisions'|trans }}" title="{{ 'wiki.revisions'|trans }}">{{ ux_icon('lucide:history', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+    <a href="{{ path('wiki_edit', {id: page.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">{{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+    {% if is_granted('WIKI_DELETE', page) %}
+        {{ ui.post_button(path('wiki_delete', {id: page.id}), 'wiki-delete', 'wiki.delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: page.children is empty ? 'wiki.delete_confirm' : 'wiki.delete_confirm_children'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block detail %}
+    <article class="mx-auto max-w-3xl space-y-5 p-4 lg:p-6">
+        <header>
+            <nav aria-label="{{ 'wiki.breadcrumb'|trans }}" class="text-sm text-slate-500">
+                <ol role="list" class="flex flex-wrap items-center gap-1">
+                    <li>{{ page.organization.name }}</li>
+                    {% for a in page.path|slice(0, -1) %}
+                        <li class="flex items-center gap-1">{{ ux_icon('lucide:chevron-right', {class: 'size-3.5', 'aria-hidden': 'true'}) }}<a class="link" href="{{ path('wiki_show', {id: a.id}) }}">{{ a.title }}</a></li>
+                    {% endfor %}
+                </ol>
+            </nav>
+            <p class="mt-1 text-2xl font-semibold">{{ page.title }}</p>
+            <p class="mt-1 text-xs text-slate-500">{{ 'wiki.updated'|trans({'%date%': page.updatedAt|date('d.m.Y H:i'), '%name%': page.updatedBy ? page.updatedBy.name : '–'}) }}</p>
+        </header>
+        {% if page.body is not empty %}
+            <div class="markdown">{{ page.body|markdown }}</div>
+        {% else %}
+            <p class="text-slate-500">{{ 'wiki.empty_page'|trans }}</p>
+        {% endif %}
+        {% if page.children is not empty %}
+            <section aria-labelledby="wiki-children" class="border-t border-slate-100 pt-4">
+                <h2 id="wiki-children" class="mb-2 text-sm font-semibold text-slate-600">{{ 'wiki.children'|trans }}</h2>
+                <ul role="list" class="space-y-1">
+                    {% for c in page.children %}
+                        <li><a class="link inline-flex items-center gap-2" href="{{ path('wiki_show', {id: c.id}) }}">{{ ux_icon('lucide:file-text', {class: 'size-4', 'aria-hidden': 'true'}) }}{{ c.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+    </article>
+{% endblock %}

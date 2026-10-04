@@ -7,10 +7,13 @@ namespace App\Controller;
 use App\Entity\Invitation;
 use App\Entity\Membership;
 use App\Entity\Organization;
+use App\Entity\Project;
 use App\Entity\User;
 use App\Enum\OrganizationRole;
 use App\Form\InvitationFormType;
+use App\Form\MembershipFormType;
 use App\Form\OrganizationFormType;
+use App\Organization\HandoverService;
 use App\Repository\InvitationRepository;
 use App\Repository\MailAccountRepository;
 use App\Repository\MailRuleRepository;
@@ -31,6 +34,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/organizations')]
 final class OrganizationController extends AbstractController
@@ -87,7 +91,6 @@ final class OrganizationController extends AbstractController
             'organization' => $organization,
             'invitations' => $invitations->findPending($organization),
             'invite_form' => $inviteForm,
-            'roles' => OrganizationRole::cases(),
             'mail_accounts' => $mailAccounts->findForOrganization($organization),
             'mail_rules' => $mailRules->findForOrganization($organization),
             'org_projects' => $projects->findBy(['organization' => $organization], ['name' => 'ASC']),
@@ -132,38 +135,83 @@ final class OrganizationController extends AbstractController
         return $this->redirectToRoute('organization_index');
     }
 
-    #[Route('/{id<\d+>}/members/{membership<\d+>}/role', name: 'organization_member_role', methods: ['POST'])]
+    /**
+     * Role, function, term, voting right and (for guests) released projects of a membership.
+     */
+    #[Route('/{id<\d+>}/members/{membership<\d+>}/edit', name: 'organization_member_edit')]
     #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
-    #[IsCsrfTokenValid('member-role')]
-    public function changeRole(Request $request, Organization $organization, Membership $membership): Response
+    public function editMember(Request $request, Organization $organization, Membership $membership, #[CurrentUser] User $user, ProjectRepository $projects): Response
     {
         $this->assertBelongs($organization, $membership);
-        $role = OrganizationRole::tryFrom($request->getPayload()->getString('role'));
-        if (null === $role) {
-            throw $this->createNotFoundException();
-        }
-        if ($membership->isAdmin() && OrganizationRole::Admin !== $role && 1 === $organization->countAdmins()) {
-            $this->addFlash('error', 'organization.last_admin');
-        } else {
-            $membership->setRole($role);
+        $wasAdmin = $membership->isAdmin();
+        $choices = array_values(array_filter($projects->findBy(['organization' => $organization], ['name' => 'ASC']),
+            static fn (Project $p): bool => !$p->isArchived() || $membership->getGuestProjects()->contains($p)));
+        $form = $this->createForm(MembershipFormType::class, $membership, ['projects' => $choices]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($wasAdmin && !$membership->isAdmin() && 0 === $organization->countAdmins()) {
+                $this->em->refresh($membership);
+                $this->addFlash('error', 'organization.last_admin');
+
+                return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+            }
+            if (!$membership->isGuest()) {
+                $membership->getGuestProjects()->clear();
+            }
             $this->em->flush();
             $this->addFlash('success', 'flash.saved');
+
+            return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
         }
 
-        return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+        return $this->render('organization/member.html.twig', [
+            'organizations' => $this->organizations->findForUser($user),
+            'organization' => $organization,
+            'membership' => $membership,
+            'form' => $form,
+        ]);
     }
 
-    #[Route('/{id<\d+>}/members/{membership<\d+>}/voting', name: 'organization_member_voting', methods: ['POST'])]
+    /**
+     * Change of office: hands over assignments, tasks, rules, projects and minute taking of one person to another.
+     */
+    #[Route('/{id<\d+>}/handover', name: 'organization_handover')]
     #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
-    #[IsCsrfTokenValid('member-voting')]
-    public function toggleVotingRight(Organization $organization, Membership $membership): Response
+    public function handover(Request $request, Organization $organization, #[CurrentUser] User $user, HandoverService $handover, TranslatorInterface $translator): Response
     {
-        $this->assertBelongs($organization, $membership);
-        $membership->setVotingRight(!$membership->hasVotingRight());
-        $this->em->flush();
-        $this->addFlash('success', 'flash.saved');
+        $payload = $request->getPayload();
+        $from = null;
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('handover', $payload->getString('_token'))) {
+                throw $this->createAccessDeniedException();
+            }
+            $from = $organization->getMemberships()->findFirst(static fn (int $k, Membership $m): bool => (string) $m->getId() === $payload->getString('from'));
+            $to = $organization->getMemberships()->findFirst(static fn (int $k, Membership $m): bool => (string) $m->getId() === $payload->getString('to'));
+            $scopes = array_values(array_filter($payload->all('scopes'), \is_string(...)));
+            if (null === $from || null === $to || $from === $to || !$to->isFull() || [] === $scopes) {
+                $this->addFlash('error', 'handover.invalid');
+            } else {
+                $counts = $handover->transfer($organization, $from->getUser(), $to->getUser(), $scopes);
+                if ($payload->getBoolean('end_term') && $from->isActive()) {
+                    $from->setTermEndsOn(new \DateTimeImmutable('yesterday'));
+                }
+                $this->em->flush();
+                $this->addFlash('success', $translator->trans('handover.done_flash', [
+                    '%from%' => $from->getUser()->getName(),
+                    '%to%' => $to->getUser()->getName(),
+                    '%count%' => array_sum($counts),
+                ]));
 
-        return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+                return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+            }
+        }
+
+        return $this->render('organization/handover.html.twig', [
+            'organizations' => $this->organizations->findForUser($user),
+            'organization' => $organization,
+            'scopes' => HandoverService::SCOPES,
+            'preselected' => $request->query->getInt('from'),
+        ]);
     }
 
     /**
@@ -205,6 +253,7 @@ final class OrganizationController extends AbstractController
             /** @var array{email: string, role: OrganizationRole} $data */
             $data = $form->getData();
             $email = mb_strtolower(trim($data['email']));
+            // guests and former members may be invited again (as members)
             $alreadyMember = array_any($organization->getMembers(), static fn (User $u): bool => $u->getEmail() === $email);
 
             if ($alreadyMember) {

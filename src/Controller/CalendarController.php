@@ -168,7 +168,7 @@ final class CalendarController extends AbstractController
         $form = $this->createForm(CalendarItemFormType::class, $item, [
             'users' => $this->memberships->colleaguesOf($user),
             'organizations' => $organizations->findForUser($user),
-            'projects' => $this->projects->findVisibleFor($user),
+            'projects' => $this->projects->findVisibleFor($user, $item->getProject()),
         ]);
         $form->handleRequest($request);
 

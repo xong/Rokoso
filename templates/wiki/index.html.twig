@@ -1,0 +1,8 @@
+{% extends 'wiki/_layout.html.twig' %}
+
+{% block detail %}
+    <div class="flex h-full flex-col items-center justify-center gap-2 p-8 text-center text-slate-500">
+        {{ ux_icon('lucide:book-open', {class: 'size-10 text-slate-300', 'aria-hidden': 'true'}) }}
+        <p>{{ 'wiki.intro'|trans }}</p>
+    </div>
+{% endblock %}

@@ -297,7 +297,7 @@ final class MeetingController extends AbstractController
     private function handleForm(Request $request, User $user, Meeting $meeting, array $options): Response
     {
         $isNew = null === $meeting->getId();
-        $form = $this->createForm(MeetingFormType::class, $meeting, $options + ['projects' => $this->projects->findVisibleFor($user)]);
+        $form = $this->createForm(MeetingFormType::class, $meeting, $options + ['projects' => $this->projects->findVisibleFor($user, $meeting->getProject())]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             // The minute taker must belong to the organization

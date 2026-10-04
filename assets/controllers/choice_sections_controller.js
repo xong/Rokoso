@@ -1,6 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 
-/* Zeigt im Abstimmungsformular nur die Felder, die zur gewählten Art passen (data-kinds="choice schedule"). */
+/* Zeigt nur die Abschnitte, die zur gewählten Option der Radiogruppe passen (data-kinds="choice schedule"); verborgene Felder werden deaktiviert. */
 export default class extends Controller {
     static targets = ['section'];
 

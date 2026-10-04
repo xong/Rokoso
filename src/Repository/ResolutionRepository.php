@@ -29,7 +29,7 @@ class ResolutionRepository extends ServiceEntityRepository
     public function search(User $user, ?string $query = null, ?int $year = null, ?int $projectId = null, ?int $organizationId = null, ?int $limit = 200): array
     {
         $qb = $this->createQueryBuilder('r')
-            ->join(Membership::class, 'vm', 'WITH', 'vm.organization = r.organization AND vm.user = :viewer')
+            ->join(Membership::class, 'vm', 'WITH', 'vm.organization = r.organization AND vm.user = :viewer AND '.Membership::fullDql('vm'))
             ->setParameter('viewer', $user)
             ->orderBy('r.decidedOn', 'DESC')
             ->addOrderBy('r.id', 'DESC')
@@ -64,7 +64,7 @@ class ResolutionRepository extends ServiceEntityRepository
     {
         $dates = $this->createQueryBuilder('r')
             ->select('r.decidedOn')
-            ->join(Membership::class, 'vm', 'WITH', 'vm.organization = r.organization AND vm.user = :viewer')
+            ->join(Membership::class, 'vm', 'WITH', 'vm.organization = r.organization AND vm.user = :viewer AND '.Membership::fullDql('vm'))
             ->setParameter('viewer', $user)
             ->getQuery()
             ->getSingleColumnResult();

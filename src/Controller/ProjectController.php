@@ -15,6 +15,7 @@ use App\Notification\ActivityNotifier;
 use App\Repository\CalendarItemRepository;
 use App\Repository\CommentRepository;
 use App\Repository\ForumTopicRepository;
+use App\Repository\MembershipRepository;
 use App\Repository\MessageRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
@@ -45,15 +46,13 @@ final class ProjectController extends AbstractController
     }
 
     #[Route('', name: 'project_index')]
-    public function index(#[CurrentUser] User $user): Response
+    public function index(Request $request, #[CurrentUser] User $user): Response
     {
-        return $this->render('project/index.html.twig', [
-            'projects' => $this->projects->findVisibleFor($user),
-        ]);
+        return $this->render('project/index.html.twig', $this->listContext($request, $user));
     }
 
     #[Route('/new', name: 'project_new')]
-    public function new(Request $request, #[CurrentUser] User $user, OrganizationRepository $organizations): Response
+    public function new(Request $request, #[CurrentUser] User $user, OrganizationRepository $organizations, MembershipRepository $memberships): Response
     {
         $project = new Project($user);
         $preselected = $organizations->find($request->query->getInt('organization'));
@@ -61,7 +60,7 @@ final class ProjectController extends AbstractController
             $project->setOrganization($preselected);
         }
 
-        $form = $this->createForm(ProjectFormType::class, $project, ['user' => $user]);
+        $form = $this->createForm(ProjectFormType::class, $project, ['user' => $user, 'users' => $memberships->colleaguesOf($user)]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -74,15 +73,14 @@ final class ProjectController extends AbstractController
         }
 
         return $this->render('project/form.html.twig', [
-            'projects' => $this->projects->findVisibleFor($user),
             'project' => null,
             'form' => $form,
-        ]);
+        ] + $this->listContext($request, $user));
     }
 
     #[Route('/{id<\d+>}', name: 'project_show')]
     #[IsGranted(ProjectVoter::VIEW, 'project')]
-    public function show(Project $project, #[CurrentUser] User $user, MessageRepository $messages, CommentRepository $comments, StoredFileRepository $files, ForumTopicRepository $topics, CalendarService $calendar, CalendarItemRepository $items): Response
+    public function show(Request $request, Project $project, #[CurrentUser] User $user, MessageRepository $messages, CommentRepository $comments, StoredFileRepository $files, ForumTopicRepository $topics, CalendarService $calendar, CalendarItemRepository $items): Response
     {
         $forumTopics = $topics->forProject($project, $user);
         $now = new \DateTimeImmutable();
@@ -96,12 +94,11 @@ final class ProjectController extends AbstractController
             'open_tasks' => $items->findTasks($user, false, $project->getId(), false, 8),
             'topics' => $forumTopics,
             'unread_ids' => $topics->unreadIds($user, $forumTopics),
-            'projects' => $this->projects->findVisibleFor($user),
             'project' => $project,
             'comments' => $comments->forTarget($project),
             'files' => $files->forProject($project),
             'recent_messages' => \array_slice($messages->findForList($user, new MessageFilter('all', project: $project->getId())), 0, 5),
-        ]);
+        ] + $this->listContext($request, $user, $project));
     }
 
     #[Route('/{id<\d+>}/comment', name: 'project_comment', methods: ['POST'])]
@@ -136,9 +133,9 @@ final class ProjectController extends AbstractController
 
     #[Route('/{id<\d+>}/edit', name: 'project_edit')]
     #[IsGranted(ProjectVoter::MANAGE, 'project')]
-    public function edit(Request $request, Project $project, #[CurrentUser] User $user): Response
+    public function edit(Request $request, Project $project, #[CurrentUser] User $user, MembershipRepository $memberships): Response
     {
-        $form = $this->createForm(ProjectFormType::class, $project, ['user' => $user]);
+        $form = $this->createForm(ProjectFormType::class, $project, ['user' => $user, 'users' => $memberships->colleaguesOf($user)]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -153,10 +150,29 @@ final class ProjectController extends AbstractController
         }
 
         return $this->render('project/form.html.twig', [
-            'projects' => $this->projects->findVisibleFor($user),
             'project' => $project,
             'form' => $form,
-        ]);
+        ] + $this->listContext($request, $user, $project));
+    }
+
+    /**
+     * Completed projects are archived: hidden from selection lists, still readable.
+     */
+    #[Route('/{id<\d+>}/archive', name: 'project_archive', methods: ['POST'])]
+    #[IsGranted(ProjectVoter::MANAGE, 'project')]
+    #[IsCsrfTokenValid('project-archive')]
+    public function archive(Project $project): Response
+    {
+        if ($project->isArchived()) {
+            $project->unarchive();
+            $this->addFlash('success', 'project.unarchived_flash');
+        } else {
+            $project->archive();
+            $this->addFlash('success', 'project.archived_flash');
+        }
+        $this->em->flush();
+
+        return $this->redirectToRoute('project_show', ['id' => $project->getId()]);
     }
 
     #[Route('/{id<\d+>}/delete', name: 'project_delete', methods: ['POST'])]
@@ -170,6 +186,19 @@ final class ProjectController extends AbstractController
         $this->addFlash('success', 'flash.deleted');
 
         return $this->redirectToRoute('project_index');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function listContext(Request $request, User $user, ?Project $current = null): array
+    {
+        $archived = $request->query->getBoolean('archived', $current?->isArchived() ?? false);
+
+        return [
+            'projects' => $archived ? $this->projects->findArchivedFor($user) : $this->projects->findVisibleFor($user),
+            'archived' => $archived,
+        ];
     }
 
     /**

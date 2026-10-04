@@ -8,6 +8,7 @@ enum OrganizationRole: string
 {
     case Admin = 'admin';
     case Member = 'member';
+    case Guest = 'guest';
 
     public function label(): string
     {

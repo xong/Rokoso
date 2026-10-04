@@ -102,7 +102,8 @@
                         <li>
                             <a href="{{ path('project_show', {id: p.id}) }}" class="card flex items-center gap-2 py-1.5 pr-3 pl-1.5 hover:bg-slate-50">
                                 {{ ui.tile(p.name, p.image, p.color, 'size-6 text-[10px]') }}
-                                <span class="font-medium">{{ p.name }}</span>
+                                <span class="font-medium {{ p.archived ? 'text-slate-500' }}">{{ p.name }}</span>
+                                {% if p.archived %}{{ ux_icon('lucide:archive', {class: 'size-3.5 text-slate-400', 'aria-label': 'project.archived'|trans, role: 'img'}) }}{% endif %}
                             </a>
                         </li>
                     {% endfor %}
@@ -111,7 +112,12 @@
         </section>
 
         <section aria-labelledby="members-heading">
-            <h3 id="members-heading" class="mb-3 font-semibold">{{ 'organization.members'|trans }} <span class="font-normal text-slate-500">({{ organization.memberships|length }})</span></h3>
+            <div class="mb-3 flex items-center justify-between gap-2">
+                <h3 id="members-heading" class="font-semibold">{{ 'organization.members'|trans }} <span class="font-normal text-slate-500">({{ organization.members|length }})</span></h3>
+                {% if is_admin %}
+                    <a href="{{ path('organization_handover', {id: organization.id}) }}" class="btn-secondary">{{ ux_icon('lucide:arrow-right-left', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'handover.title'|trans }}</a>
+                {% endif %}
+            </div>
             <ul role="list" class="card divide-y divide-slate-100">
                 {% for membership in organization.memberships %}
                     {% set member = membership.user %}
@@ -120,33 +126,29 @@
                         <twig:Avatar name="{{ member.name }}" image="{{ member.avatar }}" />
                         <div class="min-w-0 flex-1">
                             <p class="truncate font-medium">{{ member.name }}{% if is_self %} <span class="text-slate-500">({{ 'organization.you'|trans }})</span>{% endif %}</p>
-                            <p class="truncate text-xs text-slate-500">{{ member.email }}</p>
+                            <p class="truncate text-xs text-slate-500">
+                                {% if membership.position %}{{ membership.position }} · {% endif %}{{ member.email }}
+                                {% if membership.termEndsOn and not membership.former %} · {{ 'membership.term_until'|trans({'%date%': membership.termEndsOn|date('d.m.Y')}) }}{% endif %}
+                            </p>
+                            {% if membership.guest and membership.guestProjects is not empty %}
+                                <p class="truncate text-xs text-slate-500">{{ 'membership.guest_in'|trans({'%projects%': membership.guestProjects|map(p => p.name)|join(', ')}) }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            {% if membership.former %}
+                                <span class="badge bg-slate-100 text-slate-500">{{ 'membership.former'|trans({'%date%': membership.termEndsOn|date('d.m.Y')}) }}</span>
+                            {% else %}
+                                <span class="badge {{ membership.admin ? 'bg-brand-50 text-brand-700' : (membership.guest ? 'bg-amber-50 text-amber-800' : 'bg-slate-100 text-slate-600') }}">{{ membership.role.label|trans }}</span>
+                            {% endif %}
+                            {% if membership.votingRight and membership.full %}
+                                <span class="badge bg-emerald-50 text-emerald-700">{{ 'organization.voting_right'|trans }}</span>
+                            {% endif %}
                         </div>
                         {% if is_admin %}
-                            <form method="post" action="{{ path('organization_member_voting', {id: organization.id, membership: membership.id}) }}">
-                                <input type="hidden" name="_token" value="{{ csrf_token('member-voting') }}">
-                                <button type="submit" class="btn-secondary py-1 text-xs" aria-pressed="{{ membership.votingRight ? 'true' : 'false' }}"
-                                        title="{{ 'organization.voting_right_toggle'|trans({'%name%': member.name}) }}">
-                                    {{ ux_icon(membership.votingRight ? 'lucide:check' : 'lucide:x', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
-                                    {{ 'organization.voting_right'|trans }}
-                                </button>
-                            </form>
-                        {% elseif membership.votingRight %}
-                            <span class="badge bg-emerald-50 text-emerald-700">{{ 'organization.voting_right'|trans }}</span>
-                        {% endif %}
-                        {% if is_admin %}
-                            <form method="post" action="{{ path('organization_member_role', {id: organization.id, membership: membership.id}) }}" class="flex items-center gap-1" data-controller="autosubmit">
-                                <input type="hidden" name="_token" value="{{ csrf_token('member-role') }}">
-                                <label for="role-{{ membership.id }}" class="sr-only">{{ 'organization.role.label'|trans }}</label>
-                                <select id="role-{{ membership.id }}" name="role" class="input w-auto py-1" data-action="autosubmit#submit">
-                                    {% for role in roles %}
-                                        <option value="{{ role.value }}" {{ membership.role == role ? 'selected' }}>{{ role.label|trans }}</option>
-                                    {% endfor %}
-                                </select>
-                                <noscript><button type="submit" class="btn-secondary">{{ 'action.save'|trans }}</button></noscript>
-                            </form>
-                        {% else %}
-                            <span class="badge {{ membership.admin ? 'bg-brand-50 text-brand-700' : 'bg-slate-100 text-slate-600' }}">{{ membership.role.label|trans }}</span>
+                            <a href="{{ path('organization_member_edit', {id: organization.id, membership: membership.id}) }}" class="btn-icon"
+                               aria-label="{{ 'membership.edit'|trans({'%name%': member.name}) }}" title="{{ 'membership.edit'|trans({'%name%': member.name}) }}">
+                                {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            </a>
                         {% endif %}
                         {% if is_admin or is_self %}
                             {{ ui.post_button(path('organization_member_remove', {id: organization.id, membership: membership.id}), 'member-remove',

@@ -104,7 +104,10 @@ class ForumTopicRepository extends ServiceEntityRepository
             ->addSelect('b', 'lb')
             ->join('t.board', 'b')
             ->leftJoin('t.lastPostBy', 'lb')
-            ->join(Membership::class, 'm', 'WITH', 'm.organization = b.organization AND m.user = :user')
+            ->leftJoin('b.parent', 'pb')
+            ->leftJoin(Membership::class, 'm', 'WITH', 'm.organization = b.organization AND m.user = :user AND '.Membership::fullDql('m'))
+            ->andWhere('m.id IS NOT NULL OR '.Membership::guestDql('t.project', 'user', 'gt').' OR '.Membership::guestDql('b.project', 'user', 'gb')
+                .' OR '.Membership::guestDql('pb.project', 'user', 'gpb'))
             ->setParameter('user', $user);
     }
 }

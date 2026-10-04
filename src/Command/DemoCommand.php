@@ -26,6 +26,7 @@ use App\Entity\Project;
 use App\Entity\Resolution;
 use App\Entity\User;
 use App\Entity\Watch;
+use App\Entity\WikiPage;
 use App\Enum\AttendanceStatus;
 use App\Enum\CalendarItemType;
 use App\Enum\MailEncryption;
@@ -81,8 +82,9 @@ final readonly class DemoCommand
 
             $org = (new Organization())->setName('SEV Musterstadt')->setColor('#2563eb')
                 ->setDescription('Stadtelternvertretung der Musterstädter Schulen');
-            $org->addMember($user, OrganizationRole::Admin);
-            $org->addMember($colleague, OrganizationRole::Member);
+            $org->addMember($user, OrganizationRole::Admin)->setPosition('Vorsitz');
+            $org->addMember($colleague, OrganizationRole::Member)->setPosition('Schriftführung')
+                ->setTermEndsOn(new \DateTimeImmutable('31 July next year'));
             $guest = (new User())->setEmail('gast@coop.test')->setName('Gerd Gastmitglied')->setVerified(true);
             $guest->setPassword($this->hasher->hashPassword($guest, 'demo-passwort'));
             $this->em->persist($guest);
@@ -94,6 +96,16 @@ final readonly class DemoCommand
                 $projects[] = $project = (new Project($user))->setName($name)->setColor($color)->setOrganization($org);
                 $this->em->persist($project);
             }
+            $projects[0]->setLead($colleague);
+            $projects[1]->setLead($user);
+            $this->em->persist((new Project($user))->setName('Sommerfest 2025')->setColor('#a855f7')->setOrganization($org)->archive());
+
+            // external guest: sees only the released project
+            $school = (new User())->setEmail('schule@coop.test')->setName('Sabine Schulleitung')->setVerified(true);
+            $school->setPassword($this->hasher->hashPassword($school, 'demo-passwort'));
+            $this->em->persist($school);
+            $org->addMember($school, OrganizationRole::Guest)->setVotingRight(false)->setPosition('Schulleitung GS Nord')->addGuestProject($projects[0]);
+            $this->createWiki($org, $user, $colleague);
 
             foreach ([['Eva', 'Elternteil', 'Elternbeirat GS Nord', 'eva@example.org'], [null, null, 'Schulamt Musterstadt', 'info@schulamt.example.org']] as [$first, $last, $company, $email]) {
                 $this->em->persist((new Contact($user))->setFirstName($first)->setLastName($last)->setCompany($company)->setEmail($email)->setOrganization($org));
@@ -154,7 +166,7 @@ final readonly class DemoCommand
             $this->em->persist((new MailRule($org))->setName('Rundbrief Landeselternrat')->setField(MailRuleField::From)
                 ->setNeedle('newsletter@')->setMarkDone(true));
             $this->em->flush();
-            $io->success('Demo angelegt: demo@coop.test / demo-passwort (und kim@coop.test)');
+            $io->success('Demo angelegt: demo@coop.test / demo-passwort (und kim@coop.test, Gast schule@coop.test)');
         }
 
         if ($mails) {
@@ -190,6 +202,28 @@ final readonly class DemoCommand
         }
 
         return 0;
+    }
+
+    /**
+     * Knowledge base: a few nested pages, one of them edited twice.
+     */
+    private function createWiki(Organization $org, User $user, User $colleague): void
+    {
+        $page = function (string $title, string $body, User $author, ?WikiPage $parent = null) use ($org): WikiPage {
+            $page = (new WikiPage($org))->setTitle($title)->setBody($body)->setParent($parent);
+            $this->em->persist($page);
+            $this->em->persist($page->record($author));
+
+            return $page;
+        };
+        $basics = $page('Grundlagen', "Was die Stadtelternvertretung macht und wie wir arbeiten.\n\n- Sitzungen alle zwei Wochen\n- Beschlüsse stehen in der **Beschlussliste**", $user);
+        $page('Geschäftsordnung', "## Sitzungen\n\nDie Einladung geht mindestens **7 Tage** vorher raus.\n\n## Beschlüsse\n\nBeschlussfähig sind wir, wenn die Hälfte der Stimmberechtigten anwesend ist.", $user, $basics);
+        $contacts = $page('Ansprechpartner', "- Schulamt: info@schulamt.example.org\n- Elternbeirat GS Nord: Eva Elternteil", $colleague, $basics);
+        $contacts->setBody($contacts->getBody()."\n- Stadtverwaltung, Verkehrsplanung: Zimmer 214");
+        $this->em->persist($contacts->record($user));
+        $howto = $page('Anleitungen', 'Schritt-für-Schritt-Hilfen für wiederkehrende Aufgaben.', $colleague);
+        $page('Protokoll schreiben', "1. Vorlage aus *Dateien → Protokolle* nehmen\n2. Beschlüsse mit Nummer festhalten\n3. Protokoll zur Freigabe in der Sitzung hochladen", $colleague, $howto);
+        $page('Übergabe bei Amtswechsel', "Unter *Organisationen → Übergabe* gehen offene Nachrichten, Aufgaben und Projekte an die Nachfolge.\n\nDanach Amtszeit beenden.", $user, $howto);
     }
 
     /** @param list<Project> $projects */

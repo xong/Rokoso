@@ -49,6 +49,7 @@ final class Sidebar
         ['label' => 'nav.polls', 'icon' => 'lucide:vote', 'route' => 'poll_index', 'match' => ['poll_']],
         ['label' => 'nav.files', 'icon' => 'lucide:folder', 'route' => 'file_index', 'match' => ['file_', 'folder_']],
         ['label' => 'nav.shelf', 'icon' => 'lucide:bookmark', 'route' => 'shelf_index', 'match' => ['shelf_']],
+        ['label' => 'nav.knowledge', 'icon' => 'lucide:book-open', 'route' => 'wiki_index', 'match' => ['wiki_']],
         ['label' => 'nav.forum', 'icon' => 'lucide:messages-square', 'route' => 'forum_index', 'match' => ['forum_']],
         ['label' => 'nav.contacts', 'icon' => 'lucide:contact', 'route' => 'contact_index', 'match' => ['contact_']],
         ['label' => 'nav.projects', 'icon' => 'lucide:folder-kanban', 'route' => 'project_index', 'match' => ['project_']],

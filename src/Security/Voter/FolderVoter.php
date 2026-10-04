@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
- * Folders and files: members of the organization view, upload and edit;
+ * Folders and files: members of the organization (guests: of their projects) view, upload and edit;
  * deleting is reserved for the creator and the organization's administrators.
  *
  * @extends Voter<string, Folder|StoredFile>
@@ -35,9 +35,7 @@ final class FolderVoter extends Voter
         if (!$user instanceof User) {
             return false;
         }
-        $folder = $subject instanceof StoredFile ? $subject->getFolder() : $subject;
-        $membership = $folder->getOrganization()->getMembership($user);
-        if (null === $membership) {
+        if (!$subject->isVisibleTo($user)) {
             return false;
         }
         if (self::DELETE !== $attribute) {
@@ -45,6 +43,6 @@ final class FolderVoter extends Voter
         }
         $owner = $subject instanceof StoredFile ? $subject->getUploadedBy() : $subject->getCreatedBy();
 
-        return $owner === $user || $membership->isAdmin();
+        return $owner === $user || ($subject->getOrganization()->getMembership($user)?->isAdmin() ?? false);
     }
 }

@@ -72,6 +72,11 @@ class StoredFile
         return $this->folder->getOrganization();
     }
 
+    public function isVisibleTo(User $user): bool
+    {
+        return $this->folder->isVisibleTo($user) || ($this->getOrganization()->findMembership($user)?->grantsGuestAccessTo($this->project) ?? false);
+    }
+
     public function getFilename(): string
     {
         return $this->filename;

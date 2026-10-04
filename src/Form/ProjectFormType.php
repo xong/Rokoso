@@ -42,12 +42,21 @@ final class ProjectFormType extends AbstractType
                 'help' => 'project.organization_help',
                 // Nur Organisationen, in denen der Benutzer Administrator ist
                 'query_builder' => static fn (EntityRepository $r): QueryBuilder => $r->createQueryBuilder('o')
-                    ->join(Membership::class, 'm', 'WITH', 'm.organization = o AND m.user = :user AND m.role = :admin')
+                    ->join(Membership::class, 'm', 'WITH', 'm.organization = o AND m.user = :user AND m.role = :admin AND '.Membership::fullDql('m'))
                     ->setParameter('user', $user)
                     ->setParameter('admin', OrganizationRole::Admin->value)
                     ->orderBy('o.name'),
             ])
             ->add('description', TextareaType::class, ['label' => 'project.description', 'required' => false])
+            ->add('lead', EntityType::class, [
+                'label' => 'project.lead',
+                'class' => User::class,
+                'choices' => $options['users'],
+                'choice_label' => 'name',
+                'required' => false,
+                'placeholder' => 'project.no_lead',
+                'help' => 'project.lead_help',
+            ])
             ->add('color', ColorType::class, ['label' => 'project.color'])
             ->add('imageFile', FileType::class, [
                 'label' => 'project.image',
@@ -66,7 +75,8 @@ final class ProjectFormType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => Project::class]);
+        $resolver->setDefaults(['data_class' => Project::class, 'users' => []]);
+        $resolver->setAllowedTypes('users', 'array');
         $resolver->setRequired('user');
         $resolver->setAllowedTypes('user', User::class);
     }

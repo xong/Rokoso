@@ -8,8 +8,8 @@
 | | |
 |---|---|
 | **Aktuelle Phase** | Ausbau 2 nach Systemvergleich (Phasen 20–34) |
-| **Nächster Schritt** | Phase 25 (Mitgliedschaften: Amtszeiten, Gäste, Übergabe, Wissen) |
-| **Letzte Sitzung** | 2026-10-04: Phase 24 (Abstimmungen offen/geheim, Entscheidung/Auswahl/Terminfindung, Umlaufbeschluss → Beschlussliste, gewählter Termin → Sitzung bzw. Kalender, Abstimmungen in Forenthemen und Sitzungen; Entscheidung 52); davor Phase 23 (Sitzungen mit Tagesordnung, TOP-Vorschlägen, Einladung per E-Mail mit .ics, Anwesenheit/Beschlussfähigkeit, Protokoll mit Freigabe und Druckansicht, Beschlussliste, Aufgaben aus TOPs, Stimmrecht pro Mitgliedschaft; Entscheidung 51); davor Phase 22 (Aufgaben ohne Pflichtfrist, Status offen/in Arbeit/erledigt, Liste Meine/Alle/Projekt, Board, Aufgabe aus Nachricht/Forenthema, Projektseite mit Terminen und Aufgaben; Entscheidung 50); davor Phase 21 (Benachrichtigungen mit Glocke, @-Erwähnungen, Beobachten, E-Mail sofort/täglich/aus, Web-Push; Cron `app:notify`; Entscheidung 49); davor Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
+| **Nächster Schritt** | Phase 26 (Postfach: Schreiben – Entwürfe, Signaturen, Textbausteine, Rich-Text, Senden rückgängig) |
+| **Letzte Sitzung** | 2026-10-04: Phase 25 (Mitgliedschaft mit Funktion und Amtszeit, ehemalige Mitglieder ohne Zugriff, Gastzugang pro Projekt, Übergabe beim Amtswechsel, Projektleitung, Projekte archivieren, Handbuch mit Seitenbaum und Versionen; Entscheidung 53); davor Phase 24 (Abstimmungen offen/geheim, Entscheidung/Auswahl/Terminfindung, Umlaufbeschluss → Beschlussliste, gewählter Termin → Sitzung bzw. Kalender, Abstimmungen in Forenthemen und Sitzungen; Entscheidung 52); davor Phase 23 (Sitzungen mit Tagesordnung, TOP-Vorschlägen, Einladung per E-Mail mit .ics, Anwesenheit/Beschlussfähigkeit, Protokoll mit Freigabe und Druckansicht, Beschlussliste, Aufgaben aus TOPs, Stimmrecht pro Mitgliedschaft; Entscheidung 51); davor Phase 22 (Aufgaben ohne Pflichtfrist, Status offen/in Arbeit/erledigt, Liste Meine/Alle/Projekt, Board, Aufgabe aus Nachricht/Forenthema, Projektseite mit Terminen und Aufgaben; Entscheidung 50); davor Phase 21 (Benachrichtigungen mit Glocke, @-Erwähnungen, Beobachten, E-Mail sofort/täglich/aus, Web-Push; Cron `app:notify`; Entscheidung 49); davor Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
 **Starten:** `docker compose up -d` · `php bin/console doctrine:migrations:migrate -n` · `php bin/console app:demo --mails` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000 (Login `demo@coop.test` / `demo-passwort`)
 
@@ -165,11 +165,11 @@ Grundlage: Vergleich mit Front/Help Scout/Zammad (gemeinsames Postfach), Nextclo
 - [x] 24.5 Abstimmungen in Forenthemen und Sitzungen
 
 ## Phase 25 – Mitgliedschaften: Amtszeiten, Gäste, Übergabe, Wissen
-- [ ] 25.1 Mitgliedschaft mit **Funktion** (Vorsitz, Kasse, Schriftführung …) und **Amtszeit** bis; abgelaufene werden „ehemalig“ (kein Zugriff mehr)
-- [ ] 25.2 **Gastzugang pro Projekt**: Rolle „Gast“ sieht nur freigegebene Projekte (Forum, Dateien, Termine, Aufgaben), keine E-Mails, Kontakte oder Mitgliederdaten
-- [ ] 25.3 **Übergabe**: Zuweisungen, Aufgaben, Projekte einer Person an eine andere übertragen
-- [ ] 25.4 **Wissen/Handbuch** pro Organisation: Seiten (Markdown, Hierarchie, Versionen)
-- [ ] 25.5 **Projekte archivieren** (abgeschlossen, aus Auswahllisten ausgeblendet)
+- [x] 25.1 Mitgliedschaft mit **Funktion** (Vorsitz, Kasse, Schriftführung …) und **Amtszeit** bis; abgelaufene werden „ehemalig“ (kein Zugriff mehr)
+- [x] 25.2 **Gastzugang pro Projekt**: Rolle „Gast“ sieht nur freigegebene Projekte (Forum, Dateien, Termine, Aufgaben), keine E-Mails, Kontakte oder Mitgliederdaten
+- [x] 25.3 **Übergabe**: Zuweisungen, Aufgaben, Projekte einer Person an eine andere übertragen
+- [x] 25.4 **Wissen/Handbuch** pro Organisation: Seiten (Markdown, Hierarchie, Versionen)
+- [x] 25.5 **Projekte archivieren** (abgeschlossen, aus Auswahllisten ausgeblendet)
 
 ## Phase 26 – Postfach: Schreiben
 - [ ] 26.1 **Entwürfe** (automatisch gespeichert, Ordner „Entwürfe“)

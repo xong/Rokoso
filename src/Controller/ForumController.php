@@ -142,7 +142,7 @@ final class ForumController extends AbstractController
     public function editBoard(Request $request, ForumBoard $board, #[CurrentUser] User $user): Response
     {
         $form = $this->createForm(ForumBoardFormType::class, $board, [
-            'projects' => $this->projectChoices($user, $board->getOrganization()),
+            'projects' => $this->projectChoices($user, $board->getOrganization(), $board->getProject()),
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -247,7 +247,7 @@ final class ForumController extends AbstractController
     public function editTopic(Request $request, ForumTopic $topic, #[CurrentUser] User $user): Response
     {
         $form = $this->createForm(ForumTopicFormType::class, $topic, [
-            'projects' => $this->projectChoices($user, $topic->getOrganization()),
+            'projects' => $this->projectChoices($user, $topic->getOrganization(), $topic->getProject()),
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -434,8 +434,10 @@ final class ForumController extends AbstractController
     private function treeContext(User $user, ?ForumBoard $current): array
     {
         $tree = [];
-        foreach ($this->boards->findVisibleFor($user) as $board) {
-            if (null !== $board->getParent()) {
+        $visible = $this->boards->findVisibleFor($user);
+        foreach ($visible as $board) {
+            // guests may see a subfolder/sub-area without its parent: then it is shown at the top level
+            if (null !== $board->getParent() && \in_array($board->getParent(), $visible, true)) {
                 continue;
             }
             $organization = $board->getOrganization();
@@ -454,10 +456,10 @@ final class ForumController extends AbstractController
     /**
      * @return list<Project>
      */
-    private function projectChoices(User $user, ?Organization $organization): array
+    private function projectChoices(User $user, ?Organization $organization, ?Project $keep = null): array
     {
         return array_values(array_filter(
-            $this->projects->findVisibleFor($user),
+            $this->projects->findVisibleFor($user, $keep),
             static fn (Project $p): bool => null !== $p->getOrganization() && (null === $organization || $p->getOrganization() === $organization),
         ));
     }

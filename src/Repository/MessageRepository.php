@@ -38,7 +38,7 @@ class MessageRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('m')
             ->leftJoin('m.project', 'p')
-            ->andWhere('(m.organization IS NOT NULL AND EXISTS (SELECT 1 FROM '.Membership::class.' vm WHERE vm.organization = m.organization AND vm.user = :viewer))'
+            ->andWhere('(m.organization IS NOT NULL AND EXISTS (SELECT 1 FROM '.Membership::class.' vm WHERE vm.organization = m.organization AND vm.user = :viewer AND '.Membership::fullDql('vm').'))'
                 .' OR m.author = :viewer'
                 .' OR :viewer MEMBER OF m.recipientUsers'
                 .' OR (m.organization IS NULL AND p.createdBy = :viewer)')

@@ -24,7 +24,7 @@ class ContactRepository extends ServiceEntityRepository
     public function visibleQuery(User $user): QueryBuilder
     {
         return $this->createQueryBuilder('c')
-            ->leftJoin(Membership::class, 'cm', 'WITH', 'cm.organization = c.organization AND cm.user = :viewer')
+            ->leftJoin(Membership::class, 'cm', 'WITH', 'cm.organization = c.organization AND cm.user = :viewer AND '.Membership::fullDql('cm'))
             ->andWhere('cm.id IS NOT NULL OR (c.organization IS NULL AND c.createdBy = :viewer)')
             ->setParameter('viewer', $user);
     }

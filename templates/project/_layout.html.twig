@@ -3,7 +3,7 @@
 
 {% block title %}{{ 'nav.projects'|trans }}{% endblock %}
 {% block list_title %}{{ 'nav.projects'|trans }}{% endblock %}
-{% block back_url %}{{ path('project_index') }}{% endblock %}
+{% block back_url %}{{ path('project_index', archived ? {archived: 1} : {}) }}{% endblock %}
 
 {% block list_actions %}
     <a href="{{ path('project_new') }}" class="btn-icon" aria-label="{{ 'project.new'|trans }}" title="{{ 'project.new'|trans }}">
@@ -12,8 +12,15 @@
 {% endblock %}
 
 {% block list %}
+    <nav aria-label="{{ 'project.state'|trans }}" class="m-3 flex gap-1 rounded-lg bg-slate-100 p-1 text-sm">
+        {% for value, label in {0: 'project.active', 1: 'project.archived'} %}
+            {% set active = (value == 1) == archived %}
+            <a href="{{ path('project_index', value ? {archived: 1} : {}) }}" {% if active %}aria-current="page"{% endif %}
+               class="flex-1 rounded-md px-3 py-1 text-center {{ active ? 'bg-surface font-medium shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">{{ label|trans }}</a>
+        {% endfor %}
+    </nav>
     {% if projects is empty %}
-        {{ ui.empty('project.none', 'lucide:folder-kanban') }}
+        {{ ui.empty(archived ? 'project.none_archived' : 'project.none', 'lucide:folder-kanban') }}
     {% else %}
         <ul role="list">
             {% for p in projects %}

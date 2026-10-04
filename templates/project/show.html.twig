@@ -12,6 +12,8 @@
         <a href="{{ path('project_edit', {id: project.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">
             {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
         </a>
+        {{ ui.post_button(path('project_archive', {id: project.id}), 'project-archive', project.archived ? 'project.unarchive' : 'project.archive',
+            {class: 'btn-icon', icon: project.archived ? 'lucide:archive-restore' : 'lucide:archive', icon_only: true}) }}
         {{ ui.post_button(path('project_delete', {id: project.id}), 'delete-project-' ~ project.id, 'project.delete',
             {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'project.delete_confirm'}) }}
     {% endif %}
@@ -23,7 +25,7 @@
             <div class="flex items-start gap-4">
                 {{ ui.tile(project.name, project.image, project.color, 'size-16 text-lg') }}
                 <div class="min-w-0">
-                    <p class="text-lg font-semibold">{{ project.name }}</p>
+                    <p class="text-lg font-semibold">{{ project.name }}{% if project.archived %} <span class="badge bg-slate-100 align-middle text-slate-600">{{ ux_icon('lucide:archive', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'project.archived_on'|trans({'%date%': project.archivedAt|date('d.m.Y')}) }}</span>{% endif %}</p>
                     <p class="text-sm text-slate-500">
                         {% if project.organization %}
                             <a class="link" href="{{ path('organization_show', {id: project.organization.id}) }}">{{ project.organization.name }}</a>
@@ -31,6 +33,7 @@
                             {{ 'project.personal'|trans }}
                         {% endif %}
                     </p>
+                    {% if project.lead %}<p class="mt-1 text-sm text-slate-600">{{ 'project.lead'|trans }}: {{ project.lead.name }}</p>{% endif %}
                     {% if project.description %}<p class="mt-2 whitespace-pre-line text-slate-600">{{ project.description }}</p>{% endif %}
                 </div>
             </div>

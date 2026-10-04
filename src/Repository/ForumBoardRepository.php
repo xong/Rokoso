@@ -27,8 +27,8 @@ class ForumBoardRepository extends ServiceEntityRepository
      */
     public function findVisibleFor(User $user): array
     {
-        /* @var list<ForumBoard> */
-        return $this->createQueryBuilder('b')
+        /** @var list<ForumBoard> $all */
+        $all = $this->createQueryBuilder('b')
             ->addSelect('o')
             ->join('b.organization', 'o')
             ->join(Membership::class, 'm', 'WITH', 'm.organization = o AND m.user = :user')
@@ -36,6 +36,8 @@ class ForumBoardRepository extends ServiceEntityRepository
             ->orderBy('o.name')
             ->addOrderBy('b.name')
             ->getQuery()->getResult();
+
+        return array_values(array_filter($all, static fn (ForumBoard $x): bool => $x->isVisibleTo($user)));
     }
 
     /**

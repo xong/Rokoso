@@ -1,0 +1,59 @@
+{% extends 'organization/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ 'handover.title'|trans }}{% endblock %}
+{% block detail_title %}{{ 'handover.title'|trans }} · {{ organization.name }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        <p class="mb-6 text-sm text-slate-600">{{ 'handover.intro'|trans }}</p>
+        <form method="post" action="{{ path('organization_handover', {id: organization.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('handover') }}">
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                <div class="mb-4">
+                    <label for="handover-from" class="label">{{ 'handover.from'|trans }}</label>
+                    <select id="handover-from" name="from" class="input" required>
+                        <option value="">{{ 'handover.choose'|trans }}</option>
+                        {% for m in organization.memberships %}
+                            <option value="{{ m.id }}" {{ preselected == m.id ? 'selected' }}>{{ m.user.name }}{% if m.position %} ({{ m.position }}){% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="handover-to" class="label">{{ 'handover.to'|trans }}</label>
+                    <select id="handover-to" name="to" class="input" required>
+                        <option value="">{{ 'handover.choose'|trans }}</option>
+                        {% for m in organization.memberships|filter(m => m.full) %}
+                            <option value="{{ m.id }}">{{ m.user.name }}{% if m.position %} ({{ m.position }}){% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <fieldset class="mb-4 rounded-lg border border-slate-200 p-4">
+                <legend class="px-1 text-sm font-medium">{{ 'handover.scopes'|trans }}</legend>
+                {% for scope in scopes %}
+                    <div class="flex items-center gap-2 py-1">
+                        <input type="checkbox" id="scope-{{ scope }}" name="scopes[]" value="{{ scope }}" class="size-4 accent-brand-600" checked>
+                        <label for="scope-{{ scope }}">{{ ('handover.scope.' ~ scope)|trans }}</label>
+                    </div>
+                {% endfor %}
+            </fieldset>
+
+            <div class="mb-6 flex items-start gap-2">
+                <input type="checkbox" id="handover-end-term" name="end_term" value="1" class="mt-1 size-4 accent-brand-600" aria-describedby="handover-end-term-help">
+                <div>
+                    <label for="handover-end-term">{{ 'handover.end_term'|trans }}</label>
+                    <p id="handover-end-term-help" class="text-xs text-slate-500">{{ 'handover.end_term_help'|trans }}</p>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ ux_icon('lucide:arrow-right-left', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'handover.submit'|trans }}</button>
+                <a href="{{ path('organization_show', {id: organization.id}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

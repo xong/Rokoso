@@ -27,6 +27,7 @@ nav:
     files: Dateien
     shelf: Ablage
     forum: Forum
+    knowledge: Wissen
     calendar: Kalender
     contacts: Kontakte
     projects: Projekte
@@ -180,6 +181,7 @@ organization:
         label: Rolle
         admin: Administrator
         member: Nutzer
+        guest: Gast
     leave: Organisation verlassen
     leave_confirm: Organisation wirklich verlassen?
     left: Du hast die Organisation verlassen.
@@ -202,7 +204,76 @@ organization:
     invitation_days: Ladungsfrist (Tage)
     invitation_days_help: Mindestabstand zwischen Einladung und Sitzung. 0 = keine Frist.
     voting_right: stimmberechtigt
-    voting_right_toggle: 'Stimmrecht von %name% umschalten'
+
+membership:
+    title: 'Mitgliedschaft von %name%'
+    edit: 'Mitgliedschaft von %name% bearbeiten'
+    position: Funktion
+    position_help: z. B. Vorsitz, Kasse, Schriftführung – frei wählbar.
+    positions:
+        chair: Vorsitz
+        vice_chair: Stellv. Vorsitz
+        treasurer: Kasse
+        secretary: Schriftführung
+        assessor: Beisitz
+    term_ends_on: Amtszeit bis
+    term_ends_on_help: Danach gilt die Person als ehemaliges Mitglied und hat keinen Zugriff mehr. Leer = unbefristet.
+    term_until: 'Amtszeit bis %date%'
+    voting_right_help: Zählt für Beschlussfähigkeit und Abstimmungen, die nur Stimmberechtigten offenstehen.
+    guest_projects: Freigegebene Projekte
+    guest_projects_help: Gäste sehen nur diese Projekte (Forum, Dateien, Termine, Aufgaben) – keine E-Mails, Kontakte oder Mitgliederdaten.
+    guest_in: 'Gast in: %projects%'
+    former: 'ehemalig seit %date%'
+
+handover:
+    title: Übergabe
+    intro: Bei einem Amtswechsel werden offene Zuweisungen einer Person an eine andere übertragen. Erledigtes bleibt unverändert.
+    from: Bisher zuständig
+    to: Neu zuständig
+    choose: '– bitte wählen –'
+    scopes: Was wird übergeben?
+    scope:
+        messages: Zugewiesene offene Nachrichten
+        tasks: Offene Aufgaben
+        rules: Zuweisungen in E-Mail-Regeln
+        projects: Projektleitung und beobachtete Projekte
+        meetings: Protokollführung kommender Sitzungen
+    end_term: Amtszeit der bisherigen Person heute beenden
+    end_term_help: Sie wird ehemaliges Mitglied und verliert den Zugriff.
+    submit: Übergeben
+    invalid: Bitte zwei verschiedene Personen und mindestens einen Bereich wählen. Neu zuständig kann nur ein aktives Mitglied sein.
+    done_flash: '{0}Übergabe von %from% an %to%: nichts zu übertragen.|{1}Übergabe von %from% an %to%: 1 Eintrag übertragen.|]1,Inf[Übergabe von %from% an %to%: %count% Einträge übertragen.'
+
+wiki:
+    intro: Das Handbuch sammelt Wissen der Organisation – Abläufe, Ansprechpartner, Vorlagen. Wähle links eine Seite oder lege eine neue an.
+    none: Noch keine Seiten.
+    no_organization: Das Handbuch steht Mitgliedern einer Organisation zur Verfügung.
+    no_hits: Keine Seite gefunden.
+    count: '{0}Keine Seite gefunden|{1}1 Seite gefunden|]1,Inf[%count% Seiten gefunden'
+    search: Handbuch durchsuchen
+    new: Neue Seite
+    new_in: 'Neue Seite in %name%'
+    new_child: Unterseite anlegen
+    page_title: Titel
+    parent: Übergeordnete Seite
+    no_parent: '– oberste Ebene –'
+    body: Inhalt
+    body_help: 'Markdown: **fett**, *kursiv*, # Überschrift, - Liste, [Link](https://…)'
+    breadcrumb: Pfad
+    updated: 'Zuletzt geändert am %date% von %name%'
+    empty_page: Diese Seite hat noch keinen Inhalt.
+    children: Unterseiten
+    delete: Seite löschen
+    delete_confirm: Seite mit allen Versionen löschen?
+    delete_confirm_children: Seite mit allen Unterseiten und Versionen löschen?
+    revisions: Versionen
+    current: aktuell
+    back_to_page: Zur Seite
+    choose_revision: '{1}Eine Version gespeichert. Wähle sie zum Ansehen.|]1,Inf[%count% Versionen gespeichert. Wähle eine zum Ansehen oder Wiederherstellen.'
+    revision_of: 'Version vom %date% von %name%'
+    restore: Diese Version wiederherstellen
+    restore_confirm: Diese Version als aktuellen Stand übernehmen? Der bisherige Stand bleibt als Version erhalten.
+    restored: Version wiederhergestellt.
 
 invitation:
     title: Einladung
@@ -247,6 +318,18 @@ project:
     no_files: Diesem Projekt sind noch keine Dateien zugeordnet.
     forum: Forum
     no_topics: Diesem Projekt sind noch keine Forumsthemen zugeordnet.
+    state: Projektstatus
+    active: Aktiv
+    archived: Archiviert
+    none_archived: Keine archivierten Projekte.
+    archive: Projekt archivieren
+    unarchive: Projekt reaktivieren
+    archived_flash: Projekt archiviert. Es erscheint nicht mehr in Auswahllisten, bleibt aber lesbar.
+    unarchived_flash: Projekt reaktiviert.
+    archived_on: 'archiviert am %date%'
+    lead: Projektleitung
+    lead_help: Ansprechperson für das Projekt; wird bei einer Übergabe mit übertragen.
+    no_lead: '– niemand –'
 
 mail_account:
     title: E-Mail-Konten

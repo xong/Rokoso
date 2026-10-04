@@ -1,0 +1,53 @@
+{% extends 'organization/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ 'membership.title'|trans({'%name%': membership.user.name}) }}{% endblock %}
+{% block detail_title %}{{ 'membership.title'|trans({'%name%': membership.user.name}) }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        <div class="mb-6 flex items-center gap-3">
+            <twig:Avatar name="{{ membership.user.name }}" image="{{ membership.user.avatar }}" />
+            <div class="min-w-0">
+                <p class="truncate font-medium">{{ membership.user.name }}</p>
+                <p class="truncate text-xs text-slate-500">{{ membership.user.email }} · {{ organization.name }}</p>
+            </div>
+        </div>
+
+        {{ form_start(form, {attr: {'data-controller': 'choice-sections'}}) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.role) }}
+
+            <div data-choice-sections-target="section" data-kinds="guest" class="mb-4 rounded-lg border border-slate-200 p-4">
+                {% if form.guestProjects|length %}
+                    {{ form_row(form.guestProjects) }}
+                {% else %}
+                    <p class="text-sm text-slate-500">{{ 'project.none'|trans }}</p>
+                    {% do form.guestProjects.setRendered %}
+                {% endif %}
+            </div>
+
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.position) }}
+                {{ form_row(form.termEndsOn) }}
+            </div>
+            <datalist id="membership-positions">
+                {% for key in ['chair', 'vice_chair', 'treasurer', 'secretary', 'assessor'] %}
+                    <option value="{{ ('membership.positions.' ~ key)|trans }}"></option>
+                {% endfor %}
+            </datalist>
+            {{ form_row(form.votingRight) }}
+
+            {{ form_rest(form) }}
+            <div class="flex flex-wrap gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ path('organization_show', {id: organization.id}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+                <a href="{{ path('organization_handover', {id: organization.id, from: membership.id}) }}" class="btn-secondary">
+                    {{ ux_icon('lucide:arrow-right-left', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'handover.title'|trans }}
+                </a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

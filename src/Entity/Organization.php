@@ -145,7 +145,7 @@ class Organization
     public function getVotingMembers(): array
     {
         return array_values(array_map(static fn (Membership $m): User => $m->getUser(),
-            array_filter($this->memberships->toArray(), static fn (Membership $m): bool => $m->hasVotingRight())));
+            array_filter($this->memberships->toArray(), static fn (Membership $m): bool => $m->isFull() && $m->hasVotingRight())));
     }
 
     public function getCreatedAt(): \DateTimeImmutable
@@ -167,9 +167,32 @@ class Organization
         return $membership;
     }
 
+    /**
+     * The membership granting full access (active member or administrator); null for guests and former members.
+     */
     public function getMembership(User $user): ?Membership
     {
+        $membership = $this->findMembership($user);
+
+        return null !== $membership && $membership->isFull() ? $membership : null;
+    }
+
+    /**
+     * Any membership of the user, including guests and former members.
+     */
+    public function findMembership(User $user): ?Membership
+    {
         return $this->memberships->findFirst(static fn (int $k, Membership $m): bool => $m->getUser() === $user);
+    }
+
+    /**
+     * Full members see everything of the organization, active guests only the projects released to them.
+     */
+    public function canSeeProject(User $user, ?Project $project): bool
+    {
+        $membership = $this->findMembership($user);
+
+        return null !== $membership && ($membership->isFull() || $membership->grantsGuestAccessTo($project));
     }
 
     public function isAdmin(User $user): bool
@@ -182,10 +205,26 @@ class Organization
         return $this->memberships->filter(static fn (Membership $m): bool => $m->isAdmin())->count();
     }
 
-    /** @return list<User> */
+    /**
+     * Active members and administrators (without guests and former members).
+     *
+     * @return list<User>
+     */
     public function getMembers(): array
     {
-        return array_values($this->memberships->map(static fn (Membership $m): User => $m->getUser())->toArray());
+        return array_values($this->memberships->filter(static fn (Membership $m): bool => $m->isFull())
+            ->map(static fn (Membership $m): User => $m->getUser())->toArray());
+    }
+
+    /**
+     * Full members plus the active guests of the project.
+     *
+     * @return list<User>
+     */
+    public function getProjectParticipants(?Project $project): array
+    {
+        return array_values($this->memberships->filter(static fn (Membership $m): bool => $m->isFull() || $m->grantsGuestAccessTo($project))
+            ->map(static fn (Membership $m): User => $m->getUser())->toArray());
     }
 
     public function __toString(): string

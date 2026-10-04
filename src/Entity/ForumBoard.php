@@ -120,6 +120,17 @@ class ForumBoard
         return $this->organization;
     }
 
+    /**
+     * Full members see all areas; guests the areas assigned (directly or via a parent area) to their projects.
+     */
+    public function isVisibleTo(User $user): bool
+    {
+        $membership = $this->organization->findMembership($user);
+
+        return null !== $membership && ($membership->isFull()
+            || array_any($this->getPath(), static fn (ForumBoard $b): bool => $membership->grantsGuestAccessTo($b->getProject())));
+    }
+
     public function setOrganization(Organization $organization): static
     {
         $this->organization = $organization;

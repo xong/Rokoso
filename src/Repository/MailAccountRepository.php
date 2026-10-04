@@ -38,7 +38,7 @@ class MailAccountRepository extends ServiceEntityRepository
     {
         /* @var list<MailAccount> */
         return $this->createQueryBuilder('a')
-            ->join(Membership::class, 'm', 'WITH', 'm.organization = a.organization AND m.user = :user')
+            ->join(Membership::class, 'm', 'WITH', 'm.organization = a.organization AND m.user = :user AND '.Membership::fullDql('m'))
             ->setParameter('user', $user)
             ->orderBy('a.name')
             ->getQuery()

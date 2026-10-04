@@ -12,6 +12,7 @@
             {{ form_row(form.name) }}
             {{ form_row(form.organization) }}
             {{ form_row(form.description) }}
+            {{ form_row(form.lead) }}
             {{ form_row(form.color) }}
             <div class="mb-4 flex items-center gap-4">
                 {% if project %}{{ ui.tile(project.name, project.image, project.color, 'size-16 text-lg') }}{% endif %}

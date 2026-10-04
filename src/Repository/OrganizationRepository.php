@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\Membership;
 use App\Entity\Organization;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -27,7 +28,7 @@ class OrganizationRepository extends ServiceEntityRepository
         /* @var list<Organization> */
         return $this->createQueryBuilder('o')
             ->join('o.memberships', 'm')
-            ->andWhere('m.user = :user')
+            ->andWhere('m.user = :user AND '.Membership::fullDql('m'))
             ->setParameter('user', $user)
             ->orderBy('o.name')
             ->getQuery()

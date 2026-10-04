@@ -1,0 +1,47 @@
+{% extends 'wiki/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ 'wiki.revisions'|trans }} · {{ page.title }}{% endblock %}
+{% block detail_title %}{{ 'wiki.revisions'|trans }}: {{ page.title }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('wiki_show', {id: page.id}) }}" class="btn-secondary">{{ 'wiki.back_to_page'|trans }}</a>
+{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto grid max-w-5xl gap-6 p-4 lg:grid-cols-[16rem_1fr] lg:p-6">
+        <nav aria-label="{{ 'wiki.revisions'|trans }}">
+            <ol role="list" class="card divide-y divide-slate-100 text-sm">
+                {% for r in page.revisions %}
+                    {% set active = revision and revision.id == r.id %}
+                    <li>
+                        <a href="{{ path('wiki_revision', {id: r.id}) }}" {% if active %}aria-current="true"{% endif %}
+                           class="block px-3 py-2 {{ active ? 'bg-brand-50 text-brand-700' : 'hover:bg-slate-50' }}">
+                            <span class="block font-medium">{{ r.createdAt|date('d.m.Y H:i') }}{% if loop.first %} · {{ 'wiki.current'|trans }}{% endif %}</span>
+                            <span class="block truncate text-xs text-slate-500">{{ r.author ? r.author.name : '–' }}</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ol>
+        </nav>
+        <div>
+            {% if revision %}
+                <div class="mb-4 flex flex-wrap items-center gap-3">
+                    <p class="min-w-0 flex-1 text-sm text-slate-600">{{ 'wiki.revision_of'|trans({'%date%': revision.createdAt|date('d.m.Y H:i'), '%name%': revision.author ? revision.author.name : '–'}) }}</p>
+                    {% if revision != page.revisions.first %}
+                        {{ ui.post_button(path('wiki_revision_restore', {id: revision.id}), 'wiki-restore', 'wiki.restore',
+                            {icon: 'lucide:history', confirm: 'wiki.restore_confirm'}) }}
+                    {% endif %}
+                </div>
+                <article class="card space-y-3 p-4">
+                    <p class="text-xl font-semibold">{{ revision.title }}</p>
+                    <div class="markdown">{{ revision.body|markdown }}</div>
+                </article>
+            {% else %}
+                <p class="text-slate-500">{{ 'wiki.choose_revision'|trans({'%count%': page.revisions|length}) }}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'wiki/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ is_new ? 'wiki.new'|trans : page.title }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-3xl p-4 lg:p-6">
+        <p class="mb-4 text-sm text-slate-600">{{ page.organization.name }}</p>
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.title) }}
+                {{ form_row(form.parent) }}
+            </div>
+            {{ form_row(form.body) }}
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ is_new ? (page.parent ? path('wiki_show', {id: page.parent.id}) : path('wiki_index')) : path('wiki_show', {id: page.id}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

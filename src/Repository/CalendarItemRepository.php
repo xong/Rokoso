@@ -11,6 +11,7 @@ use App\Enum\CalendarItemType;
 use App\Enum\Recurrence;
 use App\Enum\TaskStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -31,9 +32,7 @@ class CalendarItemRepository extends ServiceEntityRepository
      */
     public function findCandidates(User $user, \DateTimeImmutable $from, \DateTimeImmutable $to, ?int $projectId = null): array
     {
-        $qb = $this->createQueryBuilder('i')
-            ->leftJoin(Membership::class, 'im', 'WITH', 'im.organization = i.organization AND im.user = :viewer')
-            ->andWhere('im.id IS NOT NULL OR (i.organization IS NULL AND i.createdBy = :viewer)')
+        $qb = $this->visibleQuery()
             ->andWhere('i.startsAt < :to')
             ->andWhere('i.recurrence != :none OR COALESCE(i.endsAt, i.startsAt) >= :fromDay')
             ->setParameter('viewer', $user)
@@ -57,10 +56,8 @@ class CalendarItemRepository extends ServiceEntityRepository
      */
     public function findTasks(User $user, bool $mine = false, ?int $projectId = null, bool $withDone = true, ?int $limit = null): array
     {
-        $qb = $this->createQueryBuilder('i')
+        $qb = $this->visibleQuery()
             ->addSelect('CASE WHEN i.startsAt IS NULL THEN 1 ELSE 0 END AS HIDDEN undated')
-            ->leftJoin(Membership::class, 'im', 'WITH', 'im.organization = i.organization AND im.user = :viewer')
-            ->andWhere('im.id IS NOT NULL OR (i.organization IS NULL AND i.createdBy = :viewer)')
             ->andWhere('i.type = :task')
             ->setParameter('viewer', $user)
             ->setParameter('task', CalendarItemType::Task->value)
@@ -82,5 +79,15 @@ class CalendarItemRepository extends ServiceEntityRepository
 
         /* @var list<CalendarItem> */
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Items of the viewer's organizations (full members), of projects released to them as a guest, and their own private ones.
+     */
+    private function visibleQuery(): QueryBuilder
+    {
+        return $this->createQueryBuilder('i')
+            ->leftJoin(Membership::class, 'im', 'WITH', 'im.organization = i.organization AND im.user = :viewer AND '.Membership::fullDql('im'))
+            ->andWhere('im.id IS NOT NULL OR (i.organization IS NULL AND i.createdBy = :viewer) OR '.Membership::guestDql('i.project'));
     }
 }

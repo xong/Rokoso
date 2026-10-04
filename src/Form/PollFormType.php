@@ -39,7 +39,7 @@ final class PollFormType extends AbstractType
                 'class' => PollKind::class,
                 'expanded' => true,
                 'choice_label' => static fn (PollKind $kind): string => $kind->label(),
-                'choice_attr' => static fn (): array => ['data-action' => 'poll-form#toggle'],
+                'choice_attr' => static fn (): array => ['data-action' => 'choice-sections#toggle'],
             ])
             ->add('organization', EntityType::class, [
                 'label' => 'poll.organization',

@@ -14,20 +14,20 @@
                 {% else %}{{ 'poll.for_meeting'|trans({'%title%': poll.meeting.title}) }}{% endif %}
             </p>
         {% endif %}
-        {{ form_start(form, {attr: {'data-controller': 'poll-form'}}) }}
+        {{ form_start(form, {attr: {'data-controller': 'choice-sections'}}) }}
             {{ form_errors(form) }}
             {{ form_row(form.title) }}
             {{ form_row(form.kind) }}
             {{ form_row(form.description) }}
             {{ form_row(form.organization) }}
 
-            <fieldset data-poll-form-target="section" data-kinds="choice" class="mb-4 rounded-lg border border-slate-200 p-4">
+            <fieldset data-choice-sections-target="section" data-kinds="choice" class="mb-4 rounded-lg border border-slate-200 p-4">
                 <legend class="px-1 text-sm font-medium">{{ 'poll.kind.choice'|trans }}</legend>
                 {{ form_row(form.options) }}
                 {{ form_row(form.multiple) }}
             </fieldset>
 
-            <fieldset data-poll-form-target="section" data-kinds="schedule" class="mb-4 rounded-lg border border-slate-200 p-4">
+            <fieldset data-choice-sections-target="section" data-kinds="schedule" class="mb-4 rounded-lg border border-slate-200 p-4">
                 <legend class="px-1 text-sm font-medium">{{ 'poll.slots'|trans }}</legend>
                 <div class="grid gap-x-4 sm:grid-cols-2">
                     {% for i in 1..6 %}{{ form_row(form['slot' ~ i]) }}{% endfor %}
@@ -37,9 +37,9 @@
 
             <fieldset class="mb-4 rounded-lg border border-slate-200 p-4">
                 <legend class="px-1 text-sm font-medium">{{ 'poll.settings'|trans }}</legend>
-                <div data-poll-form-target="section" data-kinds="decision choice">{{ form_row(form.secret) }}</div>
+                <div data-choice-sections-target="section" data-kinds="decision choice">{{ form_row(form.secret) }}</div>
                 {{ form_row(form.votingOnly) }}
-                <div data-poll-form-target="section" data-kinds="decision">{{ form_row(form.circular) }}</div>
+                <div data-choice-sections-target="section" data-kinds="decision">{{ form_row(form.circular) }}</div>
                 <div class="grid gap-x-4 sm:grid-cols-2">
                     {{ form_row(form.deadline) }}
                     {{ form_row(form.project) }}

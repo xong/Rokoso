@@ -14,7 +14,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
- * Forum: members of the organization read and write (new areas, topics, posts).
+ * Forum: members of the organization read and write (new areas, topics, posts); guests only in the areas
+ * and topics of the projects released to them.
  * FORUM_MANAGE (edit/delete) is reserved for the author/creator and the organization's administrators;
  * editing a post's text is reserved for its author.
  *
@@ -38,14 +39,16 @@ final class ForumVoter extends Voter
         if (!$user instanceof User) {
             return false;
         }
-        $organization = match (true) {
-            $subject instanceof ForumPost => $subject->getTopic()->getOrganization(),
-            default => $subject->getOrganization(),
+        $visible = match (true) {
+            $subject instanceof ForumPost => $subject->getTopic()->isVisibleTo($user),
+            $subject instanceof ForumUpload => $subject->getBoard()->isVisibleTo($user),
+            default => $subject->isVisibleTo($user),
         };
-        $membership = $organization->getMembership($user);
-        if (null === $membership) {
+        if (!$visible) {
             return false;
         }
+        $organization = $subject instanceof ForumPost ? $subject->getTopic()->getOrganization() : $subject->getOrganization();
+        $isAdmin = $organization->getMembership($user)?->isAdmin() ?? false;
 
         $owner = match (true) {
             $subject instanceof ForumBoard => $subject->getCreatedBy(),
@@ -57,7 +60,7 @@ final class ForumVoter extends Voter
         return match ($attribute) {
             self::VIEW => true,
             self::EDIT_POST => $owner === $user,
-            default => $owner === $user || $membership->isAdmin(),
+            default => $owner === $user || $isAdmin,
         };
     }
 }
