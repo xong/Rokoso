@@ -108,6 +108,23 @@ class CalendarItem
     #[ORM\JoinTable(name: 'calendar_item_participant')]
     private Collection $participants;
 
+    /** Shown on the public page of the organization */
+    #[ORM\Column]
+    private bool $public = false;
+
+    /** Outsiders may sign up on the public page */
+    #[ORM\Column]
+    private bool $signup = false;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\Positive]
+    private ?int $signupLimit = null;
+
+    /** @var Collection<int, EventSignup> */
+    #[ORM\OneToMany(targetEntity: EventSignup::class, mappedBy: 'item', orphanRemoval: true)]
+    #[ORM\OrderBy(['createdAt' => 'ASC'])]
+    private Collection $signups;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -120,6 +137,7 @@ class CalendarItem
         $this->createdAt = new \DateTimeImmutable();
         $this->assignees = new ArrayCollection();
         $this->participants = new ArrayCollection();
+        $this->signups = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -469,6 +487,75 @@ class CalendarItem
         $this->participants->removeElement($user);
 
         return $this;
+    }
+
+    public function isPublic(): bool
+    {
+        return $this->public;
+    }
+
+    public function setPublic(bool $public): static
+    {
+        $this->public = $public;
+
+        return $this;
+    }
+
+    public function isSignup(): bool
+    {
+        return $this->signup;
+    }
+
+    public function setSignup(bool $signup): static
+    {
+        $this->signup = $signup;
+
+        return $this;
+    }
+
+    public function getSignupLimit(): ?int
+    {
+        return $this->signupLimit;
+    }
+
+    public function setSignupLimit(?int $signupLimit): static
+    {
+        $this->signupLimit = $signupLimit;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EventSignup>
+     */
+    public function getSignups(): Collection
+    {
+        return $this->signups;
+    }
+
+    /** Persons signed up so far */
+    public function getSignupCount(): int
+    {
+        $count = 0;
+        foreach ($this->signups as $signup) {
+            $count += $signup->getPersons();
+        }
+
+        return $count;
+    }
+
+    /** Free places, null when unlimited */
+    public function getSignupFree(): ?int
+    {
+        return null === $this->signupLimit ? null : max(0, $this->signupLimit - $this->getSignupCount());
+    }
+
+    /** Public signup is possible: switched on, single upcoming event, places left */
+    public function isSignupOpen(): bool
+    {
+        return $this->public && $this->signup && !$this->isTask() && !$this->isRecurring()
+            && $this->getDate() >= new \DateTimeImmutable('today')
+            && 0 !== $this->getSignupFree();
     }
 
     public function getCreatedBy(): User

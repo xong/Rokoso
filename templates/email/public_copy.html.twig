@@ -1,0 +1,6 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ 'public.email.copy_text'|trans({'%organization%': organization}) }}</p>
+    <p><strong>{{ message_subject }}</strong></p>
+    <p style="white-space:pre-line;">{{ body }}</p>
+{% endblock %}

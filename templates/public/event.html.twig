@@ -1,0 +1,45 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}{{ item.title }} · {{ parent() }}{% endblock %}
+
+{% block content %}
+    <article>
+        <h1 class="mb-2 text-2xl font-semibold">{{ item.title }}</h1>
+        <dl class="mb-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-slate-700">
+            <dt class="font-medium">{{ 'public.event.when'|trans }}</dt>
+            <dd>{{ item.date|date(item.allDay ? 'd.m.Y' : 'd.m.Y H:i') }}{% if item.endsAt %} – {{ item.endsAt|date(item.allDay ? 'd.m.Y' : 'd.m.Y H:i') }}{% endif %}</dd>
+            {% if item.location %}
+                <dt class="font-medium">{{ 'public.event.location'|trans }}</dt>
+                <dd>{{ item.location }}</dd>
+            {% endif %}
+            {% if item.url %}
+                <dt class="font-medium">{{ 'public.event.url'|trans }}</dt>
+                <dd><a href="{{ item.url }}" class="link" rel="noopener">{{ item.url }}</a></dd>
+            {% endif %}
+            {% if item.signup and item.signupLimit %}
+                <dt class="font-medium">{{ 'public.event.places'|trans }}</dt>
+                <dd>{{ 'public.event.free'|trans({'%free%': item.signupFree, '%limit%': item.signupLimit}) }}</dd>
+            {% endif %}
+        </dl>
+        {% if item.description %}<p class="mb-8 whitespace-pre-line">{{ item.description }}</p>{% endif %}
+    </article>
+
+    {% if form %}
+        <section aria-labelledby="signup-heading">
+            <h2 id="signup-heading" class="mb-3 text-lg font-semibold">{{ 'public.event.signup'|trans }}</h2>
+            {{ form_start(form, {attr: {class: 'card p-6'}}) }}
+                {{ form_errors(form) }}
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.email) }}
+                </div>
+                {{ form_row(form.persons) }}
+                {{ include('public/_consent.html.twig') }}
+                {{ form_rest(form) }}
+                <button type="submit" class="btn-primary">{{ 'public.event.submit'|trans }}</button>
+            {{ form_end(form) }}
+        </section>
+    {% elseif item.signup %}
+        <p class="card p-4 text-slate-600" role="status">{{ 'public.event.signup_closed'|trans }}</p>
+    {% endif %}
+{% endblock %}

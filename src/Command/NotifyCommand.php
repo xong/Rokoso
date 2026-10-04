@@ -11,6 +11,7 @@ use App\Enum\NotificationEmail;
 use App\Enum\NotificationType;
 use App\Notification\NotificationCenter;
 use App\Notification\NotificationMailer;
+use App\Participation\PublicSubmissionHandler;
 use App\Repository\NotificationRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,7 +21,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Due reminders (next 24 hours), leftover instant mails and the daily digest. Run via cron, e.g. every 15 minutes.
+ * Due reminders (next 24 hours), leftover instant mails the daily digest and removal of expired public requests. Run via cron, e.g. every 15 minutes.
  */
 #[AsCommand(name: 'app:notify', description: 'Erinnerungen und Zusammenfassungen verschicken')]
 final readonly class NotifyCommand
@@ -36,6 +37,7 @@ final readonly class NotifyCommand
         private UrlGeneratorInterface $urls,
         private EntityManagerInterface $em,
         private ClockInterface $clock,
+        private PublicSubmissionHandler $public,
     ) {
     }
 
@@ -55,7 +57,9 @@ final readonly class NotifyCommand
         }
         $this->em->flush();
 
-        $io->writeln(\sprintf('%d Erinnerung(en), %d E-Mail(s)', $reminders, $mails));
+        $purged = $this->public->purgeExpired();
+
+        $io->writeln(\sprintf('%d Erinnerung(en), %d E-Mail(s), %d abgelaufene Anfrage(n) entfernt', $reminders, $mails, $purged));
 
         return 0;
     }

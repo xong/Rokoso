@@ -11,6 +11,7 @@ use App\Entity\Comment;
 use App\Entity\Contact;
 use App\Entity\ContactGroup;
 use App\Entity\Draft;
+use App\Entity\EventSignup;
 use App\Entity\Folder;
 use App\Entity\ForumBoard;
 use App\Entity\ForumPost;
@@ -26,8 +27,13 @@ use App\Entity\PollAnswer;
 use App\Entity\PollBallot;
 use App\Entity\PollOption;
 use App\Entity\Project;
+use App\Entity\PublicSettings;
+use App\Entity\PublicTopic;
 use App\Entity\Resolution;
 use App\Entity\Signature;
+use App\Entity\Survey;
+use App\Entity\SurveyQuestion;
+use App\Entity\SurveyResponse;
 use App\Entity\TextSnippet;
 use App\Entity\User;
 use App\Entity\Watch;
@@ -41,6 +47,7 @@ use App\Enum\NotificationType;
 use App\Enum\OrganizationRole;
 use App\Enum\PollKind;
 use App\Enum\Recurrence;
+use App\Enum\SurveyQuestionType;
 use App\Enum\TaskStatus;
 use App\Mail\ComposeData;
 use App\Mail\MailSynchronizer;
@@ -137,8 +144,13 @@ final readonly class DemoCommand
             $this->em->persist((new CalendarItem($user))->setTitle('Vorstandstreffen')->setOrganization($org)->setLocation('Rathaus, Raum 2')
                 ->setStartsAt($monday->setTime(19, 0))->setEndsAt($monday->setTime(21, 0))
                 ->setRecurrence(Recurrence::Weekly)->setRecurrenceInterval(2)->addParticipant($user)->addParticipant($colleague));
-            $this->em->persist((new CalendarItem($user))->setTitle('Elternabend')->setOrganization($org)->setProject($projects[1])
-                ->setStartsAt($monday->modify('+9 days')->setTime(19, 30))->setEndsAt($monday->modify('+9 days')->setTime(21, 0))->setLocation('Aula'));
+            $parentsEvening = (new CalendarItem($user))->setTitle('Elternabend')->setOrganization($org)->setProject($projects[1])
+                ->setStartsAt($monday->modify('+9 days')->setTime(19, 30))->setEndsAt($monday->modify('+9 days')->setTime(21, 0))->setLocation('Aula')
+                ->setDescription("Infoabend für alle Eltern der Stadt.\nThemen: Schulwege, Ganztag, Elternbeiräte.")
+                ->setPublic(true)->setSignup(true)->setSignupLimit(80);
+            $this->em->persist($parentsEvening);
+            $this->em->persist(new EventSignup($parentsEvening, 'Eva Elternteil', 'eva@example.org', 2));
+            $councils->setPublicSubscribe(true);
             $this->em->persist((new CalendarItem($user))->setTitle('Protokoll verschicken')->setType(CalendarItemType::Task)->setOrganization($org)
                 ->setStartsAt($monday->modify('+3 days')->setTime(12, 0))->addAssignee($colleague));
 
@@ -188,6 +200,7 @@ final readonly class DemoCommand
             $this->em->persist((new MailRule($org))->setName('Rundbrief Landeselternrat')->setField(MailRuleField::From)
                 ->setNeedle('newsletter@')->setMarkDone(true));
             $this->createWritingAids($org, $account, $user, $colleague);
+            $this->createPublicPage($org, $account, $user, $colleague, $projects);
             $this->em->flush();
             $io->success('Demo angelegt: demo@coop.test / demo-passwort (und kim@coop.test, Gast schule@coop.test)');
         }
@@ -238,6 +251,50 @@ final readonly class DemoCommand
         }
 
         return 0;
+    }
+
+    /**
+     * Public page with contact form, a topic and a running survey with a few answers.
+     *
+     * @param list<Project> $projects
+     */
+    private function createPublicPage(Organization $org, MailAccount $account, User $user, User $colleague, array $projects): void
+    {
+        $settings = (new PublicSettings($org))->setSlug('sev-musterstadt')->setInfoEnabled(true)
+            ->setIntro("Wir sind die **Stadtelternvertretung Musterstadt** und vertreten die Eltern aller Schulen und Kitas.\n\nSchreib uns, mach bei Umfragen mit oder komm zu unseren Veranstaltungen.")
+            ->setContactEnabled(true)->setContactAccount($account)->setTopicsEnabled(true)
+            ->setSurveysEnabled(true)->setEventsEnabled(true)->setSubscribeEnabled(true);
+        $settings->addTopic((new PublicTopic($settings))->setName('Schulweg')->setProject($projects[0])->setAssignee($colleague));
+        $settings->addTopic((new PublicTopic($settings))->setName('Veranstaltungen')->setProject($projects[1])->setAssignee($user));
+        $settings->addTopic((new PublicTopic($settings))->setName('Sonstiges'));
+        $this->em->persist($settings);
+
+        $survey = (new Survey($org, $user))->setTitle('Wie kommt Ihr Kind zur Schule?')
+            ->setDescription('Eine kurze Umfrage zur Schulwegsicherheit. Dauert keine zwei Minuten.')->setAnonymous(true)->setListed(true);
+        $questions = [
+            (new SurveyQuestion($survey))->setType(SurveyQuestionType::Single)->setLabel('Wie kommt Ihr Kind meistens zur Schule?')
+                ->setOptionsText("Zu Fuß\nFahrrad\nBus/Bahn\nAuto")->setRequired(true),
+            (new SurveyQuestion($survey))->setType(SurveyQuestionType::Multiple)->setLabel('Wo sehen Sie Gefahrenstellen?')
+                ->setOptionsText("Kreuzungen\nFehlende Zebrastreifen\nElterntaxis\nBaustellen"),
+            (new SurveyQuestion($survey))->setType(SurveyQuestionType::Scale)->setLabel('Wie sicher ist der Schulweg insgesamt? (1 = unsicher, 5 = sehr sicher)')->setRequired(true),
+            (new SurveyQuestion($survey))->setType(SurveyQuestionType::Text)->setLabel('Was sollten wir ansprechen?'),
+        ];
+        foreach ($questions as $question) {
+            $survey->addQuestion($question);
+        }
+        $survey->open();
+        $this->em->persist($survey);
+        $this->em->flush();
+
+        [$way, $danger, $scale, $text] = array_map(static fn (SurveyQuestion $q): int => (int) $q->getId(), $questions);
+        foreach ([
+            ['Zu Fuß', ['Kreuzungen', 'Elterntaxis'], 2, 'Die Ampel an der Hauptstraße ist viel zu kurz grün.'],
+            ['Fahrrad', ['Baustellen'], 3, ''],
+            ['Auto', ['Elterntaxis'], 4, ''],
+            ['Zu Fuß', ['Fehlende Zebrastreifen', 'Kreuzungen'], 2, 'Bitte einen Zebrastreifen an der Grundschule Nord!'],
+        ] as [$a, $b, $c, $d]) {
+            $this->em->persist(new SurveyResponse($survey, [$way => $a, $danger => $b, $scale => $c, $text => $d]));
+        }
     }
 
     /**
@@ -314,7 +371,7 @@ final readonly class DemoCommand
 
         $year = (int) $past->getStartsAt()->format('Y');
         $this->em->persist((new Resolution($org, $user))->setNumber($year.'/1')->setAgendaItem($items[1])->setProject($projects[0])
-            ->setTitle('Antrag auf Zebrastreifen')->setDecidedOn($past->getStartsAt())->setAdopted(true)
+            ->setTitle('Antrag auf Zebrastreifen')->setDecidedOn($past->getStartsAt())->setAdopted(true)->setPublic(true)
             ->setText('Die SEV beantragt bei der Stadt einen Zebrastreifen vor der **Grundschule Nord**.')
             ->setVotesYes(2)->setVotesNo(0)->setVotesAbstain(0));
         $this->em->persist((new Resolution($org, $user))->setNumber($year.'/2')->setAgendaItem($items[2])->setProject($projects[1])

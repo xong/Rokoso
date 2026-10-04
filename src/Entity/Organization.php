@@ -206,6 +206,15 @@ class Organization
     }
 
     /**
+     * @return list<User>
+     */
+    public function getAdmins(): array
+    {
+        return array_values($this->memberships->filter(static fn (Membership $m): bool => $m->isAdmin())
+            ->map(static fn (Membership $m): User => $m->getUser())->toArray());
+    }
+
+    /**
      * Active members and administrators (without guests and former members).
      *
      * @return list<User>

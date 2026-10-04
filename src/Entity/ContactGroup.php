@@ -38,6 +38,10 @@ class ContactGroup
     #[ORM\OrderBy(['lastName' => 'ASC', 'company' => 'ASC', 'firstName' => 'ASC'])]
     private Collection $contacts;
 
+    /** Outsiders may subscribe on the public page */
+    #[ORM\Column]
+    private bool $publicSubscribe = false;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -136,6 +140,18 @@ class ContactGroup
                 return;
             }
         }
+    }
+
+    public function isPublicSubscribe(): bool
+    {
+        return $this->publicSubscribe;
+    }
+
+    public function setPublicSubscribe(bool $publicSubscribe): static
+    {
+        $this->publicSubscribe = $publicSubscribe;
+
+        return $this;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

@@ -22,6 +22,24 @@ class ResolutionRepository extends ServiceEntityRepository
     }
 
     /**
+     * Resolutions released for the public page, newest first.
+     *
+     * @return list<Resolution>
+     */
+    public function findPublic(Organization $organization, int $limit = 20): array
+    {
+        /* @var list<Resolution> */
+        return $this->createQueryBuilder('r')
+            ->where('r.organization = :org AND r.public = true')
+            ->setParameter('org', $organization)
+            ->orderBy('r.decidedOn', 'DESC')
+            ->addOrderBy('r.id', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Resolutions of the user's organizations, newest first.
      *
      * @return list<Resolution>

@@ -1,0 +1,7 @@
+{{ 'public.email.subscribed_text'|trans({'%organization%': organization}) }}
+
+{% for g in groups %}
+{{ g.name }} – {{ 'public.email.unsubscribe'|trans }}: {{ g.url }}
+{% endfor %}
+
+{{ 'public.email.subscribed_hint'|trans }}

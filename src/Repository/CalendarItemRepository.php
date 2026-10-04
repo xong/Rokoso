@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\CalendarItem;
 use App\Entity\Membership;
+use App\Entity\Organization;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
 use App\Enum\Recurrence;
@@ -84,6 +85,28 @@ class CalendarItemRepository extends ServiceEntityRepository
     /**
      * Items of the viewer's organizations (full members), of projects released to them as a guest, and their own private ones.
      */
+    /**
+     * Public events of the organization that may have an occurrence in [from, to).
+     *
+     * @return list<CalendarItem>
+     */
+    public function findPublicCandidates(Organization $organization, \DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        /* @var list<CalendarItem> */
+        return $this->createQueryBuilder('i')
+            ->where('i.organization = :org AND i.public = true AND i.type != :task')
+            ->andWhere('i.startsAt < :to')
+            ->andWhere('i.recurrence != :none OR COALESCE(i.endsAt, i.startsAt) >= :fromDay')
+            ->setParameter('org', $organization)
+            ->setParameter('task', CalendarItemType::Task->value)
+            ->setParameter('to', $to)
+            ->setParameter('fromDay', $from->modify('-1 day'))
+            ->setParameter('none', Recurrence::None->value)
+            ->orderBy('i.startsAt')
+            ->getQuery()
+            ->getResult();
+    }
+
     private function visibleQuery(): QueryBuilder
     {
         return $this->createQueryBuilder('i')

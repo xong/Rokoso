@@ -1,0 +1,11 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block content %}
+    <div class="card mx-auto max-w-lg p-6 text-center" role="status">
+        <h1 class="mb-2 text-xl font-semibold">{{ title_raw|default(false) ? title : title|trans }}</h1>
+        <p class="text-slate-700">{{ text|trans }}</p>
+        {% if settings and settings.slug and not app.request.query.getBoolean('embed') %}
+            <p class="mt-4"><a href="{{ path('public_home', {slug: settings.slug}) }}" class="link">{{ 'public.back_home'|trans }}</a></p>
+        {% endif %}
+    </div>
+{% endblock %}

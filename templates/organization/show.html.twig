@@ -87,6 +87,16 @@
             </section>
         {% endif %}
 
+        {% if is_admin %}
+            <section aria-labelledby="public-heading">
+                <div class="mb-3 flex items-center justify-between gap-2">
+                    <h3 id="public-heading" class="font-semibold">{{ 'public.settings.title'|trans }}</h3>
+                    <a href="{{ path('public_settings', {id: organization.id}) }}" class="btn-secondary">{{ ux_icon('lucide:globe', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.settings.configure'|trans }}</a>
+                </div>
+                <p class="text-slate-500">{{ 'public.settings.teaser'|trans }}</p>
+            </section>
+        {% endif %}
+
         <section aria-labelledby="snippets-heading">
             <div class="mb-3 flex items-center justify-between gap-2">
                 <h3 id="snippets-heading" class="font-semibold">{{ 'snippet.title'|trans }}</h3>

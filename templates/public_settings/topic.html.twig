@@ -1,0 +1,20 @@
+{% extends 'organization/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ 'public.topic.title'|trans }} · {{ organization.name }}{% endblock %}
+{% block detail_title %}{{ (topic.id ? 'public.topic.edit' : 'public.topic.new')|trans }}{% endblock %}
+{% block back_url %}{{ path('public_settings', {id: organization.id}) }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-xl p-4 lg:p-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ path('public_settings', {id: organization.id}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

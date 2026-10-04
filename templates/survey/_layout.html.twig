@@ -1,0 +1,27 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.surveys'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.surveys'|trans }}{% endblock %}
+{% block back_url %}{{ path('survey_index') }}{% endblock %}
+
+{% block list_actions %}
+    <a href="{{ path('survey_new') }}" class="btn-icon" aria-label="{{ 'survey.new'|trans }}" title="{{ 'survey.new'|trans }}">
+        {{ ux_icon('lucide:plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block list %}
+    {% if surveys is empty %}
+        {{ ui.empty('survey.none', 'lucide:clipboard-list') }}
+    {% else %}
+        <ul role="list">
+            {% for s in surveys %}
+                {% set subtitle = ('survey.state.' ~ (s.draft ? 'draft' : (s.open ? 'open' : 'closed')))|trans
+                    ~ ' · ' ~ 'survey.response_count'|trans({'%count%': s.responses|length}) ~ ' · ' ~ s.organization.name %}
+                <li>{{ ui.list_link(path('survey_show', {id: s.id}), current and current.id == s.id, s.title, subtitle,
+                        ui.tile(s.organization.name, s.organization.logo, s.organization.color)) }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

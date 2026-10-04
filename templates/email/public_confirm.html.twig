@@ -1,0 +1,6 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ ('public.email.confirm_text_' ~ kind)|trans({'%organization%': organization}) }}</p>
+    {{ include('email/_button.html.twig', {url: url, label: 'public.email.confirm_button'|trans}) }}
+    <p style="font-size:13px;color:#64748b;">{{ 'public.email.confirm_hint'|trans }}</p>
+{% endblock %}

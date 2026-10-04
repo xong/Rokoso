@@ -1,0 +1,66 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block content %}
+    <h1 class="mb-4 text-2xl font-semibold">{{ settings.organization.name }}</h1>
+    {% if settings.infoEnabled and settings.intro %}
+        <div class="markdown mb-8">{{ settings.intro|markdown }}</div>
+    {% endif %}
+
+    <div class="space-y-8">
+        {% if settings.contactEnabled and settings.contactAccount or groups is not empty %}
+            <section aria-labelledby="actions-heading">
+                <h2 id="actions-heading" class="sr-only">{{ 'public.home.actions'|trans }}</h2>
+                <div class="flex flex-wrap gap-2">
+                    {% if settings.contactEnabled and settings.contactAccount %}
+                        <a href="{{ path('public_contact', {slug: settings.slug}) }}" class="btn-primary">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.contact.title'|trans }}</a>
+                    {% endif %}
+                    {% if groups is not empty %}
+                        <a href="{{ path('public_subscribe', {slug: settings.slug}) }}" class="btn-secondary">{{ ux_icon('lucide:bell', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.subscribe.title'|trans }}</a>
+                    {% endif %}
+                </div>
+            </section>
+        {% endif %}
+
+        {% if events is not empty %}
+            <section aria-labelledby="events-heading">
+                <h2 id="events-heading" class="mb-3 text-lg font-semibold">{{ 'public.home.events'|trans }}</h2>
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for o in events %}
+                        <li class="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
+                            <span class="w-36 shrink-0 text-slate-600">{{ o.start|date(o.item.allDay ? 'd.m.Y' : 'd.m.Y H:i') }}</span>
+                            <a href="{{ path('public_event', {slug: settings.slug, id: o.item.id}) }}" class="link min-w-0 flex-1">{{ o.item.title }}</a>
+                            {% if o.item.signupOpen %}<span class="badge bg-emerald-50 text-emerald-700">{{ 'public.event.signup_open'|trans }}</span>{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        {% if surveys is not empty %}
+            <section aria-labelledby="surveys-heading">
+                <h2 id="surveys-heading" class="mb-3 text-lg font-semibold">{{ 'public.home.surveys'|trans }}</h2>
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for s in surveys %}
+                        <li class="px-4 py-3"><a href="{{ path('public_survey', {slug: settings.slug, token: s.token}) }}" class="link">{{ s.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        {% if resolutions is not empty %}
+            <section aria-labelledby="resolutions-heading">
+                <h2 id="resolutions-heading" class="mb-3 text-lg font-semibold">{{ 'public.home.resolutions'|trans }}</h2>
+                <ul role="list" class="space-y-3">
+                    {% for r in resolutions %}
+                        <li class="card p-4">
+                            <details>
+                                <summary class="cursor-pointer font-medium">{{ r.number ? r.number ~ ' · ' }}{{ r.title }} <span class="font-normal text-slate-500">({{ r.decidedOn|date('d.m.Y') }})</span></summary>
+                                <div class="markdown mt-3">{{ r.text|markdown }}</div>
+                            </details>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

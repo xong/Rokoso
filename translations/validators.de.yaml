@@ -23,3 +23,13 @@ file:
     none_selected: Bitte wähle mindestens eine Datei aus.
 forum:
     body_required: Bitte gib einen Text ein.
+public:
+    slug_taken: Dieser Kurzname ist bereits vergeben.
+    slug_invalid: Nur Kleinbuchstaben, Ziffern und Bindestriche.
+    slug_required: Für eine aktive öffentliche Seite wird ein Kurzname gebraucht.
+    account_required: Für das Kontaktformular wird ein Postfach der Organisation gebraucht.
+    consent_required: Bitte bestätige den Datenschutzhinweis.
+    groups_required: Bitte wähle mindestens einen Verteiler.
+survey:
+    options_required: Auswahlfragen brauchen mindestens zwei Antwortmöglichkeiten.
+    answer_required: Bitte beantworte diese Frage.

@@ -1,0 +1,12 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block content %}
+    <div class="card mx-auto max-w-lg p-6 text-center">
+        <h1 class="mb-2 text-xl font-semibold">{{ 'public.confirm.title'|trans }}</h1>
+        <p class="mb-4 text-slate-700">{{ ('public.confirm.question_' ~ public_request.kind.value)|trans({'%email%': public_request.email}) }}</p>
+        <form method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token('public-confirm') }}">
+            <button type="submit" class="btn-primary">{{ 'public.confirm.submit'|trans }}</button>
+        </form>
+    </div>
+{% endblock %}

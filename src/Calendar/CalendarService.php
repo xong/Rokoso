@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Calendar;
 
+use App\Entity\CalendarItem;
+use App\Entity\Organization;
 use App\Entity\User;
 use App\Repository\CalendarItemRepository;
 use RRule\RRule;
@@ -24,8 +26,28 @@ final readonly class CalendarService
      */
     public function occurrences(User $user, \DateTimeImmutable $from, \DateTimeImmutable $to, ?int $projectId = null): array
     {
+        return $this->expand($this->items->findCandidates($user, $from, $to, $projectId), $from, $to);
+    }
+
+    /**
+     * Public events of an organization (for its public page).
+     *
+     * @return list<Occurrence> sorted by start
+     */
+    public function publicOccurrences(Organization $organization, \DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        return $this->expand($this->items->findPublicCandidates($organization, $from, $to), $from, $to);
+    }
+
+    /**
+     * @param list<CalendarItem> $items
+     *
+     * @return list<Occurrence>
+     */
+    private function expand(array $items, \DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
         $result = [];
-        foreach ($this->items->findCandidates($user, $from, $to, $projectId) as $item) {
+        foreach ($items as $item) {
             $duration = $item->getDuration();
             $rrule = $item->getRrule();
             if (null === $rrule) {

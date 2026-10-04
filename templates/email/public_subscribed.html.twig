@@ -1,0 +1,10 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ 'public.email.subscribed_text'|trans({'%organization%': organization}) }}</p>
+    <ul>
+        {% for g in groups %}
+            <li>{{ g.name }} – <a href="{{ g.url }}">{{ 'public.email.unsubscribe'|trans }}</a></li>
+        {% endfor %}
+    </ul>
+    <p style="font-size:13px;color:#64748b;">{{ 'public.email.subscribed_hint'|trans }}</p>
+{% endblock %}

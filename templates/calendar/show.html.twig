@@ -72,10 +72,36 @@
                     </div>
                 {% endif %}
             {% endfor %}
+            {% if item.public %}
+                <div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'calendar.public'|trans }}</dt><dd><span class="badge bg-brand-50 text-brand-700">{{ ux_icon('lucide:globe', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'calendar.public_badge'|trans }}</span></dd></div>
+            {% endif %}
         </dl>
 
         {% if item.description %}
             <div class="card px-4 py-3 whitespace-pre-line">{{ item.description }}</div>
+        {% endif %}
+
+        {% if item.signup %}
+            <section aria-labelledby="signups-heading">
+                <h3 id="signups-heading" class="mb-2 font-semibold">
+                    {{ 'calendar.signups'|trans }}
+                    <span class="font-normal text-slate-500">({{ item.signupLimit ? 'calendar.signup_count_limit'|trans({'%count%': item.signupCount, '%limit%': item.signupLimit}) : 'calendar.signup_count'|trans({'%count%': item.signupCount}) }})</span>
+                </h3>
+                {% if item.signups is empty %}
+                    <p class="text-slate-500">{{ 'calendar.no_signups'|trans }}</p>
+                {% else %}
+                    <ul role="list" class="card divide-y divide-slate-100">
+                        {% for s in item.signups %}
+                            <li class="flex flex-wrap gap-x-3 px-4 py-2">
+                                <span class="font-medium">{{ s.name }}</span>
+                                <a href="mailto:{{ s.email }}" class="link">{{ s.email }}</a>
+                                {% if s.persons > 1 %}<span class="text-slate-500">{{ 'calendar.signup_persons'|trans({'%count%': s.persons}) }}</span>{% endif %}
+                                <span class="ml-auto text-slate-500">{{ s.createdAt|date('d.m.Y H:i') }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
         {% endif %}
     </div>
 {% endblock %}

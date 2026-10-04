@@ -1,0 +1,12 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block content %}
+    <div class="card mx-auto max-w-lg p-6 text-center">
+        <h1 class="mb-2 text-xl font-semibold">{{ 'public.unsubscribe.title'|trans }}</h1>
+        <p class="mb-4 text-slate-700">{{ 'public.unsubscribe.question'|trans({'%email%': email, '%group%': group.name}) }}</p>
+        <form method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token('public-unsubscribe') }}">
+            <button type="submit" class="btn-primary">{{ 'public.unsubscribe.submit'|trans }}</button>
+        </form>
+    </div>
+{% endblock %}

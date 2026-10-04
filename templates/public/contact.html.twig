@@ -1,0 +1,24 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}{{ 'public.contact.title'|trans }} · {{ parent() }}{% endblock %}
+
+{% block content %}
+    <h1 class="mb-2 text-2xl font-semibold">{{ 'public.contact.title'|trans }}</h1>
+    <p class="mb-6 text-slate-600">{{ 'public.contact.intro'|trans({'%name%': settings.organization.name}) }}</p>
+    {{ form_start(form, {attr: {class: 'card p-6'}}) }}
+        {{ form_errors(form) }}
+        <div class="grid gap-x-4 sm:grid-cols-2">
+            {{ form_row(form.name) }}
+            {{ form_row(form.email) }}
+        </div>
+        {{ form_row(form.institution) }}
+        {% if form.topic is defined %}{{ form_row(form.topic) }}{% endif %}
+        {{ form_row(form.subject) }}
+        {{ form_row(form.message) }}
+        {{ form_row(form.attachments) }}
+        {{ form_row(form.copy) }}
+        {{ include('public/_consent.html.twig') }}
+        {{ form_rest(form) }}
+        <button type="submit" class="btn-primary">{{ 'public.contact.submit'|trans }}</button>
+    {{ form_end(form) }}
+{% endblock %}

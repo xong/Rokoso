@@ -9,6 +9,7 @@ nav:
     meetings: Sitzungen
     resolutions: Beschlüsse
     polls: Abstimmungen
+    surveys: Umfragen
     skip_to_content: Zum Inhalt springen
     open: Navigation öffnen
     close: Navigation schließen
@@ -694,9 +695,23 @@ contact_group:
     all: Alle Kontakte
     suggestion: 'Verteiler %name% (%count%)'
     field_help: Der Kontakt kann nur in Verteilern seiner eigenen Organisation stehen.
+    public_subscribe: Öffentlich abonnierbar
+    public_subscribe_help: Externe können sich über die öffentliche Seite selbst eintragen (mit Bestätigung per E-Mail).
 
 calendar:
     today: Heute
+    public_title: Öffentlich
+    public: Öffentlich
+    public_help: Der Termin erscheint auf der öffentlichen Seite der Organisation.
+    public_badge: Auf der öffentlichen Seite
+    signup: Anmeldung erlauben
+    signup_help: Externe können sich über die öffentliche Seite anmelden (nur einmalige Termine).
+    signup_limit: Höchstzahl Teilnehmende
+    signups: Anmeldungen
+    signup_count: '%count% Person(en)'
+    signup_count_limit: '%count% von %limit% Plätzen belegt'
+    signup_persons: '%count% Personen'
+    no_signups: Noch keine Anmeldungen.
     prev_month: Vorheriger Monat
     next_month: Nächster Monat
     prev_week: Vorherige Woche
@@ -1084,6 +1099,8 @@ meeting:
 
 resolution:
     single: Beschluss
+    public: Öffentlich
+    public_help: Der Beschluss erscheint auf der öffentlichen Seite der Organisation.
     new: Beschluss erfassen
     edit: Beschluss bearbeiten
     delete: Beschluss löschen
@@ -1201,3 +1218,207 @@ poll:
     reopened_flash: Die Abstimmung läuft wieder.
     delete: Abstimmung löschen
     delete_confirm: Abstimmung mit allen Stimmen löschen?
+
+survey:
+    new: Neue Umfrage
+    edit: Umfrage bearbeiten
+    delete: Umfrage löschen
+    delete_confirm: Umfrage mit allen Antworten löschen?
+    none: Noch keine Umfragen.
+    choose: Wähle links eine Umfrage aus.
+    no_organization: Umfragen gehören zu einer Organisation – du bist noch in keiner Mitglied.
+    created: Die Umfrage wurde angelegt. Füge jetzt Fragen hinzu.
+    deleted: Die Umfrage wurde gelöscht.
+    title: Titel
+    description: Beschreibung
+    description_help: Wird über den Fragen angezeigt; Markdown ist möglich.
+    anonymous: Anonym
+    anonymous_help: Es werden weder Name noch E-Mail-Adresse abgefragt.
+    listed: Auf der öffentlichen Seite auflisten
+    listed_help: Sonst ist die Umfrage nur über den Link erreichbar.
+    organization: Organisation
+    state:
+        draft: Entwurf
+        open: Läuft
+        closed: Beendet
+    anonymous_badge: Anonym
+    named_badge: Mit Namen
+    listed_badge: Öffentlich gelistet
+    created_by: 'Angelegt von %name% am %date%'
+    response_count: '{0}Keine Antworten|{1}1 Antwort|]1,Inf[%count% Antworten'
+    draft_hint: Solange die Umfrage ein Entwurf ist, kannst du Fragen ändern. Nach dem Start sind sie fest.
+    open: Umfrage starten
+    opened: Die Umfrage läuft. Teile den öffentlichen Link.
+    no_questions: Füge zuerst mindestens eine Frage hinzu.
+    close: Umfrage beenden
+    close_confirm: Umfrage beenden? Danach sind keine Antworten mehr möglich.
+    closed_flash: Die Umfrage ist beendet.
+    closed_hint: 'Beendet am %date%.'
+    public_link: Öffentlicher Link
+    no_public_page: Für die Organisation ist keine öffentliche Seite mit Umfragen eingerichtet – ein Link ist erst danach verfügbar.
+    questions: Fragen
+    no_questions_yet: Noch keine Fragen.
+    results: Ergebnisse
+    no_answers: Noch keine Antworten.
+    average: 'Durchschnitt: %value%'
+    export: CSV exportieren
+    csv_date: Zeitpunkt
+    respondents: Teilnehmende
+    type:
+        single: Einfachauswahl
+        multiple: Mehrfachauswahl
+        scale: Skala 1–5
+        text: Freitext
+    question:
+        new: Neue Frage
+        add: Frage hinzufügen
+        edit: Frage bearbeiten
+        label: Frage
+        type: Art
+        options: Antwortmöglichkeiten
+        options_help: Eine Möglichkeit pro Zeile (bei Auswahlfragen).
+        required: Pflichtfrage
+        up: Nach oben
+        down: Nach unten
+
+public:
+    nav: Öffentliche Seiten
+    thanks: Vielen Dank!
+    back_home: Zur Startseite
+    sent_confirm: Wir haben dir eine E-Mail geschickt. Bitte bestätige darin deine Angaben – erst dann geht es weiter.
+    honeypot: Bitte leer lassen
+    error:
+        rejected: Die Eingabe konnte nicht verarbeitet werden.
+        expired: Das Formular ist abgelaufen. Bitte lade die Seite neu und versuche es noch einmal.
+        too_fast: Das ging sehr schnell. Bitte prüfe deine Angaben und sende das Formular erneut.
+        throttled: Zu viele Anfragen in kurzer Zeit. Bitte versuche es später noch einmal.
+    field:
+        name: Name
+        email: E-Mail-Adresse
+        institution: Schule/Kita/Institution
+        institution_help: Optional
+        topic: Thema
+        topic_none: – bitte wählen –
+        subject: Betreff
+        message: Nachricht
+        attachments: Anhänge
+        attachments_help: Bis zu 3 Dateien (PDF, Bilder, Office), je höchstens 5 MB.
+        copy: Kopie an mich senden
+        persons: Anzahl Personen
+        groups: Verteiler
+        consent: 'Ich habe den <a href="%url%" class="link" target="_blank">Datenschutzhinweis</a> gelesen und bin mit der Verarbeitung meiner Angaben einverstanden.'
+    home:
+        title: Start
+        actions: Mitmachen
+        events: Termine
+        surveys: Umfragen
+        resolutions: Beschlüsse
+    contact:
+        title: Kontakt
+        intro: 'Schreib %name% eine Nachricht. Wir melden uns per E-Mail.'
+        submit: Nachricht senden
+        sent: Deine Nachricht ist angekommen. Wir melden uns.
+        topic: Thema
+        institution: Institution
+    survey:
+        anonymous_hint: Die Umfrage ist anonym.
+        named_hint: Bei dieser Umfrage werden Name und E-Mail-Adresse gespeichert.
+        submit: Antworten senden
+        thanks: Danke für deine Teilnahme!
+        closed: Diese Umfrage ist beendet.
+    event:
+        when: Wann
+        location: Ort
+        url: Link
+        places: Plätze
+        free: '%free% von %limit% frei'
+        signup: Anmeldung
+        signup_open: Anmeldung möglich
+        signup_closed: Eine Anmeldung ist nicht (mehr) möglich.
+        submit: Anmelden
+        signed_up: Du bist angemeldet.
+        full: Leider sind nicht mehr genug Plätze frei.
+    subscribe:
+        title: Verteiler abonnieren
+        intro: Trag dich in unsere Verteiler ein, um Informationen per E-Mail zu erhalten. Du bekommst zuerst eine Bestätigungs-E-Mail.
+        submit: Eintragen
+        contact_note: Über die öffentliche Seite eingetragen.
+    unsubscribe:
+        title: Verteiler abbestellen
+        question: '%email% aus dem Verteiler „%group%“ austragen?'
+        submit: Austragen
+        done: Du wurdest ausgetragen.
+    confirm:
+        title: Bestätigung
+        question_contact: 'Nachricht von %email% jetzt absenden?'
+        question_signup: 'Anmeldung von %email% jetzt bestätigen?'
+        question_subscribe: '%email% jetzt in die Verteiler eintragen?'
+        submit: Bestätigen
+        done_contact: Deine Nachricht ist angekommen. Wir melden uns.
+        done_signup: Du bist angemeldet.
+        done_subscribe: Du bist eingetragen.
+        failed: Das hat leider nicht geklappt – zum Beispiel, weil die Veranstaltung inzwischen ausgebucht ist.
+        invalid: Der Bestätigungslink ist ungültig oder abgelaufen.
+    privacy:
+        title: Datenschutz
+        default: '%name% verarbeitet deine Angaben nur, um dein Anliegen zu bearbeiten. Bestätigungsanfragen werden nach sieben Tagen gelöscht.'
+    email:
+        confirm_subject: 'Bitte bestätigen – %organization%'
+        confirm_text_contact: 'Du hast %organization% über das Kontaktformular eine Nachricht geschrieben. Bitte bestätige, dass sie von dir stammt.'
+        confirm_text_signup: 'Du hast dich bei %organization% zu einer Veranstaltung angemeldet. Bitte bestätige die Anmeldung.'
+        confirm_text_subscribe: 'Du möchtest Verteiler von %organization% abonnieren. Bitte bestätige das.'
+        confirm_button: Jetzt bestätigen
+        confirm_hint: Der Link ist sieben Tage gültig. Wenn du das nicht warst, ignoriere diese E-Mail einfach.
+        copy_subject: 'Kopie deiner Nachricht an %organization%'
+        copy_text: 'Das hast du %organization% geschrieben:'
+        subscribed_subject: 'Eingetragen – %organization%'
+        subscribed_text: 'Du bist jetzt in folgenden Verteilern von %organization% eingetragen:'
+        subscribed_hint: Über die Links kannst du dich jederzeit wieder austragen.
+        unsubscribe: austragen
+    settings:
+        title: Öffentliche Seite
+        teaser: Infoseite, Kontaktformular, Umfragen, Veranstaltungsanmeldungen und Verteiler-Abos für Externe.
+        configure: Einrichten
+        intro_text: Hier legst du fest, was Externe ohne Anmeldung sehen und tun können.
+        url: Adresse
+        embed_hint: 'Zum Einbinden in eine andere Website ?embed=1 anhängen, z. B.:'
+        features: Bausteine
+        spam: Spamschutz
+        slug: Kurzname in der Adresse
+        slug_help: 'Nur Kleinbuchstaben, Ziffern und Bindestriche, z. B. „stev-musterstadt“. Leer = Seite aus.'
+        info: Infoseite
+        info_help: Einleitungstext und öffentliche Beschlüsse anzeigen.
+        intro: Einleitungstext
+        intro_help: Markdown ist möglich.
+        contact: Kontaktformular
+        contact_help: Nachrichten landen im Posteingang des gewählten Postfachs.
+        account: Postfach für Kontaktanfragen
+        account_none: – kein Postfach –
+        topics: Themenauswahl
+        topics_help: Absender wählen ein Thema; es bestimmt Projekt und Zuständige.
+        surveys: Umfragen
+        surveys_help: Gestartete Umfragen sind über ihren Link erreichbar.
+        events: Termine
+        events_help: Öffentliche Termine anzeigen und Anmeldungen erlauben.
+        subscribe: Verteiler-Abo
+        subscribe_help: Externe können sich in öffentlich abonnierbare Verteiler eintragen.
+        privacy: Datenschutzhinweis
+        privacy_help: Wird auf der Datenschutzseite angezeigt; Markdown ist möglich. Leer = kurzer Standardtext.
+        spam_invisible: Unsichtbarer Spamschutz
+        spam_invisible_help: Verstecktes Feld, Mindestzeit zum Ausfüllen und Begrenzung pro Stunde.
+        spam_min_seconds: Mindestzeit (Sekunden)
+        spam_max_per_hour: Höchstens Einsendungen pro Stunde und Absender
+        spam_confirm: Bestätigung per E-Mail
+        spam_confirm_help: Kontaktanfragen und Anmeldungen gelten erst nach Klick auf einen Link in einer E-Mail.
+    topic:
+        title: Themen
+        new: Neues Thema
+        edit: Thema bearbeiten
+        help: Themen erscheinen im Kontaktformular, wenn die Themenauswahl eingeschaltet ist.
+        none: Noch keine Themen.
+        name: Bezeichnung
+        project: Projekt
+        assignee: Zuständig
+        assignee_none: – niemand –
+        deleted: Das Thema wurde gelöscht.
+        delete_confirm: Thema löschen?

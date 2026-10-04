@@ -1,0 +1,18 @@
+{% extends 'survey/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block detail_title %}{{ (survey ? 'survey.edit' : 'survey.new')|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ survey ? path('survey_show', {id: survey.id}) : path('survey_index') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

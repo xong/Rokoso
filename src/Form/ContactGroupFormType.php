@@ -8,6 +8,7 @@ use App\Entity\Contact;
 use App\Entity\ContactGroup;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -23,6 +24,7 @@ final class ContactGroupFormType extends AbstractType
         $builder
             ->add('name', TextType::class, ['label' => 'contact_group.name', 'empty_data' => ''])
             ->add('description', TextareaType::class, ['label' => 'contact_group.description', 'required' => false, 'attr' => ['rows' => 2]])
+            ->add('publicSubscribe', CheckboxType::class, ['label' => 'contact_group.public_subscribe', 'required' => false, 'help' => 'contact_group.public_subscribe_help'])
             ->add('contacts', EntityType::class, [
                 'label' => 'contact_group.members',
                 'class' => Contact::class,

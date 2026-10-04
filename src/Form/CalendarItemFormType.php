@@ -84,7 +84,10 @@ final class CalendarItemFormType extends AbstractType
                 'label' => 'task.status.label',
                 'class' => TaskStatus::class,
                 'choice_label' => static fn (TaskStatus $s): string => $s->label(),
-            ]);
+            ])
+            ->add('public', CheckboxType::class, ['label' => 'calendar.public', 'required' => false, 'help' => 'calendar.public_help'])
+            ->add('signup', CheckboxType::class, ['label' => 'calendar.signup', 'required' => false, 'help' => 'calendar.signup_help'])
+            ->add('signupLimit', IntegerType::class, ['label' => 'calendar.signup_limit', 'required' => false, 'attr' => ['min' => 1]]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -1,0 +1,81 @@
+{% extends 'organization/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ 'public.settings.title'|trans }} · {{ organization.name }}{% endblock %}
+{% block detail_title %}{{ 'public.settings.title'|trans }}{% endblock %}
+{% block back_url %}{{ path('organization_show', {id: organization.id}) }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl space-y-8 p-4 lg:p-6">
+        <p class="text-slate-600">{{ 'public.settings.intro_text'|trans }}</p>
+        {% if settings.active %}
+            {% set url = url('public_home', {slug: settings.slug}) %}
+            <div class="card space-y-2 p-4">
+                <p><span class="font-medium">{{ 'public.settings.url'|trans }}:</span> <a href="{{ url }}" class="link break-all" target="_blank" rel="noopener">{{ url }}</a></p>
+                <p class="text-xs text-slate-500">{{ 'public.settings.embed_hint'|trans }}</p>
+                <code class="block overflow-x-auto rounded bg-slate-100 p-2 text-xs">&lt;iframe src="{{ url }}/contact?embed=1" title="{{ organization.name }}" width="100%" height="900"&gt;&lt;/iframe&gt;</code>
+            </div>
+        {% endif %}
+
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.slug) }}
+            <fieldset class="mb-6">
+                <legend class="mb-2 text-base font-semibold">{{ 'public.settings.features'|trans }}</legend>
+                {{ form_row(form.infoEnabled) }}
+                {{ form_row(form.intro) }}
+                {{ form_row(form.contactEnabled) }}
+                {{ form_row(form.contactAccount) }}
+                {{ form_row(form.topicsEnabled) }}
+                {{ form_row(form.surveysEnabled) }}
+                {{ form_row(form.eventsEnabled) }}
+                {{ form_row(form.subscribeEnabled) }}
+            </fieldset>
+            <fieldset class="mb-6">
+                <legend class="mb-2 text-base font-semibold">{{ 'public.settings.spam'|trans }}</legend>
+                {{ form_row(form.spamInvisible) }}
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {{ form_row(form.spamMinSeconds) }}
+                    {{ form_row(form.spamMaxPerHour) }}
+                </div>
+                {{ form_row(form.spamConfirmEmail) }}
+            </fieldset>
+            {{ form_row(form.privacyNotice) }}
+            {{ form_rest(form) }}
+            <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+        {{ form_end(form) }}
+
+        {% if settings.id %}
+            <section id="topics" aria-labelledby="topics-heading">
+                <div class="mb-3 flex items-center justify-between gap-2">
+                    <h3 id="topics-heading" class="font-semibold">{{ 'public.topic.title'|trans }}</h3>
+                    <a href="{{ path('public_topic_new', {id: organization.id}) }}" class="btn-secondary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.topic.new'|trans }}</a>
+                </div>
+                <p class="mb-3 text-xs text-slate-500">{{ 'public.topic.help'|trans }}</p>
+                {% if settings.topics is empty %}
+                    <p class="text-slate-500">{{ 'public.topic.none'|trans }}</p>
+                {% else %}
+                    <ul role="list" class="card divide-y divide-slate-100">
+                        {% for topic in settings.topics %}
+                            <li class="flex items-center gap-3 px-4 py-3">
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate font-medium">{{ topic.name }}</p>
+                                    <p class="truncate text-xs text-slate-500">
+                                        {{ topic.project ? topic.project.name : 'mail.project.none'|trans }} · {{ topic.assignee ? topic.assignee.name : 'public.topic.assignee_none'|trans }}
+                                    </p>
+                                </div>
+                                <a href="{{ path('public_topic_edit', {id: organization.id, topic: topic.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}: {{ topic.name }}" title="{{ 'action.edit'|trans }}">
+                                    {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                </a>
+                                {{ ui.post_button(path('public_topic_delete', {id: organization.id, topic: topic.id}), 'public-topic', 'action.delete',
+                                    {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'public.topic.delete_confirm'}) }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

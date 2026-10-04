@@ -1,0 +1,24 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}{{ survey.title }} · {{ parent() }}{% endblock %}
+
+{% block content %}
+    <h1 class="mb-2 text-2xl font-semibold">{{ survey.title }}</h1>
+    {% if survey.description %}<div class="markdown mb-4">{{ survey.description|markdown }}</div>{% endif %}
+    <p class="mb-6 text-sm text-slate-600">{{ (survey.anonymous ? 'public.survey.anonymous_hint' : 'public.survey.named_hint')|trans }}</p>
+    {{ form_start(form, {attr: {class: 'card p-6'}}) }}
+        {{ form_errors(form) }}
+        {% for question in survey.questions %}
+            {{ form_row(form['q' ~ question.id]) }}
+        {% endfor %}
+        {% if not survey.anonymous %}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.name) }}
+                {{ form_row(form.email) }}
+            </div>
+            {{ include('public/_consent.html.twig') }}
+        {% endif %}
+        {{ form_rest(form) }}
+        <button type="submit" class="btn-primary">{{ 'public.survey.submit'|trans }}</button>
+    {{ form_end(form) }}
+{% endblock %}

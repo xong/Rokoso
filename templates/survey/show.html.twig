@@ -1,0 +1,133 @@
+{% extends 'survey/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+{% set state = survey.draft ? 'draft' : (survey.open ? 'open' : 'closed') %}
+{% set response_count = survey.responses|length %}
+
+{% block title %}{{ survey.title }} · {{ parent() }}{% endblock %}
+{% block detail_title %}{{ survey.title }}{% endblock %}
+
+{% block detail_actions %}
+    {% if can_manage %}
+        <a href="{{ path('survey_edit', {id: survey.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">
+            {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+        </a>
+        {{ ui.post_button(path('survey_delete', {id: survey.id}), 'survey-delete', 'survey.delete',
+            {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'survey.delete_confirm'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-3xl space-y-6 p-4 lg:p-6">
+        <header class="space-y-2">
+            <p class="flex flex-wrap items-center gap-2 text-sm">
+                <span class="badge {{ state == 'open' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700' }}">{{ ('survey.state.' ~ state)|trans }}</span>
+                <span class="badge bg-slate-100 text-slate-700">{{ (survey.anonymous ? 'survey.anonymous_badge' : 'survey.named_badge')|trans }}</span>
+                {% if survey.listed %}<span class="badge bg-brand-50 text-brand-700">{{ 'survey.listed_badge'|trans }}</span>{% endif %}
+            </p>
+            <p class="text-sm text-slate-600">{{ survey.organization.name }} · {{ 'survey.created_by'|trans({'%name%': survey.createdBy.name, '%date%': survey.createdAt|date('d.m.Y')}) }}</p>
+        </header>
+
+        {% if survey.description %}<div class="markdown">{{ survey.description|markdown }}</div>{% endif %}
+
+        {% if can_manage %}
+            <div class="card flex flex-wrap items-center gap-3 p-4">
+                {% if survey.draft %}
+                    <p class="min-w-0 flex-1 text-sm text-slate-600">{{ 'survey.draft_hint'|trans }}</p>
+                    {{ ui.post_button(path('survey_open', {id: survey.id}), 'survey-state', 'survey.open', {class: 'btn-primary', icon: 'lucide:play'}) }}
+                {% elseif survey.open %}
+                    <div class="min-w-0 flex-1 text-sm">
+                        {% if public_url %}
+                            <label for="survey-link" class="label">{{ 'survey.public_link'|trans }}</label>
+                            <input id="survey-link" type="text" readonly value="{{ public_url }}" class="input font-mono text-xs">
+                        {% else %}
+                            <p class="text-amber-800">{{ 'survey.no_public_page'|trans }}</p>
+                        {% endif %}
+                    </div>
+                    {{ ui.post_button(path('survey_close', {id: survey.id}), 'survey-state', 'survey.close', {icon: 'lucide:square', confirm: 'survey.close_confirm'}) }}
+                {% else %}
+                    <p class="min-w-0 flex-1 text-sm text-slate-600">{{ 'survey.closed_hint'|trans({'%date%': survey.closedAt|date('d.m.Y H:i')}) }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <section id="questions" aria-labelledby="questions-heading" class="space-y-3">
+            <div class="flex flex-wrap items-center gap-2">
+                <h3 id="questions-heading" class="font-semibold">{{ survey.draft ? 'survey.questions'|trans : 'survey.results'|trans }}</h3>
+                {% if not survey.draft %}
+                    <span class="text-sm text-slate-500">{{ 'survey.response_count'|trans({'%count%': response_count}) }}</span>
+                    {% if response_count > 0 %}
+                        <a href="{{ path('survey_csv', {id: survey.id}) }}" class="btn-secondary ml-auto py-1 text-xs">{{ ux_icon('lucide:download', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'survey.export'|trans }}</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% if survey.questions is empty %}
+                <p class="text-slate-500">{{ 'survey.no_questions_yet'|trans }}</p>
+            {% else %}
+                <ol class="space-y-3">
+                    {% for q in survey.questions %}
+                        {% set r = results[q.id] %}
+                        <li class="card p-4">
+                            <div class="flex items-start gap-2">
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-medium">{{ loop.index }}. {{ q.label }}{% if q.required %} <span class="text-red-600" aria-hidden="true">*</span><span class="sr-only">({{ 'survey.question.required'|trans }})</span>{% endif %}</p>
+                                    <p class="text-xs text-slate-500">{{ ('survey.type.' ~ q.type.value)|trans }}</p>
+                                </div>
+                                {% if can_manage and survey.draft %}
+                                    {% if not loop.first %}{{ ui.post_button(path('survey_question_move', {id: q.id}), 'survey-question', 'survey.question.up', {class: 'btn-icon', icon: 'lucide:arrow-up', icon_only: true, fields: {direction: 'up'}}) }}{% endif %}
+                                    {% if not loop.last %}{{ ui.post_button(path('survey_question_move', {id: q.id}), 'survey-question', 'survey.question.down', {class: 'btn-icon', icon: 'lucide:arrow-down', icon_only: true, fields: {direction: 'down'}}) }}{% endif %}
+                                    <a href="{{ path('survey_question_edit', {id: q.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}: {{ q.label }}" title="{{ 'action.edit'|trans }}">{{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+                                    {{ ui.post_button(path('survey_question_delete', {id: q.id}), 'survey-question', 'action.delete', {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true}) }}
+                                {% endif %}
+                            </div>
+                            {% if survey.draft %}
+                                {% if q.type.hasOptions %}
+                                    <ul class="mt-2 list-disc pl-6 text-sm text-slate-700">{% for o in q.options %}<li>{{ o }}</li>{% endfor %}</ul>
+                                {% endif %}
+                            {% elseif q.type.value == 'text' %}
+                                {% if r.texts is empty %}
+                                    <p class="mt-2 text-sm text-slate-500">{{ 'survey.no_answers'|trans }}</p>
+                                {% else %}
+                                    <ul class="mt-2 space-y-1 text-sm">{% for t in r.texts %}<li class="whitespace-pre-line rounded bg-slate-50 px-3 py-2">{{ t }}</li>{% endfor %}</ul>
+                                {% endif %}
+                            {% else %}
+                                {% if r.average is not null %}<p class="mt-2 text-sm">{{ 'survey.average'|trans({'%value%': r.average|number_format(1, ',')}) }}</p>{% endif %}
+                                <dl class="mt-2 space-y-1 text-sm">
+                                    {% for option, count in r.counts %}
+                                        {% set pct = r.answered > 0 ? (count * 100 / r.answered)|round : 0 %}
+                                        <div class="grid grid-cols-[minmax(0,12rem)_1fr_auto] items-center gap-2">
+                                            <dt class="truncate">{{ option }}</dt>
+                                            <dd class="h-2 overflow-hidden rounded bg-slate-100" aria-hidden="true"><div class="h-full bg-brand-600" style="width: {{ pct }}%"></div></dd>
+                                            <dd class="text-right text-slate-600 tabular-nums">{{ count }} ({{ pct }} %)</dd>
+                                        </div>
+                                    {% endfor %}
+                                </dl>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ol>
+            {% endif %}
+
+            {% if question_form %}
+                {{ form_start(question_form, {attr: {class: 'card space-y-2 p-4'}}) }}
+                    <h4 class="font-semibold">{{ 'survey.question.new'|trans }}</h4>
+                    {{ form_errors(question_form) }}
+                    {{ form_rest(question_form) }}
+                    <button type="submit" class="btn-primary">{{ 'survey.question.add'|trans }}</button>
+                {{ form_end(question_form) }}
+            {% endif %}
+        </section>
+
+        {% if not survey.anonymous and response_count > 0 %}
+            <section aria-labelledby="respondents-heading">
+                <h3 id="respondents-heading" class="mb-2 font-semibold">{{ 'survey.respondents'|trans }}</h3>
+                <ul role="list" class="card divide-y divide-slate-100 text-sm">
+                    {% for resp in survey.responses %}
+                        <li class="flex flex-wrap gap-x-3 px-4 py-2"><span class="font-medium">{{ resp.name }}</span><span class="text-slate-500">{{ resp.email }}</span><span class="ml-auto text-slate-500">{{ resp.createdAt|date('d.m.Y H:i') }}</span></li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

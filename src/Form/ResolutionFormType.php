@@ -8,6 +8,7 @@ use App\Entity\Project;
 use App\Entity\Resolution;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -43,7 +44,8 @@ final class ResolutionFormType extends AbstractType
                 'choice_label' => 'name',
                 'required' => false,
                 'placeholder' => 'mail.project.none',
-            ]);
+            ])
+            ->add('public', CheckboxType::class, ['label' => 'resolution.public', 'required' => false, 'help' => 'resolution.public_help']);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

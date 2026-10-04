@@ -66,6 +66,10 @@ class Resolution
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Project $project = null;
 
+    /** Shown on the public page of the organization */
+    #[ORM\Column]
+    private bool $public = false;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -234,6 +238,18 @@ class Resolution
     public function setProject(?Project $project): static
     {
         $this->project = $project;
+
+        return $this;
+    }
+
+    public function isPublic(): bool
+    {
+        return $this->public;
+    }
+
+    public function setPublic(bool $public): static
+    {
+        $this->public = $public;
 
         return $this;
     }

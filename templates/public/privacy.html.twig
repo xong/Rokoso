@@ -1,0 +1,12 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}{{ 'public.privacy.title'|trans }} · {{ parent() }}{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4 text-2xl font-semibold">{{ 'public.privacy.title'|trans }}</h1>
+    {% if settings.privacyNotice %}
+        <div class="markdown">{{ settings.privacyNotice|markdown }}</div>
+    {% else %}
+        <p class="text-slate-700">{{ 'public.privacy.default'|trans({'%name%': settings.organization.name}) }}</p>
+    {% endif %}
+{% endblock %}
