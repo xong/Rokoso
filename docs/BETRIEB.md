@@ -122,6 +122,38 @@ Ein Dauer-Worker (Messenger) ist **nicht** nötig: Systemmails werden direkt ver
 4. Mitglieder per E-Mail **einladen**.
 5. Das eigene Konto zum **Plattform-Admin** machen: `php bin/console app:user:promote <E-Mail>` (Rücknahme mit `--revoke`). Plattform-Admins sehen unter `/admin` alle Konten (sperren, löschen), die Organisationen (ohne deren Inhalte) und das Sicherheitsprotokoll.
 
+## Deployment mit GitHub Actions (Shared Hosting)
+
+Für Hosting ohne Docker und ohne passendes PHP auf der Kommandozeile (z. B. KeyHelp bei GN2: Web-PHP 8.5, per SSH nur 8.2) liegt `.github/workflows/deploy.yml` bei. Bei jedem Push auf `main` laufen zuerst `composer check` (mit MariaDB-Dienst), dann der Build auf GitHub (Composer ohne Dev-Pakete, Tailwind, JavaScript, Assets). Auf dem Server wird nur hochgeladen und umgeschaltet:
+
+```
+/www/staging.rokoso.de/
+├── current -> releases/<zeit>-<commit>   (Document Root: current/public)
+├── releases/                             (die letzten 5 Stände)
+└── shared/
+    ├── .env.local                        (Zugangsdaten, nur hier)
+    ├── var/storage, var/log              (Dateien, Anhänge, Logs)
+    └── public/uploads                    (Profilbilder, Logos)
+```
+
+Ablauf: Upload per rsync in einen neuen Ordner unter `releases/` (unveränderte Dateien als Hardlink), Verlinken von `shared/`, Umschalten von `current`, dann ruft GitHub den **Deploy-Hook** `POST /_deploy` auf. Er führt mit dem Web-PHP die Migrationen und `cache:warmup` aus. Geschützt ist er durch `DEPLOY_TOKEN` (mind. 32 Zeichen, in `.env.local` und als GitHub-Secret; ohne Token ist er aus). Liefert der Webserver kurz nach dem Umschalten noch den alten Stand aus, antwortet der Hook mit 409 und GitHub versucht es erneut.
+
+Einstellungen im GitHub-Repository unter *Settings → Environments → staging*:
+
+| Art | Name | Inhalt |
+|---|---|---|
+| Secret | `SSH_PRIVATE_KEY` | privater Deploy-Schlüssel (ed25519, ohne Passphrase) |
+| Secret | `DEPLOY_TOKEN` | derselbe Wert wie in `shared/.env.local` |
+| Variable | `SSH_HOST` | z. B. `robert-rupf.host-011.gn2.hosting` |
+| Variable | `SSH_USER` | SSH-Benutzer |
+| Variable | `SSH_KNOWN_HOSTS` | Ausgabe von `ssh-keyscan <host>` |
+| Variable | `DEPLOY_PATH` | z. B. `/www/staging.rokoso.de` |
+| Variable | `APP_URL` | z. B. `https://staging.rokoso.de` |
+
+**Zurück auf den vorigen Stand:** per SSH `cd /www/staging.rokoso.de && ln -sfn releases/<älterer Ordner> current.new && mv -Tf current.new current`. Migrationen werden dabei nicht zurückgedreht.
+
+Apache braucht die mitgelieferte `public/.htaccess` (Weiterleitung auf `index.php`).
+
 ## Updates
 
 ```bash

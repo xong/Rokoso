@@ -1,0 +1,116 @@
+# Prüfen und auf den Staging-Server deployen (Shared Hosting, siehe docs/BETRIEB.md „Deployment mit GitHub Actions“).
+# Gebaut wird hier (Composer, Tailwind, JS, Assets); auf dem Server wird nur hochgeladen, verlinkt und der Deploy-Hook aufgerufen.
+name: Test & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: mariadb:11.8
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: rokoso
+        ports: ['3307:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-retries=20
+    env:
+      DATABASE_URL: mysql://root:root@127.0.0.1:3307/rokoso?serverVersion=11.8.0-MariaDB&charset=utf8mb4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql, intl, sodium, zip, gd, mbstring
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('composer.lock') }}
+      - run: composer install --prefer-dist --no-progress
+      - run: composer check
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      APP_ENV: prod
+      APP_DEBUG: '0'
+      APP_SECRET: build-only
+      SSH_TARGET: ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: intl, sodium, zip, gd, mbstring
+          coverage: none
+
+      - name: Build
+        run: |
+          composer install --no-dev --no-scripts --prefer-dist --no-progress
+          composer dump-autoload --no-dev --classmap-authoritative
+          php bin/console importmap:install
+          php bin/console app:js:build --minify
+          php bin/console tailwind:build --minify
+          php bin/console asset-map:compile
+          rm -rf var .git .github tests docker drivers
+          echo "RELEASE=$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+      - name: SSH
+        env:
+          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ vars.SSH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Upload
+        run: |
+          ssh "$SSH_TARGET" "set -e; cd '$DEPLOY_PATH'; mkdir -p releases shared/var/storage shared/var/log shared/public/uploads
+            test -f shared/.env.local || { echo 'shared/.env.local fehlt (siehe docs/BETRIEB.md)'; exit 1; }"
+          # unveränderte Dateien des laufenden Stands per Hardlink übernehmen (spart Upload)
+          LINK=$(ssh "$SSH_TARGET" "test -d '$DEPLOY_PATH/current/' && echo --link-dest='$DEPLOY_PATH/current/'" || true)
+          rsync -az $LINK ./ "$SSH_TARGET:$DEPLOY_PATH/releases/$RELEASE/"
+
+      - name: Switch
+        run: |
+          ssh "$SSH_TARGET" "set -e; cd '$DEPLOY_PATH'; R=releases/$RELEASE
+            ln -s ../../shared/.env.local \$R/.env.local
+            mkdir -p \$R/var && ln -s ../../../shared/var/storage \$R/var/storage && ln -s ../../../shared/var/log \$R/var/log
+            rm -rf \$R/public/uploads && ln -s ../../../shared/public/uploads \$R/public/uploads
+            ln -sfn \$R current.new && mv -Tf current.new current"
+
+      - name: Migrate (deploy hook)
+        env:
+          TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          URL: ${{ vars.APP_URL }}/_deploy
+        run: |
+          # 409 = Webserver liefert noch den alten Stand aus (Pfad-Cache), dann erneut versuchen
+          for i in $(seq 1 30); do
+            code=$(curl -s -o hook.txt -w '%{http_code}' -X POST -H "X-Deploy-Token: $TOKEN" --data-urlencode "release=$RELEASE" "$URL" || echo 000)
+            cat hook.txt; echo "HTTP $code"
+            if [ "$code" = 200 ]; then exit 0; fi
+            if [ "$code" != 409 ] && [ "$code" != 000 ] && [ "$code" != 502 ] && [ "$code" != 503 ]; then exit 1; fi
+            sleep 10
+          done
+          exit 1
+
+      - name: Clean up old releases
+        run: |
+          ssh "$SSH_TARGET" "cd '$DEPLOY_PATH'; rels=(\$(ls -1dt releases/*)); for d in \"\${rels[@]:5}\"; do rm -rf \"\$d\"; done; ls releases"
