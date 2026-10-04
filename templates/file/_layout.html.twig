@@ -16,10 +16,10 @@
         <a href="{{ path('folder_show', {id: folder.id}) }}" {% if active %}aria-current="page"{% endif %}
            class="flex items-center gap-2 rounded-md py-1.5 pr-2 text-sm {{ active ? 'bg-brand-50 font-medium text-brand-700' : 'hover:bg-slate-100' }}"
            style="padding-left: {{ 0.5 + depth * 1 }}rem">
-            {{ ux_icon(open ? 'lucide:folder-open' : 'lucide:folder', {class: 'size-4 shrink-0 ' ~ (active ? 'text-brand-600' : 'text-slate-400'), 'aria-hidden': 'true'}) }}
+            {{ ux_icon(open ? 'lucide:folder-open' : 'lucide:folder', {class: 'size-4 shrink-0 ' ~ (active ? 'text-brand-600' : 'text-slate-500'), 'aria-hidden': 'true'}) }}
             <span class="min-w-0 flex-1 truncate">{{ folder.name }}</span>
             {% if folder.children is not empty and not open %}
-                <span class="text-xs text-slate-400" aria-label="{{ 'folder.subfolders'|trans({'%count%': folder.children|length}) }}">{{ folder.children|length }}</span>
+                <span class="text-xs text-slate-500" aria-label="{{ 'folder.subfolders'|trans({'%count%': folder.children|length}) }}">{{ folder.children|length }}</span>
             {% endif %}
         </a>
         {% if open and folder.children is not empty %}

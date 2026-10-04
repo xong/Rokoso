@@ -16,10 +16,10 @@
         <a href="{{ path('forum_board_show', {id: board.id}) }}" {% if active %}aria-current="page"{% endif %}
            class="flex items-center gap-2 rounded-md py-1.5 pr-2 text-sm {{ active ? 'bg-brand-50 font-medium text-brand-700' : 'hover:bg-slate-100' }}"
            style="padding-left: {{ 0.5 + depth * 1 }}rem">
-            {{ ux_icon('lucide:messages-square', {class: 'size-4 shrink-0 ' ~ (active ? 'text-brand-600' : 'text-slate-400'), 'aria-hidden': 'true'}) }}
+            {{ ux_icon('lucide:messages-square', {class: 'size-4 shrink-0 ' ~ (active ? 'text-brand-600' : 'text-slate-500'), 'aria-hidden': 'true'}) }}
             <span class="min-w-0 flex-1 truncate">{{ board.name }}</span>
             {% if board.children is not empty and not open %}
-                <span class="text-xs text-slate-400" aria-label="{{ 'forum.sub_boards'|trans({'%count%': board.children|length}) }}">{{ board.children|length }}</span>
+                <span class="text-xs text-slate-500" aria-label="{{ 'forum.sub_boards'|trans({'%count%': board.children|length}) }}">{{ board.children|length }}</span>
             {% endif %}
         </a>
         {% if open and board.children is not empty %}
@@ -44,7 +44,7 @@
     <nav aria-label="{{ 'forum.tree'|trans }}" class="space-y-4 p-2">
         <a href="{{ path('forum_index') }}" {% if app.current_route == 'forum_index' %}aria-current="page"{% endif %}
            class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm {{ app.current_route == 'forum_index' ? 'bg-brand-50 font-medium text-brand-700' : 'hover:bg-slate-100' }}">
-            {{ ux_icon('lucide:clock', {class: 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}{{ 'forum.recent'|trans }}
+            {{ ux_icon('lucide:clock', {class: 'size-4 shrink-0 text-slate-500', 'aria-hidden': 'true'}) }}{{ 'forum.recent'|trans }}
         </a>
         {% if tree is empty %}
             {{ ui.empty('forum.no_boards', 'lucide:messages-square', path('forum_board_new'), 'forum.board_new_root') }}

@@ -75,7 +75,7 @@
                                     <td class="px-3 py-2 text-slate-600 max-md:hidden">{{ f.project ? f.project.name }}</td>
                                     <td class="px-3 py-2 text-slate-600 max-sm:hidden">
                                         {{ f.uploadedBy ? f.uploadedBy.name : 'mail.comments.deleted_user'|trans }}
-                                        <time class="block text-xs text-slate-400" datetime="{{ f.createdAt|date('c') }}">{{ f.createdAt|short_date }}</time>
+                                        <time class="block text-xs text-slate-500" datetime="{{ f.createdAt|date('c') }}">{{ f.createdAt|short_date }}</time>
                                     </td>
                                     <td class="px-3 py-2 text-right whitespace-nowrap text-slate-600 tabular-nums">{{ f.size|filesize }}</td>
                                     <td class="px-3 py-2 text-right">

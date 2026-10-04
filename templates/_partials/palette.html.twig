@@ -29,7 +29,7 @@
         class="m-auto mt-[12vh] w-[min(36rem,calc(100vw-2rem))] rounded-xl bg-surface p-0 text-slate-900 shadow-2xl ring-1 ring-slate-200 backdrop:bg-black/40">
     <h2 id="palette-heading" class="sr-only">{{ 'palette.title'|trans }}</h2>
     <div class="relative border-b border-slate-200">
-        {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-3.5 left-3.5 size-4 text-slate-400', 'aria-hidden': 'true'}) }}
+        {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-3.5 left-3.5 size-4 text-slate-500', 'aria-hidden': 'true'}) }}
         <label for="palette-input" class="sr-only">{{ 'palette.label'|trans }}</label>
         <input id="palette-input" type="text" role="combobox" autocomplete="off" spellcheck="false"
                aria-expanded="true" aria-controls="palette-list" aria-autocomplete="list" aria-describedby="palette-hint"
@@ -44,7 +44,7 @@
                 class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 aria-selected:bg-brand-50 aria-selected:text-brand-700">
                 {{ ux_icon(command.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                 <span class="truncate">{{ command.label|trans }}</span>
-                {% if command.keys is defined %}<kbd class="ml-auto font-mono text-xs text-slate-400" aria-hidden="true">{{ command.keys }}</kbd>{% endif %}
+                {% if command.keys is defined %}<kbd class="ml-auto font-mono text-xs text-slate-500" aria-hidden="true">{{ command.keys }}</kbd>{% endif %}
             </li>
         {% endfor %}
         <li role="option" id="palette-option-search" aria-selected="false" data-url="{{ path('search') }}" data-search="1" data-palette-target="option"

@@ -14,6 +14,7 @@ use App\Enum\NotificationType;
 use App\Mail\MessageFilter;
 use App\Repository\CalendarItemRepository;
 use App\Repository\ForumTopicRepository;
+use App\Repository\MailAccountRepository;
 use App\Repository\MeetingRepository;
 use App\Repository\MessageRepository;
 use App\Repository\NotificationRepository;
@@ -44,6 +45,7 @@ final class HomeController extends AbstractController
         ForumTopicRepository $topics,
         NotificationRepository $notifications,
         SetupChecklist $setup,
+        MailAccountRepository $mailAccounts,
     ): Response {
         $now = new \DateTimeImmutable();
         $events = array_filter(
@@ -70,6 +72,7 @@ final class HomeController extends AbstractController
             'topics' => \array_slice(array_values(array_filter($recentTopics, static fn ($t): bool => \in_array($t->getId(), $unreadTopics, true))), 0, self::LIMIT),
             'mentions' => \array_slice(array_values($mentions), 0, self::LIMIT),
             'setup' => $setup->stepsFor($user),
+            'sync_problems' => $mailAccounts->findWithSyncProblems($user),
             'now' => $now,
         ]);
     }

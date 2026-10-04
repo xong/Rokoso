@@ -46,8 +46,17 @@
                                 <p class="truncate text-xs text-slate-500">
                                     {{ account.emailAddress }}
                                     {% if not account.enabled %} · {{ 'mail_account.disabled'|trans }}{% endif %}
-                                    {% if account.lastSyncError %} · <span class="text-red-600">{{ 'mail_account.sync_failed'|trans }}</span>{% endif %}
+                                    {% if account.lastSyncError %} · <span class="text-red-700">{{ 'mail_account.sync_failed'|trans }}</span>{% endif %}
                                 </p>
+                                {% if is_admin and account.enabled %}
+                                    <p class="text-xs text-slate-500">
+                                        {{ account.lastSyncAt ? 'mail_account.last_sync'|trans({'%date%': account.lastSyncAt|date('d.m.Y H:i')}) : 'mail_account.never_synced'|trans }}
+                                        {% if account.syncProblem == 'stale' %} · <span class="text-amber-800">{{ 'mail_account.sync_stale'|trans }}</span>{% endif %}
+                                    </p>
+                                    {% if account.lastSyncError %}
+                                        <p class="text-xs break-words text-red-700">{{ account.lastSyncError }}</p>
+                                    {% endif %}
+                                {% endif %}
                             </div>
                             {% if is_admin %}
                                 <a href="{{ path('mail_account_edit', {id: account.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}: {{ account.name }}" title="{{ 'action.edit'|trans }}">

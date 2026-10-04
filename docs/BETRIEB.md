@@ -52,6 +52,37 @@ Die Zeitzone ist auf `Europe/Berlin` ausgelegt: in der `php.ini` `date.timezone 
 
 Dateien (Menü „Dateien“, Forum-Anhänge) dürfen bis zu **50 MB** groß sein. Damit das klappt, in der `php.ini` z. B. `upload_max_filesize = 50M`, `post_max_size = 200M` und `max_file_uploads = 20` setzen (bei nginx zusätzlich `client_max_body_size 200m;`).
 
+## Alternative: Betrieb mit Docker
+
+Statt eines eigenen Webservers kann Coop als Docker-Image laufen. Das Image basiert auf **FrankenPHP** (Caddy + PHP 8.4) und holt sich für die eingetragene Domain automatisch ein HTTPS-Zertifikat (Let's Encrypt). Ein Beispiel mit Datenbank liegt in `compose.prod.yaml`:
+
+| Dienst | Aufgabe |
+|---|---|
+| `app` | Webserver; führt beim Start die Datenbank-Migrationen aus |
+| `cron` | Hintergrundaufgaben ohne System-Cron (Ausgang jede Minute, Abruf alle 5 Min., `app:notify` alle 15 Min., Passwort-Links täglich) |
+| `db` | MariaDB 11.8 |
+
+`.env.prod` neben `compose.prod.yaml` anlegen (nicht einchecken):
+
+```dotenv
+SERVER_NAME=coop.example.org
+DEFAULT_URI=https://coop.example.org
+APP_SECRET=<64 zufällige Hex-Zeichen>
+DB_PASSWORD=<zufällig>
+DB_ROOT_PASSWORD=<zufällig>
+MAILER_DSN=smtp://benutzer:passwort@smtp.example.org:465
+MAILER_FROM="Coop <noreply@example.org>"
+VAPID_PUBLIC_KEY=...
+VAPID_PRIVATE_KEY=...
+```
+
+```bash
+docker compose -f compose.prod.yaml --env-file .env.prod up -d --build
+docker compose -f compose.prod.yaml --env-file .env.prod exec app php bin/console app:user:promote <E-Mail>
+```
+
+Läuft ein anderer Reverse-Proxy davor, `SERVER_NAME=:80` setzen und nur Port 80 freigeben. **Update:** `git pull` und denselben `up -d --build`-Befehl erneut ausführen. **Sicherung:** die Volumes `db`, `storage` (= `var/storage`) und `uploads` (= `public/uploads`) sowie `.env.prod`.
+
 ## Cronjobs
 
 ```cron
@@ -69,6 +100,8 @@ Dateien (Menü „Dateien“, Forum-Anhänge) dürfen bis zu **50 MB** groß sei
 ```
 
 Ein Dauer-Worker (Messenger) ist **nicht** nötig: Systemmails werden direkt verschickt.
+
+**Abruf beim Öffnen:** Zusätzlich ruft Coop die Postfächer ab, wenn jemand „Heute“ oder den Posteingang öffnet und der letzte Abruf länger als `MAIL_SYNC_INTERVAL` Minuten (Standard 5, `0` = aus) zurückliegt – nach dem Ausliefern der Seite, also ohne Wartezeit. Der Cronjob bleibt trotzdem empfohlen. Hängt der Abruf eines Kontos länger als eine Stunde oder ist er fehlgeschlagen, sehen die Admins der Organisation einen Hinweis auf „Heute“ und in der Organisation.
 
 `app:notify` setzt auch die **Löschfristen** um (einstellbar je Organisation unter „Organisation bearbeiten“):
 
@@ -123,7 +156,19 @@ E-Mails liegen zusätzlich weiterhin auf dem IMAP-Server; Coop verändert dort n
 
 - Logs: `var/log/prod.log`, E-Mail-Abruf: `var/log/mail-sync.log`
 - Abruf eines einzelnen Kontos testen: `php bin/console app:mail:sync <Konto-ID>`
-- Der letzte Abruffehler eines Kontos steht auch in der Oberfläche beim E-Mail-Konto.
+- Der letzte Abruffehler eines Kontos steht auch in der Oberfläche beim E-Mail-Konto und auf „Heute“ (nur Admins).
+- Docker: `docker compose -f compose.prod.yaml logs -f app cron`
+
+## Für Entwickler: Browser- und Barrierefreiheitstests
+
+`composer check` deckt Code-Stil, PHPStan und die PHPUnit-Tests ab. Zusätzlich gibt es Tests in einem echten Chrome (Symfony Panther):
+
+```bash
+vendor/bin/bdi detect drivers   # passenden chromedriver nach drivers/ laden (einmalig, Chrome muss installiert sein)
+composer test:browser
+```
+
+Sie prüfen Anmeldung, Befehlspalette/Tastenkürzel, Turbo-Aktionen im Posteingang sowie mit **axe-core** die wichtigsten Seiten in hellem und dunklem Design auf WCAG-2.2-AA-Verstöße (Stufe „serious“/„critical“). axe-core (MPL-2.0) wird nur zur Testzeit nach `var/` geladen und ist nicht Teil von Coop. Die Tests schreiben echte Daten in die Testdatenbank (`coop_test`). Eine Stichprobe mit einem Screenreader (NVDA) ersetzen sie nicht.
 
 ## Muster: Verzeichnis der Verarbeitungstätigkeiten (Art. 30 DSGVO)
 

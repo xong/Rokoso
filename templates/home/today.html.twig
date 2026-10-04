@@ -19,6 +19,27 @@
             <time datetime="{{ now|date('Y-m-d') }}">{{ ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'][now|date('w')] }}, {{ now|date('j') }}. {{ ('calendar.months.' ~ now|date('n'))|trans }} {{ now|date('Y') }}</time>
         </p>
 
+        {% if sync_problems %}
+            <section aria-labelledby="sync-heading" class="mb-4 rounded-lg bg-amber-50 p-4 text-amber-800 ring-1 ring-amber-200">
+                <h2 id="sync-heading" class="flex items-center gap-2 font-semibold">
+                    {{ ux_icon('lucide:triangle-alert', {class: 'size-5', 'aria-hidden': 'true'}) }}
+                    {{ 'today.sync.title'|trans }}
+                </h2>
+                <ul class="mt-2 space-y-1 text-sm">
+                    {% for account in sync_problems %}
+                        <li>
+                            <a href="{{ path('mail_account_edit', {id: account.id}) }}" class="font-medium underline">{{ account.name }}</a>:
+                            {% if account.syncProblem == 'error' %}
+                                {{ 'today.sync.error'|trans }} <span class="break-words">{{ account.lastSyncError|length > 160 ? account.lastSyncError|slice(0, 160) ~ '…' : account.lastSyncError }}</span>
+                            {% else %}
+                                {{ 'today.sync.stale'|trans({'%date%': account.lastSyncAt ? account.lastSyncAt|date('d.m.Y H:i') : '–'}) }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
         {% if setup %}
             {% set done = setup|filter(s => s.done)|length %}
             <section aria-labelledby="setup-heading" class="card mb-4 p-4">

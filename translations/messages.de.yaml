@@ -493,6 +493,8 @@ mail_account:
     sync_failed: Abruf fehlgeschlagen
     sync_error: 'Letzter Abruf fehlgeschlagen:'
     last_sync: 'zuletzt abgerufen: %date%'
+    never_synced: noch nicht abgerufen
+    sync_stale: 'seit über einer Stunde kein Abruf'
     section_general: Allgemein
     section_imap: Empfang (IMAP)
     section_smtp: Versand (SMTP)
@@ -848,6 +850,7 @@ contact_group:
     public_subscribe_help: Externe können sich über die öffentliche Seite selbst eintragen (mit Bestätigung per E-Mail).
 
 calendar:
+    timeline_region: Tagesablauf (scrollbar)
     today: Heute
     public_title: Öffentlich
     public: Öffentlich
@@ -1654,6 +1657,10 @@ public:
 
 today:
     title: Heute
+    sync:
+        title: Postfach-Abruf gestört
+        error: 'letzter Abruf fehlgeschlagen –'
+        stale: 'seit über einer Stunde nicht abgerufen (zuletzt: %date%). Läuft der Cron-Job app:mail:sync?'
     greeting: 'Hallo %name%, heute ist'
     show_all: Alle anzeigen
     nothing: Nichts offen.

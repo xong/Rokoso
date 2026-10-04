@@ -8,7 +8,7 @@
          failOnNotice="true"
          failOnWarning="true"
          bootstrap="tests/bootstrap.php"
-         cacheDirectory=".phpunit.cache"
+         cacheDirectory=".phpunit.cache/browser"
 >
     <php>
         <ini name="display_errors" value="1" />
@@ -16,12 +16,13 @@
         <ini name="memory_limit" value="512M" />
         <server name="APP_ENV" value="test" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
+        <!-- Browser-Tests: echter Browser gegen den PHP-Webserver, Daten werden ohne DAMA wirklich gespeichert -->
+        <server name="PANTHER_APP_ENV" value="test" />
     </php>
 
     <testsuites>
-        <testsuite name="Project Test Suite">
-            <directory>tests</directory>
-            <exclude>tests/Browser</exclude>
+        <testsuite name="Browser">
+            <directory>tests/Browser</directory>
         </testsuite>
     </testsuites>
 
@@ -42,6 +43,6 @@
     </source>
 
     <extensions>
-        <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />
+        <bootstrap class="Symfony\Component\Panther\ServerExtension" />
     </extensions>
 </phpunit>

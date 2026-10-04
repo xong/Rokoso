@@ -42,7 +42,7 @@
                                 <span id="post-{{ post.id }}-author" class="font-medium">{{ post.author ? post.author.name : 'mail.comments.deleted_user'|trans }}</span>
                                 <time class="ml-1 text-xs text-slate-500" datetime="{{ post.createdAt|date('c') }}">{{ post.createdAt|date('d.m.Y H:i') }}</time>
                                 {% if post.editedAt %}
-                                    <span class="ml-1 text-xs text-slate-400">({{ 'forum.edited'|trans }} <time datetime="{{ post.editedAt|date('c') }}">{{ post.editedAt|short_date }}</time>)</span>
+                                    <span class="ml-1 text-xs text-slate-500">({{ 'forum.edited'|trans }} <time datetime="{{ post.editedAt|date('c') }}">{{ post.editedAt|short_date }}</time>)</span>
                                 {% endif %}
                             </div>
                             {% if is_granted('FORUM_EDIT_POST', post) %}

@@ -16,6 +16,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: MailAccountRepository::class)]
 class MailAccount
 {
+    public const int STALE_AFTER_MINUTES = 60;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -359,6 +361,24 @@ class MailAccount
     public function getLastSyncError(): ?string
     {
         return $this->lastSyncError;
+    }
+
+    /**
+     * "error" when the last fetch failed, "stale" when an enabled account was not fetched for an hour
+     * (cron not running), otherwise null.
+     */
+    public function getSyncProblem(?\DateTimeImmutable $now = null): ?string
+    {
+        if (!$this->enabled) {
+            return null;
+        }
+        if (null !== $this->lastSyncError) {
+            return 'error';
+        }
+        $now ??= new \DateTimeImmutable();
+        $since = $this->lastSyncAt ?? $this->createdAt;
+
+        return $since < $now->modify('-'.self::STALE_AFTER_MINUTES.' minutes') ? 'stale' : null;
     }
 
     public function markSynced(?string $error = null): static

@@ -76,19 +76,19 @@
                         </p>
                         <dl class="mt-0.5 grid grid-cols-[auto_1fr] gap-x-2 text-xs text-slate-600">
                             {% if message.toRecipients is not empty %}
-                                <dt class="text-slate-400">{{ 'mail.to'|trans }}</dt>
+                                <dt class="text-slate-500">{{ 'mail.to'|trans }}</dt>
                                 <dd class="truncate">{% for r in message.toRecipients %}{{ r.name ?: r.address }}{% if not loop.last %}, {% endif %}{% endfor %}</dd>
                             {% endif %}
                             {% if message.circular %}
-                                <dt class="text-slate-400">{{ ux_icon('lucide:mails', {class: 'inline size-3.5', 'aria-hidden': 'true'}) }}</dt>
+                                <dt class="text-slate-500">{{ ux_icon('lucide:mails', {class: 'inline size-3.5', 'aria-hidden': 'true'}) }}</dt>
                                 <dd>{{ 'mail.circular'|trans({'%count%': message.toRecipients|length}) }}</dd>
                             {% endif %}
                             {% if message.ccRecipients is not empty %}
-                                <dt class="text-slate-400">{{ 'mail.cc'|trans }}</dt>
+                                <dt class="text-slate-500">{{ 'mail.cc'|trans }}</dt>
                                 <dd class="truncate">{% for r in message.ccRecipients %}{{ r.name ?: r.address }}{% if not loop.last %}, {% endif %}{% endfor %}</dd>
                             {% endif %}
                             {% if message.internal %}
-                                <dt class="text-slate-400">{{ 'mail.to'|trans }}</dt>
+                                <dt class="text-slate-500">{{ 'mail.to'|trans }}</dt>
                                 <dd class="truncate">
                                     {% set targets = [] %}
                                     {% for u in message.recipientUsers %}{% set targets = targets|merge([u.name]) %}{% endfor %}
@@ -97,7 +97,7 @@
                                     {{ targets|join(', ') }}
                                 </dd>
                             {% endif %}
-                            <dt class="text-slate-400">{{ 'mail.date'|trans }}</dt>
+                            <dt class="text-slate-500">{{ 'mail.date'|trans }}</dt>
                             <dd><time datetime="{{ message.date|date('c') }}">{{ message.date|date('d.m.Y H:i') }}</time></dd>
                         </dl>
                     </div>
@@ -152,7 +152,7 @@
                             <li>
                                 <a href="{{ path('mail_show', {folder: folder, id: t.id}|merge(filter.params)) }}" {% if t.id == message.id %}aria-current="true"{% endif %}
                                    class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm {{ t.id == message.id ? 'bg-brand-50 font-medium text-brand-700' : 'hover:bg-slate-50' }}">
-                                    {{ ux_icon(t.folder.value == 'sent' ? 'lucide:send' : 'lucide:mail', {class: 'size-3.5 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                                    {{ ux_icon(t.folder.value == 'sent' ? 'lucide:send' : 'lucide:mail', {class: 'size-3.5 shrink-0 text-slate-500', 'aria-hidden': 'true'}) }}
                                     <span class="w-40 shrink-0 truncate">{{ t.internal and t.author ? t.author.name : t.fromLabel }}</span>
                                     <span class="min-w-0 flex-1 truncate text-slate-500">{{ t.snippet }}</span>
                                     <time datetime="{{ t.date|date('c') }}" class="shrink-0 text-xs text-slate-500">{{ t.date|short_date }}</time>
@@ -171,7 +171,7 @@
                             {% set shelved = in_shelf(a) %}
                             <li class="card flex items-center">
                                 <a href="{{ path('mail_attachment', {id: message.id, attachment: a.id}) }}" class="flex items-center gap-2 py-2 pr-1 pl-3 hover:bg-slate-50" data-turbo="false">
-                                    {{ ux_icon('lucide:file', {class: 'size-4 text-slate-400', 'aria-hidden': 'true'}) }}
+                                    {{ ux_icon('lucide:file', {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}
                                     <span class="max-w-48 truncate">{{ a.filename }}</span>
                                     <span class="text-xs text-slate-500">{{ a.size|filesize }}</span>
                                 </a>
@@ -190,7 +190,7 @@
                     <ol class="mt-2 space-y-1">
                         {% for e in message.events|reverse %}
                             <li class="flex gap-2 text-slate-600">
-                                <time datetime="{{ e.createdAt|date('c') }}" class="w-28 shrink-0 text-xs text-slate-400">{{ e.createdAt|date('d.m.Y H:i') }}</time>
+                                <time datetime="{{ e.createdAt|date('c') }}" class="w-28 shrink-0 text-xs text-slate-500">{{ e.createdAt|date('d.m.Y H:i') }}</time>
                                 <span>{{ e.type.label|trans({'%user%': e.user ? e.user.name : 'mail.rule_or_system'|trans, '%detail%': e.detail ?? '–'}) }}</span>
                             </li>
                         {% endfor %}

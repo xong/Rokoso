@@ -7,7 +7,7 @@
     {% if organizations is empty %}
         {{ ui.empty('platform.no_organizations', 'lucide:building-2') }}
     {% else %}
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="{{ 'platform.organizations'|trans }}">
             <table class="w-full text-left text-sm">
                 <caption class="sr-only">{{ 'platform.organizations'|trans }}</caption>
                 <thead class="text-xs text-slate-500">

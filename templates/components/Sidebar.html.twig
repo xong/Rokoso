@@ -93,7 +93,7 @@
                     <twig:Avatar name="{{ app.user.name }}" image="{{ app.user.avatar }}" size="size-8 text-xs" />
                     <span class="min-w-0 lg:collapsed:sr-only">
                         <span class="block truncate font-medium">{{ app.user.name }}</span>
-                        <span class="block truncate text-xs text-slate-500">{{ 'nav.profile'|trans }}</span>
+                        <span class="block truncate text-xs {{ profile_active ? 'text-brand-700' : 'text-slate-500' }}">{{ 'nav.profile'|trans }}</span>
                     </span>
                 </a>
                 <a href="{{ path('app_logout') }}" class="btn-icon" aria-label="{{ 'nav.logout'|trans }}" title="{{ 'nav.logout'|trans }}" data-turbo="false">

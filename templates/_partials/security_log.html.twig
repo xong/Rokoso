@@ -3,7 +3,7 @@
 {% if events is empty %}
     <p class="text-slate-500">{{ 'security_log.empty'|trans }}</p>
 {% else %}
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto" tabindex="0" role="region" aria-label="{{ 'security_log.title'|trans }}">
         <table class="w-full text-left text-sm">
             <caption class="sr-only">{{ 'security_log.title'|trans }}</caption>
             <thead class="text-xs text-slate-500">

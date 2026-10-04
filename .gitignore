@@ -28,3 +28,6 @@
 
 /public/uploads/
 /var/storage/
+
+# Browser-Treiber für Panther (vendor/bin/bdi detect drivers)
+/drivers/

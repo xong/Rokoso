@@ -32,6 +32,9 @@
 - Dateien: `StoredFile::replaceWith()` legt eine `FileVersion` an (Löschen über `getAllStoragePaths()`); Freigabelinks `FileShare` unter `/s/{token}` (öffentlich); „Merken“ = `ShelfItem::for()` (Datei, Anhang, Nachricht, Forenthema), Zugriff in `Shelf::isAccessible()`; PWA-Teilen-Ziel `ShareTargetController` mit Zwischenablage `FileStorage::storeIncoming()`.
 - Startseite „Heute“: `HomeController`; globale Suche: `App\Search\GlobalSearch` (nutzt die Repository-Sichtbarkeit – neue Bereiche dort ergänzen); Befehlspalette/Kürzel: `templates/_partials/palette.html.twig` + `palette_controller.js`; Live-Badges: `[data-live-count]` + `CountsController` + `live_counts_controller.js`.
 - Sicherheit: `SecurityLog::record()` für sicherheitsrelevante Ereignisse (Typen in `security_log.type.*` übersetzen); `User::renewSessionStamp()` beendet alle Sitzungen; Konto löschen über `AccountDeleter` (neue personenbezogene Tabellen dort ergänzen, ebenso in `AccountExport`); Löschfristen in `RetentionCleaner` (läuft in `app:notify`). Plattform-Admin (`ROLE_PLATFORM_ADMIN`, `app:user:promote`) unter `/admin` (`PlatformAdminController`); Menüpunkte mit `role` werden nur bei passendem Recht gezeigt.
+- Abruf beim Öffnen: `SyncOnOpenListener` (Routen-Liste) → `SyncOnOpen` (Drossel `MAIL_SYNC_INTERVAL`, in Tests 0 = aus); Abrufprobleme über `MailAccount::getSyncProblem()`.
+- Browser-Tests: `tests/Browser` (Panther, `composer test:browser`, eigene `phpunit.browser.xml` ohne DAMA – Daten werden geschrieben, daher eindeutige E-Mails); `AccessibilityTest` prüft mit axe (neue Hauptseiten in `PAGES` ergänzen). Nicht Teil von `composer check`.
+- Docker: `Dockerfile` (FrankenPHP), `docker/entrypoint.sh` (Migrationen), `docker/cron.sh`, Beispiel `compose.prod.yaml`.
 - Keine `sed`/`php -r`-Ersetzungen in PHP-Dateien – Edit-Werkzeug nutzen (Escaping-Fallen).
 
 ## Konventionen

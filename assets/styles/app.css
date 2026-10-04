@@ -57,6 +57,7 @@
         --color-red-700: oklch(0.76 0.14 22);
         --color-red-800: oklch(0.85 0.09 20);
         --color-amber-50: oklch(0.3 0.05 75);
+        --color-amber-200: oklch(0.42 0.08 75);
         --color-amber-800: oklch(0.87 0.11 85);
         --color-emerald-50: oklch(0.29 0.05 165);
         --color-emerald-200: oklch(0.42 0.08 165);

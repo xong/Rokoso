@@ -1,0 +1,73 @@
+# Beispiel für den Betrieb mit Docker (siehe docs/BETRIEB.md).
+# Start: docker compose -f compose.prod.yaml --env-file .env.prod up -d --build
+# .env.prod (nicht einchecken) enthält mindestens APP_SECRET, DB_PASSWORD, DB_ROOT_PASSWORD, SERVER_NAME,
+# DEFAULT_URI, MAILER_DSN, MAILER_FROM, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY.
+x-env: &env
+  APP_SECRET: ${APP_SECRET}
+  DATABASE_URL: mysql://coop:${DB_PASSWORD}@db:3306/coop?serverVersion=11.8.0-MariaDB&charset=utf8mb4
+  DEFAULT_URI: ${DEFAULT_URI}
+  MAILER_DSN: ${MAILER_DSN}
+  MAILER_FROM: ${MAILER_FROM}
+  VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+  VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+  MAIL_SEND_DELAY: ${MAIL_SEND_DELAY:-10}
+  MAIL_SYNC_INTERVAL: ${MAIL_SYNC_INTERVAL:-5}
+
+x-app: &app
+  image: coop:latest
+  restart: unless-stopped
+  environment: *env
+  volumes:
+    - storage:/app/var/storage
+    - uploads:/app/public/uploads
+  depends_on:
+    - db
+
+services:
+  app:
+    <<: *app
+    build: .
+    environment:
+      <<: *env
+      # Domain für automatisches HTTPS (Let's Encrypt), z. B. coop.example.org; ":80" hinter einem Proxy
+      SERVER_NAME: ${SERVER_NAME:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - storage:/app/var/storage
+      - uploads:/app/public/uploads
+      - caddy_data:/data
+      - caddy_config:/config
+
+  cron:
+    <<: *app
+    command: ["coop-cron"]
+    # kein Webserver: der Healthcheck des Images (Caddy) passt hier nicht
+    healthcheck:
+      disable: true
+    environment:
+      <<: *env
+      # Migrationen laufen im app-Container
+      RUN_MIGRATIONS: "0"
+    depends_on:
+      - app
+
+  db:
+    image: mariadb:11.8
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: coop
+      MARIADB_USER: coop
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db:/var/lib/mysql
+
+volumes:
+  storage:
+  uploads:
+  db:
+  caddy_data:
+  caddy_config:
