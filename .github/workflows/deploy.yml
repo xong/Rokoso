@@ -39,6 +39,11 @@ jobs:
           path: ~/.composer/cache
           key: composer-${{ hashFiles('composer.lock') }}
       - run: composer install --prefer-dist --no-progress
+      # Assets wie lokal bauen (var/ und assets/vendor/ sind nicht eingecheckt)
+      - run: |
+          php bin/console importmap:install
+          php bin/console app:js:build
+          php bin/console tailwind:build
       - run: composer check
 
   deploy:
