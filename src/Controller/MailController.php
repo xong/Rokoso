@@ -16,6 +16,7 @@ use App\Mail\MessageHtmlRenderer;
 use App\Mail\ParticipantResolver;
 use App\Mail\ReadTracker;
 use App\Notification\ActivityNotifier;
+use App\Repository\DraftRepository;
 use App\Repository\MailAccountRepository;
 use App\Repository\MessageRepository;
 use App\Repository\ProjectRepository;
@@ -62,7 +63,7 @@ final class MailController extends AbstractController
 
     #[Route('/{folder<inbox|all|sent|done|snoozed|trash>}/{id<\d+>}', name: 'mail_show')]
     #[IsGranted(MessageVoter::VIEW, 'message')]
-    public function show(Request $request, string $folder, Message $message, #[CurrentUser] User $user, MessageHtmlRenderer $renderer, ParticipantResolver $participants): Response
+    public function show(Request $request, string $folder, Message $message, #[CurrentUser] User $user, MessageHtmlRenderer $renderer, ParticipantResolver $participants, DraftRepository $drafts): Response
     {
         $request->attributes->set('_nav', 'mail_'.$folder);
         $this->readTracker->markRead($message, $user);
@@ -76,6 +77,7 @@ final class MailController extends AbstractController
             'has_external_images' => $message->hasHtml() && $renderer->hasExternalImages($message),
             'load_images' => $request->query->getBoolean('images'),
             'candidates' => $participants->candidates($message),
+            'writers' => $drafts->findOtherWriters($message, $user),
             'message_projects' => $participants->projects($message),
             'open' => $request->query->getString('open'),
             'thread' => $this->messages->findThread($message, $user),

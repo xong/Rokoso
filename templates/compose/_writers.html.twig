@@ -1,0 +1,7 @@
+{# Hinweis: andere schreiben gerade eine Antwort auf diese Nachricht (offener Entwurf) #}
+{% if writers is defined and writers is not empty %}
+    <p role="status" class="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
+        {{ ux_icon('lucide:file-pen-line', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+        {{ 'compose.writing'|trans({'%names%': writers|map(u => u.name)|join(', '), '%count%': writers|length}) }}
+    </p>
+{% endif %}

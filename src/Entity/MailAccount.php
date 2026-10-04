@@ -77,6 +77,10 @@ class MailAccount
     #[Assert\NotBlank]
     private string $inboxFolder = 'INBOX';
 
+    /** IMAP folder that receives a copy of every mail sent from Coop (null = no copy). */
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $sentFolder = null;
+
     /** Only messages newer than this many days are imported on the first sync. */
     #[ORM\Column]
     #[Assert\Range(min: 1, max: 3650)]
@@ -286,6 +290,18 @@ class MailAccount
     public function setInboxFolder(?string $inboxFolder): static
     {
         $this->inboxFolder = trim((string) $inboxFolder);
+
+        return $this;
+    }
+
+    public function getSentFolder(): ?string
+    {
+        return $this->sentFolder;
+    }
+
+    public function setSentFolder(?string $sentFolder): static
+    {
+        $this->sentFolder = '' === trim((string) $sentFolder) ? null : trim((string) $sentFolder);
 
         return $this;
     }

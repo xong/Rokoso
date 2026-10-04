@@ -58,6 +58,7 @@
         <article class="flex min-w-0 flex-1 flex-col" aria-labelledby="detail-heading">
             {# Kopfdaten #}
             <div class="space-y-3 border-b border-slate-200 p-4">
+                {{ include('compose/_writers.html.twig') }}
                 <div class="flex items-start gap-3">
                     {% if message.internal and message.author %}
                         <twig:Avatar name="{{ message.author.name }}" image="{{ message.author.avatar }}" size="size-10 text-sm" />

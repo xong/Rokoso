@@ -22,17 +22,32 @@ final class MarkdownRenderer
 {
     private ?MarkdownConverter $converter = null;
 
+    private ?MarkdownConverter $emailConverter = null;
+
     public function render(string $markdown): string
     {
         return $this->converter()->convert($markdown)->getContent();
     }
 
+    /**
+     * HTML part of an email: like render(), but single line breaks stay line breaks (as in the text part).
+     */
+    public function renderEmail(string $markdown): string
+    {
+        $this->emailConverter ??= $this->createConverter(true);
+
+        return $this->emailConverter->convert($markdown)->getContent();
+    }
+
     private function converter(): MarkdownConverter
     {
-        if (null !== $this->converter) {
-            return $this->converter;
-        }
+        return $this->converter ??= $this->createConverter(false);
+    }
+
+    private function createConverter(bool $hardBreaks): MarkdownConverter
+    {
         $environment = new Environment([
+            'renderer' => ['soft_break' => $hardBreaks ? "<br>\n" : "\n"],
             'html_input' => 'escape',
             'allow_unsafe_links' => false,
             'max_nesting_level' => 50,
@@ -49,7 +64,7 @@ final class MarkdownRenderer
         $environment->addExtension(new ExternalLinkExtension());
         $environment->addEventListener(DocumentParsedEvent::class, self::replaceExternalImages(...));
 
-        return $this->converter = new MarkdownConverter($environment);
+        return new MarkdownConverter($environment);
     }
 
     private static function replaceExternalImages(DocumentParsedEvent $event): void

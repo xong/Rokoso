@@ -87,6 +87,31 @@
             </section>
         {% endif %}
 
+        <section aria-labelledby="snippets-heading">
+            <div class="mb-3 flex items-center justify-between gap-2">
+                <h3 id="snippets-heading" class="font-semibold">{{ 'snippet.title'|trans }}</h3>
+                <a href="{{ path('snippet_new', {id: organization.id}) }}" class="btn-secondary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'snippet.new'|trans }}</a>
+            </div>
+            {% if snippets is empty %}
+                <p class="text-slate-500">{{ 'snippet.none'|trans }}</p>
+            {% else %}
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for snippet in snippets %}
+                        <li class="flex items-center gap-3 px-4 py-3">
+                            {{ ux_icon('lucide:text-quote', {class: 'size-5 text-slate-400', 'aria-hidden': 'true'}) }}
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate font-medium">{{ snippet.title }}</p>
+                                <p class="truncate text-xs text-slate-500">{{ snippet.body|length > 100 ? snippet.body|slice(0, 100) ~ '…' : snippet.body }}</p>
+                            </div>
+                            <a href="{{ path('snippet_edit', {id: snippet.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}: {{ snippet.title }}" title="{{ 'action.edit'|trans }}">
+                                {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
+
         <section aria-labelledby="projects-heading">
             <div class="mb-3 flex items-center justify-between gap-2">
                 <h3 id="projects-heading" class="font-semibold">{{ 'nav.projects'|trans }}</h3>

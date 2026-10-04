@@ -6,28 +6,122 @@
 {% block title %}{{ heading|trans }}{% endblock %}
 {% block detail_title %}{{ heading|trans }}{% endblock %}
 
+{% block detail_actions %}
+    <a href="{{ path('mail_drafts') }}" class="btn-icon" aria-label="{{ 'nav.mail_drafts'|trans }}" title="{{ 'nav.mail_drafts'|trans }}">{{ ux_icon('lucide:file-pen-line', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+    <a href="{{ path('mail_signatures') }}" class="btn-icon" aria-label="{{ 'signature.title'|trans }}" title="{{ 'signature.title'|trans }}">{{ ux_icon('lucide:signature', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
+{% endblock %}
+
+{# Eingabefeld mit Vorschlägen aus Kontakten und Mitgliedern (Combobox) #}
+{% macro address_row(field, recipients) %}
+    <div class="relative" data-controller="recipients"
+         data-recipients-options-value="{{ recipients|json_encode }}"
+         data-recipients-count-value="{{ 'notification.mention.count'|trans }}">
+        {{ form_row(field, {attr: field.vars.attr|merge({
+            role: 'combobox',
+            'data-recipients-target': 'input',
+            'data-action': 'input->recipients#update keydown->recipients#key blur->recipients#close',
+        })}) }}
+        <ul role="listbox" hidden data-recipients-target="list" aria-label="{{ 'compose.suggestions'|trans }}"
+            class="absolute inset-x-0 top-full z-30 -mt-3 max-h-60 overflow-y-auto rounded-md bg-surface py-1 text-sm shadow-lg ring-1 ring-slate-200"></ul>
+        <p class="sr-only" role="status" data-recipients-target="status"></p>
+    </div>
+{% endmacro %}
+
 {% block detail %}
+    {% import _self as compose %}
     <div class="mx-auto max-w-3xl p-4 lg:p-6">
         {% if original %}
             <p class="mb-4 flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-600">
                 {{ ux_icon(is_forward ? 'lucide:forward' : 'lucide:reply', {class: 'size-4', 'aria-hidden': 'true'}) }}
                 <a class="link truncate" href="{{ path('mail_show', {folder: original.folder.value == 'sent' ? 'sent' : 'inbox', id: original.id}) }}">{{ original.subject ?: 'mail.no_subject'|trans }}</a>
             </p>
+            <div class="mb-4">{{ include('compose/_writers.html.twig') }}</div>
+        {% endif %}
+        {% if draft and draft.sendError %}
+            <p role="alert" class="mb-4 flex items-center gap-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 ring-1 ring-red-200">
+                {{ ux_icon('lucide:circle-alert', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ 'compose.failed'|trans({'%error%': draft.sendError}) }}
+            </p>
         {% endif %}
 
-        {{ form_start(form) }}
+        {{ form_start(form, {attr: {
+            'data-controller': 'autosave signature',
+            'data-autosave-saved-value': 'compose.autosaved'|trans,
+            'data-autosave-failed-value': 'compose.autosave_failed'|trans,
+            'data-signature-signatures-value': signatures|json_encode,
+            'data-action': 'input->autosave#changed change->autosave#changed submit->autosave#submit',
+        }}) }}
             {{ form_errors(form) }}
-            {{ form_row(form.account) }}
-            {{ form_row(form.to) }}
+            {{ form_row(form.account, {attr: {'data-signature-target': 'account', 'data-action': 'signature#swap'}}) }}
+            {{ compose.address_row(form.to, recipients) }}
             <details class="mb-4" {{ form.cc.vars.value or form.bcc.vars.value ? 'open' }}>
                 <summary class="link cursor-pointer text-sm">{{ 'compose.cc_bcc'|trans }}</summary>
                 <div class="mt-3 grid gap-x-4 sm:grid-cols-2">
-                    {{ form_row(form.cc) }}
-                    {{ form_row(form.bcc) }}
+                    {{ compose.address_row(form.cc, recipients) }}
+                    {{ compose.address_row(form.bcc, recipients) }}
                 </div>
             </details>
             {{ form_row(form.subject) }}
-            {{ form_row(form.body) }}
+
+            {# Text (Markdown) mit Werkzeugleiste und Textbausteinen #}
+            <div data-controller="markdown-toolbar">
+                <div class="mb-1 flex flex-wrap items-center gap-2">
+                    <div role="toolbar" aria-label="{{ 'compose.toolbar'|trans }}" aria-controls="{{ form.body.vars.id }}"
+                         class="flex flex-wrap items-center gap-0.5 rounded-md ring-1 ring-slate-200"
+                         data-action="keydown->markdown-toolbar#navigate">
+                        {% for tool in [
+                            {action: 'wrap', icon: 'lucide:bold', label: 'compose.format.bold', params: {before: '**', after: '**'}},
+                            {action: 'wrap', icon: 'lucide:italic', label: 'compose.format.italic', params: {before: '_', after: '_'}},
+                            {action: 'prefix', icon: 'lucide:heading', label: 'compose.format.heading', params: {prefix: '## '}},
+                            {action: 'prefix', icon: 'lucide:list', label: 'compose.format.list', params: {prefix: '- '}},
+                            {action: 'prefix', icon: 'lucide:list-ordered', label: 'compose.format.ordered', params: {prefix: '1. '}},
+                            {action: 'prefix', icon: 'lucide:quote', label: 'compose.format.quote', params: {prefix: '> '}},
+                            {action: 'link', icon: 'lucide:link', label: 'compose.format.link', params: {}},
+                        ] %}
+                            <button type="button" class="btn-icon size-8" tabindex="{{ loop.first ? 0 : -1 }}"
+                                    aria-label="{{ tool.label|trans }}" title="{{ tool.label|trans }}"
+                                    data-action="markdown-toolbar#{{ tool.action }}"
+                                    {% for name, value in tool.params %}data-markdown-toolbar-{{ name }}-param="{{ value }}" {% endfor %}>
+                                {{ ux_icon(tool.icon, {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                    {% if snippets is not empty %}
+                        <div class="ml-auto flex items-center gap-1">
+                            <label for="compose-snippet" class="sr-only">{{ 'snippet.title'|trans }}</label>
+                            <select id="compose-snippet" class="input w-auto py-1 text-sm" data-markdown-toolbar-target="snippet">
+                                <option value="">{{ 'snippet.choose'|trans }}</option>
+                                {% for snippet in snippets %}
+                                    {% if loop.first or snippet.organization != loop.parent.snippets[loop.index0 - 1].organization %}
+                                        {% if not loop.first %}</optgroup>{% endif %}
+                                        <optgroup label="{{ snippet.organization.name }}">
+                                    {% endif %}
+                                    <option value="{{ snippet.body }}">{{ snippet.title }}</option>
+                                    {% if loop.last %}</optgroup>{% endif %}
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="btn-secondary py-1" data-action="markdown-toolbar#insertSnippet">{{ 'snippet.insert'|trans }}</button>
+                        </div>
+                    {% endif %}
+                </div>
+                {{ form_row(form.body, {attr: form.body.vars.attr|merge({
+                    'data-markdown-toolbar-target': 'input',
+                    'data-signature-target': 'input',
+                    'data-action': 'keydown->markdown-toolbar#shortcut',
+                })}) }}
+            </div>
+
+            {% if draft and draft.files is not empty %}
+                <fieldset class="mb-4">
+                    <legend class="label">{{ 'compose.stored_files'|trans }}</legend>
+                    {% for index, file in draft.files %}
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" name="keep_files[]" value="{{ index }}" checked>
+                            {{ file.name }} <span class="text-slate-500">({{ (file.size / 1024)|round(0, 'ceil') }} KB)</span>
+                        </label>
+                    {% endfor %}
+                </fieldset>
+            {% endif %}
             <div class="grid gap-x-4 sm:grid-cols-2">
                 {{ form_row(form.files) }}
                 {{ form_row(form.project) }}
@@ -43,10 +137,15 @@
             {% if form.keepAttachments is defined %}
                 {{ form_row(form.keepAttachments, {help: original.visibleAttachments|map(a => a.filename)|join(', ')}) }}
             {% endif %}
+            {{ form_row(form.draft, {attr: {'data-autosave-target': 'draft'}}) }}
             {{ form_rest(form) }}
-            <div class="flex gap-2">
+            <div class="flex flex-wrap items-center gap-2">
                 <button type="submit" class="btn-primary">{{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'compose.send'|trans }}</button>
-                <a href="{{ original ? path('mail_show', {folder: 'inbox', id: original.id}) : path('mail_inbox') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+                <button type="submit" name="save_draft" value="1" class="btn-secondary" formnovalidate>{{ ux_icon('lucide:save', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'compose.save_draft'|trans }}</button>
+                <a href="{{ original ? path('mail_show', {folder: original.folder.value == 'sent' ? 'sent' : 'inbox', id: original.id}) : path('mail_inbox') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+                <p class="ml-auto text-xs text-slate-500" role="status" data-autosave-target="status">
+                    {% if draft %}{{ 'compose.autosaved'|trans({'%time%': draft.updatedAt|date('H:i', 'Europe/Berlin')}) }}{% endif %}
+                </p>
             </div>
         {{ form_end(form) }}
     </div>

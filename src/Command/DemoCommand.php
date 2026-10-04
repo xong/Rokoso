@@ -8,6 +8,7 @@ use App\Entity\AgendaItem;
 use App\Entity\Attendance;
 use App\Entity\CalendarItem;
 use App\Entity\Contact;
+use App\Entity\Draft;
 use App\Entity\Folder;
 use App\Entity\ForumBoard;
 use App\Entity\ForumPost;
@@ -24,6 +25,8 @@ use App\Entity\PollBallot;
 use App\Entity\PollOption;
 use App\Entity\Project;
 use App\Entity\Resolution;
+use App\Entity\Signature;
+use App\Entity\TextSnippet;
 use App\Entity\User;
 use App\Entity\Watch;
 use App\Entity\WikiPage;
@@ -37,6 +40,7 @@ use App\Enum\OrganizationRole;
 use App\Enum\PollKind;
 use App\Enum\Recurrence;
 use App\Enum\TaskStatus;
+use App\Mail\ComposeData;
 use App\Mail\MailSynchronizer;
 use App\Meeting\MeetingService;
 use App\Repository\UserRepository;
@@ -165,6 +169,7 @@ final readonly class DemoCommand
             $this->em->persist($account);
             $this->em->persist((new MailRule($org))->setName('Rundbrief Landeselternrat')->setField(MailRuleField::From)
                 ->setNeedle('newsletter@')->setMarkDone(true));
+            $this->createWritingAids($org, $account, $user, $colleague);
             $this->em->flush();
             $io->success('Demo angelegt: demo@coop.test / demo-passwort (und kim@coop.test, Gast schule@coop.test)');
         }
@@ -199,9 +204,46 @@ final readonly class DemoCommand
 
         foreach ($this->em->getRepository(MailAccount::class)->findBy(['emailAddress' => 'sev@coop.test']) as $account) {
             $io->writeln(\sprintf('Abruf: %d neue E-Mail(s)%s', $this->synchronizer->sync($account), $account->getLastSyncError() ? ' – Fehler: '.$account->getLastSyncError() : ''));
+            // Kim is answering the question about the zebra crossing: the hint "is writing" shows up for Dana
+            $question = $this->em->getRepository(Message::class)->findOneBy(['mailAccount' => $account, 'subject' => 'Zebrastreifen an der Grundschule Nord']);
+            $kim = $this->users->findOneByEmail('kim@coop.test');
+            if (null !== $question && null !== $kim && 0 === $this->em->getRepository(Draft::class)->count(['original' => $question])) {
+                $reply = new ComposeData();
+                $reply->account = $account;
+                $reply->original = $question;
+                $reply->to = $question->getFromAddress();
+                $reply->subject = 'Re: '.$question->getSubject();
+                $reply->body = "Hallo Eva,\n\nwir haben das Thema beim Ordnungsamt angesprochen …";
+                $this->em->persist((new Draft($kim, $account))->apply($reply));
+                $this->em->flush();
+            }
         }
 
         return 0;
+    }
+
+    /**
+     * Signature for Dana, a few text snippets and an unfinished draft.
+     */
+    private function createWritingAids(Organization $org, MailAccount $account, User $user, User $colleague): void
+    {
+        $signature = "Dana Demo\nVorsitz · SEV Musterstadt\nhttps://sev.example.org";
+        $this->em->persist((new Signature($user, $account))->setBody($signature));
+        $this->em->persist((new Signature($colleague, $account))->setBody("Kim Kollegin\nSchriftführung · SEV Musterstadt"));
+        foreach ([
+            'Eingangsbestätigung' => 'vielen Dank für Ihre Nachricht. Wir haben sie erhalten und melden uns, sobald wir uns im Vorstand abgestimmt haben.',
+            'Einladung Sitzung' => "hiermit laden wir herzlich zur nächsten Sitzung der Stadtelternvertretung ein.\n\n- **Ort:** Rathaus, Raum 2\n- **Beginn:** 19:00 Uhr\n\nDie Tagesordnung folgt gesondert.",
+            'Datenschutzhinweis' => '_Ihre Angaben verwenden wir ausschließlich für die Arbeit der Stadtelternvertretung und geben sie nicht an Dritte weiter._',
+        ] as $title => $body) {
+            $this->em->persist((new TextSnippet($org))->setTitle($title)->setBody($body));
+        }
+
+        $draft = new ComposeData();
+        $draft->account = $account;
+        $draft->to = 'Schulamt Musterstadt <info@schulamt.example.org>';
+        $draft->subject = 'Termin Gesamtelternbeirat';
+        $draft->body = "Sehr geehrte Damen und Herren,\n\n\n\n-- \n".$signature."\n";
+        $this->em->persist((new Draft($user, $account))->apply($draft));
     }
 
     /**

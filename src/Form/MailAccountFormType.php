@@ -47,6 +47,7 @@ final class MailAccountFormType extends AbstractType
                 'attr' => ['autocomplete' => 'new-password'],
             ])
             ->add('inboxFolder', TextType::class, ['label' => 'mail_account.inbox_folder'])
+            ->add('sentFolder', TextType::class, ['label' => 'mail_account.sent_folder', 'required' => false, 'help' => 'mail_account.sent_folder_help', 'attr' => ['placeholder' => 'Sent']])
             ->add('importDays', IntegerType::class, ['label' => 'mail_account.import_days', 'help' => 'mail_account.import_days_help'])
             ->add('smtpHost', TextType::class, ['label' => 'mail_account.host', 'attr' => ['placeholder' => 'smtp.example.org']])
             ->add('smtpPort', IntegerType::class, ['label' => 'mail_account.port'])

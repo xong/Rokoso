@@ -1,0 +1,31 @@
+{% extends 'layout/app.html.twig' %}
+
+{% set show_list = false %}
+
+{% block title %}{{ 'signature.title'|trans }}{% endblock %}
+{% block detail_title %}{{ 'signature.title'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-3xl p-4 lg:p-6">
+        <p class="mb-6 text-sm text-slate-600">{{ 'signature.intro'|trans }}</p>
+        {% if accounts is empty %}
+            <p class="text-slate-500">{{ 'compose.no_account'|trans }}</p>
+        {% else %}
+            <form method="post" action="{{ path('mail_signatures') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('signatures') }}">
+                {% for account in accounts %}
+                    <div class="mb-4">
+                        <label for="signature-{{ account.id }}" class="label">{{ account.name }} &lt;{{ account.emailAddress }}&gt;</label>
+                        <textarea id="signature-{{ account.id }}" name="signature[{{ account.id }}]" rows="4" class="input"
+                                  aria-describedby="signature-help">{{ signatures[account.id] ?? '' }}</textarea>
+                    </div>
+                {% endfor %}
+                <p id="signature-help" class="mb-4 text-xs text-slate-500">{{ 'signature.help'|trans }}</p>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                    <a href="{{ path('mail_drafts') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

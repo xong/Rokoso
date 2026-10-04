@@ -19,6 +19,7 @@ nav:
     mail_inbox: Eingang
     mail_all: Alle E-Mails
     mail_sent: Ausgang
+    mail_drafts: Entwürfe
     mail_done: Erledigt
     mail_snoozed: Wiedervorlage
     mail_trash: Papierkorb
@@ -358,6 +359,8 @@ mail_account:
     inbox_folder: Ordner
     import_days: Erster Abruf (Tage)
     import_days_help: Beim ersten Abruf werden E-Mails der letzten so vielen Tage übernommen.
+    sent_folder: Ordner für gesendete E-Mails
+    sent_folder_help: Leer lassen, wenn gesendete E-Mails nicht auf dem Server abgelegt werden sollen (z. B. „Sent“ oder „Gesendet“).
     enabled: Konto aktiv (wird regelmäßig abgerufen)
     test: Verbindung testen
     test_ok: '%protocol%: Verbindung erfolgreich.'
@@ -553,6 +556,52 @@ compose:
     no_account: Zum Schreiben brauchst du ein E-Mail-Konto in einer deiner Organisationen.
     reply_header: 'Am %date% schrieb %from%:'
     forward_header: "---------- Weitergeleitete Nachricht ----------\nVon: %from%\nDatum: %date%\nBetreff: %subject%"
+    body_help: 'Markdown möglich: **fett**, _kursiv_, Listen mit „-“, Links. Empfänger erhalten Text und formatierte Fassung.'
+    draft_saved: Entwurf gespeichert.
+    draft_deleted: Entwurf gelöscht.
+    cancelled: Senden abgebrochen – die E-Mail liegt wieder als Entwurf vor.
+    cancel_too_late: Die E-Mail ist bereits verschickt.
+    queued: '{1} E-Mail wird in einer Sekunde gesendet.|]1,Inf[ E-Mail wird in %count% Sekunden gesendet.'
+    queued_title: Wird gleich gesendet
+    writing: '{1} %names% schreibt gerade eine Antwort auf diese Nachricht.|]1,Inf[ %names% schreiben gerade Antworten auf diese Nachricht.'
+    autosaved: 'Entwurf gespeichert um %time%'
+    autosave_failed: Entwurf konnte nicht automatisch gespeichert werden.
+    save_draft: Als Entwurf speichern
+    stored_files: Bereits angehängt
+    suggestions: Adressvorschläge
+    toolbar: Formatierung
+    format:
+        bold: Fett (Strg+B)
+        italic: Kursiv (Strg+I)
+        heading: Überschrift
+        list: Aufzählung
+        ordered: Nummerierte Liste
+        quote: Zitat
+        link: Link
+    no_drafts: Keine Entwürfe.
+    draft_to: 'An: %to%'
+    draft_no_recipient: Noch kein Empfänger
+    draft_delete: Entwurf löschen
+    draft_delete_confirm: Entwurf und seine Anhänge löschen?
+
+signature:
+    title: Signaturen
+    intro: Die Signatur wird beim Schreiben über dem zitierten Text eingefügt – je E-Mail-Konto eine eigene.
+    help: Leer lassen, wenn du für dieses Konto keine Signatur möchtest.
+    saved: Signaturen gespeichert.
+
+snippet:
+    title: Textbausteine
+    new: Textbaustein anlegen
+    edit: Textbaustein bearbeiten
+    none: Noch keine Textbausteine.
+    name: Bezeichnung
+    body: Text
+    intro: Textbausteine stehen allen Mitgliedern beim Schreiben von E-Mails zur Verfügung.
+    choose: Textbaustein wählen …
+    insert: Einfügen
+    deleted: Textbaustein gelöscht.
+    delete_confirm: Textbaustein wirklich löschen?
 
 internal:
     intro: Interne Nachrichten bleiben in Coop und erscheinen bei den Empfängern im Eingang – wie E-Mails, mit Kommentaren und Verantwortlichen.

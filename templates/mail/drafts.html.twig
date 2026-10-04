@@ -1,0 +1,70 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set show_list = false %}
+
+{% block title %}{{ 'nav.mail_drafts'|trans }}{% endblock %}
+{% block detail_title %}{{ 'nav.mail_drafts'|trans }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('mail_signatures') }}" class="btn-secondary">{{ ux_icon('lucide:signature', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'signature.title'|trans }}</a>
+    <a href="{{ path('mail_compose') }}" class="btn-primary">{{ ux_icon('lucide:square-pen', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'nav.mail_compose'|trans }}</a>
+{% endblock %}
+
+{% macro draft_row(draft) %}
+    <div class="min-w-0 flex-1">
+        <a href="{{ path('mail_compose', {draft: draft.id}) }}" class="link block truncate font-medium">{{ draft.subject ?: 'mail.no_subject'|trans }}</a>
+        <p class="truncate text-xs text-slate-500">
+            {{ draft.to ? 'compose.draft_to'|trans({'%to%': draft.to}) : 'compose.draft_no_recipient'|trans }}
+            · {{ draft.account.name }}
+            {% if draft.original %}· {{ (draft.forward ? 'compose.title_forward' : 'compose.title_reply')|trans }}{% endif %}
+        </p>
+        {% if draft.sendError %}
+            <p class="mt-1 flex items-center gap-1 text-xs text-red-700">
+                {{ ux_icon('lucide:circle-alert', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                {{ 'compose.failed'|trans({'%error%': draft.sendError}) }}
+            </p>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% block detail %}
+    {% import _self as list %}
+    <div class="mx-auto max-w-3xl space-y-8 p-4 lg:p-6">
+        {% if queued is not empty %}
+            <section aria-labelledby="queued-heading">
+                <h2 id="queued-heading" class="mb-3 font-semibold">{{ 'compose.queued_title'|trans }}</h2>
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for draft in queued %}
+                        <li class="flex items-center gap-3 px-4 py-3">
+                            {{ ux_icon('lucide:send', {class: 'size-5 text-slate-400', 'aria-hidden': 'true'}) }}
+                            {{ list.draft_row(draft) }}
+                            <form method="post" action="{{ path('mail_draft_cancel', {id: draft.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('draft-cancel') }}">
+                                <button type="submit" class="btn-secondary">{{ ux_icon('lucide:undo-2', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'action.undo'|trans }}</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        <section aria-labelledby="drafts-heading">
+            <h2 id="drafts-heading" class="sr-only">{{ 'nav.mail_drafts'|trans }}</h2>
+            {% if drafts is empty %}
+                {{ ui.empty('compose.no_drafts', 'lucide:file-pen-line') }}
+            {% else %}
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for draft in drafts %}
+                        <li class="flex items-center gap-3 px-4 py-3">
+                            {{ ux_icon('lucide:file-pen-line', {class: 'size-5 text-slate-400', 'aria-hidden': 'true'}) }}
+                            {{ list.draft_row(draft) }}
+                            <span class="hidden text-xs whitespace-nowrap text-slate-500 sm:inline"><time datetime="{{ draft.updatedAt|date('c') }}">{{ draft.updatedAt|date('d.m.Y H:i') }}</time></span>
+                            {{ ui.post_button(path('mail_draft_delete', {id: draft.id}), 'draft-delete', 'compose.draft_delete', {class: 'btn-icon', icon: 'lucide:trash-2', icon_only: true, confirm: 'compose.draft_delete_confirm'}) }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

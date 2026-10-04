@@ -1,8 +1,11 @@
 import { Controller } from '@hotwired/stimulus';
 
-/* Blendet Kurzmeldungen nach einigen Sekunden aus (nicht, solange Maus oder Fokus darin sind). */
+/*
+ * Blendet Kurzmeldungen nach einigen Sekunden aus (nicht, solange Maus oder Fokus darin sind).
+ * ping: URL, die danach per POST angestoßen wird (z. B. Versand nach "Senden rückgängig").
+ */
 export default class extends Controller {
-    static values = { delay: { type: Number, default: 6000 } };
+    static values = { delay: { type: Number, default: 6000 }, ping: String };
 
     connect() {
         this.start();
@@ -18,7 +21,11 @@ export default class extends Controller {
 
     start = () => {
         this.stop();
-        this.timeout = setTimeout(() => this.element.remove(), this.delayValue);
+        this.timeout = setTimeout(() => {
+            const ping = this.pingValue;
+            this.element.remove();
+            if (ping) setTimeout(() => fetch(ping, { method: 'POST' }).catch(() => {}), 1500);
+        }, this.delayValue);
     };
 
     stop = () => {

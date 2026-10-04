@@ -12,6 +12,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -36,7 +37,8 @@ final class ComposeFormType extends AbstractType
             ->add('cc', TextType::class, ['label' => 'compose.cc', 'empty_data' => '', 'required' => false, 'attr' => ['autocomplete' => 'off']])
             ->add('bcc', TextType::class, ['label' => 'compose.bcc', 'empty_data' => '', 'required' => false, 'attr' => ['autocomplete' => 'off']])
             ->add('subject', TextType::class, ['label' => 'compose.subject', 'empty_data' => '', 'required' => false])
-            ->add('body', TextareaType::class, ['label' => 'compose.body', 'empty_data' => '', 'required' => false, 'attr' => ['rows' => 14, 'class' => 'font-mono']])
+            ->add('body', TextareaType::class, ['label' => 'compose.body', 'empty_data' => '', 'required' => false, 'help' => 'compose.body_help', 'attr' => ['rows' => 16]])
+            ->add('draft', HiddenType::class, ['mapped' => false, 'data' => $options['draft_id']])
             ->add('files', FileType::class, [
                 'label' => 'compose.attachments',
                 'mapped' => false,
@@ -76,7 +78,9 @@ final class ComposeFormType extends AbstractType
             'projects' => [],
             'forward_attachments' => false,
             'shelf' => [],
+            'draft_id' => null,
         ]);
+        $resolver->setAllowedTypes('draft_id', ['null', 'int']);
         $resolver->setAllowedTypes('shelf', 'array');
         $resolver->setAllowedTypes('accounts', 'array');
         $resolver->setAllowedTypes('projects', 'array');

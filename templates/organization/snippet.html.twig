@@ -1,0 +1,28 @@
+{% extends 'organization/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+{% set heading = snippet.id ? 'snippet.edit' : 'snippet.new' %}
+
+{% block title %}{{ heading|trans }}{% endblock %}
+{% block detail_title %}{{ heading|trans }} · {{ organization.name }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        <p class="mb-6 text-sm text-slate-600">{{ 'snippet.intro'|trans }}</p>
+        {{ form_start(form) }}
+            {{ form_row(form.title) }}
+            {{ form_row(form.body) }}
+            {{ form_rest(form) }}
+            <div class="flex flex-wrap gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ path('organization_show', {id: organization.id}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+        {% if snippet.id %}
+            <div class="mt-8 border-t border-slate-200 pt-4">
+                {{ ui.post_button(path('snippet_delete', {id: snippet.id}), 'snippet-delete', 'action.delete', {class: 'btn-danger', icon: 'lucide:trash-2', confirm: 'snippet.delete_confirm'}) }}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

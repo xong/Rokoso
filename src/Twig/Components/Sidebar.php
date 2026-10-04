@@ -37,6 +37,7 @@ final class Sidebar
                 ['label' => 'nav.mail_snoozed', 'icon' => 'lucide:alarm-clock', 'route' => 'mail_snoozed'],
                 ['label' => 'nav.mail_done', 'icon' => 'lucide:circle-check', 'route' => 'mail_done'],
                 ['label' => 'nav.mail_sent', 'icon' => 'lucide:send', 'route' => 'mail_sent'],
+                ['label' => 'nav.mail_drafts', 'icon' => 'lucide:file-pen-line', 'route' => 'mail_drafts'],
                 ['label' => 'nav.mail_trash', 'icon' => 'lucide:trash-2', 'route' => 'mail_trash'],
                 ['label' => 'nav.mail_compose', 'icon' => 'lucide:square-pen', 'route' => 'mail_compose'],
                 ['label' => 'nav.mail_message', 'icon' => 'lucide:message-square-plus', 'route' => 'mail_message_new'],

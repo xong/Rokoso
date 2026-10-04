@@ -8,6 +8,7 @@ use App\Entity\Invitation;
 use App\Entity\Membership;
 use App\Entity\Organization;
 use App\Entity\Project;
+use App\Entity\TextSnippet;
 use App\Entity\User;
 use App\Enum\OrganizationRole;
 use App\Form\InvitationFormType;
@@ -94,6 +95,7 @@ final class OrganizationController extends AbstractController
             'mail_accounts' => $mailAccounts->findForOrganization($organization),
             'mail_rules' => $mailRules->findForOrganization($organization),
             'org_projects' => $projects->findBy(['organization' => $organization], ['name' => 'ASC']),
+            'snippets' => $this->em->getRepository(TextSnippet::class)->findBy(['organization' => $organization], ['title' => 'ASC']),
         ]);
     }
 

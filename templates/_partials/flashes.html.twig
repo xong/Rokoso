@@ -2,12 +2,13 @@
 {% set flashes = app.flashes %}
 {% if flashes is not empty %}
     <div role="status" aria-live="polite" class="pointer-events-none fixed inset-x-0 top-3 z-[60] flex flex-col items-center gap-2 px-3"
-         data-controller="flash" {% if flashes.undo is defined %}data-flash-delay-value="10000"{% endif %}>
+         data-controller="flash" {% if flashes.undo is defined %}data-flash-delay-value="10000"{% endif %}
+         {% if flashes.outbox is defined %}data-flash-delay-value="{{ (flashes.outbox|first).seconds * 1000 }}" data-flash-ping-value="{{ path('mail_outbox_flush') }}"{% endif %}>
         {% for type, messages in flashes %}
             {% for message in messages %}
                 <div class="pointer-events-auto flex max-w-md items-start gap-2 rounded-lg px-4 py-3 text-sm shadow-lg ring-1
-                            {{ type == 'error' ? 'bg-red-50 text-red-800 ring-red-200' : (type in ['success', 'undo'] ? 'bg-emerald-50 text-emerald-800 ring-emerald-200' : 'bg-surface text-slate-800 ring-slate-200') }}">
-                    {{ ux_icon(type == 'error' ? 'lucide:circle-alert' : (type in ['success', 'undo'] ? 'lucide:circle-check' : 'lucide:info'), {class: 'mt-0.5 size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ type == 'error' ? 'bg-red-50 text-red-800 ring-red-200' : (type in ['success', 'undo', 'outbox'] ? 'bg-emerald-50 text-emerald-800 ring-emerald-200' : 'bg-surface text-slate-800 ring-slate-200') }}">
+                    {{ ux_icon(type == 'error' ? 'lucide:circle-alert' : (type == 'outbox' ? 'lucide:send' : (type in ['success', 'undo'] ? 'lucide:circle-check' : 'lucide:info')), {class: 'mt-0.5 size-4 shrink-0', 'aria-hidden': 'true'}) }}
                     {% if type == 'undo' %}
                         <p>{{ message.text|trans({'%count%': message.count}) }}</p>
                         <form method="post" action="{{ path('mail_action') }}" class="-my-1">
@@ -17,6 +18,12 @@
                             <input type="hidden" name="redirect" value="{{ app.request.requestUri }}">
                             {% if message.project %}<input type="hidden" name="project" value="{{ message.project }}">{% endif %}
                             {% for id in message.ids %}<input type="hidden" name="ids[]" value="{{ id }}">{% endfor %}
+                            <button type="submit" class="rounded px-2 py-1 font-semibold underline hover:bg-slate-900/10">{{ 'action.undo'|trans }}</button>
+                        </form>
+                    {% elseif type == 'outbox' %}
+                        <p>{{ 'compose.queued'|trans({'%count%': message.seconds}) }}</p>
+                        <form method="post" action="{{ path('mail_draft_cancel', {id: message.id}) }}" class="-my-1">
+                            <input type="hidden" name="_token" value="{{ csrf_token('draft-cancel') }}">
                             <button type="submit" class="rounded px-2 py-1 font-semibold underline hover:bg-slate-900/10">{{ 'action.undo'|trans }}</button>
                         </form>
                     {% else %}

@@ -13,9 +13,9 @@ use Webklex\PHPIMAP\Connection\Protocols\ImapProtocol;
 
 /**
  * IMAP access via webklex/php-imap. The folder is opened with EXAMINE (read-only),
- * so fetching never sets the \Seen flag on the server.
+ * so fetching never sets the \Seen flag on the server. The only write is the copy of a sent mail.
  */
-final readonly class ImapMailboxReader implements MailboxReader
+final readonly class ImapMailboxReader implements MailboxReader, SentFolderWriter
 {
     private const int FETCH_CHUNK = 20;
 
@@ -68,6 +68,17 @@ final readonly class ImapMailboxReader implements MailboxReader
         $client = $this->connect($account);
         try {
             $this->protocol($client)->examineFolder($account->getInboxFolder())->validatedData();
+        } finally {
+            $client->disconnect();
+        }
+    }
+
+    public function append(MailAccount $account, string $raw): void
+    {
+        $folder = $account->getSentFolder() ?? throw new \LogicException('No sent folder configured.');
+        $client = $this->connect($account);
+        try {
+            $this->protocol($client)->appendMessage($folder, $raw, ['\Seen'])->validatedData();
         } finally {
             $client->disconnect();
         }
