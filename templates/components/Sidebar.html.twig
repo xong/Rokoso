@@ -4,7 +4,7 @@
             max-lg:nav-open:visible max-lg:nav-open:translate-x-0
             lg:w-[20vw] lg:min-w-52 lg:max-w-80 lg:collapsed:w-16 lg:collapsed:min-w-16">
     <div class="flex h-14 items-center gap-2 border-b border-slate-200 px-4 lg:collapsed:justify-center lg:collapsed:px-0">
-        <span class="grid size-8 shrink-0 place-items-center rounded-lg bg-brand-600 text-xs font-bold text-white" aria-hidden="true">{{ 'app.short_name'|trans }}</span>
+        {{ include('_partials/logo.html.twig', {class: 'size-8 shrink-0'}) }}
         <span class="truncate font-semibold lg:collapsed:sr-only">{{ 'app.name'|trans }}</span>
         <button type="button" data-action="shell#close" aria-label="{{ 'nav.close'|trans }}"
                 class="ml-auto grid size-10 place-items-center rounded-md text-slate-500 hover:bg-slate-100 lg:hidden">
@@ -53,7 +53,7 @@
                             {{ ux_icon(item.icon, {class: 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
                             <span class="truncate lg:collapsed:sr-only">{{ item.label|trans }}</span>
                             {% if item.live %}
-                                <span data-live-count="{{ item.live }}" {{ item.badge > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white lg:collapsed:absolute lg:collapsed:top-0.5 lg:collapsed:right-0.5"><span data-live-number>{{ item.badge > 99 ? '99+' : item.badge }}</span><span class="sr-only"> {{ item.badge_label|trans }}</span></span>
+                                <span data-live-count="{{ item.live }}" {{ item.badge > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-500 px-1.5 text-[10px] leading-4 font-semibold text-brand-950 lg:collapsed:absolute lg:collapsed:top-0.5 lg:collapsed:right-0.5"><span data-live-number>{{ item.badge > 99 ? '99+' : item.badge }}</span><span class="sr-only"> {{ item.badge_label|trans }}</span></span>
                             {% endif %}
                         </a>
 
@@ -129,7 +129,7 @@
                     {% set count = item.route == 'mail_inbox' ? unread : item.badge %}
                     {% set live = item.route == 'mail_inbox' ? 'inbox' : item.live %}
                     {% if live %}
-                        <span data-live-count="{{ live }}" {{ count > 0 ? '' : 'hidden' }} class="absolute top-1 left-1/2 ml-2 rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white"><span data-live-number>{{ count > 99 ? '99+' : count }}</span><span class="sr-only"> {{ (live == 'inbox' ? 'mail.unread' : item.badge_label)|trans }}</span></span>
+                        <span data-live-count="{{ live }}" {{ count > 0 ? '' : 'hidden' }} class="absolute top-1 left-1/2 ml-2 rounded-full bg-brand-500 px-1.5 text-[10px] leading-4 font-semibold text-brand-950"><span data-live-number>{{ count > 99 ? '99+' : count }}</span><span class="sr-only"> {{ (live == 'inbox' ? 'mail.unread' : item.badge_label)|trans }}</span></span>
                     {% endif %}
                 </a>
             </li>
@@ -150,7 +150,7 @@
         {{ ux_icon(child.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
         <span class="truncate">{{ child.label|trans }}</span>
         {% if child.route == 'mail_inbox' %}
-            <span data-live-count="inbox" {{ unread > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white"><span data-live-number>{{ unread > 99 ? '99+' : unread }}</span><span class="sr-only"> {{ 'mail.unread'|trans }}</span></span>
+            <span data-live-count="inbox" {{ unread > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-500 px-1.5 text-[10px] leading-4 font-semibold text-brand-950"><span data-live-number>{{ unread > 99 ? '99+' : unread }}</span><span class="sr-only"> {{ 'mail.unread'|trans }}</span></span>
         {% endif %}
     </a>
 {% endmacro %}

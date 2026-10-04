@@ -7,13 +7,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>{% block title %}{% endblock %}{% if block('title') is not empty %} · {% endif %}{{ 'app.name'|trans }}</title>
         <meta name="color-scheme" content="{{ theme == 'system' ? 'light dark' : theme }}">
-        <meta name="theme-color" content="#2563eb">
+        <meta name="theme-color" content="#84c232">
         <meta name="description" content="{{ 'pwa.description'|trans }}">
         {# Aktionen, die auf dieselbe Seite zurückleiten, aktualisieren sie per Morphing statt neu zu laden (Scroll und Fokus bleiben) #}
         <meta name="turbo-refresh-method" content="morph">
         <meta name="turbo-refresh-scroll" content="preserve">
         <link rel="manifest" href="{{ path('pwa_manifest') }}">
-        <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+        <link rel="icon" href="/favicon.ico" sizes="48x48">
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-title" content="{{ 'app.name'|trans }}">

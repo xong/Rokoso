@@ -27,9 +27,9 @@ final readonly class MessageHtmlRenderer
 
     /**
      * Dark mode inverts the whole mail (its inline colours stay readable) and inverts media back.
-     * The light background #e2eaf8 ends up as the app's dark surface colour after the filter.
+     * The light background #e9e9e9 ends up as the app's dark surface colour after the filter.
      */
-    private const string DARK_CSS = 'html{background:#e2eaf8;filter:invert(1) hue-rotate(180deg)}'
+    private const string DARK_CSS = 'html{background:#e9e9e9;filter:invert(1) hue-rotate(180deg)}'
         .'img,video,picture,[style*="background-image"],[background]{filter:invert(1) hue-rotate(180deg)}';
 
     public function render(Message $message, Theme $theme = Theme::Light): string

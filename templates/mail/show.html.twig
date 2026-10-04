@@ -125,9 +125,9 @@
                     <span class="text-slate-500" id="view-label">{{ 'mail.view'|trans }}</span>
                     <div class="inline-flex rounded-md ring-1 ring-slate-200" role="group" aria-labelledby="view-label">
                         <a href="{{ path('mail_show', {folder: folder, id: message.id, view: 'html'}|merge(filter.params)) }}" aria-pressed="{{ show_html ? 'true' : 'false' }}" role="button"
-                           class="rounded-l-md px-2 py-1 {{ show_html ? 'bg-brand-600 text-white' : 'hover:bg-slate-50' }}">HTML</a>
+                           class="rounded-l-md px-2 py-1 {{ show_html ? 'bg-brand-500 text-brand-950' : 'hover:bg-slate-50' }}">HTML</a>
                         <a href="{{ path('mail_show', {folder: folder, id: message.id, view: 'text'}|merge(filter.params)) }}" aria-pressed="{{ show_html ? 'false' : 'true' }}" role="button"
-                           class="rounded-r-md px-2 py-1 {{ show_html ? 'hover:bg-slate-50' : 'bg-brand-600 text-white' }}">{{ 'mail.text'|trans }}</a>
+                           class="rounded-r-md px-2 py-1 {{ show_html ? 'hover:bg-slate-50' : 'bg-brand-500 text-brand-950' }}">{{ 'mail.text'|trans }}</a>
                     </div>
                     {% if show_html and has_external_images and not load_images %}
                         <span class="ml-auto text-slate-500">{{ 'mail.images_blocked'|trans }}</span>

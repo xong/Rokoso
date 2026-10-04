@@ -4,8 +4,8 @@
 {% block body %}
     {{ include('_partials/flashes.html.twig') }}
     <main id="main" class="flex min-h-full flex-col items-center justify-center px-4 py-10">
-        <div class="mb-6 flex items-center gap-2">
-            <span class="grid size-10 place-items-center rounded-xl bg-brand-600 text-sm font-bold text-white" aria-hidden="true">{{ 'app.short_name'|trans }}</span>
+        <div class="mb-6 flex flex-col items-center gap-2">
+            {{ include('_partials/logo.html.twig', {variant: 'line', class: 'size-24 text-brand-500'}) }}
             <span class="text-xl font-semibold">{{ 'app.name'|trans }}</span>
         </div>
         <div class="card w-full max-w-sm p-6 shadow-sm">
