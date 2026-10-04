@@ -1,10 +1,10 @@
 /*
- * Koopio Service Worker
+ * Rokoso Service Worker
  * - Seiten: immer aus dem Netz (keine personenbezogenen Inhalte im Cache), ohne Netz die Offline-Seite
  * - Statische Dateien (/assets, /icons): Cache, dann Netz
  * - Web-Push: zeigt Benachrichtigungen an, Klick öffnet bzw. fokussiert die Seite
  */
-const CACHE = 'koopio-{{ cache_version }}';
+const CACHE = 'rokoso-{{ cache_version }}';
 const OFFLINE_URL = '{{ path('pwa_offline') }}';
 
 self.addEventListener('install', (event) => {
@@ -55,7 +55,7 @@ self.addEventListener('push', (event) => {
     } catch (e) {
         data = { title: event.data ? event.data.text() : '' };
     }
-    event.waitUntil(self.registration.showNotification(data.title || 'Koopio', {
+    event.waitUntil(self.registration.showNotification(data.title || 'Rokoso', {
         body: data.body || '',
         icon: '{{ public_file('/icons/icon-192.png') }}',
         badge: '{{ public_file('/icons/icon-192.png') }}',

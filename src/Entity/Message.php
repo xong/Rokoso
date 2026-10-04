@@ -14,7 +14,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * An email (synced from IMAP or sent via Koopio) or an internal message.
+ * An email (synced from IMAP or sent via Rokoso) or an internal message.
  * Both share list, filters, comments, assignees and projects.
  */
 #[ORM\Entity(repositoryClass: MessageRepository::class)]
@@ -106,7 +106,7 @@ class Message
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $threadKey = null;
 
-    /** Koopio user who wrote the message (internal messages, mails sent from Koopio). */
+    /** Rokoso user who wrote the message (internal messages, mails sent from Rokoso). */
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?User $author = null;

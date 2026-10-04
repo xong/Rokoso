@@ -1,5 +1,5 @@
 app:
-    name: Koopio
+    name: Rokoso
     short_name: Ko
 
 nav:
@@ -57,7 +57,7 @@ compose_menu:
 
 two_factor:
     title: Zwei-Faktor-Anmeldung
-    intro: Zusätzlich zum Passwort fragt Koopio bei der Anmeldung einen sechsstelligen Code aus einer Authenticator-App ab (z. B. Aegis, FreeOTP, Google Authenticator). So bleibt dein Konto geschützt, auch wenn jemand dein Passwort kennt.
+    intro: Zusätzlich zum Passwort fragt Rokoso bei der Anmeldung einen sechsstelligen Code aus einer Authenticator-App ab (z. B. Aegis, FreeOTP, Google Authenticator). So bleibt dein Konto geschützt, auch wenn jemand dein Passwort kennt.
     active: Die Zwei-Faktor-Anmeldung ist eingeschaltet.
     setup: Zwei-Faktor-Anmeldung einrichten
     step_app: Installiere eine Authenticator-App auf deinem Smartphone.
@@ -250,7 +250,7 @@ profile:
     section_security: Sicherheit
     section_account: Konto und Daten
     calendar:
-        intro: Mit einem persönlichen Link kannst du deine Koopio-Termine in Outlook, Thunderbird, Google- oder Apple-Kalender abonnieren. Der Kalender aktualisiert sich dort automatisch, Änderungen sind nur in Koopio möglich.
+        intro: Mit einem persönlichen Link kannst du deine Rokoso-Termine in Outlook, Thunderbird, Google- oder Apple-Kalender abonnieren. Der Kalender aktualisiert sich dort automatisch, Änderungen sind nur in Rokoso möglich.
         url: Abo-Adresse
         secret_hint: Wer diese Adresse kennt, sieht deine Termine. Gib sie nicht weiter; bei Bedarf erzeugst du eine neue.
         subscribe: Im Kalender abonnieren
@@ -272,35 +272,35 @@ profile:
     pending_email: '%email% wartet noch auf Bestätigung.'
 
 email:
-    footer: Diese E-Mail wurde automatisch von Koopio verschickt.
+    footer: Diese E-Mail wurde automatisch von Rokoso verschickt.
     notification:
         subject: '%text%'
         button: Ansehen
         settings: 'Wie und wann du Benachrichtigungen bekommst, stellst du in deinem Profil ein:'
         settings_link: Einstellungen
     digest:
-        subject: '{1} Koopio: 1 neue Benachrichtigung|]1,Inf[ Koopio: %count% neue Benachrichtigungen'
+        subject: '{1} Rokoso: 1 neue Benachrichtigung|]1,Inf[ Rokoso: %count% neue Benachrichtigungen'
         intro: '{1} Seit der letzten Zusammenfassung gibt es eine neue Benachrichtigung:|]1,Inf[ Seit der letzten Zusammenfassung gibt es %count% neue Benachrichtigungen:'
         button: Alle Benachrichtigungen
     hello: Hallo %name%,
     link_fallback: 'Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:'
     verify:
         subject: Bitte bestätige deine E-Mail-Adresse
-        text: danke für deine Registrierung bei Koopio. Bitte bestätige deine E-Mail-Adresse.
+        text: danke für deine Registrierung bei Rokoso. Bitte bestätige deine E-Mail-Adresse.
         button: E-Mail-Adresse bestätigen
         expires: Der Link ist eine Stunde gültig.
     email_change:
         subject: Bitte bestätige deine neue E-Mail-Adresse
-        text: du möchtest deine E-Mail-Adresse bei Koopio ändern. Bitte bestätige die neue Adresse.
+        text: du möchtest deine E-Mail-Adresse bei Rokoso ändern. Bitte bestätige die neue Adresse.
         button: Neue Adresse bestätigen
     reset:
-        subject: Neues Passwort für Koopio
-        text: jemand (hoffentlich du) möchte das Passwort für dein Koopio-Konto zurücksetzen.
+        subject: Neues Passwort für Rokoso
+        text: jemand (hoffentlich du) möchte das Passwort für dein Rokoso-Konto zurücksetzen.
         button: Neues Passwort setzen
         expires: Der Link ist eine Stunde gültig. Wenn du das nicht angefordert hast, ignoriere diese E-Mail.
     invitation:
-        subject: Einladung zu „%organization%“ in Koopio
-        text: 'Hallo, %inviter% lädt dich in die Organisation „%organization%“ in Koopio ein.'
+        subject: Einladung zu „%organization%“ in Rokoso
+        text: 'Hallo, %inviter% lädt dich in die Organisation „%organization%“ in Rokoso ein.'
         button: Einladung ansehen
         expires: Die Einladung ist 14 Tage gültig.
     meeting:
@@ -495,7 +495,7 @@ mail_account:
     none: Noch kein E-Mail-Konto verbunden.
     created: E-Mail-Konto gespeichert. Teste jetzt die Verbindung.
     delete: E-Mail-Konto entfernen
-    delete_confirm: E-Mail-Konto und alle daraus abgerufenen E-Mails in Koopio löschen? Auf dem Mailserver bleibt alles erhalten.
+    delete_confirm: E-Mail-Konto und alle daraus abgerufenen E-Mails in Rokoso löschen? Auf dem Mailserver bleibt alles erhalten.
     disabled: deaktiviert
     sync_failed: Abruf fehlgeschlagen
     sync_error: 'Letzter Abruf fehlgeschlagen:'
@@ -769,7 +769,7 @@ snippet:
     delete_confirm: Textbaustein wirklich löschen?
 
 internal:
-    intro: Direktnachrichten bleiben in Koopio und erscheinen nur bei den gewählten Personen im Eingang – wie E-Mails, mit Kommentaren und Verantwortlichen.
+    intro: Direktnachrichten bleiben in Rokoso und erscheinen nur bei den gewählten Personen im Eingang – wie E-Mails, mit Kommentaren und Verantwortlichen.
     forum_hint: Für Gruppen, Projekte und die ganze Organisation ein Forenthema eröffnen.
     to: Empfänger
     recipients: Personen
@@ -881,7 +881,7 @@ calendar:
         m2880: 2 Tage vorher
         m10080: 1 Woche vorher
     guests: Gäste (E-Mail)
-    guests_help: Eine Adresse pro Zeile. Gäste bekommen eine Einladung mit Kalenderdatei, ohne Zugang zu Koopio.
+    guests_help: Eine Adresse pro Zeile. Gäste bekommen eine Einladung mit Kalenderdatei, ohne Zugang zu Rokoso.
     occurrence:
         title: 'Termin am %date%'
         edit: Nur diesen Termin ändern
@@ -905,7 +905,7 @@ calendar:
         sent: '{1}Einladung an einen Gast verschickt.|]1,Inf[Einladung an %count% Gäste verschickt.'
         none: Keine Gäste zum Einladen.
     ical:
-        name: 'Koopio – %name%'
+        name: 'Rokoso – %name%'
         task: 'Aufgabe: %title%'
     no_signups: Noch keine Anmeldungen.
     prev_month: Vorheriger Monat
@@ -1113,7 +1113,7 @@ shelf:
 
 share:
     title: Geteilt
-    empty: Es wurde nichts geteilt. Teile Dateien oder Links aus einer anderen App über das Teilen-Menü an Koopio (dazu muss Koopio als App installiert sein).
+    empty: Es wurde nichts geteilt. Teile Dateien oder Links aus einer anderen App über das Teilen-Menü an Rokoso (dazu muss Rokoso als App installiert sein).
     files: '{1} Eine geteilte Datei|]1,Inf[ %count% geteilte Dateien'
     folder: Speichern in Ordner
     folder_choose: Ordner wählen …
@@ -1178,7 +1178,7 @@ forum:
 pwa:
     description: Gemeinsames Postfach, Projekte, Kalender und Kontakte für Stadtelternvertretungen.
     offline_title: Keine Verbindung
-    offline_text: Koopio braucht eine Internetverbindung. Bitte prüfe deine Verbindung und versuche es erneut.
+    offline_text: Rokoso braucht eine Internetverbindung. Bitte prüfe deine Verbindung und versuche es erneut.
     retry: Erneut versuchen
 
 upload:
@@ -1196,7 +1196,7 @@ notification:
     all_read: Alle Benachrichtigungen sind als gelesen markiert.
     empty: Noch keine Benachrichtigungen.
     empty_unread: Keine ungelesenen Benachrichtigungen.
-    system: Koopio
+    system: Rokoso
     type:
         assigned: '%actor% hat dir „%subject%“ zugewiesen'
         mentioned: '%actor% hat dich in „%subject%“ erwähnt'
@@ -1213,10 +1213,10 @@ notification:
         daily: Täglich
         daily_help: Eine Zusammenfassung am Morgen mit allem, was du noch nicht gelesen hast.
         'off': Nie
-        off_help: Benachrichtigungen erscheinen nur in Koopio.
+        off_help: Benachrichtigungen erscheinen nur in Rokoso.
     push:
         title: Push-Benachrichtigungen
-        help: Zeigt neue Benachrichtigungen auch dann an, wenn Koopio nicht geöffnet ist – auf diesem Gerät und in diesem Browser.
+        help: Zeigt neue Benachrichtigungen auch dann an, wenn Rokoso nicht geöffnet ist – auf diesem Gerät und in diesem Browser.
         enable: Auf diesem Gerät einschalten
         disable: Auf diesem Gerät ausschalten
         enabled: Push-Benachrichtigungen sind eingeschaltet.
@@ -1289,7 +1289,7 @@ meeting:
     minute_taker_none: '– noch offen –'
     description: Hinweise
     guests: Gäste (E-Mail)
-    guests_help: Eine Adresse pro Zeile. Gäste erhalten die Einladung ohne Zugang zu Koopio.
+    guests_help: Eine Adresse pro Zeile. Gäste erhalten die Einladung ohne Zugang zu Rokoso.
     planned_duration: Geplante Dauer
     minutes_count: '{1}1 Minute|]1,Inf[%count% Minuten'
     period: Zeitraum
@@ -1712,7 +1712,7 @@ today:
 
 setup:
     title: Erste Schritte
-    intro: So richtet ihr Koopio für euer Gremium ein. Erledigte Schritte werden automatisch abgehakt.
+    intro: So richtet ihr Rokoso für euer Gremium ein. Erledigte Schritte werden automatisch abgehakt.
     dismiss: Ausblenden
     progress: '%done% von %total% Schritten erledigt'
     done: erledigt

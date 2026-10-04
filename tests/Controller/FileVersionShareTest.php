@@ -242,7 +242,7 @@ final class FileVersionShareTest extends AppTestCase
 
     private function tempFile(string $name, string $content): string
     {
-        $dir = sys_get_temp_dir().'/koopio-test-'.bin2hex(random_bytes(4));
+        $dir = sys_get_temp_dir().'/rokoso-test-'.bin2hex(random_bytes(4));
         mkdir($dir);
         $path = $dir.'/'.$name;
         file_put_contents($path, $content);

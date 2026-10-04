@@ -1,2 +1,2 @@
--- Rechte für die Test-Datenbank (PHPUnit legt koopio_test selbst an)
-GRANT ALL PRIVILEGES ON `koopio_test%`.* TO 'koopio'@'%';
+-- Rechte für die Test-Datenbank (PHPUnit legt rokoso_test selbst an)
+GRANT ALL PRIVILEGES ON `rokoso_test%`.* TO 'rokoso'@'%';

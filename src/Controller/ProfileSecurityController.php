@@ -156,7 +156,7 @@ final class ProfileSecurityController extends AbstractController
     {
         $response = new JsonResponse($export->export($user));
         $response->setEncodingOptions(\JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES);
-        $response->headers->set('Content-Disposition', $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'koopio-daten-'.date('Y-m-d').'.json'));
+        $response->headers->set('Content-Disposition', $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'rokoso-daten-'.date('Y-m-d').'.json'));
         $this->log->record('data_exported', $user);
 
         return $response;

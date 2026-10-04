@@ -143,6 +143,6 @@
         "symfony/stopwatch": "8.0.*",
         "symfony/web-profiler-bundle": "8.0.*"
     },
-    "name": "koopio/koopio",
+    "name": "rokoso/rokoso",
     "description": "Kollaborationssoftware für Stadtelternvertretungen"
 }

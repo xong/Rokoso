@@ -152,7 +152,7 @@ final class FileTest extends AppTestCase
 
     private function tempFile(string $content): string
     {
-        $dir = sys_get_temp_dir().'/koopio-test-'.bin2hex(random_bytes(4));
+        $dir = sys_get_temp_dir().'/rokoso-test-'.bin2hex(random_bytes(4));
         mkdir($dir);
         $path = $dir.'/protokoll.txt';
         file_put_contents($path, $content);

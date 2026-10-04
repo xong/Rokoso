@@ -1,6 +1,6 @@
-# Betrieb – Koopio installieren, aktualisieren, sichern
+# Betrieb – Rokoso installieren, aktualisieren, sichern
 
-Diese Anleitung richtet sich an die Person, die Koopio für eine Stadtelternvertretung betreibt.
+Diese Anleitung richtet sich an die Person, die Rokoso für eine Stadtelternvertretung betreibt.
 
 ## Voraussetzungen
 
@@ -16,7 +16,7 @@ Node.js wird nicht benötigt.
 ## Installation
 
 ```bash
-git clone <repository> koopio && cd koopio
+git clone <repository> rokoso && cd rokoso
 composer install --no-dev --optimize-autoloader
 ```
 
@@ -25,10 +25,10 @@ composer install --no-dev --optimize-autoloader
 ```dotenv
 APP_ENV=prod
 APP_SECRET=<64 zufällige Hex-Zeichen, z. B. php -r "echo bin2hex(random_bytes(32));">
-DATABASE_URL="mysql://koopio:PASSWORT@127.0.0.1:3306/koopio?serverVersion=11.8.0-MariaDB&charset=utf8mb4"
+DATABASE_URL="mysql://rokoso:PASSWORT@127.0.0.1:3306/rokoso?serverVersion=11.8.0-MariaDB&charset=utf8mb4"
 MAILER_DSN=smtp://benutzer:passwort@smtp.example.org:465
-MAILER_FROM="Koopio <noreply@example.org>"
-DEFAULT_URI=https://koopio.example.org
+MAILER_FROM="Rokoso <noreply@example.org>"
+DEFAULT_URI=https://rokoso.example.org
 ```
 
 > **Wichtig:** Aus `APP_SECRET` wird der Schlüssel abgeleitet, mit dem die Passwörter der E-Mail-Konten verschlüsselt sind.
@@ -55,7 +55,7 @@ Dateien (Menü „Dateien“, Forum-Anhänge) dürfen bis zu **50 MB** groß sei
 
 ## Alternative: Betrieb mit Docker
 
-Statt eines eigenen Webservers kann Koopio als Docker-Image laufen. Das Image basiert auf **FrankenPHP** (Caddy + PHP 8.4) und holt sich für die eingetragene Domain automatisch ein HTTPS-Zertifikat (Let's Encrypt). Ein Beispiel mit Datenbank liegt in `compose.prod.yaml`:
+Statt eines eigenen Webservers kann Rokoso als Docker-Image laufen. Das Image basiert auf **FrankenPHP** (Caddy + PHP 8.4) und holt sich für die eingetragene Domain automatisch ein HTTPS-Zertifikat (Let's Encrypt). Ein Beispiel mit Datenbank liegt in `compose.prod.yaml`:
 
 | Dienst | Aufgabe |
 |---|---|
@@ -66,13 +66,13 @@ Statt eines eigenen Webservers kann Koopio als Docker-Image laufen. Das Image ba
 `.env.prod` neben `compose.prod.yaml` anlegen (nicht einchecken):
 
 ```dotenv
-SERVER_NAME=koopio.example.org
-DEFAULT_URI=https://koopio.example.org
+SERVER_NAME=rokoso.example.org
+DEFAULT_URI=https://rokoso.example.org
 APP_SECRET=<64 zufällige Hex-Zeichen>
 DB_PASSWORD=<zufällig>
 DB_ROOT_PASSWORD=<zufällig>
 MAILER_DSN=smtp://benutzer:passwort@smtp.example.org:465
-MAILER_FROM="Koopio <noreply@example.org>"
+MAILER_FROM="Rokoso <noreply@example.org>"
 VAPID_PUBLIC_KEY=...
 VAPID_PRIVATE_KEY=...
 ```
@@ -88,21 +88,21 @@ Läuft ein anderer Reverse-Proxy davor, `SERVER_NAME=:80` setzen und nur Port 80
 
 ```cron
 # Neue E-Mails aller aktiven Konten abrufen (alle 5 Minuten)
-*/5 * * * * cd /pfad/zu/koopio && php bin/console app:mail:sync --no-interaction >> var/log/mail-sync.log 2>&1
+*/5 * * * * cd /pfad/zu/rokoso && php bin/console app:mail:sync --no-interaction >> var/log/mail-sync.log 2>&1
 
 # Ausgang: verzögert gesendete E-Mails („Senden rückgängig“) verschicken (jede Minute)
-* * * * * cd /pfad/zu/koopio && php bin/console app:mail:outbox --no-interaction >> var/log/outbox.log 2>&1
+* * * * * cd /pfad/zu/rokoso && php bin/console app:mail:outbox --no-interaction >> var/log/outbox.log 2>&1
 
 # Erinnerungen, Tageszusammenfassung, Aufräumen und Löschfristen (alle 15 Minuten)
-*/15 * * * * cd /pfad/zu/koopio && php bin/console app:notify --no-interaction >> var/log/notify.log 2>&1
+*/15 * * * * cd /pfad/zu/rokoso && php bin/console app:notify --no-interaction >> var/log/notify.log 2>&1
 
 # Abgelaufene Passwort-Links aufräumen (täglich)
-15 3 * * * cd /pfad/zu/koopio && php bin/console reset-password:remove-expired --no-interaction
+15 3 * * * cd /pfad/zu/rokoso && php bin/console reset-password:remove-expired --no-interaction
 ```
 
 Ein Dauer-Worker (Messenger) ist **nicht** nötig: Systemmails werden direkt verschickt.
 
-**Abruf beim Öffnen:** Zusätzlich ruft Koopio die Postfächer ab, wenn jemand „Heute“ oder den Posteingang öffnet und der letzte Abruf länger als `MAIL_SYNC_INTERVAL` Minuten (Standard 5, `0` = aus) zurückliegt – nach dem Ausliefern der Seite, also ohne Wartezeit. Der Cronjob bleibt trotzdem empfohlen. Hängt der Abruf eines Kontos länger als eine Stunde oder ist er fehlgeschlagen, sehen die Admins der Organisation einen Hinweis auf „Heute“ und in der Organisation.
+**Abruf beim Öffnen:** Zusätzlich ruft Rokoso die Postfächer ab, wenn jemand „Heute“ oder den Posteingang öffnet und der letzte Abruf länger als `MAIL_SYNC_INTERVAL` Minuten (Standard 5, `0` = aus) zurückliegt – nach dem Ausliefern der Seite, also ohne Wartezeit. Der Cronjob bleibt trotzdem empfohlen. Hängt der Abruf eines Kontos länger als eine Stunde oder ist er fehlgeschlagen, sehen die Admins der Organisation einen Hinweis auf „Heute“ und in der Organisation.
 
 `app:notify` setzt auch die **Löschfristen** um (einstellbar je Organisation unter „Organisation bearbeiten“):
 
@@ -138,21 +138,21 @@ php bin/console cache:clear
 
 Zu sichern sind:
 
-- die **Datenbank** (z. B. täglich `mysqldump --single-transaction koopio > koopio-$(date +%F).sql`)
+- die **Datenbank** (z. B. täglich `mysqldump --single-transaction rokoso > rokoso-$(date +%F).sql`)
 - **`var/storage/`** – Anhänge von E-Mails und Nachrichten, Dateien (`files/`) und Forum-Uploads
 - **`public/uploads/`** – Profilbilder, Logos, Kontaktfotos
 - **`.env.local`** – insbesondere `APP_SECRET` (siehe oben)
 
-E-Mails liegen zusätzlich weiterhin auf dem IMAP-Server; Koopio verändert dort nichts.
+E-Mails liegen zusätzlich weiterhin auf dem IMAP-Server; Rokoso verändert dort nichts.
 
 ## Datenschutz-Hinweise
 
-- Koopio liest Postfächer nur (IMAP read-only); „Papierkorb“ wirkt nur in Koopio.
+- Rokoso liest Postfächer nur (IMAP read-only); „Papierkorb“ wirkt nur in Rokoso.
 - Externe Bilder in HTML-Mails werden standardmäßig blockiert.
 - Anhänge liegen außerhalb des Web-Roots und werden nur angemeldeten, berechtigten Mitgliedern ausgeliefert.
 - Jede Person kann im Profil unter **Konto und Daten** ihre Daten als JSON herunterladen (Art. 15/20 DSGVO) und ihr Konto löschen (Art. 17). Beim Löschen werden persönliche Daten entfernt; Beiträge in gemeinsamen Bereichen bleiben unter „Gelöschtes Konto“ erhalten. Wer einziger Admin einer Organisation ist, muss vorher die Rolle übergeben.
 - **Zwei-Faktor-Anmeldung** (TOTP-App, Ersatzcodes) kann jede Person im Profil unter **Sicherheit** einschalten; dort gibt es auch „Überall abmelden“ und das persönliche Sicherheitsprotokoll. Für Admins einer Organisation wird sie dringend empfohlen.
-- Für den Betrieb sind ein Impressum und eine Datenschutzerklärung der betreibenden Stelle nötig (nicht Teil von Koopio).
+- Für den Betrieb sind ein Impressum und eine Datenschutzerklärung der betreibenden Stelle nötig (nicht Teil von Rokoso).
 
 ## Fehlersuche
 
@@ -170,17 +170,17 @@ vendor/bin/bdi detect drivers   # passenden chromedriver nach drivers/ laden (ei
 composer test:browser
 ```
 
-Sie prüfen Anmeldung, Befehlspalette/Tastenkürzel, Turbo-Aktionen im Posteingang sowie mit **axe-core** die wichtigsten Seiten in hellem und dunklem Design auf WCAG-2.2-AA-Verstöße (Stufe „serious“/„critical“). axe-core (MPL-2.0) wird nur zur Testzeit nach `var/` geladen und ist nicht Teil von Koopio. Die Tests schreiben echte Daten in die Testdatenbank (`koopio_test`). Eine Stichprobe mit einem Screenreader (NVDA) ersetzen sie nicht.
+Sie prüfen Anmeldung, Befehlspalette/Tastenkürzel, Turbo-Aktionen im Posteingang sowie mit **axe-core** die wichtigsten Seiten in hellem und dunklem Design auf WCAG-2.2-AA-Verstöße (Stufe „serious“/„critical“). axe-core (MPL-2.0) wird nur zur Testzeit nach `var/` geladen und ist nicht Teil von Rokoso. Die Tests schreiben echte Daten in die Testdatenbank (`rokoso_test`). Eine Stichprobe mit einem Screenreader (NVDA) ersetzen sie nicht.
 
 ## Muster: Verzeichnis der Verarbeitungstätigkeiten (Art. 30 DSGVO)
 
-Vorlage für die betreibende Stelle – Angaben in eckigen Klammern ergänzen. Die Verantwortung liegt bei der Stadtelternvertretung bzw. dem Träger, nicht bei den Entwicklern von Koopio.
+Vorlage für die betreibende Stelle – Angaben in eckigen Klammern ergänzen. Die Verantwortung liegt bei der Stadtelternvertretung bzw. dem Träger, nicht bei den Entwicklern von Rokoso.
 
 | Feld | Angabe |
 |---|---|
 | **Verantwortliche Stelle** | [Name der Stadtelternvertretung / des Trägervereins, Anschrift, Kontakt] |
 | **Datenschutzbeauftragte*r** | [falls vorhanden, sonst „nicht benannt (nicht erforderlich)“] |
-| **Bezeichnung** | Kollaborationsplattform „Koopio“ für die Gremienarbeit der Elternvertretung |
+| **Bezeichnung** | Kollaborationsplattform „Rokoso“ für die Gremienarbeit der Elternvertretung |
 | **Zwecke** | Kommunikation der Mitglieder (E-Mail-Postfach, interne Nachrichten, Forum), Organisation von Sitzungen, Beschlüssen, Abstimmungen, Terminen und Aufgaben, Ablage von Dokumenten, Kontakt zu Eltern und Institutionen, Beteiligung der Öffentlichkeit (Kontaktformular, Umfragen, Anmeldungen, Verteiler) |
 | **Rechtsgrundlagen** | Art. 6 Abs. 1 lit. e DSGVO i. V. m. [Landesschulgesetz, § … Elternvertretung] für die Gremienarbeit; Art. 6 Abs. 1 lit. a (Einwilligung) für Verteiler-Abos und freiwillige Angaben in Umfragen; Art. 6 Abs. 1 lit. f für Sicherheitsprotokoll und Spamschutz |
 | **Betroffene** | Mitglieder und Gäste der Organisation; Eltern, Lehrkräfte, Schulleitungen, Verwaltung und weitere Absender*innen von E-Mails; Teilnehmende an Umfragen, Anmeldungen und Verteilern |

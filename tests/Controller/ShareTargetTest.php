@@ -89,7 +89,7 @@ final class ShareTargetTest extends AppTestCase
 
     private function uploadedFile(string $name, string $content): UploadedFile
     {
-        $path = sys_get_temp_dir().'/koopio-test-'.bin2hex(random_bytes(4)).'-'.$name;
+        $path = sys_get_temp_dir().'/rokoso-test-'.bin2hex(random_bytes(4)).'-'.$name;
         file_put_contents($path, $content);
 
         return new UploadedFile($path, $name, null, null, true);

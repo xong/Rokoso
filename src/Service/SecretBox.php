@@ -17,7 +17,7 @@ final readonly class SecretBox
 
     public function __construct(#[Autowire('%kernel.secret%')] string $secret)
     {
-        $this->key = sodium_crypto_generichash('koopio-secretbox|'.$secret, '', \SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+        $this->key = sodium_crypto_generichash('rokoso-secretbox|'.$secret, '', \SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
     }
 
     public function encrypt(string $plain): string

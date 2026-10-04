@@ -89,7 +89,7 @@ final readonly class MeetingService
         }
         $description = trim(implode("\n", array_filter([$meeting->getDescription(), implode("\n", $agenda), $meeting->getVideoUrl(), $url])));
 
-        return Ics::document([Ics::event('meeting-'.$meeting->getId().'@'.(parse_url($url, \PHP_URL_HOST) ?: 'koopio'),
+        return Ics::document([Ics::event('meeting-'.$meeting->getId().'@'.(parse_url($url, \PHP_URL_HOST) ?: 'rokoso'),
             $meeting->getStartsAt(), $meeting->getEffectiveEnd(), false, $meeting->getTitle(), $description,
             $meeting->getLocation() ?? $meeting->getVideoUrl(), $url)], 'Sitzungen');
     }

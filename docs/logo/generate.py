@@ -1,4 +1,4 @@
-"""Generates every logo/icon file of Koopio from one geometric definition.
+"""Generates every logo/icon file of Rokoso from one geometric definition.
 
 Usage (from the project root, Python 3 and Google Chrome required):
     python docs/logo/generate.py

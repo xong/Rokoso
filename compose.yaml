@@ -1,12 +1,12 @@
 # Lokale Entwicklungsdienste: `docker compose up -d`
-name: koopio
+name: rokoso
 services:
   database:
     image: mariadb:11.8
     environment:
-      MARIADB_DATABASE: koopio
-      MARIADB_USER: koopio
-      MARIADB_PASSWORD: koopio
+      MARIADB_DATABASE: rokoso
+      MARIADB_USER: rokoso
+      MARIADB_PASSWORD: rokoso
       MARIADB_ROOT_PASSWORD: root
     ports:
       - "3307:3306" # 3307, damit es nicht mit XAMPP-MariaDB kollidiert
