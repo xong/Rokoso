@@ -20,6 +20,7 @@ use App\Repository\MailAccountRepository;
 use App\Repository\MailRuleRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
+use App\Security\SecurityLog;
 use App\Security\Voter\OrganizationVoter;
 use App\Service\ImageUploader;
 use App\Service\SystemMailer;
@@ -44,6 +45,7 @@ final class OrganizationController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly OrganizationRepository $organizations,
         private readonly ImageUploader $uploader,
+        private readonly SecurityLog $log,
     ) {
     }
 
@@ -127,11 +129,13 @@ final class OrganizationController extends AbstractController
     #[Route('/{id<\d+>}/delete', name: 'organization_delete', methods: ['POST'])]
     #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
     #[IsCsrfTokenValid(new Expression('"delete-organization-" ~ args["organization"].getId()'))]
-    public function delete(Organization $organization): Response
+    public function delete(Organization $organization, #[CurrentUser] User $user): Response
     {
+        $name = $organization->getName();
         $this->uploader->remove($organization->getLogo());
         $this->em->remove($organization);
         $this->em->flush();
+        $this->log->record('organization_deleted', $user, $name);
         $this->addFlash('success', 'flash.deleted');
 
         return $this->redirectToRoute('organization_index');
@@ -146,6 +150,7 @@ final class OrganizationController extends AbstractController
     {
         $this->assertBelongs($organization, $membership);
         $wasAdmin = $membership->isAdmin();
+        $oldRole = $membership->getRole();
         $choices = array_values(array_filter($projects->findBy(['organization' => $organization], ['name' => 'ASC']),
             static fn (Project $p): bool => !$p->isArchived() || $membership->getGuestProjects()->contains($p)));
         $form = $this->createForm(MembershipFormType::class, $membership, ['projects' => $choices]);
@@ -161,6 +166,10 @@ final class OrganizationController extends AbstractController
                 $membership->getGuestProjects()->clear();
             }
             $this->em->flush();
+            if ($oldRole !== $membership->getRole()) {
+                $this->log->record('role_changed', $membership->getUser(),
+                    $organization->getName().': '.$oldRole->value.' → '.$membership->getRole()->value, $user);
+            }
             $this->addFlash('success', 'flash.saved');
 
             return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
@@ -237,6 +246,7 @@ final class OrganizationController extends AbstractController
 
         $organization->getMemberships()->removeElement($membership);
         $this->em->flush();
+        $this->log->record('member_removed', $membership->getUser(), $organization->getName(), $user);
         $this->addFlash('success', $self ? 'organization.left' : 'organization.member_removed');
 
         return $self

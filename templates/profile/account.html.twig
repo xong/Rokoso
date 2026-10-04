@@ -1,0 +1,40 @@
+{% extends 'profile/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'profile.section_account'|trans }}{% endblock %}
+
+{% block form %}
+    <div class="space-y-8">
+        <section aria-labelledby="export-heading" class="space-y-3">
+            <h2 id="export-heading" class="text-base font-semibold">{{ 'account.export_title'|trans }}</h2>
+            <p class="text-slate-600">{{ 'account.export_intro'|trans }}</p>
+            <a href="{{ path('profile_export') }}" class="btn-secondary" data-turbo="false" download>
+                {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                {{ 'account.export'|trans }}
+            </a>
+        </section>
+
+        <section aria-labelledby="delete-heading" class="space-y-3">
+            <h2 id="delete-heading" class="text-base font-semibold">{{ 'account.delete_title'|trans }}</h2>
+            <p class="text-slate-600">{{ 'account.delete_intro'|trans }}</p>
+            {% if blockers is not empty %}
+                <div class="rounded-md border border-amber-300 bg-amber-50 p-4 text-amber-950" role="status">
+                    <p>{{ 'account.delete_blocked'|trans }}</p>
+                    <ul class="mt-2 list-disc pl-5">
+                        {% for organization in blockers %}
+                            <li><a href="{{ path('organization_show', {id: organization.id}) }}" class="underline">{{ organization.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                {{ form_start(form, {attr: {'data-turbo-confirm': 'account.delete_confirm'|trans}}) }}
+                    {{ form_row(form.currentPassword) }}
+                    {{ form_rest(form) }}
+                    <button type="submit" class="btn-danger">
+                        {{ ux_icon('lucide:user-x', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                        {{ 'account.delete'|trans }}
+                    </button>
+                {{ form_end(form) }}
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

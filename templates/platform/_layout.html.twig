@@ -1,0 +1,33 @@
+{% extends 'layout/app.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ 'platform.title'|trans }}{% endblock %}
+{% block list_title %}{{ 'platform.title'|trans }}{% endblock %}
+{% block back_url %}{{ path('home') }}{% endblock %}
+
+{% block list %}
+    <p class="p-4 text-sm text-slate-600">{{ 'platform.intro'|trans }}</p>
+    <ul role="list" class="p-2">
+        {% for item in [
+            {key: 'users', route: 'platform_users', icon: 'lucide:users', label: 'platform.users'},
+            {key: 'organizations', route: 'platform_organizations', icon: 'lucide:building-2', label: 'platform.organizations'},
+            {key: 'log', route: 'platform_log', icon: 'lucide:scroll-text', label: 'security_log.title'},
+        ] %}
+            {% set active = section == item.key %}
+            <li>
+                <a href="{{ path(item.route) }}" {% if active %}aria-current="page"{% endif %}
+                   class="flex items-center gap-3 rounded-md px-3 py-2 {{ active ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-700 hover:bg-slate-100' }}">
+                    {{ ux_icon(item.icon, {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    {{ item.label|trans }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+{% block detail %}
+    <div class="p-4 lg:p-6">
+        {% block content %}{% endblock %}
+    </div>
+{% endblock %}

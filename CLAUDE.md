@@ -11,7 +11,7 @@
 - Tailwind 4 über `symfonycasts/tailwind-bundle` + AssetMapper (kein Node); `tailwind:init` ist interaktiv, Version steht in `config/packages/symfonycasts_tailwind.yaml`
 - Lokal: MariaDB 11.8 + Mailpit + GreenMail per `docker compose up -d` (DB-Port 3307, Mailpit http://localhost:8025, IMAP 3143/SMTP 3025); Demodaten: `php bin/console app:demo --mails`
 - Nur freie Bibliotheken, Lizenz MIT
-- Vor Abschluss eines Schritts: `composer check` (CS-Fixer, PHPStan Level 8, PHPUnit)
+- Vor Abschluss eines Schritts: `composer check` (CS-Fixer, PHPStan Level 8, PHPUnit); stürzt PHPStan unter Windows ab, vorher `cache:clear` + `cache:warmup`
 
 ## Layout
 - Seiten mit 3-Spalten-Ansicht erweitern `templates/layout/app.html.twig` (Blöcke `list_title`, `list`, `detail_title`, `detail`; `has_detail` + `back_url` für Mobil).
@@ -31,6 +31,7 @@
 - Twig-Makros für Buttons/Listen (`ui.empty(text, icon, cta_url, cta_label)` für Leer-Zustände mit Knopf): `templates/_partials/ui.html.twig` (in jedem Kind-Template importieren).
 - Dateien: `StoredFile::replaceWith()` legt eine `FileVersion` an (Löschen über `getAllStoragePaths()`); Freigabelinks `FileShare` unter `/s/{token}` (öffentlich); „Merken“ = `ShelfItem::for()` (Datei, Anhang, Nachricht, Forenthema), Zugriff in `Shelf::isAccessible()`; PWA-Teilen-Ziel `ShareTargetController` mit Zwischenablage `FileStorage::storeIncoming()`.
 - Startseite „Heute“: `HomeController`; globale Suche: `App\Search\GlobalSearch` (nutzt die Repository-Sichtbarkeit – neue Bereiche dort ergänzen); Befehlspalette/Kürzel: `templates/_partials/palette.html.twig` + `palette_controller.js`; Live-Badges: `[data-live-count]` + `CountsController` + `live_counts_controller.js`.
+- Sicherheit: `SecurityLog::record()` für sicherheitsrelevante Ereignisse (Typen in `security_log.type.*` übersetzen); `User::renewSessionStamp()` beendet alle Sitzungen; Konto löschen über `AccountDeleter` (neue personenbezogene Tabellen dort ergänzen, ebenso in `AccountExport`); Löschfristen in `RetentionCleaner` (läuft in `app:notify`). Plattform-Admin (`ROLE_PLATFORM_ADMIN`, `app:user:promote`) unter `/admin` (`PlatformAdminController`); Menüpunkte mit `role` werden nur bei passendem Recht gezeigt.
 - Keine `sed`/`php -r`-Ersetzungen in PHP-Dateien – Edit-Werkzeug nutzen (Escaping-Fallen).
 
 ## Konventionen

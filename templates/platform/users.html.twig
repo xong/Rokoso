@@ -1,0 +1,64 @@
+{% extends 'platform/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block detail_title %}{{ 'platform.users'|trans }}{% endblock %}
+
+{% block content %}
+    <form method="get" role="search" class="mb-4 flex max-w-md gap-2">
+        <label for="platform-user-search" class="sr-only">{{ 'platform.search'|trans }}</label>
+        <input id="platform-user-search" type="search" name="q" value="{{ query }}" class="input" placeholder="{{ 'platform.search'|trans }}">
+        <button type="submit" class="btn-secondary">{{ 'action.search'|trans }}</button>
+    </form>
+
+    {% if users is empty %}
+        {{ ui.empty('platform.no_users', 'lucide:users') }}
+    {% else %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <caption class="sr-only">{{ 'platform.users'|trans }}</caption>
+                <thead class="text-xs text-slate-500">
+                    <tr>
+                        <th scope="col" class="py-1 pr-3 font-medium">{{ 'platform.name'|trans }}</th>
+                        <th scope="col" class="py-1 pr-3 font-medium">{{ 'platform.status'|trans }}</th>
+                        <th scope="col" class="py-1 pr-3 font-medium">{{ 'platform.since'|trans }}</th>
+                        <th scope="col" class="py-1 font-medium"><span class="sr-only">{{ 'platform.actions'|trans }}</span></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for account in users %}
+                        <tr>
+                            <td class="py-2 pr-3">
+                                <span class="font-medium">{{ account.name }}</span>
+                                <span class="block text-xs text-slate-500">{{ account.email }}</span>
+                            </td>
+                            <td class="py-2 pr-3">
+                                {% if account.blockedAt %}
+                                    <span class="text-red-700">{{ 'platform.state_blocked'|trans }}</span>
+                                {% elseif not account.verified %}
+                                    <span class="text-slate-500">{{ 'platform.state_unverified'|trans }}</span>
+                                {% else %}
+                                    {{ 'platform.state_active'|trans }}
+                                {% endif %}
+                                {% if account.platformAdmin %}<span class="block text-xs text-slate-500">{{ 'platform.is_admin'|trans }}</span>{% endif %}
+                                {% if account.totpAuthenticationEnabled %}<span class="block text-xs text-slate-500">{{ 'two_factor.title'|trans }}</span>{% endif %}
+                            </td>
+                            <td class="whitespace-nowrap py-2 pr-3">{{ account.createdAt|date('d.m.Y') }}</td>
+                            <td class="py-2">
+                                {% if account != app.user %}
+                                    <div class="flex flex-wrap justify-end gap-1">
+                                        {{ ui.post_button(path('platform_user_block', {id: account.id}), 'platform-user',
+                                            (account.blockedAt ? 'platform.unblock' : 'platform.block')|trans({'%name%': account.name}),
+                                            {class: 'btn-secondary', icon: account.blockedAt ? 'lucide:lock-open' : 'lucide:lock'}) }}
+                                        {{ ui.post_button(path('platform_user_delete', {id: account.id}), 'platform-user',
+                                            'platform.delete'|trans({'%name%': account.name}),
+                                            {class: 'btn-danger', icon: 'lucide:user-x', confirm: 'platform.delete_confirm'}) }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

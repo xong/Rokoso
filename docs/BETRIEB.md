@@ -7,7 +7,7 @@ Diese Anleitung richtet sich an die Person, die Coop für eine Stadtelternvertre
 - Webserver mit **PHP ≥ 8.4** und den Erweiterungen `ctype, iconv, curl, fileinfo, gd, intl, mbstring, openssl, pdo_mysql, sodium, zip`
 - **MariaDB ≥ 10.11 / MySQL ≥ 8** (PostgreSQL funktioniert über Doctrine ebenfalls; die Migrationen sind für MySQL/MariaDB erzeugt)
 - **Composer** und SSH-Zugang (für Installation und Updates)
-- Möglichkeit für **Cronjobs** (E-Mail-Abruf)
+- Möglichkeit für **Cronjobs** (E-Mail-Abruf, Versand, Erinnerungen, Löschfristen)
 - Ein SMTP-Zugang für die Systemmails (Bestätigung, Passwort, Einladungen)
 - HTTPS (Pflicht für die installierbare App und sichere Cookies)
 
@@ -58,11 +58,27 @@ Dateien (Menü „Dateien“, Forum-Anhänge) dürfen bis zu **50 MB** groß sei
 # Neue E-Mails aller aktiven Konten abrufen (alle 5 Minuten)
 */5 * * * * cd /pfad/zu/coop && php bin/console app:mail:sync --no-interaction >> var/log/mail-sync.log 2>&1
 
+# Ausgang: verzögert gesendete E-Mails („Senden rückgängig“) verschicken (jede Minute)
+* * * * * cd /pfad/zu/coop && php bin/console app:mail:outbox --no-interaction >> var/log/outbox.log 2>&1
+
+# Erinnerungen, Tageszusammenfassung, Aufräumen und Löschfristen (alle 15 Minuten)
+*/15 * * * * cd /pfad/zu/coop && php bin/console app:notify --no-interaction >> var/log/notify.log 2>&1
+
 # Abgelaufene Passwort-Links aufräumen (täglich)
 15 3 * * * cd /pfad/zu/coop && php bin/console reset-password:remove-expired --no-interaction
 ```
 
 Ein Dauer-Worker (Messenger) ist **nicht** nötig: Systemmails werden direkt verschickt.
+
+`app:notify` setzt auch die **Löschfristen** um (einstellbar je Organisation unter „Organisation bearbeiten“):
+
+| Was | Standard | Wirkung |
+|---|---|---|
+| Papierkorb | 30 Tage | Nachrichten im Papierkorb werden samt Anhängen endgültig gelöscht |
+| Nachrichten | unbegrenzt | E-Mails und interne Nachrichten älter als X Jahre werden gelöscht (auf dem IMAP-Server bleiben sie) |
+| Öffentliche Einsendungen | 2 Jahre | Umfrage-Antworten und Veranstaltungs-Anmeldungen |
+| Sicherheitsprotokoll | 1 Jahr | fest, IP-Adressen werden gekürzt gespeichert |
+| Unbestätigte Anfragen der öffentlichen Seite | 7 Tage | fest |
 
 ## Erste Schritte nach der Installation
 
@@ -70,6 +86,7 @@ Ein Dauer-Worker (Messenger) ist **nicht** nötig: Systemmails werden direkt ver
 2. Unter **Organisationen** die Stadtelternvertretung anlegen – wer sie anlegt, ist Administrator.
 3. In der Organisation ein **E-Mail-Konto** hinzufügen (IMAP + SMTP) und „Verbindung testen“.
 4. Mitglieder per E-Mail **einladen**.
+5. Das eigene Konto zum **Plattform-Admin** machen: `php bin/console app:user:promote <E-Mail>` (Rücknahme mit `--revoke`). Plattform-Admins sehen unter `/admin` alle Konten (sperren, löschen), die Organisationen (ohne deren Inhalte) und das Sicherheitsprotokoll.
 
 ## Updates
 
@@ -98,6 +115,8 @@ E-Mails liegen zusätzlich weiterhin auf dem IMAP-Server; Coop verändert dort n
 - Coop liest Postfächer nur (IMAP read-only); „Papierkorb“ wirkt nur in Coop.
 - Externe Bilder in HTML-Mails werden standardmäßig blockiert.
 - Anhänge liegen außerhalb des Web-Roots und werden nur angemeldeten, berechtigten Mitgliedern ausgeliefert.
+- Jede Person kann im Profil unter **Konto und Daten** ihre Daten als JSON herunterladen (Art. 15/20 DSGVO) und ihr Konto löschen (Art. 17). Beim Löschen werden persönliche Daten entfernt; Beiträge in gemeinsamen Bereichen bleiben unter „Gelöschtes Konto“ erhalten. Wer einziger Admin einer Organisation ist, muss vorher die Rolle übergeben.
+- **Zwei-Faktor-Anmeldung** (TOTP-App, Ersatzcodes) kann jede Person im Profil unter **Sicherheit** einschalten; dort gibt es auch „Überall abmelden“ und das persönliche Sicherheitsprotokoll. Für Admins einer Organisation wird sie dringend empfohlen.
 - Für den Betrieb sind ein Impressum und eine Datenschutzerklärung der betreibenden Stelle nötig (nicht Teil von Coop).
 
 ## Fehlersuche
@@ -105,3 +124,22 @@ E-Mails liegen zusätzlich weiterhin auf dem IMAP-Server; Coop verändert dort n
 - Logs: `var/log/prod.log`, E-Mail-Abruf: `var/log/mail-sync.log`
 - Abruf eines einzelnen Kontos testen: `php bin/console app:mail:sync <Konto-ID>`
 - Der letzte Abruffehler eines Kontos steht auch in der Oberfläche beim E-Mail-Konto.
+
+## Muster: Verzeichnis der Verarbeitungstätigkeiten (Art. 30 DSGVO)
+
+Vorlage für die betreibende Stelle – Angaben in eckigen Klammern ergänzen. Die Verantwortung liegt bei der Stadtelternvertretung bzw. dem Träger, nicht bei den Entwicklern von Coop.
+
+| Feld | Angabe |
+|---|---|
+| **Verantwortliche Stelle** | [Name der Stadtelternvertretung / des Trägervereins, Anschrift, Kontakt] |
+| **Datenschutzbeauftragte*r** | [falls vorhanden, sonst „nicht benannt (nicht erforderlich)“] |
+| **Bezeichnung** | Kollaborationsplattform „Coop“ für die Gremienarbeit der Elternvertretung |
+| **Zwecke** | Kommunikation der Mitglieder (E-Mail-Postfach, interne Nachrichten, Forum), Organisation von Sitzungen, Beschlüssen, Abstimmungen, Terminen und Aufgaben, Ablage von Dokumenten, Kontakt zu Eltern und Institutionen, Beteiligung der Öffentlichkeit (Kontaktformular, Umfragen, Anmeldungen, Verteiler) |
+| **Rechtsgrundlagen** | Art. 6 Abs. 1 lit. e DSGVO i. V. m. [Landesschulgesetz, § … Elternvertretung] für die Gremienarbeit; Art. 6 Abs. 1 lit. a (Einwilligung) für Verteiler-Abos und freiwillige Angaben in Umfragen; Art. 6 Abs. 1 lit. f für Sicherheitsprotokoll und Spamschutz |
+| **Betroffene** | Mitglieder und Gäste der Organisation; Eltern, Lehrkräfte, Schulleitungen, Verwaltung und weitere Absender*innen von E-Mails; Teilnehmende an Umfragen, Anmeldungen und Verteilern |
+| **Datenkategorien** | Mitglieder: Name, E-Mail, Profilbild, Funktion/Amtszeit, Inhalte (Nachrichten, Beiträge, Kommentare, Dateien), Anmeldeprotokoll mit gekürzter IP. Externe: Name, E-Mail-Adresse, Inhalt der Nachricht samt Anhängen, ggf. Kontaktdaten (Institution, Funktion, Telefon). Öffentlichkeit: Formulareingaben, ggf. Name/E-Mail |
+| **Besondere Kategorien (Art. 9)** | Nicht vorgesehen; in Elternanfragen können jedoch Gesundheits- oder Sozialdaten von Kindern enthalten sein → sparsam weitergeben, Löschfristen nutzen |
+| **Empfänger** | Mitglieder der jeweiligen Organisation (rollenbasiert, Gäste nur freigegebene Projekte); Hoster [Name, AV-Vertrag vom …]; E-Mail-Anbieter [Name, AV-Vertrag vom …] |
+| **Drittlandübermittlung** | Keine [bei Hosting in der EU]; Web-Push läuft über den Push-Dienst des jeweiligen Browsers (nur Titel und Link der Benachrichtigung) |
+| **Löschfristen** | Papierkorb [30] Tage; Nachrichten [unbegrenzt / X Jahre]; öffentliche Einsendungen [2] Jahre; Sicherheitsprotokoll 1 Jahr; unbestätigte Anfragen 7 Tage; Konten auf Wunsch sofort (Inhalte in gemeinsamen Bereichen werden anonymisiert); Mitgliedschaften nach Ende der Amtszeit ohne Zugriff, [Löschung nach … ] |
+| **Technische und organisatorische Maßnahmen** | HTTPS; Passwörter mit modernem Hash (bcrypt/argon2); optionale Zwei-Faktor-Anmeldung; Sperre nach wiederholten Fehlversuchen; „Überall abmelden“; Postfach-Passwörter verschlüsselt (aus `APP_SECRET`); Anhänge außerhalb des Web-Roots, Auslieferung nur nach Rechteprüfung; externe Bilder in E-Mails blockiert; Sicherheitsprotokoll; tägliche Datensicherung [Ort, Aufbewahrung]; Updates [Rhythmus] |

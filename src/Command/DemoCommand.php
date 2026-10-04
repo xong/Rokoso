@@ -90,7 +90,7 @@ final readonly class DemoCommand
     {
         $user = $this->users->findOneByEmail('demo@coop.test');
         if (null === $user) {
-            $user = (new User())->setEmail('demo@coop.test')->setName('Dana Demo')->setVerified(true);
+            $user = (new User())->setEmail('demo@coop.test')->setName('Dana Demo')->setVerified(true)->setPlatformAdmin(true);
             $user->setPassword($this->hasher->hashPassword($user, 'demo-passwort'));
             $user->resetCalendarToken();
             $this->em->persist($user);

@@ -46,6 +46,21 @@ class Organization
     #[Assert\Range(min: 0, max: 90)]
     private int $invitationDays = 7;
 
+    /** Days after which messages in the trash are deleted for good */
+    #[ORM\Column(options: ['default' => 30])]
+    #[Assert\Range(min: 1, max: 365)]
+    private int $trashDays = 30;
+
+    /** Years after which messages (inbox, sent, internal) are deleted; null = keep */
+    #[ORM\Column(nullable: true)]
+    #[Assert\Range(min: 1, max: 30)]
+    private ?int $messageRetentionYears = null;
+
+    /** Years after which survey answers and event signups from the public page are deleted; null = keep */
+    #[ORM\Column(nullable: true, options: ['default' => 2])]
+    #[Assert\Range(min: 1, max: 30)]
+    private ?int $submissionRetentionYears = 2;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -133,6 +148,42 @@ class Organization
     public function setInvitationDays(?int $invitationDays): static
     {
         $this->invitationDays = $invitationDays ?? 0;
+
+        return $this;
+    }
+
+    public function getTrashDays(): int
+    {
+        return $this->trashDays;
+    }
+
+    public function setTrashDays(?int $trashDays): static
+    {
+        $this->trashDays = $trashDays ?? 30;
+
+        return $this;
+    }
+
+    public function getMessageRetentionYears(): ?int
+    {
+        return $this->messageRetentionYears;
+    }
+
+    public function setMessageRetentionYears(?int $years): static
+    {
+        $this->messageRetentionYears = $years;
+
+        return $this;
+    }
+
+    public function getSubmissionRetentionYears(): ?int
+    {
+        return $this->submissionRetentionYears;
+    }
+
+    public function setSubmissionRetentionYears(?int $years): static
+    {
+        $this->submissionRetentionYears = $years;
 
         return $this;
     }

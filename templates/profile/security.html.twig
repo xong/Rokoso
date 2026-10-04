@@ -1,0 +1,62 @@
+{% extends 'profile/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block detail_title %}{{ 'profile.section_security'|trans }}{% endblock %}
+
+{% block form %}
+    <div class="space-y-8">
+        <section aria-labelledby="two-factor-heading" class="space-y-3">
+            <h2 id="two-factor-heading" class="text-base font-semibold">{{ 'two_factor.title'|trans }}</h2>
+            <p class="text-slate-600">{{ 'two_factor.intro'|trans }}</p>
+            {% if app.user.totpAuthenticationEnabled %}
+                <p class="flex items-center gap-2 font-medium text-green-700">
+                    {{ ux_icon('lucide:shield-check', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    {{ 'two_factor.active'|trans }}
+                </p>
+
+                {% if new_codes %}
+                    <div class="rounded-md border border-amber-300 bg-amber-50 p-4 text-amber-950" role="status">
+                        <h3 class="font-semibold">{{ 'two_factor.codes_title'|trans }}</h3>
+                        <p class="mt-1 text-sm">{{ 'two_factor.codes_hint'|trans }}</p>
+                        <ul role="list" class="mt-3 grid grid-cols-2 gap-1 font-mono text-sm">
+                            {% for code in new_codes %}<li>{{ code }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <p class="text-sm text-slate-600">{{ 'two_factor.codes_left'|trans({'%count%': app.user.countBackupCodes}) }}</p>
+                {% endif %}
+
+                {{ ui.post_button(path('profile_2fa_codes'), 'totp-codes', 'two_factor.renew_codes',
+                    {class: 'btn-secondary', icon: 'lucide:refresh-cw', confirm: 'two_factor.renew_confirm'}) }}
+
+                <details class="rounded-md border border-slate-200 p-3" {% if disable_form.vars.submitted %}open{% endif %}>
+                    <summary class="cursor-pointer font-medium">{{ 'two_factor.disable'|trans }}</summary>
+                    <div class="mt-3">
+                        {{ form_start(disable_form) }}
+                            {{ form_row(disable_form.currentPassword) }}
+                            {{ form_rest(disable_form) }}
+                            <button type="submit" class="btn-danger">{{ 'two_factor.disable'|trans }}</button>
+                        {{ form_end(disable_form) }}
+                    </div>
+                </details>
+            {% else %}
+                <a href="{{ path('profile_2fa_setup') }}" class="btn-primary">
+                    {{ ux_icon('lucide:smartphone', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    {{ 'two_factor.setup'|trans }}
+                </a>
+            {% endif %}
+        </section>
+
+        <section aria-labelledby="sessions-heading" class="space-y-3">
+            <h2 id="sessions-heading" class="text-base font-semibold">{{ 'security_log.sessions'|trans }}</h2>
+            <p class="text-slate-600">{{ 'security_log.sessions_intro'|trans }}</p>
+            {{ ui.post_button(path('profile_logout_everywhere'), 'logout-everywhere', 'security_log.logout_everywhere',
+                {class: 'btn-secondary', icon: 'lucide:log-out', confirm: 'security_log.logout_everywhere_confirm'}) }}
+        </section>
+
+        <section aria-labelledby="log-heading" class="space-y-3">
+            <h2 id="log-heading" class="text-base font-semibold">{{ 'security_log.title'|trans }}</h2>
+            {{ include('_partials/security_log.html.twig') }}
+        </section>
+    </div>
+{% endblock %}

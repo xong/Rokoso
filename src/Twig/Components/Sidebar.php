@@ -24,7 +24,7 @@ final class Sidebar
     /**
      * Groups of menu items; a group with label null has no heading.
      *
-     * @var list<array{label: ?string, items: list<array{label: string, icon: string, route: string, match: list<string>, children?: list<array{label: string, icon: string, route: string}>}>}>
+     * @var list<array{label: ?string, items: list<array{label: string, icon: string, route: string, match: list<string>, role?: string, children?: list<array{label: string, icon: string, route: string}>}>}>
      */
     private const array GROUPS = [
         ['label' => null, 'items' => [
@@ -69,6 +69,8 @@ final class Sidebar
                 'route' => 'organization_index',
                 'match' => ['organization_', 'mail_account_', 'mail_rule_', 'snippet_', 'public_settings', 'public_topic_'],
             ],
+            // only for platform admins (see getGroups())
+            ['label' => 'nav.platform', 'icon' => 'lucide:server-cog', 'route' => 'platform_users', 'match' => ['platform_'], 'role' => 'ROLE_PLATFORM_ADMIN'],
         ]],
     ];
 
@@ -157,6 +159,9 @@ final class Sidebar
         foreach (self::GROUPS as $group) {
             $items = [];
             foreach ($group['items'] as $item) {
+                if (isset($item['role']) && !$this->security->isGranted($item['role'])) {
+                    continue;
+                }
                 $item['active'] = $item['route'] === $best;
                 $children = [];
                 foreach ($item['children'] ?? [] as $child) {

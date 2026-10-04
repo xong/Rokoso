@@ -21,6 +21,8 @@
             {key: 'email', route: 'profile_email', icon: 'lucide:at-sign', label: 'profile.section_email'},
             {key: 'notifications', route: 'profile_notifications', icon: 'lucide:bell', label: 'profile.section_notifications'},
             {key: 'calendar', route: 'profile_calendar', icon: 'lucide:calendar-sync', label: 'profile.section_calendar'},
+            {key: 'security', route: 'profile_security', icon: 'lucide:shield-check', label: 'profile.section_security'},
+            {key: 'account', route: 'profile_account', icon: 'lucide:user-x', label: 'profile.section_account'},
         ] %}
             {% set active = section|default('') == item.key %}
             <li>

@@ -49,6 +49,23 @@ final class OrganizationFormType extends AbstractType
                 'label' => 'organization.invitation_days',
                 'help' => 'organization.invitation_days_help',
                 'attr' => ['min' => 0, 'max' => 90],
+            ])
+            ->add('trashDays', IntegerType::class, [
+                'label' => 'organization.trash_days',
+                'help' => 'organization.trash_days_help',
+                'attr' => ['min' => 1, 'max' => 365],
+            ])
+            ->add('messageRetentionYears', IntegerType::class, [
+                'label' => 'organization.message_retention',
+                'help' => 'organization.message_retention_help',
+                'required' => false,
+                'attr' => ['min' => 1, 'max' => 30],
+            ])
+            ->add('submissionRetentionYears', IntegerType::class, [
+                'label' => 'organization.submission_retention',
+                'help' => 'organization.submission_retention_help',
+                'required' => false,
+                'attr' => ['min' => 1, 'max' => 30],
             ]);
     }
 

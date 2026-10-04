@@ -1,0 +1,28 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'security.two_factor_title'|trans }}{% endblock %}
+
+{% block content %}
+    <form method="post" action="{{ checkPathUrl ? checkPathUrl : path(checkPathRoute) }}" data-turbo="false">
+        {% if authenticationError %}
+            <div role="alert" class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+                {{ authenticationError|trans(authenticationErrorData, 'SchebTwoFactorBundle') }}
+            </div>
+        {% endif %}
+
+        <p id="two-factor-intro" class="mb-4 text-sm text-slate-600">{{ 'security.two_factor_intro'|trans }}</p>
+        <div class="mb-5">
+            <label for="_auth_code" class="label">{{ 'security.two_factor_code'|trans }}</label>
+            <input id="_auth_code" type="text" name="{{ authCodeParameterName }}" class="input" autocomplete="one-time-code"
+                   autocapitalize="none" spellcheck="false" required autofocus aria-describedby="two-factor-intro">
+        </div>
+        {% if isCsrfProtectionEnabled %}
+            <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
+        {% endif %}
+        <button type="submit" class="btn-primary w-full">{{ 'security.two_factor_submit'|trans }}</button>
+    </form>
+{% endblock %}
+
+{% block below %}
+    <p class="mt-4 text-sm text-slate-600"><a class="link" href="{{ logoutPath }}">{{ 'security.two_factor_cancel'|trans }}</a></p>
+{% endblock %}

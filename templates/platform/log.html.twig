@@ -1,0 +1,8 @@
+{% extends 'platform/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'security_log.title'|trans }}{% endblock %}
+
+{% block content %}
+    <p class="mb-4 text-sm text-slate-600">{{ 'platform.log_intro'|trans }}</p>
+    {{ include('_partials/security_log.html.twig', {show_user: true}) }}
+{% endblock %}

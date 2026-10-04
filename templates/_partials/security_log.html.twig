@@ -1,0 +1,33 @@
+{# Tabelle des Sicherheitsprotokolls; show_user = Spalte „Konto“ (Plattform-Admin) #}
+{% set show_user = show_user ?? false %}
+{% if events is empty %}
+    <p class="text-slate-500">{{ 'security_log.empty'|trans }}</p>
+{% else %}
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <caption class="sr-only">{{ 'security_log.title'|trans }}</caption>
+            <thead class="text-xs text-slate-500">
+                <tr>
+                    <th scope="col" class="py-1 pr-3 font-medium">{{ 'security_log.when'|trans }}</th>
+                    {% if show_user %}<th scope="col" class="py-1 pr-3 font-medium">{{ 'security_log.account'|trans }}</th>{% endif %}
+                    <th scope="col" class="py-1 pr-3 font-medium">{{ 'security_log.what'|trans }}</th>
+                    <th scope="col" class="py-1 font-medium">{{ 'security_log.ip'|trans }}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for event in events %}
+                    <tr>
+                        <td class="whitespace-nowrap py-1.5 pr-3"><time datetime="{{ event.createdAt|date('c') }}">{{ event.createdAt|date('d.m.Y H:i') }}</time></td>
+                        {% if show_user %}<td class="py-1.5 pr-3">{{ event.user ? event.user.name : '–' }}</td>{% endif %}
+                        <td class="py-1.5 pr-3">
+                            {{ ('security_log.type.' ~ event.type)|trans }}
+                            {% if event.actor %}<span class="text-slate-500">({{ 'security_log.by'|trans({'%name%': event.actor.name}) }})</span>{% endif %}
+                            {% if event.detail %}<span class="block max-w-md truncate text-xs text-slate-500" title="{{ event.detail }}">{{ event.detail }}</span>{% endif %}
+                        </td>
+                        <td class="py-1.5 font-mono text-xs">{{ event.ip }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}

@@ -4,6 +4,7 @@ app:
 
 nav:
     label: Hauptnavigation
+    platform: Plattform
     today: Heute
     notifications: Benachrichtigungen
     tasks: Aufgaben
@@ -52,8 +53,101 @@ compose_menu:
     event: Termin
     task: Aufgabe
 
+two_factor:
+    title: Zwei-Faktor-Anmeldung
+    intro: Zusätzlich zum Passwort fragt Coop bei der Anmeldung einen sechsstelligen Code aus einer Authenticator-App ab (z. B. Aegis, FreeOTP, Google Authenticator). So bleibt dein Konto geschützt, auch wenn jemand dein Passwort kennt.
+    active: Die Zwei-Faktor-Anmeldung ist eingeschaltet.
+    setup: Zwei-Faktor-Anmeldung einrichten
+    step_app: Installiere eine Authenticator-App auf deinem Smartphone.
+    step_scan: Scanne den QR-Code mit der App oder gib den Schlüssel von Hand ein.
+    step_code: Gib den Code ein, den die App anzeigt.
+    qr_alt: QR-Code zum Einrichten der Authenticator-App
+    manual: 'Schlüssel zur manuellen Eingabe:'
+    code: Code aus der App
+    activate: Einschalten
+    wrong_code: Der Code stimmt nicht. Prüfe die Uhrzeit deines Smartphones und versuche es erneut.
+    enabled: Die Zwei-Faktor-Anmeldung ist eingeschaltet. Bewahre die Ersatzcodes gut auf.
+    disabled: Die Zwei-Faktor-Anmeldung ist ausgeschaltet.
+    disable: Zwei-Faktor-Anmeldung ausschalten
+    codes_title: Deine Ersatzcodes
+    codes_hint: Jeder Code funktioniert einmal, falls du dein Smartphone nicht zur Hand hast. Die Codes werden nur jetzt angezeigt – drucke sie aus oder speichere sie in deinem Passwortmanager.
+    codes_left: '{0} Du hast keine Ersatzcodes mehr.|{1} Du hast noch einen Ersatzcode.|]1,Inf[ Du hast noch %count% Ersatzcodes.'
+    renew_codes: Neue Ersatzcodes erzeugen
+    renew_confirm: Die bisherigen Ersatzcodes werden ungültig. Fortfahren?
+
+security_log:
+    title: Sicherheitsprotokoll
+    empty: Noch keine Einträge.
+    when: Zeitpunkt
+    what: Ereignis
+    ip: IP (gekürzt)
+    by: 'durch %name%'
+    account: Konto
+    sessions: Angemeldete Geräte
+    sessions_intro: Wenn du ein Gerät verloren hast oder dich an einem fremden Rechner nicht abgemeldet hast, meldest du hier alle Geräte auf einmal ab – auch „Angemeldet bleiben“ verfällt.
+    logout_everywhere: Überall abmelden
+    logout_everywhere_confirm: Alle Geräte einschließlich dieses werden abgemeldet. Fortfahren?
+    type:
+        login: Anmeldung
+        login_failed: Fehlgeschlagene Anmeldung
+        two_factor_failed: Falscher Bestätigungscode
+        two_factor_enabled: Zwei-Faktor-Anmeldung eingeschaltet
+        two_factor_disabled: Zwei-Faktor-Anmeldung ausgeschaltet
+        backup_codes_renewed: Neue Ersatzcodes erzeugt
+        logout_everywhere: Überall abgemeldet
+        password_changed: Passwort geändert
+        password_reset: Passwort zurückgesetzt
+        email_changed: E-Mail-Adresse geändert
+        data_exported: Daten exportiert
+        account_deleted: Konto gelöscht
+        account_blocked: Konto gesperrt
+        account_unblocked: Konto entsperrt
+        role_changed: Rolle geändert
+        member_removed: Aus Organisation entfernt
+        organization_deleted: Organisation gelöscht
+        platform_admin: Plattform-Admin ernannt
+
+platform:
+    title: Plattform
+    intro: Betrieb der Installation. Inhalte der Organisationen sind hier nicht sichtbar.
+    users: Benutzerkonten
+    organizations: Organisationen
+    search: Name oder E-Mail-Adresse
+    no_users: Keine Konten gefunden.
+    no_organizations: Noch keine Organisationen.
+    name: Name
+    status: Status
+    since: Angelegt
+    actions: Aktionen
+    members: Mitglieder
+    admins: Admins
+    state_active: Aktiv
+    state_blocked: Gesperrt
+    state_unverified: Nicht bestätigt
+    is_admin: Plattform-Admin
+    block: Sperren
+    unblock: Entsperren
+    blocked: Das Konto ist gesperrt und überall abgemeldet.
+    unblocked: Das Konto ist entsperrt.
+    delete: Löschen
+    delete_confirm: Das Konto wird endgültig gelöscht und anonymisiert. Fortfahren?
+    delete_blocked: 'Das Konto ist einziger Admin in: %organizations%. Dort muss zuerst jemand anderes Admin werden.'
+    deleted: Das Konto wurde gelöscht.
+    log_intro: Anmeldungen, Rollenänderungen und Löschungen aller Konten. Einträge werden nach einem Jahr gelöscht, IP-Adressen sind gekürzt.
+
+account:
+    export_title: Meine Daten herunterladen
+    export_intro: Du erhältst eine JSON-Datei mit deinem Profil, deinen Mitgliedschaften und allem, was du selbst geschrieben hast (Nachrichten, Beiträge, Kommentare, Termine, Entwürfe), sowie deinem Sicherheitsprotokoll.
+    export: Daten herunterladen
+    delete_title: Konto löschen
+    delete_intro: Deine persönlichen Daten, Mitgliedschaften, Entwürfe, Merkliste und Benachrichtigungen werden gelöscht. Beiträge in gemeinsamen Bereichen (Forum, Protokolle, Beschlüsse) bleiben erhalten und erscheinen unter „Gelöschtes Konto“.
+    delete_blocked: 'Du bist in diesen Organisationen der einzige Admin. Ernenne zuerst jemand anderen zum Admin oder lösche die Organisation:'
+    delete_confirm: Dein Konto wird endgültig gelöscht. Das lässt sich nicht rückgängig machen. Fortfahren?
+    delete: Konto endgültig löschen
+    deleted: Dein Konto wurde gelöscht.
+
 admin:
-    intro: Hier verwaltet ihr Organisationen, Mitglieder, E-Mail-Konten, Regeln, Textbausteine und die öffentliche Mitwirkung.
+    intro:Hier verwaltet ihr Organisationen, Mitglieder, E-Mail-Konten, Regeln, Textbausteine und die öffentliche Mitwirkung.
 
 empty:
     folder: Ordner anlegen
@@ -112,6 +206,11 @@ security:
     remember_me: Angemeldet bleiben
     no_account: Noch kein Konto?
     back_to_login: Zurück zur Anmeldung
+    two_factor_title: Bestätigungscode
+    two_factor_intro: Gib den sechsstelligen Code aus deiner Authenticator-App ein – oder einen deiner Ersatzcodes.
+    two_factor_code: Code
+    two_factor_submit: Bestätigen
+    two_factor_cancel: Abbrechen und abmelden
 
 registration:
     title: Registrieren
@@ -143,6 +242,8 @@ profile:
     section_email: E-Mail-Adresse
     section_notifications: Benachrichtigungen
     section_calendar: Kalender-Abo
+    section_security: Sicherheit
+    section_account: Konto und Daten
     calendar:
         intro: Mit einem persönlichen Link kannst du deine Coop-Termine in Outlook, Thunderbird, Google- oder Apple-Kalender abonnieren. Der Kalender aktualisiert sich dort automatisch, Änderungen sind nur in Coop möglich.
         url: Abo-Adresse
@@ -246,6 +347,13 @@ organization:
     quorum_percent_help: Anteil der stimmberechtigten Mitglieder, die anwesend sein müssen.
     invitation_days: Ladungsfrist (Tage)
     invitation_days_help: Mindestabstand zwischen Einladung und Sitzung. 0 = keine Frist.
+    retention_legend: Löschfristen (Datenschutz)
+    trash_days: Papierkorb leeren nach (Tagen)
+    trash_days_help: Gelöschte Nachrichten werden danach endgültig entfernt.
+    message_retention: Nachrichten löschen nach (Jahren)
+    message_retention_help: Gilt für E-Mails und interne Nachrichten. Leer = unbegrenzt aufbewahren.
+    submission_retention: Öffentliche Einsendungen löschen nach (Jahren)
+    submission_retention_help: Umfrage-Antworten und Anmeldungen von der öffentlichen Seite. Leer = unbegrenzt.
     voting_right: stimmberechtigt
 
 membership:

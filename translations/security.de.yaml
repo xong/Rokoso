@@ -1,2 +1,3 @@
 security:
     not_verified: Bitte bestätige zuerst deine E-Mail-Adresse über den Link, den wir dir geschickt haben.
+    blocked: Dieses Konto ist gesperrt oder gelöscht.

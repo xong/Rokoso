@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Form\EmailOnlyType;
 use App\Form\NewPasswordType;
 use App\Repository\UserRepository;
+use App\Security\SecurityLog;
 use App\Service\SystemMailer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,6 +29,7 @@ final class ResetPasswordController extends AbstractController
     public function __construct(
         private readonly ResetPasswordHelperInterface $resetPasswordHelper,
         private readonly EntityManagerInterface $em,
+        private readonly SecurityLog $log,
     ) {
     }
 
@@ -96,6 +98,7 @@ final class ResetPasswordController extends AbstractController
             // Wer den Link aus der Mail nutzt, hat die Adresse bestätigt.
             $user->setVerified(true);
             $this->em->flush();
+            $this->log->record('password_reset', $user);
             $this->cleanSessionAfterReset();
             $this->addFlash('success', 'reset.done');
 

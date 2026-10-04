@@ -10,6 +10,7 @@ use App\Form\EmailOnlyType;
 use App\Form\ProfileFormType;
 use App\Repository\UserRepository;
 use App\Security\EmailVerifier;
+use App\Security\SecurityLog;
 use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,7 +28,7 @@ use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 #[Route('/profile')]
 final class ProfileController extends AbstractController
 {
-    public function __construct(private readonly EntityManagerInterface $em)
+    public function __construct(private readonly EntityManagerInterface $em, private readonly SecurityLog $log)
     {
     }
 
@@ -74,6 +75,7 @@ final class ProfileController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $user->setPassword($hasher->hashPassword($user, (string) $form->get('plainPassword')->getData()));
             $this->em->flush();
+            $this->log->record('password_changed', $user);
             $this->addFlash('success', 'profile.password_changed');
 
             return $this->redirectToRoute('profile_password');
@@ -127,6 +129,7 @@ final class ProfileController extends AbstractController
             $this->addFlash('error', 'user.email_taken');
         } else {
             $user->setEmail($pending);
+            $this->log->record('email_changed', $user);
             $this->addFlash('success', 'profile.email_changed');
         }
         $user->setPendingEmail(null);

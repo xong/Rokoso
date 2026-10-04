@@ -1,0 +1,32 @@
+{% extends 'profile/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'two_factor.setup'|trans }}{% endblock %}
+
+{% block form %}
+    <div class="space-y-4">
+        <ol class="list-decimal space-y-2 pl-5 text-slate-700">
+            <li>{{ 'two_factor.step_app'|trans }}</li>
+            <li>{{ 'two_factor.step_scan'|trans }}</li>
+            <li>{{ 'two_factor.step_code'|trans }}</li>
+        </ol>
+        <img src="{{ qr }}" alt="{{ 'two_factor.qr_alt'|trans }}" width="200" height="200" class="rounded-md bg-white p-2">
+        <div>
+            <p class="text-sm text-slate-600">{{ 'two_factor.manual'|trans }}</p>
+            <p class="font-mono text-sm select-all">{{ secret }}</p>
+        </div>
+        <form method="post" class="space-y-3">
+            <input type="hidden" name="_token" value="{{ csrf_token('totp-setup') }}">
+            <div>
+                <label for="totp-code" class="label">{{ 'two_factor.code'|trans }}</label>
+                <input id="totp-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required
+                       class="input w-40 font-mono" pattern="[0-9 ]{6,7}"
+                       {% if error %}aria-invalid="true" aria-describedby="totp-error"{% endif %} autofocus>
+                {% if error %}<p id="totp-error" role="alert" class="mt-1 text-sm text-red-700">{{ 'two_factor.wrong_code'|trans }}</p>{% endif %}
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'two_factor.activate'|trans }}</button>
+                <a href="{{ path('profile_security') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}
