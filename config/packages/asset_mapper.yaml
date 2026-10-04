@@ -12,7 +12,6 @@ framework:
             - '*/assets/stimulus_bootstrap.js'
             - '*/assets/controllers/*'
             - '*/assets/controllers.json'
-            - '*/assets/vendor/*'
             # Stimulus loader of the bundle would look for the excluded controllers (500 in the dev server)
             - '*/stimulus-bundle/assets/dist/*'
         missing_import_mode: strict
