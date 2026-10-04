@@ -15,7 +15,8 @@
     <a href="#main" class="sr-only z-50 rounded-md bg-surface px-4 py-2 shadow focus:not-sr-only focus:fixed focus:top-2 focus:left-2">{{ 'nav.skip_to_content'|trans }}</a>
 
     <div class="flex h-dvh overflow-hidden"
-         data-controller="shell"
+         data-controller="shell palette live-counts"
+         data-live-counts-url-value="{{ path('counts') }}"
          data-shell-collapsed-value="{{ nav_collapsed ? 'true' : 'false' }}"
          data-shell-collapse-label-value="{{ 'nav.collapse'|trans }}"
          data-shell-expand-label-value="{{ 'nav.expand'|trans }}"
@@ -67,5 +68,21 @@
                 </div>
             </section>
         </main>
+
+        {{ include('_partials/palette.html.twig') }}
+
+        <div class="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4" role="status" aria-live="polite">
+            <div data-live-counts-target="notice" hidden
+                 class="pointer-events-auto flex items-center gap-3 rounded-lg bg-slate-900 py-2 pr-2 pl-4 text-sm text-white shadow-lg">
+                {{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                <span>{{ 'live.new_messages'|trans }}</span>
+                <button type="button" data-action="live-counts#reload" class="rounded-md bg-white/15 px-2.5 py-1 font-medium hover:bg-white/25">
+                    {{ ux_icon('lucide:refresh-cw', {class: 'mr-1 inline size-3.5', 'aria-hidden': 'true'}) }}{{ 'live.reload'|trans }}
+                </button>
+                <button type="button" data-action="live-counts#dismiss" class="grid size-7 place-items-center rounded-md hover:bg-white/15" aria-label="{{ 'action.close'|trans }}">
+                    {{ ux_icon('lucide:x', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                </button>
+            </div>
+        </div>
     </div>
 {% endblock %}

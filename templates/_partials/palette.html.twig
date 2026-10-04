@@ -1,0 +1,93 @@
+{#
+    Befehlspalette (Strg+K) und Übersicht der Tastenkürzel (?).
+    Gesteuert vom Stimulus-Controller „palette“ (hängt am Shell-Element in layout/app.html.twig).
+#}
+{% set commands = [
+    {label: 'nav.today', icon: 'lucide:sun', url: path('home'), keys: 'g h'},
+    {label: 'nav.mail_inbox', icon: 'lucide:inbox', url: path('mail_inbox'), keys: 'g i'},
+    {label: 'nav.mail_compose', icon: 'lucide:square-pen', url: path('mail_compose'), keys: 'c'},
+    {label: 'nav.mail_message', icon: 'lucide:message-square-plus', url: path('mail_message_new')},
+    {label: 'nav.calendar', icon: 'lucide:calendar', url: path('calendar_month'), keys: 'g k'},
+    {label: 'nav.tasks', icon: 'lucide:list-checks', url: path('task_index'), keys: 'g t'},
+    {label: 'nav.meetings', icon: 'lucide:presentation', url: path('meeting_index'), keys: 'g s'},
+    {label: 'nav.resolutions', icon: 'lucide:gavel', url: path('resolution_index')},
+    {label: 'nav.polls', icon: 'lucide:vote', url: path('poll_index')},
+    {label: 'nav.surveys', icon: 'lucide:clipboard-list', url: path('survey_index')},
+    {label: 'nav.files', icon: 'lucide:folder', url: path('file_index'), keys: 'g d'},
+    {label: 'nav.shelf', icon: 'lucide:bookmark', url: path('shelf_index')},
+    {label: 'nav.knowledge', icon: 'lucide:book-open', url: path('wiki_index'), keys: 'g w'},
+    {label: 'nav.forum', icon: 'lucide:messages-square', url: path('forum_index'), keys: 'g f'},
+    {label: 'nav.contacts', icon: 'lucide:contact', url: path('contact_index'), keys: 'g a'},
+    {label: 'nav.projects', icon: 'lucide:folder-kanban', url: path('project_index'), keys: 'g p'},
+    {label: 'nav.organizations', icon: 'lucide:building-2', url: path('organization_index')},
+    {label: 'nav.notifications', icon: 'lucide:bell', url: path('notification_index'), keys: 'g n'},
+    {label: 'nav.profile', icon: 'lucide:user', url: path('profile_edit')},
+] %}
+
+<dialog id="command-palette" data-palette-target="dialog" aria-labelledby="palette-heading"
+        data-action="close->palette#closed click->palette#backdrop"
+        class="m-auto mt-[12vh] w-[min(36rem,calc(100vw-2rem))] rounded-xl bg-surface p-0 text-slate-900 shadow-2xl ring-1 ring-slate-200 backdrop:bg-black/40">
+    <h2 id="palette-heading" class="sr-only">{{ 'palette.title'|trans }}</h2>
+    <div class="relative border-b border-slate-200">
+        {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-3.5 left-3.5 size-4 text-slate-400', 'aria-hidden': 'true'}) }}
+        <label for="palette-input" class="sr-only">{{ 'palette.label'|trans }}</label>
+        <input id="palette-input" type="text" role="combobox" autocomplete="off" spellcheck="false"
+               aria-expanded="true" aria-controls="palette-list" aria-autocomplete="list" aria-describedby="palette-hint"
+               placeholder="{{ 'palette.placeholder'|trans }}"
+               data-palette-target="input" data-action="input->palette#filter keydown->palette#navigate"
+               class="w-full border-0 bg-transparent py-3 pr-3 pl-10 text-base focus:ring-0 focus:outline-none">
+    </div>
+    <ul id="palette-list" role="listbox" aria-label="{{ 'palette.results'|trans }}" data-palette-target="list" class="max-h-80 overflow-y-auto p-1">
+        {% for command in commands %}
+            <li role="option" id="palette-option-{{ loop.index }}" aria-selected="false" data-url="{{ command.url }}" data-keys="{{ command.keys ?? '' }}" data-palette-target="option"
+                data-action="click->palette#choose mousemove->palette#hover"
+                class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 aria-selected:bg-brand-50 aria-selected:text-brand-700">
+                {{ ux_icon(command.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                <span class="truncate">{{ command.label|trans }}</span>
+                {% if command.keys is defined %}<kbd class="ml-auto font-mono text-xs text-slate-400" aria-hidden="true">{{ command.keys }}</kbd>{% endif %}
+            </li>
+        {% endfor %}
+        <li role="option" id="palette-option-search" aria-selected="false" data-url="{{ path('search') }}" data-search="1" data-palette-target="option"
+            data-action="click->palette#choose mousemove->palette#hover"
+            class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 aria-selected:bg-brand-50 aria-selected:text-brand-700">
+            {{ ux_icon('lucide:search', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+            <span class="truncate" data-palette-target="searchLabel" data-template="{{ 'palette.search_for'|trans({'%q%': '__Q__'}) }}">{{ 'palette.search'|trans }}</span>
+        </li>
+    </ul>
+    <p id="palette-hint" class="flex flex-wrap gap-x-4 gap-y-1 border-t border-slate-200 px-3 py-2 text-xs text-slate-500">
+        <span><kbd class="font-mono">↑↓</kbd> {{ 'palette.hint_move'|trans }}</span>
+        <span><kbd class="font-mono">↵</kbd> {{ 'palette.hint_open'|trans }}</span>
+        <span><kbd class="font-mono">Esc</kbd> {{ 'palette.hint_close'|trans }}</span>
+        <span><kbd class="font-mono">?</kbd> {{ 'shortcuts.title'|trans }}</span>
+    </p>
+    <p class="sr-only" role="status" data-palette-target="status"></p>
+</dialog>
+
+<dialog id="shortcuts-dialog" data-palette-target="help" aria-labelledby="shortcuts-heading"
+        data-action="click->palette#backdrop"
+        class="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-xl bg-surface p-0 text-slate-900 shadow-2xl ring-1 ring-slate-200 backdrop:bg-black/40">
+    <div class="flex items-center border-b border-slate-200 px-4 py-3">
+        <h2 id="shortcuts-heading" class="font-semibold">{{ 'shortcuts.title'|trans }}</h2>
+        <form method="dialog" class="ml-auto">
+            <button type="submit" class="btn-icon" aria-label="{{ 'action.close'|trans }}" autofocus>
+                {{ ux_icon('lucide:x', {class: 'size-4', 'aria-hidden': 'true'}) }}
+            </button>
+        </form>
+    </div>
+    <div class="max-h-[70vh] overflow-y-auto p-4">
+        <h3 class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'shortcuts.general'|trans }}</h3>
+        <dl class="mb-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+            <dt><kbd class="kbd">Strg</kbd> + <kbd class="kbd">K</kbd></dt><dd>{{ 'palette.title'|trans }}</dd>
+            <dt><kbd class="kbd">/</kbd></dt><dd>{{ 'shortcuts.search'|trans }}</dd>
+            <dt><kbd class="kbd">?</kbd></dt><dd>{{ 'shortcuts.help'|trans }}</dd>
+            <dt><kbd class="kbd">c</kbd></dt><dd>{{ 'nav.mail_compose'|trans }}</dd>
+        </dl>
+        <h3 class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'shortcuts.goto'|trans }}</h3>
+        <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+            {% for command in commands|filter(c => c.keys is defined and c.keys starts with 'g ') %}
+                <dt><kbd class="kbd">g</kbd> <kbd class="kbd">{{ command.keys|last }}</kbd></dt><dd>{{ command.label|trans }}</dd>
+            {% endfor %}
+        </dl>
+        <p class="mt-4 text-xs text-slate-500">{{ 'shortcuts.note'|trans }}</p>
+    </div>
+</dialog>

@@ -16,12 +16,14 @@ final class NavigationTest extends AppTestCase
         self::assertResponseRedirects('/login');
     }
 
-    public function testHomeRedirectsToInbox(): void
+    public function testHomeShowsTodayOverview(): void
     {
         $this->login();
         $this->client->request('GET', '/');
 
-        self::assertResponseRedirects('/mail');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Heute');
+        self::assertSelectorExists('nav a[href="/"][aria-current="page"]');
     }
 
     public function testCollapsedNavigationIsRenderedFromCookie(): void
@@ -30,7 +32,7 @@ final class NavigationTest extends AppTestCase
         $this->client->getCookieJar()->set(new Cookie('nav_collapsed', '1'));
         $this->client->request('GET', '/profile');
 
-        self::assertSelectorExists('[data-controller="shell"][data-collapsed="true"]');
+        self::assertSelectorExists('[data-controller~="shell"][data-collapsed="true"]');
         self::assertSelectorTextContains('#main-nav', 'Anna Schulz');
     }
 

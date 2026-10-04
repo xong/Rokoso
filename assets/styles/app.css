@@ -74,6 +74,7 @@
     .btn-danger { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 bg-red-600 text-white hover:bg-red-700 dark:hover:bg-red-500; }
     .btn-ghost { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 text-slate-600 hover:bg-slate-100; }
     .btn-icon { @apply grid size-9 shrink-0 place-items-center rounded-md text-slate-600 hover:bg-slate-100 hover:text-slate-900; }
+    .kbd { @apply inline-block min-w-5 rounded border border-slate-300 bg-slate-50 px-1 text-center font-mono text-xs text-slate-700; }
     .input {
         @apply block w-full rounded-md border-0 bg-surface px-3 py-2 text-sm text-slate-900 ring-1 ring-slate-300 ring-inset placeholder:text-slate-400 focus:ring-2 focus:ring-brand-600 focus:outline-none aria-invalid:ring-red-500;
     }

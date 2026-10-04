@@ -75,4 +75,28 @@ class StoredFileRepository extends ServiceEntityRepository
             ->orderBy('f.filename')
             ->getQuery()->getResult();
     }
+
+    /**
+     * Files in the given folders whose name contains the query.
+     *
+     * @param list<Folder> $folders
+     *
+     * @return list<StoredFile>
+     */
+    public function searchInFolders(array $folders, string $query, int $limit = 10): array
+    {
+        if ([] === $folders) {
+            return [];
+        }
+
+        /* @var list<StoredFile> */
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.folder IN (:folders)')
+            ->andWhere('f.filename LIKE :q')
+            ->setParameter('folders', $folders)
+            ->setParameter('q', '%'.addcslashes($query, '%_\\').'%')
+            ->orderBy('f.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()->getResult();
+    }
 }

@@ -12,6 +12,15 @@
         </button>
     </div>
 
+    <div class="px-2 pt-2">
+        <a href="{{ path('search') }}" data-action="palette#open" aria-haspopup="dialog" aria-keyshortcuts="Control+K"
+           class="flex items-center gap-3 rounded-md border border-slate-200 px-3 py-1.5 text-slate-500 hover:bg-slate-100 lg:collapsed:justify-center lg:collapsed:border-0 lg:collapsed:px-0 lg:collapsed:py-2">
+            {{ ux_icon('lucide:search', {class: 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
+            <span class="truncate lg:collapsed:sr-only">{{ 'palette.open'|trans }}</span>
+            <kbd class="kbd ml-auto max-lg:hidden lg:collapsed:hidden" aria-hidden="true">Strg K</kbd>
+        </a>
+    </div>
+
     {% set unread = this.unreadCount %}
     <ul role="list" class="flex-1 space-y-0.5 overflow-y-auto p-2 lg:collapsed:overflow-visible">
         {% for item in this.items %}
@@ -22,8 +31,8 @@
                           lg:collapsed:justify-center lg:collapsed:px-0">
                     {{ ux_icon(item.icon, {class: 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
                     <span class="truncate lg:collapsed:sr-only">{{ item.label|trans }}</span>
-                    {% if item.badge > 0 %}
-                        <span class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white lg:collapsed:absolute lg:collapsed:top-0.5 lg:collapsed:right-0.5">{{ item.badge > 99 ? '99+' : item.badge }}<span class="sr-only"> {{ item.badge_label|trans }}</span></span>
+                    {% if item.live %}
+                        <span data-live-count="{{ item.live }}" {{ item.badge > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white lg:collapsed:absolute lg:collapsed:top-0.5 lg:collapsed:right-0.5"><span data-live-number>{{ item.badge > 99 ? '99+' : item.badge }}</span><span class="sr-only"> {{ item.badge_label|trans }}</span></span>
                     {% endif %}
                 </a>
 
@@ -88,8 +97,8 @@
        class="flex items-center gap-2 rounded-md px-3 py-1.5 {{ child.active ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
         {{ ux_icon(child.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
         <span class="truncate">{{ child.label|trans }}</span>
-        {% if child.route == 'mail_inbox' and unread > 0 %}
-            <span class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white">{{ unread > 99 ? '99+' : unread }}<span class="sr-only"> {{ 'mail.unread'|trans }}</span></span>
+        {% if child.route == 'mail_inbox' %}
+            <span data-live-count="inbox" {{ unread > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white"><span data-live-number>{{ unread > 99 ? '99+' : unread }}</span><span class="sr-only"> {{ 'mail.unread'|trans }}</span></span>
         {% endif %}
     </a>
 {% endmacro %}

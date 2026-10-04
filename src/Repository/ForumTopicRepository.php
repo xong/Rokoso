@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\ForumBoard;
+use App\Entity\ForumPost;
 use App\Entity\ForumTopic;
 use App\Entity\ForumTopicRead;
 use App\Entity\Membership;
@@ -36,6 +37,22 @@ class ForumTopicRepository extends ServiceEntityRepository
             ->andWhere('t.board = :board')
             ->setParameter('board', $board)
             ->orderBy('t.lastPostAt', 'DESC')
+            ->getQuery()->getResult();
+    }
+
+    /**
+     * Visible topics whose title or one of whose posts contains the query.
+     *
+     * @return list<ForumTopic>
+     */
+    public function search(User $user, string $query, int $limit = 10): array
+    {
+        /* @var list<ForumTopic> */
+        return $this->visibleQuery($user)
+            ->andWhere('t.title LIKE :q OR EXISTS (SELECT 1 FROM '.ForumPost::class.' sp WHERE sp.topic = t AND sp.body LIKE :q)')
+            ->setParameter('q', '%'.addcslashes($query, '%_\\').'%')
+            ->orderBy('t.lastPostAt', 'DESC')
+            ->setMaxResults($limit)
             ->getQuery()->getResult();
     }
 

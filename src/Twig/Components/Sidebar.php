@@ -25,6 +25,7 @@ final class Sidebar
      * @var list<array{label: string, icon: string, route: string, match: list<string>, children?: list<array{label: string, icon: string, route: string}>}>
      */
     private const array ITEMS = [
+        ['label' => 'nav.today', 'icon' => 'lucide:sun', 'route' => 'home', 'match' => ['home']],
         ['label' => 'nav.notifications', 'icon' => 'lucide:bell', 'route' => 'notification_index', 'match' => ['notification_']],
         [
             'label' => 'nav.mail',
@@ -118,6 +119,12 @@ final class Sidebar
                 default => 0,
             };
             $item['badge_label'] = 'notification_index' === $item['route'] ? 'notification.unread' : 'forum.unread';
+            // key in the JSON of CountsController, updated by the live_counts Stimulus controller
+            $item['live'] = match ($item['route']) {
+                'forum_index' => 'forum',
+                'notification_index' => 'notifications',
+                default => null,
+            };
             $items[] = $item;
         }
 

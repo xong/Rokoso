@@ -4,6 +4,7 @@ app:
 
 nav:
     label: Hauptnavigation
+    today: Heute
     notifications: Benachrichtigungen
     tasks: Aufgaben
     meetings: Sitzungen
@@ -1517,3 +1518,60 @@ public:
         assignee_none: – niemand –
         deleted: Das Thema wurde gelöscht.
         delete_confirm: Thema löschen?
+
+today:
+    title: Heute
+    greeting: 'Hallo %name%, heute ist'
+    show_all: Alle anzeigen
+    nothing: Nichts offen.
+    messages: Meine offenen Nachrichten
+    tasks: Fällige Aufgaben
+    events: Nächste Termine
+    meetings: Sitzungen
+    polls: Offene Abstimmungen
+    topics: Neue Forenbeiträge
+    mentions: Erwähnungen
+    overdue: Überfällig
+    no_due: ohne Termin
+    until: 'bis %date%'
+
+search:
+    title: Suche
+    title_for: 'Suche: %q%'
+    label: Suchbegriff
+    placeholder: Nachrichten, Dateien, Forum, Kontakte, Termine, Beschlüsse, Wissen …
+    too_short: Bitte mindestens zwei Zeichen eingeben.
+    count: '{0}Keine Treffer für „%q%“.|{1}Ein Treffer für „%q%“.|]1,Inf[%count% Treffer für „%q%“.'
+    none: Versuch es mit einem anderen Begriff.
+    area:
+        messages: Nachrichten
+        files: Dateien
+        topics: Forum
+        contacts: Kontakte
+        events: Termine und Aufgaben
+        resolutions: Beschlüsse
+        wiki: Wissen
+
+palette:
+    title: Befehlspalette
+    open: Suchen und springen …
+    label: Befehl oder Suchbegriff
+    placeholder: Wohin? Oder Suchbegriff eingeben …
+    results: Befehle
+    search: Überall suchen
+    search_for: 'Überall nach „%q%“ suchen'
+    hint_move: auswählen
+    hint_open: öffnen
+    hint_close: schließen
+
+shortcuts:
+    title: Tastenkürzel
+    general: Allgemein
+    goto: Gehe zu (nacheinander drücken)
+    search: Suchfeld der Seite (sonst Befehlspalette)
+    help: Diese Übersicht
+    note: Kürzel ohne Strg wirken nicht, während ein Eingabefeld den Fokus hat.
+
+live:
+    new_messages: Neue Nachrichten sind eingegangen.
+    reload: Neu laden

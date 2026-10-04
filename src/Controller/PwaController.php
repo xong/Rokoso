@@ -23,7 +23,7 @@ final class PwaController extends AbstractController
             'short_name' => $translator->trans('app.name'),
             'description' => $translator->trans('pwa.description'),
             'lang' => 'de',
-            'start_url' => $this->generateUrl('mail_inbox'),
+            'start_url' => $this->generateUrl('home'),
             'scope' => '/',
             'display' => 'standalone',
             'background_color' => '#f8fafc',

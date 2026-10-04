@@ -49,7 +49,7 @@ final class AuthTest extends AppTestCase
         $this->client->request('GET', '/login');
         $this->client->submitForm('Anmelden', ['_username' => 'anna@example.org', '_password' => 'geheim-geheim']);
 
-        self::assertResponseRedirects('/mail');
+        self::assertResponseRedirects('/');
         $this->client->request('GET', '/logout');
         $this->client->request('GET', '/mail');
         self::assertResponseRedirects('/login');
@@ -72,7 +72,7 @@ final class AuthTest extends AppTestCase
 
         $this->client->followRedirect();
         $this->client->submitForm('Anmelden', ['_username' => 'anna@example.org', '_password' => 'neues-passwort-123']);
-        self::assertResponseRedirects('/mail');
+        self::assertResponseRedirects('/');
     }
 
     public function testProfileNameAndPasswordChange(): void

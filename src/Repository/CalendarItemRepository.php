@@ -107,6 +107,23 @@ class CalendarItemRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Visible appointments and tasks matching the query in title, description or location.
+     *
+     * @return list<CalendarItem>
+     */
+    public function search(User $user, string $query, int $limit = 10): array
+    {
+        /* @var list<CalendarItem> */
+        return $this->visibleQuery()
+            ->andWhere('i.title LIKE :q OR i.description LIKE :q OR i.location LIKE :q')
+            ->setParameter('viewer', $user)
+            ->setParameter('q', '%'.addcslashes($query, '%_\\').'%')
+            ->orderBy('i.startsAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()->getResult();
+    }
+
     private function visibleQuery(): QueryBuilder
     {
         return $this->createQueryBuilder('i')

@@ -1,0 +1,134 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set show_list = false %}
+
+{% block title %}{{ 'today.title'|trans }}{% endblock %}
+{% block detail_title %}{{ 'today.title'|trans }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('search') }}" class="btn-icon" aria-label="{{ 'search.title'|trans }}" title="{{ 'search.title'|trans }}">
+        {{ ux_icon('lucide:search', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-6xl p-4 lg:p-6">
+        <p class="mb-4 text-slate-600">
+            {{ 'today.greeting'|trans({'%name%': app.user.name}) }}
+            <time datetime="{{ now|date('Y-m-d') }}">{{ ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'][now|date('w')] }}, {{ now|date('j') }}. {{ ('calendar.months.' ~ now|date('n'))|trans }} {{ now|date('Y') }}</time>
+        </p>
+
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <section aria-labelledby="today-messages" class="card flex flex-col">
+                {{ _self.header('messages', 'today.messages', 'lucide:inbox', path('mail_inbox', {show: 'mine'})) }}
+                {% if messages is empty %}{{ _self.nothing() }}{% else %}
+                    <ul role="list" class="divide-y divide-slate-100">
+                        {% for m in messages %}
+                            <li><a href="{{ path('mail_show', {folder: 'inbox', id: m.id}) }}" class="block px-4 py-2 hover:bg-slate-50">
+                                <span class="block truncate font-medium">{{ m.subject ?: 'mail.no_subject'|trans }}</span>
+                                <span class="block truncate text-xs text-slate-500">{{ m.fromName ?: m.fromAddress }} · <time datetime="{{ m.date|date('c') }}">{{ m.date|short_date }}</time></span>
+                            </a></li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
+
+            <section aria-labelledby="today-tasks" class="card flex flex-col">
+                {{ _self.header('tasks', 'today.tasks', 'lucide:list-checks', path('task_index')) }}
+                {% if tasks is empty %}{{ _self.nothing() }}{% else %}
+                    <ul role="list" class="divide-y divide-slate-100">
+                        {% for t in tasks %}
+                            <li><a href="{{ path('calendar_item_show', {id: t.id}) }}" class="block px-4 py-2 hover:bg-slate-50">
+                                <span class="block truncate font-medium">{{ t.title }}</span>
+                                <span class="block truncate text-xs {{ t.overdue ? 'font-medium text-red-700' : 'text-slate-500' }}">
+                                    {% if t.startsAt %}{{ t.overdue ? 'today.overdue'|trans ~ ' · ' }}<time datetime="{{ t.startsAt|date('c') }}">{{ t.startsAt|short_date }}</time>{% else %}{{ 'today.no_due'|trans }}{% endif %}
+                                    · {{ t.status.label|trans }}
+                                </span>
+                            </a></li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
+
+            <section aria-labelledby="today-events" class="card flex flex-col">
+                {{ _self.header('events', 'today.events', 'lucide:calendar', path('calendar_month')) }}
+                {% if events is empty and meetings is empty %}{{ _self.nothing() }}{% else %}
+                    <ul role="list" class="divide-y divide-slate-100">
+                        {% for o in events %}
+                            <li><a href="{{ path('calendar_item_show', {id: o.item.id, date: o.day}) }}" class="block px-4 py-2 hover:bg-slate-50">
+                                <span class="block truncate font-medium">{{ o.title }}</span>
+                                <span class="block truncate text-xs text-slate-500"><time datetime="{{ o.start|date('c') }}">{{ o.start|short_date }}</time>{% if o.location %} · {{ o.location }}{% endif %}</span>
+                            </a></li>
+                        {% endfor %}
+                    </ul>
+                    {% if meetings is not empty %}
+                        <h3 class="border-t border-slate-200 px-4 pt-2 text-xs font-semibold text-slate-500">{{ 'today.meetings'|trans }}</h3>
+                        <ul role="list" class="divide-y divide-slate-100">
+                            {% for meeting in meetings %}
+                                <li><a href="{{ path('meeting_show', {id: meeting.id}) }}" class="block px-4 py-2 hover:bg-slate-50">
+                                    <span class="block truncate font-medium">{{ meeting.title }}</span>
+                                    <span class="block truncate text-xs text-slate-500"><time datetime="{{ meeting.startsAt|date('c') }}">{{ meeting.startsAt|short_date }}</time> · {{ meeting.organization.name }}</span>
+                                </a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endif %}
+            </section>
+
+            <section aria-labelledby="today-polls" class="card flex flex-col">
+                {{ _self.header('polls', 'today.polls', 'lucide:vote', path('poll_index')) }}
+                {% if polls is empty %}{{ _self.nothing() }}{% else %}
+                    <ul role="list" class="divide-y divide-slate-100">
+                        {% for p in polls %}
+                            <li><a href="{{ path('poll_show', {id: p.id}) }}" class="block px-4 py-2 hover:bg-slate-50">
+                                <span class="block truncate font-medium">{{ p.title }}</span>
+                                <span class="block truncate text-xs text-slate-500">{% if p.deadline %}{{ 'today.until'|trans({'%date%': p.deadline|short_date}) }}{% else %}{{ p.organization.name }}{% endif %}</span>
+                            </a></li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
+
+            <section aria-labelledby="today-topics" class="card flex flex-col">
+                {{ _self.header('topics', 'today.topics', 'lucide:messages-square', path('forum_index')) }}
+                {% if topics is empty %}{{ _self.nothing() }}{% else %}
+                    <ul role="list" class="divide-y divide-slate-100">
+                        {% for t in topics %}
+                            <li><a href="{{ path('forum_topic_show', {id: t.id}) }}" class="block px-4 py-2 hover:bg-slate-50">
+                                <span class="block truncate font-medium">{{ t.title }}</span>
+                                <span class="block truncate text-xs text-slate-500">{{ t.board.name }} · <time datetime="{{ t.lastPostAt|date('c') }}">{{ t.lastPostAt|short_date }}</time></span>
+                            </a></li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
+
+            <section aria-labelledby="today-mentions" class="card flex flex-col">
+                {{ _self.header('mentions', 'today.mentions', 'lucide:at-sign', path('notification_index', {unread: 1})) }}
+                {% if mentions is empty %}{{ _self.nothing() }}{% else %}
+                    <ul role="list" class="divide-y divide-slate-100">
+                        {% for n in mentions %}
+                            <li><a href="{{ path('notification_open', {id: n.id}) }}" class="block px-4 py-2 hover:bg-slate-50">
+                                <span class="block truncate font-medium">{{ n|notification_text }}</span>
+                                <span class="block truncate text-xs text-slate-500"><time datetime="{{ n.createdAt|date('c') }}">{{ n.createdAt|short_date }}</time></span>
+                            </a></li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+{% endblock %}
+
+{% macro header(id, title, icon, url) %}
+    <header class="flex items-center gap-2 border-b border-slate-200 px-4 py-2.5">
+        {{ ux_icon(icon, {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}
+        <h2 id="today-{{ id }}" class="text-sm font-semibold">{{ title|trans }}</h2>
+        <a href="{{ url }}" class="ml-auto text-xs text-brand-700 hover:underline">{{ 'today.show_all'|trans }}<span class="sr-only">: {{ title|trans }}</span></a>
+    </header>
+{% endmacro %}
+
+{% macro nothing() %}
+    <p class="px-4 py-6 text-center text-sm text-slate-500">{{ 'today.nothing'|trans }}</p>
+{% endmacro %}

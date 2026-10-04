@@ -1,0 +1,68 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set show_list = false %}
+
+{% block title %}{{ query ? 'search.title_for'|trans({'%q%': query}) : 'search.title'|trans }}{% endblock %}
+{% block detail_title %}{{ 'search.title'|trans }}{% endblock %}
+
+{% macro result(url, title, subtitle) %}
+    <li><a href="{{ url }}" class="block px-4 py-2 hover:bg-slate-50">
+        <span class="block truncate font-medium">{{ title }}</span>
+        {% if subtitle %}<span class="block truncate text-xs text-slate-500">{{ subtitle }}</span>{% endif %}
+    </a></li>
+{% endmacro %}
+
+{% block detail %}
+    <div class="mx-auto max-w-3xl p-4 lg:p-6">
+        <form method="get" action="{{ path('search') }}" role="search" class="mb-4 flex gap-2">
+            <div class="relative grow">
+                {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-2.5 left-2.5 size-4 text-slate-400', 'aria-hidden': 'true'}) }}
+                <label for="search-q" class="sr-only">{{ 'search.label'|trans }}</label>
+                <input type="search" id="search-q" name="q" value="{{ query }}" placeholder="{{ 'search.placeholder'|trans }}" class="input pl-8" {{ query is empty ? 'autofocus' }}>
+            </div>
+            <button type="submit" class="btn-primary">{{ 'action.search'|trans }}</button>
+        </form>
+
+        <p role="status" class="mb-4 text-sm text-slate-600">
+            {% if too_short %}
+                {{ 'search.too_short'|trans }}
+            {% elseif query %}
+                {{ 'search.count'|trans({'%count%': count, '%q%': query}) }}
+            {% endif %}
+        </p>
+
+        {% if query and not too_short and groups is empty %}
+            {{ ui.empty('search.none', 'lucide:search') }}
+        {% endif %}
+
+        <div class="space-y-4">
+            {% for area, results in groups %}
+                <section aria-labelledby="search-{{ area }}" class="card">
+                    <h2 id="search-{{ area }}" class="border-b border-slate-200 px-4 py-2.5 text-sm font-semibold">
+                        {{ ('search.area.' ~ area)|trans }} <span class="font-normal text-slate-500">({{ results|length }})</span>
+                    </h2>
+                    <ul role="list" class="divide-y divide-slate-100">
+                        {% for r in results %}
+                            {% if area == 'messages' %}
+                                {{ _self.result(path('mail_show', {folder: 'all', id: r.id}), r.subject ?: 'mail.no_subject'|trans, (r.fromName ?: r.fromAddress) ~ ' · ' ~ r.date|short_date) }}
+                            {% elseif area == 'files' %}
+                                {{ _self.result(path('file_show', {id: r.id}), r.filename, r.folder.name) }}
+                            {% elseif area == 'topics' %}
+                                {{ _self.result(path('forum_topic_show', {id: r.id}), r.title, r.board.name ~ ' · ' ~ r.lastPostAt|short_date) }}
+                            {% elseif area == 'contacts' %}
+                                {{ _self.result(path('contact_show', {id: r.id}), r.displayName, [r.company, r.email]|filter(v => v)|join(' · ')) }}
+                            {% elseif area == 'events' %}
+                                {{ _self.result(path('calendar_item_show', {id: r.id}), r.title, r.startsAt ? r.startsAt|short_date : 'today.no_due'|trans) }}
+                            {% elseif area == 'resolutions' %}
+                                {{ _self.result(path('resolution_show', {id: r.id}), r.number ~ ' ' ~ r.title, r.decidedOn|date('d.m.Y')) }}
+                            {% elseif area == 'wiki' %}
+                                {{ _self.result(path('wiki_show', {id: r.id}), r.title, r.updatedAt|short_date) }}
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
