@@ -63,7 +63,11 @@
                     {{ form_row(form.recurrenceUntil, {row_attr: {class: 'mb-0'}}) }}
                 </div>
             </fieldset>
-            {{ form_row(form.status, {help: 'task.status.help'}) }}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.status, {help: 'task.status.help'}) }}
+                {{ form_row(form.reminderMinutes) }}
+            </div>
+            {{ form_row(form.guestEmails) }}
             <fieldset class="card mb-4 p-4">
                 <legend class="px-1 font-semibold">{{ 'calendar.public_title'|trans }}</legend>
                 {{ form_row(form.public) }}

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Calendar\CalendarService;
+use App\Entity\CalendarItem;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
 use App\Enum\NotificationEmail;
@@ -21,7 +22,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Due reminders (next 24 hours), leftover instant mails the daily digest and removal of expired public requests. Run via cron, e.g. every 15 minutes.
+ * Reminders (per item: 15 minutes to one week before the start), leftover instant mails the daily digest and removal of expired public requests. Run via cron, e.g. every 15 minutes.
  */
 #[AsCommand(name: 'app:notify', description: 'Erinnerungen und Zusammenfassungen verschicken')]
 final readonly class NotifyCommand
@@ -67,19 +68,21 @@ final readonly class NotifyCommand
     private function remindDue(User $user, \DateTimeImmutable $now): int
     {
         $created = 0;
-        foreach ($this->calendar->occurrences($user, $now, $now->modify('+24 hours')) as $occurrence) {
+        $longest = max(CalendarItem::REMINDER_CHOICES);
+        foreach ($this->calendar->occurrences($user, $now, $now->modify(\sprintf('+%d minutes', $longest))) as $occurrence) {
             $item = $occurrence->item;
-            if ($occurrence->start < $now) {
+            $minutes = $item->getReminderMinutes();
+            if (null === $minutes || $occurrence->start < $now || $occurrence->start->modify(\sprintf('-%d minutes', $minutes)) > $now) {
                 continue;
             }
-            $concerned = CalendarItemType::Task === $item->getType()
-                ? !$item->isDone() && $item->getAssignees()->contains($user)
-                : $item->getParticipants()->contains($user);
-            if (!$concerned) {
+            // Assignees resp. participants; without any, the creator
+            $people = CalendarItemType::Task === $item->getType() ? $item->getAssignees() : $item->getParticipants();
+            $concerned = $people->isEmpty() ? $item->getCreatedBy()->getId() === $user->getId() : $people->contains($user);
+            if (!$concerned || $item->isDone()) {
                 continue;
             }
-            $created += \count($this->center->notify([$user], NotificationType::Due, $item->getTitle(),
-                $this->urls->generate('calendar_item_show', ['id' => $item->getId()]),
+            $created += \count($this->center->notify([$user], NotificationType::Due, $occurrence->getTitle(),
+                $this->urls->generate('calendar_item_show', ['id' => $item->getId()] + ($item->isRecurring() ? ['date' => $occurrence->getDay()] : [])),
                 refKey: \sprintf('due:%d:%s', $item->getId(), $occurrence->start->format('YmdHi'))));
         }
 

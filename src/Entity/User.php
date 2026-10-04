@@ -50,6 +50,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastDigestAt = null;
 
+    /** Secret for the personal iCal subscription link; null = no subscription */
+    #[ORM\Column(length: 64, unique: true, nullable: true)]
+    private ?string $calendarToken = null;
+
     #[ORM\Column]
     private bool $verified = false;
 
@@ -165,6 +169,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastDigestAt(?\DateTimeImmutable $lastDigestAt): static
     {
         $this->lastDigestAt = $lastDigestAt;
+
+        return $this;
+    }
+
+    public function getCalendarToken(): ?string
+    {
+        return $this->calendarToken;
+    }
+
+    /** Creates a new subscription secret (old links stop working) or removes it */
+    public function resetCalendarToken(bool $enabled = true): static
+    {
+        $this->calendarToken = $enabled ? bin2hex(random_bytes(32)) : null;
 
         return $this;
     }

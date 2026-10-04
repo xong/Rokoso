@@ -105,14 +105,14 @@
         <ul role="list" class="-mx-1 space-y-0.5">
             {% for o in upcoming %}
                 <li>
-                    <a href="{{ path('calendar_item_show', {id: o.item.id, date: o.start|date('Y-m-d')}) }}" class="flex gap-2 rounded-md px-2 py-1.5 hover:bg-slate-50">
+                    <a href="{{ path('calendar_item_show', {id: o.item.id, date: o.day}) }}" class="flex gap-2 rounded-md px-2 py-1.5 hover:bg-slate-50">
                         {% if o.item.task %}
                             {{ ux_icon('lucide:square', {class: 'mt-0.5 size-3.5 shrink-0', style: 'color: ' ~ o.item.color, 'aria-label': 'calendar.task_open'|trans, role: 'img'}) }}
                         {% else %}
                             <span class="mt-1.5 size-2 shrink-0 rounded-full" style="background-color: {{ o.item.color }}" aria-hidden="true"></span>
                         {% endif %}
                         <span class="min-w-0 flex-1">
-                            <span class="block truncate text-sm font-medium">{{ o.item.title }}</span>
+                            <span class="block truncate text-sm font-medium">{{ o.title }}</span>
                             <span class="block text-xs text-slate-500">
                                 {{ o.start|date('Y-m-d') == today ? 'calendar.today'|trans : weekdays_sun[o.start|date('w')] ~ ', ' ~ o.start|date('d.m.') }}
                                 {% if o.allDayLike %}· {{ 'calendar.all_day'|trans }}{% else %}· {{ o.start|date('H:i') }}{% endif %}

@@ -40,6 +40,24 @@ final readonly class CalendarService
     }
 
     /**
+     * The occurrence of a recurring item on its original day (also when cancelled); null if the series has none that day.
+     */
+    public function occurrenceOn(CalendarItem $item, \DateTimeImmutable $day): ?Occurrence
+    {
+        if (!$item->isRecurring() || !$item->occursOn($day)) {
+            return null;
+        }
+        $exception = $item->getException($day);
+        if (null !== $exception) {
+            return new Occurrence($item, $exception->getStart(), $exception->getEnd(), $exception);
+        }
+        $time = $item->getDate();
+        $start = $day->setTime((int) $time->format('G'), (int) $time->format('i'));
+
+        return new Occurrence($item, $start, $start->add($item->getDuration()));
+    }
+
+    /**
      * @param list<CalendarItem> $items
      *
      * @return list<Occurrence>
@@ -59,12 +77,21 @@ final readonly class CalendarService
             }
 
             $rule = new RRule($rrule, $item->getDate());
-            // Auch Termine einbeziehen, die vor dem Zeitraum beginnen und hineinragen
+            // Also include occurrences that start before the range and reach into it
             foreach ($rule->getOccurrencesBetween($from->sub($duration), $to) as $start) {
                 $start = \DateTimeImmutable::createFromInterface($start);
+                if (null !== $item->getException($start)) {
+                    continue;
+                }
                 $end = $start->add($duration);
                 if ($start < $to && $end >= $from) {
                     $result[] = new Occurrence($item, $start, $end);
+                }
+            }
+            // Changed occurrences wherever they were moved to
+            foreach ($item->getExceptions() as $exception) {
+                if (!$exception->isCancelled() && $exception->getStart() < $to && $exception->getEnd() >= $from) {
+                    $result[] = new Occurrence($item, $exception->getStart(), $exception->getEnd(), $exception);
                 }
             }
         }

@@ -173,4 +173,28 @@ final class NotificationTest extends AppTestCase
         self::assertCount(1, $this->notificationsOf($this->member));
         self::assertSame([], $this->notificationsOf($this->admin));
     }
+
+    public function testReminderFollowsItemSetting(): void
+    {
+        // One hour before: not yet due at three hours ahead
+        $later = (new CalendarItem($this->admin))->setTitle('Sitzung später')->setOrganization($this->org)
+            ->setStartsAt(new \DateTimeImmutable('+3 hours'))->setReminderMinutes(60)->addParticipant($this->member);
+        // One week before: due although it starts in five days
+        $week = (new CalendarItem($this->admin))->setTitle('Elternabend')->setOrganization($this->org)
+            ->setStartsAt(new \DateTimeImmutable('+5 days'))->setReminderMinutes(10080)->addParticipant($this->member);
+        // No reminder at all
+        $none = (new CalendarItem($this->admin))->setTitle('Ohne Erinnerung')->setOrganization($this->org)
+            ->setStartsAt(new \DateTimeImmutable('+1 hour'))->setReminderMinutes(null)->addParticipant($this->member);
+        // Without participants the creator is reminded
+        $own = (new CalendarItem($this->admin))->setTitle('Eigener Termin')->setStartsAt(new \DateTimeImmutable('+2 hours'));
+        foreach ([$later, $week, $none, $own] as $item) {
+            $this->em()->persist($item);
+        }
+        $this->em()->flush();
+
+        $tester = new CommandTester((new Application($this->client->getKernel()))->find('app:notify'));
+        $tester->execute([]);
+        self::assertSame(['Elternabend'], array_map(static fn ($n): string => $n->getSubject(), $this->notificationsOf($this->member)));
+        self::assertSame(['Eigener Termin'], array_map(static fn ($n): string => $n->getSubject(), $this->notificationsOf($this->admin)));
+    }
 }

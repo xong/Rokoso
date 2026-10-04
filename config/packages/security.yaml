@@ -33,7 +33,7 @@ security:
                 interval: '15 minutes'
 
     access_control:
-        - { path: ^/(login|register|verify|reset-password|invitation|manifest|sw\.js|offline|p/), roles: PUBLIC_ACCESS }
+        - { path: ^/(login|register|verify|reset-password|invitation|manifest|sw\.js|offline|p/|ical/), roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
 
 when@test:

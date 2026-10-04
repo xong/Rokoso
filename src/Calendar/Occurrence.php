@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Calendar;
 
+use App\Entity\CalendarException;
 use App\Entity\CalendarItem;
 
 /**
- * One concrete appearance of a (possibly recurring) calendar item.
+ * One concrete appearance of a (possibly recurring) calendar item, including a change to this single occurrence.
  */
 final readonly class Occurrence
 {
@@ -15,7 +16,34 @@ final readonly class Occurrence
         public CalendarItem $item,
         public \DateTimeImmutable $start,
         public \DateTimeImmutable $end,
+        public ?CalendarException $exception = null,
     ) {
+    }
+
+    public function getTitle(): string
+    {
+        return $this->exception?->getTitle() ?? $this->item->getTitle();
+    }
+
+    public function getLocation(): ?string
+    {
+        return $this->exception?->getLocation() ?? $this->item->getLocation();
+    }
+
+    /** Day that identifies the occurrence within its series (original day, even if moved) */
+    public function getDay(): string
+    {
+        return ($this->exception?->getDate() ?? $this->start)->format('Y-m-d');
+    }
+
+    public function isChanged(): bool
+    {
+        return null !== $this->exception && !$this->exception->isCancelled();
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->exception?->isCancelled() ?? false;
     }
 
     public function coversDay(\DateTimeImmutable $day): bool

@@ -67,12 +67,12 @@
                         {% for t in col.timed %}
                             {% set item = t.o.item %}
                             <li class="absolute overflow-hidden px-px" style="top: {{ t.start * hour_px / 60 }}px; height: {{ max(14, (t.end - t.start) * hour_px / 60 - 1) }}px; left: {{ t.lane * 100 / t.lanes }}%; width: {{ 100 / t.lanes }}%">
-                                <a href="{{ path('calendar_item_show', {id: item.id, date: t.o.start|date('Y-m-d')}) }}"
-                                   title="{{ t.o.start|date('H:i') }}{% if not item.task %}–{{ t.o.end|date('H:i') }}{% endif %} {{ item.title }}"
+                                <a href="{{ path('calendar_item_show', {id: item.id, date: t.o.day}) }}"
+                                   title="{{ t.o.start|date('H:i') }}{% if not item.task %}–{{ t.o.end|date('H:i') }}{% endif %} {{ t.o.title }}"
                                    class="block h-full overflow-hidden rounded-sm border-l-[3px] px-1 py-px leading-tight shadow-sm hover:brightness-95 {{ compact ? 'text-[11px]' : 'text-xs' }} {{ item.done ? 'line-through opacity-60' : '' }}"
                                    style="border-color: {{ item.color }}; background-color: color-mix(in oklab, {{ item.color }} 15%, white)">
-                                    <span class="block truncate font-medium">{{ item.title }}</span>
-                                    <span class="block truncate text-slate-600 tabular-nums">{{ t.o.start|date('H:i') }}{% if not item.task %}–{{ t.o.end|date('H:i') }}{% endif %}{% if item.location and not compact %} · {{ item.location }}{% endif %}</span>
+                                    <span class="block truncate font-medium">{{ t.o.title }}</span>
+                                    <span class="block truncate text-slate-600 tabular-nums">{{ t.o.start|date('H:i') }}{% if not item.task %}–{{ t.o.end|date('H:i') }}{% endif %}{% if t.o.location and not compact %} · {{ t.o.location }}{% endif %}</span>
                                 </a>
                             </li>
                         {% endfor %}

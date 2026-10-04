@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Calendar\CalendarInvitation;
 use App\Calendar\CalendarService;
 use App\Calendar\Occurrence;
 use App\Entity\AgendaItem;
 use App\Entity\CalendarItem;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
+use App\Form\CalendarExceptionFormType;
 use App\Form\CalendarItemFormType;
 use App\Notification\ActivityNotifier;
 use App\Repository\ForumTopicRepository;
@@ -30,6 +32,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/calendar')]
 final class CalendarController extends AbstractController
@@ -123,11 +126,83 @@ final class CalendarController extends AbstractController
     public function show(Request $request, CalendarItem $item, #[CurrentUser] User $user): Response
     {
         $date = self::parseDate($request->query->getString('date'));
+        $occurrence = null === $date ? null : $this->calendar->occurrenceOn($item, $date);
 
         return $this->render('calendar/show.html.twig', [
             'item' => $item,
-            'occurrence_date' => $date,
+            'occurrence' => $occurrence,
         ] + $this->sidebarContext($request, $user, $date ?? $item->getDate()));
+    }
+
+    /** Changes a single occurrence of a series (time, title, location) */
+    #[Route('/item/{id<\d+>}/occurrence/{date<\d{4}-\d{2}-\d{2}>}', name: 'calendar_occurrence_edit')]
+    #[IsGranted(CalendarItemVoter::EDIT, 'item')]
+    public function editOccurrence(Request $request, CalendarItem $item, string $date, #[CurrentUser] User $user): Response
+    {
+        $occurrence = $this->occurrence($item, $date);
+        $exception = $occurrence->exception
+            ?? $item->exceptionFor(new \DateTimeImmutable($date))->setStartsAt($occurrence->start)->setEndsAt($item->isTask() ? null : $occurrence->end);
+        $form = $this->createForm(CalendarExceptionFormType::class, $exception);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $exception->setCancelled(false);
+            $this->em->flush();
+            $this->addFlash('success', 'calendar.occurrence.saved');
+
+            return $this->redirectToRoute('calendar_item_show', ['id' => $item->getId(), 'date' => $date]);
+        }
+
+        return $this->render('calendar/occurrence.html.twig', ['item' => $item, 'occurrence' => $occurrence, 'form' => $form]
+            + $this->sidebarContext($request, $user, $occurrence->start), $form->isSubmitted() ? new Response(null, 422) : null);
+    }
+
+    #[Route('/item/{id<\d+>}/occurrence/{date<\d{4}-\d{2}-\d{2}>}/cancel', name: 'calendar_occurrence_cancel', methods: ['POST'])]
+    #[IsGranted(CalendarItemVoter::EDIT, 'item')]
+    #[IsCsrfTokenValid('calendar-occurrence')]
+    public function cancelOccurrence(CalendarItem $item, string $date): Response
+    {
+        $this->occurrence($item, $date);
+        $item->exceptionFor(new \DateTimeImmutable($date))->setCancelled(true);
+        $this->em->flush();
+        $this->addFlash('success', 'calendar.occurrence.cancelled');
+
+        return $this->redirectToRoute('calendar_item_show', ['id' => $item->getId(), 'date' => $date]);
+    }
+
+    /** Removes the change: the occurrence takes place as in the series again */
+    #[Route('/item/{id<\d+>}/occurrence/{date<\d{4}-\d{2}-\d{2}>}/restore', name: 'calendar_occurrence_restore', methods: ['POST'])]
+    #[IsGranted(CalendarItemVoter::EDIT, 'item')]
+    #[IsCsrfTokenValid('calendar-occurrence')]
+    public function restoreOccurrence(CalendarItem $item, string $date): Response
+    {
+        $exception = $this->occurrence($item, $date)->exception;
+        if (null !== $exception) {
+            $item->removeException($exception);
+            $this->em->flush();
+        }
+        $this->addFlash('success', 'calendar.occurrence.restored');
+
+        return $this->redirectToRoute('calendar_item_show', ['id' => $item->getId(), 'date' => $date]);
+    }
+
+    /** Sends the item as .ics to the external guests */
+    #[Route('/item/{id<\d+>}/invite', name: 'calendar_item_invite', methods: ['POST'])]
+    #[IsGranted(CalendarItemVoter::EDIT, 'item')]
+    #[IsCsrfTokenValid('calendar-invite')]
+    public function invite(CalendarItem $item, #[CurrentUser] User $user, CalendarInvitation $invitation, TranslatorInterface $translator): Response
+    {
+        $count = $invitation->invite($item, $user);
+        $this->em->flush();
+        $this->addFlash($count > 0 ? 'success' : 'error', $count > 0 ? $translator->trans('calendar.invite.sent', ['%count%' => $count]) : 'calendar.invite.none');
+
+        return $this->redirectToRoute('calendar_item_show', ['id' => $item->getId()]);
+    }
+
+    private function occurrence(CalendarItem $item, string $date): Occurrence
+    {
+        $day = self::parseDate($date);
+
+        return (null === $day ? null : $this->calendar->occurrenceOn($item, $day)) ?? throw $this->createNotFoundException();
     }
 
     #[Route('/item/{id<\d+>}/edit', name: 'calendar_item_edit')]

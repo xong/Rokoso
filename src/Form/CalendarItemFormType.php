@@ -14,6 +14,7 @@ use App\Enum\TaskStatus;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
@@ -85,6 +86,14 @@ final class CalendarItemFormType extends AbstractType
                 'class' => TaskStatus::class,
                 'choice_label' => static fn (TaskStatus $s): string => $s->label(),
             ])
+            ->add('reminderMinutes', ChoiceType::class, [
+                'label' => 'calendar.reminder.label',
+                'choices' => array_combine(array_map(static fn (int $m): string => 'calendar.reminder.m'.$m, CalendarItem::REMINDER_CHOICES), CalendarItem::REMINDER_CHOICES),
+                'required' => false,
+                'placeholder' => 'calendar.reminder.none',
+                'help' => 'calendar.reminder.help',
+            ])
+            ->add('guestEmails', TextareaType::class, ['label' => 'calendar.guests', 'required' => false, 'help' => 'calendar.guests_help', 'attr' => ['rows' => 2]])
             ->add('public', CheckboxType::class, ['label' => 'calendar.public', 'required' => false, 'help' => 'calendar.public_help'])
             ->add('signup', CheckboxType::class, ['label' => 'calendar.signup', 'required' => false, 'help' => 'calendar.signup_help'])
             ->add('signupLimit', IntegerType::class, ['label' => 'calendar.signup_limit', 'required' => false, 'attr' => ['min' => 1]]);

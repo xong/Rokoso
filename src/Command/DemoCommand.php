@@ -87,6 +87,7 @@ final readonly class DemoCommand
         if (null === $user) {
             $user = (new User())->setEmail('demo@coop.test')->setName('Dana Demo')->setVerified(true);
             $user->setPassword($this->hasher->hashPassword($user, 'demo-passwort'));
+            $user->resetCalendarToken();
             $this->em->persist($user);
 
             $colleague = (new User())->setEmail('kim@coop.test')->setName('Kim Kollegin')->setVerified(true);
@@ -141,13 +142,19 @@ final readonly class DemoCommand
             $this->em->persist(Comment::onContact($contacts[2], $colleague)->setBody('Bevorzugt Anrufe vormittags, E-Mails beantwortet sie meist erst am Wochenende.'));
 
             $monday = new \DateTimeImmutable('monday this week');
-            $this->em->persist((new CalendarItem($user))->setTitle('Vorstandstreffen')->setOrganization($org)->setLocation('Rathaus, Raum 2')
+            $board = (new CalendarItem($user))->setTitle('Vorstandstreffen')->setOrganization($org)->setLocation('Rathaus, Raum 2')
                 ->setStartsAt($monday->setTime(19, 0))->setEndsAt($monday->setTime(21, 0))
-                ->setRecurrence(Recurrence::Weekly)->setRecurrenceInterval(2)->addParticipant($user)->addParticipant($colleague));
+                ->setRecurrence(Recurrence::Weekly)->setRecurrenceInterval(2)->addParticipant($user)->addParticipant($colleague);
+            // One meeting moved to Tuesday at another place, one cancelled (holidays)
+            $board->exceptionFor($monday->modify('+14 days'))->setStartsAt($monday->modify('+15 days')->setTime(18, 30))
+                ->setEndsAt($monday->modify('+15 days')->setTime(20, 30))->setLocation('Schule am Park, Lehrerzimmer');
+            $board->exceptionFor($monday->modify('+42 days'))->setCancelled(true);
+            $this->em->persist($board);
             $parentsEvening = (new CalendarItem($user))->setTitle('Elternabend')->setOrganization($org)->setProject($projects[1])
                 ->setStartsAt($monday->modify('+9 days')->setTime(19, 30))->setEndsAt($monday->modify('+9 days')->setTime(21, 0))->setLocation('Aula')
                 ->setDescription("Infoabend für alle Eltern der Stadt.\nThemen: Schulwege, Ganztag, Elternbeiräte.")
-                ->setPublic(true)->setSignup(true)->setSignupLimit(80);
+                ->setPublic(true)->setSignup(true)->setSignupLimit(80)->setReminderMinutes(2880)
+                ->setGuestEmails("schulleitung@schule-am-park.example\npresse@musterstadt.example");
             $this->em->persist($parentsEvening);
             $this->em->persist(new EventSignup($parentsEvening, 'Eva Elternteil', 'eva@example.org', 2));
             $councils->setPublicSubscribe(true);

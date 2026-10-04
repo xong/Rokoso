@@ -1,7 +1,7 @@
 {% extends 'calendar/_layout.html.twig' %}
 {% import '_partials/ui.html.twig' as ui %}
 
-{% set ref = occurrence_date ?? item.date %}
+{% set ref = occurrence ? occurrence.start : item.date %}
 {% set sel_from = ref|date('Y-m-d') %}
 
 {% block detail_title %}{{ item.title }}{% endblock %}
@@ -18,16 +18,19 @@
             <span class="mt-1.5 size-3 shrink-0 rounded-full" style="background-color: {{ item.color }}" aria-hidden="true"></span>
             <div class="min-w-0 flex-1">
                 <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">{{ item.type.label|trans }}</p>
-                <p class="text-xl font-semibold {{ item.done ? 'line-through text-slate-500' : '' }}">{{ item.title }}</p>
+                <p class="text-xl font-semibold {{ item.done ? 'line-through text-slate-500' : '' }}">{{ occurrence ? occurrence.title : item.title }}</p>
                 <p class="mt-1 text-slate-700">
-                    {% set start = occurrence_date ? occurrence_date|date('Y-m-d') ~ ' ' ~ item.date|date('H:i') : item.startsAt %}
+                    {% set start = occurrence ? occurrence.start : item.startsAt %}
+                    {% set end = occurrence ? (item.endsAt or occurrence.changed ? occurrence.end : null) : item.endsAt %}
                     {% if not item.startsAt %}
                         {{ 'task.no_due'|trans }}
                     {% elseif item.allDay %}
-                        {{ start|date('d.m.Y') }}{% if item.endsAt and item.endsAt|date('Y-m-d') != item.startsAt|date('Y-m-d') %} – {{ item.endsAt|date('d.m.Y') }}{% endif %} · {{ 'calendar.all_day'|trans }}
+                        {{ start|date('d.m.Y') }}{% if end and end|date('Y-m-d') != start|date('Y-m-d') %} – {{ end|date('d.m.Y') }}{% endif %} · {{ 'calendar.all_day'|trans }}
                     {% else %}
-                        {{ start|date('d.m.Y H:i') }}{% if item.endsAt %} – {{ item.endsAt|date(item.endsAt|date('Y-m-d') == item.startsAt|date('Y-m-d') ? 'H:i' : 'd.m.Y H:i') }}{% endif %}
+                        {{ start|date('d.m.Y H:i') }}{% if end %} – {{ end|date(end|date('Y-m-d') == start|date('Y-m-d') ? 'H:i' : 'd.m.Y H:i') }}{% endif %}
                     {% endif %}
+                    {% if occurrence and occurrence.cancelled %}<span class="badge ml-1 bg-red-50 text-red-700">{{ 'calendar.occurrence.cancelled_badge'|trans }}</span>
+                    {% elseif occurrence and occurrence.changed %}<span class="badge ml-1 bg-amber-50 text-amber-800">{{ 'calendar.occurrence.changed_badge'|trans }}</span>{% endif %}
                     {% if item.overdue %}<span class="ml-1 font-medium text-red-700">· {{ 'task.overdue'|trans }}</span>{% endif %}
                 </p>
                 {% if item.task %}
@@ -45,7 +48,8 @@
         </div>
 
         <dl class="card divide-y divide-slate-100 px-4">
-            {% if item.location %}<div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'calendar.location'|trans }}</dt><dd>{{ item.location }}</dd></div>{% endif %}
+            {% set location = occurrence ? occurrence.location : item.location %}
+            {% if location %}<div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'calendar.location'|trans }}</dt><dd>{{ location }}</dd></div>{% endif %}
             {% if item.url %}<div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'calendar.url'|trans }}</dt><dd class="break-all"><a class="link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.url }}</a></dd></div>{% endif %}
             <div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'calendar.organization'|trans }}</dt><dd>{{ item.organization ? item.organization.name : 'calendar.personal'|trans }}</dd></div>
             {% if item.project %}<div class="grid grid-cols-[8rem_1fr] gap-2 py-2"><dt class="text-slate-500">{{ 'nav.projects'|trans }}</dt><dd><a class="link" href="{{ path('project_show', {id: item.project.id}) }}">{{ item.project.name }}</a></dd></div>{% endif %}
@@ -79,6 +83,53 @@
 
         {% if item.description %}
             <div class="card px-4 py-3 whitespace-pre-line">{{ item.description }}</div>
+        {% endif %}
+
+        {% if occurrence %}
+            <section aria-labelledby="occurrence-heading" class="card flex flex-wrap items-center gap-2 px-4 py-3">
+                <h3 id="occurrence-heading" class="mr-auto font-semibold">{{ 'calendar.occurrence.title'|trans({'%date%': occurrence.day|date('d.m.Y')}) }}</h3>
+                {% if not occurrence.cancelled %}
+                    <a href="{{ path('calendar_occurrence_edit', {id: item.id, date: occurrence.day}) }}" class="btn-secondary">{{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'calendar.occurrence.edit'|trans }}</a>
+                    {{ ui.post_button(path('calendar_occurrence_cancel', {id: item.id, date: occurrence.day}), 'calendar-occurrence', 'calendar.occurrence.cancel',
+                        {class: 'btn-secondary', icon: 'lucide:calendar-x', confirm: 'calendar.occurrence.cancel_confirm'}) }}
+                {% endif %}
+                {% if occurrence.exception %}
+                    {{ ui.post_button(path('calendar_occurrence_restore', {id: item.id, date: occurrence.day}), 'calendar-occurrence', 'calendar.occurrence.restore',
+                        {class: 'btn-secondary', icon: 'lucide:undo-2'}) }}
+                {% endif %}
+            </section>
+        {% endif %}
+
+        {% if item.recurring and item.exceptions is not empty %}
+            <section aria-labelledby="exceptions-heading">
+                <h3 id="exceptions-heading" class="mb-2 font-semibold">{{ 'calendar.occurrence.list'|trans }}</h3>
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for e in item.exceptions %}
+                        <li class="flex flex-wrap items-center gap-x-3 px-4 py-2">
+                            <a class="link" href="{{ path('calendar_item_show', {id: item.id, date: e.date|date('Y-m-d')}) }}">{{ e.date|date('d.m.Y') }}</a>
+                            {% if e.cancelled %}
+                                <span class="badge bg-red-50 text-red-700">{{ 'calendar.occurrence.cancelled_badge'|trans }}</span>
+                            {% else %}
+                                <span class="text-slate-600">→ {{ e.start|date(item.allDay ? 'd.m.Y' : 'd.m.Y H:i') }}{% if e.title %} · {{ e.title }}{% endif %}{% if e.location %} · {{ e.location }}{% endif %}</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        {% if not item.task and item.guestEmailList is not empty %}
+            <section aria-labelledby="guests-heading">
+                <h3 id="guests-heading" class="mb-2 font-semibold">{{ 'calendar.guests'|trans }}</h3>
+                <div class="card space-y-3 px-4 py-3">
+                    <ul role="list" class="flex flex-wrap gap-2">
+                        {% for email in item.guestEmailList %}<li class="badge bg-slate-100 text-slate-700">{{ email }}</li>{% endfor %}
+                    </ul>
+                    <p class="text-sm text-slate-600">{{ item.invitedAt ? 'calendar.invite.invited_at'|trans({'%date%': item.invitedAt|date('d.m.Y H:i')}) : 'calendar.invite.text'|trans }}</p>
+                    {{ ui.post_button(path('calendar_item_invite', {id: item.id}), 'calendar-invite', item.invitedAt ? 'calendar.invite.again' : 'calendar.invite.button',
+                        {class: 'btn-secondary', icon: 'lucide:send'}) }}
+                </div>
+            </section>
         {% endif %}
 
         {% if item.signup %}

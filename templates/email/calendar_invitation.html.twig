@@ -1,0 +1,12 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ 'email.calendar.text'|trans({'%sender%': sender, '%title%': item.title}) }}</p>
+    <p>
+        <strong>{{ item.allDay ? item.date|date('d.m.Y') : item.date|date('d.m.Y H:i') }}{% if item.endsAt and not item.allDay %} – {{ item.endsAt|date('H:i') }}{% endif %}</strong><br>
+        {% if item.recurring %}{{ item.recurrence.label|trans }}<br>{% endif %}
+        {% if item.location %}{{ item.location }}<br>{% endif %}
+        {% if item.url %}<a href="{{ item.url }}">{{ item.url }}</a>{% endif %}
+    </p>
+    {% if item.description %}<p style="white-space:pre-line;">{{ item.description }}</p>{% endif %}
+    <p style="font-size:13px;color:#64748b;">{{ 'email.meeting.ics_hint'|trans }}</p>
+{% endblock %}

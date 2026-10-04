@@ -1,0 +1,26 @@
+{% extends 'profile/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block detail_title %}{{ 'profile.section_calendar'|trans }}{% endblock %}
+
+{% block form %}
+    <div class="space-y-4">
+        <p class="text-slate-600">{{ 'profile.calendar.intro'|trans }}</p>
+        {% if feed_url %}
+            <div>
+                <label for="calendar-feed-url" class="label">{{ 'profile.calendar.url'|trans }}</label>
+                <input id="calendar-feed-url" type="text" class="input font-mono text-xs" value="{{ feed_url }}" readonly aria-describedby="calendar-feed-help">
+                <p id="calendar-feed-help" class="mt-1 text-sm text-slate-500">{{ 'profile.calendar.secret_hint'|trans }}</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ webcal_url }}" class="btn-primary">{{ ux_icon('lucide:calendar-plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'profile.calendar.subscribe'|trans }}</a>
+                {{ ui.post_button(path('profile_calendar_reset'), 'profile-calendar', 'profile.calendar.reset',
+                    {class: 'btn-secondary', icon: 'lucide:refresh-cw', confirm: 'profile.calendar.reset_confirm'}) }}
+                {{ ui.post_button(path('profile_calendar_disable'), 'profile-calendar', 'profile.calendar.disable',
+                    {class: 'btn-secondary', icon: 'lucide:link-2-off'}) }}
+            </div>
+        {% else %}
+            {{ ui.post_button(path('profile_calendar_reset'), 'profile-calendar', 'profile.calendar.enable', {class: 'btn-primary', icon: 'lucide:link'}) }}
+        {% endif %}
+    </div>
+{% endblock %}

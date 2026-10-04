@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Meeting;
 
+use App\Calendar\Ics;
 use App\Entity\CalendarItem;
 use App\Entity\Meeting;
 use App\Entity\User;
@@ -82,56 +83,14 @@ final readonly class MeetingService
     /** iCalendar (RFC 5545) file of the meeting. */
     public function ics(Meeting $meeting, string $url): string
     {
-        $utc = new \DateTimeZone('UTC');
-        $format = static fn (\DateTimeImmutable $d): string => $d->setTimezone($utc)->format('Ymd\THis\Z');
         $agenda = [];
         foreach ($meeting->getAgenda() as $item) {
             $agenda[] = 'TOP '.$item->getNumber().': '.$item->getTitle();
         }
         $description = trim(implode("\n", array_filter([$meeting->getDescription(), implode("\n", $agenda), $meeting->getVideoUrl(), $url])));
 
-        $lines = [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'PRODID:-//Coop//Sitzungen//DE',
-            'CALSCALE:GREGORIAN',
-            'METHOD:PUBLISH',
-            'BEGIN:VEVENT',
-            'UID:meeting-'.$meeting->getId().'@'.(parse_url($url, \PHP_URL_HOST) ?: 'coop'),
-            'DTSTAMP:'.$format(new \DateTimeImmutable()),
-            'DTSTART:'.$format($meeting->getStartsAt()),
-            'DTEND:'.$format($meeting->getEffectiveEnd()),
-            'SUMMARY:'.self::escape($meeting->getTitle()),
-            'DESCRIPTION:'.self::escape($description),
-            'URL:'.$url,
-        ];
-        $location = $meeting->getLocation() ?? $meeting->getVideoUrl();
-        if (null !== $location && '' !== $location) {
-            $lines[] = 'LOCATION:'.self::escape($location);
-        }
-        array_push($lines, 'END:VEVENT', 'END:VCALENDAR');
-
-        return implode("\r\n", array_map(self::fold(...), $lines))."\r\n";
-    }
-
-    private static function escape(string $text): string
-    {
-        return str_replace(['\\', ';', ',', "\r\n", "\n"], ['\\\\', '\;', '\,', '\n', '\n'], $text);
-    }
-
-    /** Folds lines longer than 75 octets without splitting UTF-8 characters. */
-    private static function fold(string $line): string
-    {
-        $out = '';
-        $current = '';
-        foreach (mb_str_split($line) as $char) {
-            if (\strlen($current) + \strlen($char) > 75) {
-                $out .= $current."\r\n ";
-                $current = '';
-            }
-            $current .= $char;
-        }
-
-        return $out.$current;
+        return Ics::document([Ics::event('meeting-'.$meeting->getId().'@'.(parse_url($url, \PHP_URL_HOST) ?: 'coop'),
+            $meeting->getStartsAt(), $meeting->getEffectiveEnd(), false, $meeting->getTitle(), $description,
+            $meeting->getLocation() ?? $meeting->getVideoUrl(), $url)], 'Sitzungen');
     }
 }

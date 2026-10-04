@@ -115,6 +115,18 @@ profile:
     section_password: Passwort
     section_email: E-Mail-Adresse
     section_notifications: Benachrichtigungen
+    section_calendar: Kalender-Abo
+    calendar:
+        intro: Mit einem persönlichen Link kannst du deine Coop-Termine in Outlook, Thunderbird, Google- oder Apple-Kalender abonnieren. Der Kalender aktualisiert sich dort automatisch, Änderungen sind nur in Coop möglich.
+        url: Abo-Adresse
+        secret_hint: Wer diese Adresse kennt, sieht deine Termine. Gib sie nicht weiter; bei Bedarf erzeugst du eine neue.
+        subscribe: Im Kalender abonnieren
+        enable: Abo-Link erzeugen
+        reset: Neuen Link erzeugen
+        reset_confirm: Der bisherige Link funktioniert danach nicht mehr. Fortfahren?
+        disable: Abo abschalten
+        created: Der Abo-Link wurde erzeugt.
+        disabled: Das Kalender-Abo ist abgeschaltet.
     change_password: Passwort ändern
     password_changed: Dein Passwort wurde geändert.
     current_email: 'Aktuelle Adresse:'
@@ -162,6 +174,8 @@ email:
         text: '%sender% lädt dich im Namen von „%organization%“ zur Sitzung „%title%“ ein.'
         button: Sitzung ansehen
         ics_hint: Den Termin kannst du über den Anhang in deinen Kalender übernehmen. Antworten auf diese E-Mail gehen an die einladende Person.
+    calendar:
+        text: '%sender% lädt dich zum Termin „%title%“ ein.'
 
 organization:
     new: Organisation anlegen
@@ -711,6 +725,42 @@ calendar:
     signup_count: '%count% Person(en)'
     signup_count_limit: '%count% von %limit% Plätzen belegt'
     signup_persons: '%count% Personen'
+    reminder:
+        label: Erinnerung
+        none: Keine Erinnerung
+        help: Benachrichtigt Zuständige bzw. Teilnehmende (ohne beides dich).
+        m15: 15 Minuten vorher
+        m60: 1 Stunde vorher
+        m1440: 1 Tag vorher
+        m2880: 2 Tage vorher
+        m10080: 1 Woche vorher
+    guests: Gäste (E-Mail)
+    guests_help: Eine Adresse pro Zeile. Gäste bekommen eine Einladung mit Kalenderdatei, ohne Zugang zu Coop.
+    occurrence:
+        title: 'Termin am %date%'
+        edit: Nur diesen Termin ändern
+        edit_intro: 'Änderung nur für „%title%“ am %date%. Die übrigen Termine der Serie bleiben unverändert.'
+        same_as_series: Leer lassen, um den Wert der Serie zu übernehmen.
+        cancel: Diesen Termin absagen
+        cancel_confirm: Nur diesen einen Termin der Serie absagen?
+        restore: Wie in der Serie
+        saved: Der Termin wurde geändert.
+        cancelled: Der Termin wurde abgesagt.
+        restored: Der Termin findet wieder wie in der Serie statt.
+        cancelled_badge: Abgesagt
+        changed_badge: Geändert
+        list: Abweichungen von der Serie
+    invite:
+        button: Gäste einladen
+        again: Erneut einladen
+        text: Die Gäste haben noch keine Einladung bekommen.
+        invited_at: 'Zuletzt eingeladen am %date%.'
+        subject: 'Einladung: %title% am %date%'
+        sent: '{1}Einladung an einen Gast verschickt.|]1,Inf[Einladung an %count% Gäste verschickt.'
+        none: Keine Gäste zum Einladen.
+    ical:
+        name: 'Coop – %name%'
+        task: 'Aufgabe: %title%'
     no_signups: Noch keine Anmeldungen.
     prev_month: Vorheriger Monat
     next_month: Nächster Monat

@@ -28,7 +28,7 @@
                     {% for o in events %}
                         <li class="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
                             <span class="w-36 shrink-0 text-slate-600">{{ o.start|date(o.item.allDay ? 'd.m.Y' : 'd.m.Y H:i') }}</span>
-                            <a href="{{ path('public_event', {slug: settings.slug, id: o.item.id}) }}" class="link min-w-0 flex-1">{{ o.item.title }}</a>
+                            <a href="{{ path('public_event', {slug: settings.slug, id: o.item.id}) }}" class="link min-w-0 flex-1">{{ o.title }}</a>
                             {% if o.item.signupOpen %}<span class="badge bg-emerald-50 text-emerald-700">{{ 'public.event.signup_open'|trans }}</span>{% endif %}
                         </li>
                     {% endfor %}

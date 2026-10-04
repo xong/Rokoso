@@ -1,0 +1,26 @@
+{% extends 'calendar/_layout.html.twig' %}
+
+{% set sel_from = occurrence.start|date('Y-m-d') %}
+
+{% block detail_title %}{{ 'calendar.occurrence.edit'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-2xl p-4 lg:p-6">
+        <p class="mb-4 text-slate-600">{{ 'calendar.occurrence.edit_intro'|trans({'%title%': item.title, '%date%': occurrence.day|date('d.m.Y')}) }}</p>
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.startsAt) }}
+                {{ item.task ? '' : form_row(form.endsAt) }}
+            </div>
+            {{ form_row(form.title, {attr: {placeholder: item.title}}) }}
+            {{ form_row(form.location, {attr: {placeholder: item.location}}) }}
+            {% do form.endsAt.setRendered %}
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ path('calendar_item_show', {id: item.id, date: occurrence.day}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

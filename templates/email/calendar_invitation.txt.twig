@@ -1,0 +1,11 @@
+{{ 'email.calendar.text'|trans({'%sender%': sender, '%title%': item.title}) }}
+
+{{ item.allDay ? item.date|date('d.m.Y') : item.date|date('d.m.Y H:i') }}{% if item.endsAt and not item.allDay %} – {{ item.endsAt|date('H:i') }}{% endif %}
+
+{% if item.recurring %}{{ item.recurrence.label|trans }}
+{% endif %}{% if item.location %}{{ item.location }}
+{% endif %}{% if item.url %}{{ item.url }}
+{% endif %}
+{% if item.description %}{{ item.description }}
+
+{% endif %}{{ 'email.meeting.ics_hint'|trans }}

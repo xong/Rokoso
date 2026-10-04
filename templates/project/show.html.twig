@@ -58,9 +58,9 @@
                         <ul role="list" class="card divide-y divide-slate-100">
                             {% for o in upcoming_events %}
                                 <li>
-                                    <a href="{{ path('calendar_item_show', {id: o.item.id, date: o.start|date('Y-m-d')}) }}" class="flex items-baseline gap-3 px-3 py-2 hover:bg-slate-50">
+                                    <a href="{{ path('calendar_item_show', {id: o.item.id, date: o.day}) }}" class="flex items-baseline gap-3 px-3 py-2 hover:bg-slate-50">
                                         <time datetime="{{ o.start|date('c') }}" class="w-28 shrink-0 text-xs text-slate-500 tabular-nums">{{ o.start|date(o.item.allDay ? 'd.m.Y' : 'd.m.Y H:i') }}</time>
-                                        <span class="min-w-0 flex-1 truncate">{{ o.item.title }}</span>
+                                        <span class="min-w-0 flex-1 truncate">{{ o.title }}</span>
                                     </a>
                                 </li>
                             {% endfor %}

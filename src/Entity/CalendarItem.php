@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use RRule\RRule;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -125,8 +126,27 @@ class CalendarItem
     #[ORM\OrderBy(['createdAt' => 'ASC'])]
     private Collection $signups;
 
+    /** @var Collection<int, CalendarException> */
+    #[ORM\OneToMany(targetEntity: CalendarException::class, mappedBy: 'item', cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OrderBy(['date' => 'ASC'])]
+    private Collection $exceptions;
+
+    /** Minutes before the start for a reminder notification; null = none */
+    #[ORM\Column(nullable: true, options: ['default' => 1440])]
+    private ?int $reminderMinutes = self::DEFAULT_REMINDER;
+
+    /** External guests (email addresses), invited with an .ics file */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $guestEmails = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $invitedAt = null;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
+
+    public const int DEFAULT_REMINDER = 1440;
+    public const array REMINDER_CHOICES = [15, 60, 1440, 2880, 10080];
 
     public function __construct(
         #[ORM\ManyToOne]
@@ -138,6 +158,7 @@ class CalendarItem
         $this->assignees = new ArrayCollection();
         $this->participants = new ArrayCollection();
         $this->signups = new ArrayCollection();
+        $this->exceptions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -556,6 +577,114 @@ class CalendarItem
         return $this->public && $this->signup && !$this->isTask() && !$this->isRecurring()
             && $this->getDate() >= new \DateTimeImmutable('today')
             && 0 !== $this->getSignupFree();
+    }
+
+    /**
+     * @return Collection<int, CalendarException>
+     */
+    public function getExceptions(): Collection
+    {
+        return $this->exceptions;
+    }
+
+    public function getException(\DateTimeInterface $day): ?CalendarException
+    {
+        $key = $day->format('Y-m-d');
+        foreach ($this->exceptions as $exception) {
+            if ($exception->getDate()->format('Y-m-d') === $key) {
+                return $exception;
+            }
+        }
+
+        return null;
+    }
+
+    /** Existing or new (persisted with the item) change for the occurrence on that day */
+    public function exceptionFor(\DateTimeImmutable $day): CalendarException
+    {
+        $exception = $this->getException($day);
+        if (null === $exception) {
+            $exception = new CalendarException($this, $day);
+            $this->exceptions->add($exception);
+        }
+
+        return $exception;
+    }
+
+    public function removeException(CalendarException $exception): static
+    {
+        $this->exceptions->removeElement($exception);
+
+        return $this;
+    }
+
+    /** Whether a recurring item has an occurrence starting on that day (ignoring changes) */
+    public function occursOn(\DateTimeImmutable $day): bool
+    {
+        $rrule = $this->getRrule();
+        if (null === $rrule) {
+            return $this->getDate()->format('Y-m-d') === $day->format('Y-m-d');
+        }
+        $start = $this->getDate();
+
+        return new RRule($rrule, $start)->occursAt($day->setTime((int) $start->format('G'), (int) $start->format('i')));
+    }
+
+    public function getReminderMinutes(): ?int
+    {
+        return $this->reminderMinutes;
+    }
+
+    public function setReminderMinutes(?int $reminderMinutes): static
+    {
+        $this->reminderMinutes = $reminderMinutes;
+
+        return $this;
+    }
+
+    public function getGuestEmails(): ?string
+    {
+        return $this->guestEmails;
+    }
+
+    public function setGuestEmails(?string $guestEmails): static
+    {
+        $this->guestEmails = $guestEmails;
+
+        return $this;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getGuestEmailList(): array
+    {
+        $parts = preg_split('/[\s,;]+/', (string) $this->guestEmails, -1, \PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return array_values(array_unique(array_map('mb_strtolower', $parts)));
+    }
+
+    #[Assert\Callback]
+    public function validateGuests(ExecutionContextInterface $context): void
+    {
+        foreach ($this->getGuestEmailList() as $address) {
+            if (false === filter_var($address, \FILTER_VALIDATE_EMAIL)) {
+                $context->buildViolation('compose.invalid_address')->setParameter('%address%', $address)
+                    ->atPath('guestEmails')->addViolation();
+            }
+        }
+    }
+
+    public function getInvitedAt(): ?\DateTimeImmutable
+    {
+        return $this->invitedAt;
+    }
+
+    public function markInvited(): static
+    {
+        $this->invitedAt = new \DateTimeImmutable();
+
+        return $this;
     }
 
     public function getCreatedBy(): User
