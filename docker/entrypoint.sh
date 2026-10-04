@@ -1,5 +1,5 @@
 #!/bin/sh
-# Startet Coop: Cache aufwärmen, Datenbank migrieren, dann den eigentlichen Befehl (Webserver oder Cron).
+# Startet Koopio: Cache aufwärmen, Datenbank migrieren, dann den eigentlichen Befehl (Webserver oder Cron).
 set -e
 
 if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then

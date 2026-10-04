@@ -11,7 +11,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Sends Coop's own system mails (confirmation, password reset, invitations, meeting invitations).
+ * Sends Koopio's own system mails (confirmation, password reset, invitations, meeting invitations).
  */
 final readonly class SystemMailer
 {

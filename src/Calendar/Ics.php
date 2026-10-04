@@ -14,7 +14,7 @@ final class Ics
      */
     public static function document(array $events, string $product, string $method = 'PUBLISH', ?string $name = null): string
     {
-        $lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Coop//'.$product.'//DE', 'CALSCALE:GREGORIAN', 'METHOD:'.$method];
+        $lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Koopio//'.$product.'//DE', 'CALSCALE:GREGORIAN', 'METHOD:'.$method];
         if (null !== $name) {
             array_push($lines, 'X-WR-CALNAME:'.self::escape($name), 'X-WR-TIMEZONE:'.CalendarService::TIMEZONE, 'REFRESH-INTERVAL;VALUE=DURATION:PT1H');
         }

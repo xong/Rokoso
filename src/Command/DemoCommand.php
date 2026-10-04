@@ -68,7 +68,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Local demo data: user demo@coop.test (password "demo-passwort"), organization, projects and a mail
+ * Local demo data: user demo@koopio.test (password "demo-passwort"), organization, projects and a mail
  * account on the GreenMail container from compose.yaml. Optionally sends sample mails into the mailbox.
  */
 #[AsCommand(name: 'app:demo', description: 'Demodaten für die lokale Entwicklung anlegen')]
@@ -88,14 +88,14 @@ final readonly class DemoCommand
 
     public function __invoke(SymfonyStyle $io, #[Option('Beispiel-E-Mails an das GreenMail-Postfach schicken')] bool $mails = false): int
     {
-        $user = $this->users->findOneByEmail('demo@coop.test');
+        $user = $this->users->findOneByEmail('demo@koopio.test');
         if (null === $user) {
-            $user = (new User())->setEmail('demo@coop.test')->setName('Dana Demo')->setVerified(true)->setPlatformAdmin(true);
+            $user = (new User())->setEmail('demo@koopio.test')->setName('Dana Demo')->setVerified(true)->setPlatformAdmin(true);
             $user->setPassword($this->hasher->hashPassword($user, 'demo-passwort'));
             $user->resetCalendarToken();
             $this->em->persist($user);
 
-            $colleague = (new User())->setEmail('kim@coop.test')->setName('Kim Kollegin')->setVerified(true);
+            $colleague = (new User())->setEmail('kim@koopio.test')->setName('Kim Kollegin')->setVerified(true);
             $colleague->setPassword($this->hasher->hashPassword($colleague, 'demo-passwort'));
             $this->em->persist($colleague);
 
@@ -104,7 +104,7 @@ final readonly class DemoCommand
             $org->addMember($user, OrganizationRole::Admin)->setPosition('Vorsitz');
             $org->addMember($colleague, OrganizationRole::Member)->setPosition('Schriftführung')
                 ->setTermEndsOn(new \DateTimeImmutable('31 July next year'));
-            $guest = (new User())->setEmail('gast@coop.test')->setName('Gerd Gastmitglied')->setVerified(true);
+            $guest = (new User())->setEmail('gast@koopio.test')->setName('Gerd Gastmitglied')->setVerified(true);
             $guest->setPassword($this->hasher->hashPassword($guest, 'demo-passwort'));
             $this->em->persist($guest);
             $org->addMember($guest, OrganizationRole::Member)->setVotingRight(false);
@@ -120,7 +120,7 @@ final readonly class DemoCommand
             $this->em->persist((new Project($user))->setName('Sommerfest 2025')->setColor('#a855f7')->setOrganization($org)->archive());
 
             // external guest: sees only the released project
-            $school = (new User())->setEmail('schule@coop.test')->setName('Sabine Schulleitung')->setVerified(true);
+            $school = (new User())->setEmail('schule@koopio.test')->setName('Sabine Schulleitung')->setVerified(true);
             $school->setPassword($this->hasher->hashPassword($school, 'demo-passwort'));
             $this->em->persist($school);
             $org->addMember($school, OrganizationRole::Guest)->setVotingRight(false)->setPosition('Schulleitung GS Nord')->addGuestProject($projects[0]);
@@ -167,7 +167,7 @@ final readonly class DemoCommand
                 ->setStartsAt($monday->modify('+3 days')->setTime(12, 0))->addAssignee($colleague));
 
             $note = (new Message(MessageType::Internal))->setAuthor($colleague)->setFrom($colleague->getEmail(), $colleague->getName())
-                ->addRecipientUser($user)->setSubject('Willkommen in Coop')
+                ->addRecipientUser($user)->setSubject('Willkommen in Koopio')
                 ->setBody("Hallo,\n\nhier können wir Mails gemeinsam bearbeiten, kommentieren und Verantwortliche festlegen. Für Absprachen in der Gruppe nutzen wir das Forum.\n\nKim");
             $this->em->persist($note);
 
@@ -204,10 +204,10 @@ final readonly class DemoCommand
 
             $account = (new MailAccount($org))
                 ->setName('Postfach SEV')
-                ->setEmailAddress('sev@coop.test')
+                ->setEmailAddress('sev@koopio.test')
                 ->setSenderName('SEV Musterstadt')
                 ->setImapHost('127.0.0.1')->setImapPort(3143)->setImapEncryption(MailEncryption::None)
-                ->setImapUsername('sev@coop.test')->setImapPassword($this->secretBox->encrypt('demo'))
+                ->setImapUsername('sev@koopio.test')->setImapPassword($this->secretBox->encrypt('demo'))
                 ->setSmtpHost('127.0.0.1')->setSmtpPort(3025)->setSmtpEncryption(MailEncryption::None);
             $this->em->persist($account);
             $this->em->persist((new MailRule($org))->setName('Rundbrief Landeselternrat')->setField(MailRuleField::From)
@@ -215,7 +215,7 @@ final readonly class DemoCommand
             $this->createWritingAids($org, $account, $user, $colleague);
             $this->createPublicPage($org, $account, $user, $colleague, $projects);
             $this->em->flush();
-            $io->success('Demo angelegt: demo@coop.test / demo-passwort (und kim@coop.test, Gast schule@coop.test)');
+            $io->success('Demo angelegt: demo@koopio.test / demo-passwort (und kim@koopio.test, Gast schule@koopio.test)');
         }
 
         if ($mails) {
@@ -229,7 +229,7 @@ final readonly class DemoCommand
             ];
             foreach ($samples as $sample) {
                 [$from, $subject, $text] = $sample;
-                $email = (new Email())->from($from)->to('sev@coop.test')->subject($subject)->text($text)
+                $email = (new Email())->from($from)->to('sev@koopio.test')->subject($subject)->text($text)
                     ->html('<p>'.nl2br(htmlspecialchars($text)).'</p>');
                 if (isset($sample[3])) {
                     $email->getHeaders()->addIdHeader('Message-ID', $sample[3]);
@@ -246,11 +246,11 @@ final readonly class DemoCommand
             $io->writeln('Beispiel-E-Mails verschickt.');
         }
 
-        foreach ($this->em->getRepository(MailAccount::class)->findBy(['emailAddress' => 'sev@coop.test']) as $account) {
+        foreach ($this->em->getRepository(MailAccount::class)->findBy(['emailAddress' => 'sev@koopio.test']) as $account) {
             $io->writeln(\sprintf('Abruf: %d neue E-Mail(s)%s', $this->synchronizer->sync($account), $account->getLastSyncError() ? ' – Fehler: '.$account->getLastSyncError() : ''));
             // Kim is answering the question about the zebra crossing: the hint "is writing" shows up for Dana
             $question = $this->em->getRepository(Message::class)->findOneBy(['mailAccount' => $account, 'subject' => 'Zebrastreifen an der Grundschule Nord']);
-            $kim = $this->users->findOneByEmail('kim@coop.test');
+            $kim = $this->users->findOneByEmail('kim@koopio.test');
             if (null !== $question && null !== $kim && 0 === $this->em->getRepository(Draft::class)->count(['original' => $question])) {
                 $reply = new ComposeData();
                 $reply->account = $account;
@@ -453,16 +453,16 @@ final readonly class DemoCommand
         $poll(new Poll($org, $colleague)->setTitle('Beitritt zum Bündnis „Sicherer Schulweg“')->setCircular(true)->setVotingOnly(true)
             ->setDescription('Die SEV tritt dem stadtweiten Bündnis bei und benennt eine Ansprechperson.')
             ->setProject($projects[0])->setDeadline(new \DateTimeImmutable('+5 days 18:00')),
-            ['Ja', 'Nein', 'Enthaltung'], ['kim@coop.test' => [0 => PollAnswer::YES]]);
+            ['Ja', 'Nein', 'Enthaltung'], ['kim@koopio.test' => [0 => PollAnswer::YES]]);
         $poll(new Poll($org, $user)->setTitle('Welche Themen für den Elternabend?')->setKind(PollKind::Choice)->setMultiple(true)
             ->setTopic($topic)->setProject($projects[1])->setDeadline(new \DateTimeImmutable('+2 weeks 20:00')),
             ['Schulwegsicherheit', 'Ganztag', 'Digitalisierung', 'Schulobst'],
-            ['demo@coop.test' => [0 => PollAnswer::YES, 1 => PollAnswer::YES], 'kim@coop.test' => [0 => PollAnswer::YES, 2 => PollAnswer::YES]]);
+            ['demo@koopio.test' => [0 => PollAnswer::YES, 1 => PollAnswer::YES], 'kim@koopio.test' => [0 => PollAnswer::YES, 2 => PollAnswer::YES]]);
         $slots = [new \DateTimeImmutable('+8 days 10:00'), new \DateTimeImmutable('+9 days 15:00'), new \DateTimeImmutable('+12 days 10:00')];
         $poll(new Poll($org, $colleague)->setTitle('Ortsbegehung mit der Stadt')->setKind(PollKind::Schedule)->setProject($projects[0]),
             array_map(static fn (\DateTimeImmutable $d): string => $d->format('d.m.Y H:i'), $slots),
-            ['kim@coop.test' => [0 => PollAnswer::YES, 1 => PollAnswer::MAYBE, 2 => PollAnswer::YES]], $slots);
+            ['kim@koopio.test' => [0 => PollAnswer::YES, 1 => PollAnswer::MAYBE, 2 => PollAnswer::YES]], $slots);
         $poll(new Poll($org, $user)->setTitle('Delegierte für den Landeselternrat')->setKind(PollKind::Choice)->setSecret(true)->close(),
-            ['Dana Demo', 'Kim Kollegin'], ['demo@coop.test' => [1 => PollAnswer::YES], 'kim@coop.test' => [0 => PollAnswer::YES]]);
+            ['Dana Demo', 'Kim Kollegin'], ['demo@koopio.test' => [1 => PollAnswer::YES], 'kim@koopio.test' => [0 => PollAnswer::YES]]);
     }
 }

@@ -1,4 +1,4 @@
-# Projekt: Coop – Kollaborationssoftware Stadtelternvertretung
+# Projekt: Koopio – Kollaborationssoftware Stadtelternvertretung
 
 ## Arbeitsweise
 - Vor jeder Sitzung `docs/PLAN.md` lesen (Abschnitt „Wo stehen wir?“). Nach jedem abgeschlossenen Schritt Checkboxen und Status dort aktualisieren.

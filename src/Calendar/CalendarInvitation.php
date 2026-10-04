@@ -94,6 +94,6 @@ final readonly class CalendarInvitation
 
     private function uid(CalendarItem $item): string
     {
-        return 'item-'.$item->getId().'@'.(parse_url($this->urls->generate('home', [], UrlGeneratorInterface::ABSOLUTE_URL), \PHP_URL_HOST) ?: 'coop');
+        return 'item-'.$item->getId().'@'.(parse_url($this->urls->generate('home', [], UrlGeneratorInterface::ABSOLUTE_URL), \PHP_URL_HOST) ?: 'koopio');
     }
 }

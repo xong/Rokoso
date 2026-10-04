@@ -4,7 +4,7 @@
 # DEFAULT_URI, MAILER_DSN, MAILER_FROM, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY.
 x-env: &env
   APP_SECRET: ${APP_SECRET}
-  DATABASE_URL: mysql://coop:${DB_PASSWORD}@db:3306/coop?serverVersion=11.8.0-MariaDB&charset=utf8mb4
+  DATABASE_URL: mysql://koopio:${DB_PASSWORD}@db:3306/koopio?serverVersion=11.8.0-MariaDB&charset=utf8mb4
   DEFAULT_URI: ${DEFAULT_URI}
   MAILER_DSN: ${MAILER_DSN}
   MAILER_FROM: ${MAILER_FROM}
@@ -14,7 +14,7 @@ x-env: &env
   MAIL_SYNC_INTERVAL: ${MAIL_SYNC_INTERVAL:-5}
 
 x-app: &app
-  image: coop:latest
+  image: koopio:latest
   restart: unless-stopped
   environment: *env
   volumes:
@@ -29,7 +29,7 @@ services:
     build: .
     environment:
       <<: *env
-      # Domain für automatisches HTTPS (Let's Encrypt), z. B. coop.example.org; ":80" hinter einem Proxy
+      # Domain für automatisches HTTPS (Let's Encrypt), z. B. koopio.example.org; ":80" hinter einem Proxy
       SERVER_NAME: ${SERVER_NAME:-:80}
     ports:
       - "80:80"
@@ -43,7 +43,7 @@ services:
 
   cron:
     <<: *app
-    command: ["coop-cron"]
+    command: ["koopio-cron"]
     # kein Webserver: der Healthcheck des Images (Caddy) passt hier nicht
     healthcheck:
       disable: true
@@ -58,8 +58,8 @@ services:
     image: mariadb:11.8
     restart: unless-stopped
     environment:
-      MARIADB_DATABASE: coop
-      MARIADB_USER: coop
+      MARIADB_DATABASE: koopio
+      MARIADB_USER: koopio
       MARIADB_PASSWORD: ${DB_PASSWORD}
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:

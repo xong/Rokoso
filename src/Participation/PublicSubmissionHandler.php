@@ -221,7 +221,7 @@ final readonly class PublicSubmissionHandler
         }
         $body = ([] === $lines ? '' : implode("\n", $lines)."\n\n").$payload['message'];
 
-        $domain = substr((string) strrchr($account->getEmailAddress(), '@'), 1) ?: 'coop.local';
+        $domain = substr((string) strrchr($account->getEmailAddress(), '@'), 1) ?: 'koopio.local';
         $message = (new Message())
             ->setMailAccount($account)
             ->setFolder(MessageFolder::Inbox)

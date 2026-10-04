@@ -1,12 +1,12 @@
 # Lokale Entwicklungsdienste: `docker compose up -d`
-name: coop
+name: koopio
 services:
   database:
     image: mariadb:11.8
     environment:
-      MARIADB_DATABASE: coop
-      MARIADB_USER: coop
-      MARIADB_PASSWORD: coop
+      MARIADB_DATABASE: koopio
+      MARIADB_USER: koopio
+      MARIADB_PASSWORD: koopio
       MARIADB_ROOT_PASSWORD: root
     ports:
       - "3307:3306" # 3307, damit es nicht mit XAMPP-MariaDB kollidiert

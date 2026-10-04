@@ -1,10 +1,10 @@
 /*
- * Coop Service Worker
+ * Koopio Service Worker
  * - Seiten: immer aus dem Netz (keine personenbezogenen Inhalte im Cache), ohne Netz die Offline-Seite
  * - Statische Dateien (/assets, /icons): Cache, dann Netz
  * - Web-Push: zeigt Benachrichtigungen an, Klick öffnet bzw. fokussiert die Seite
  */
-const CACHE = 'coop-v1';
+const CACHE = 'koopio-v1';
 const OFFLINE_URL = '{{ path('pwa_offline') }}';
 
 self.addEventListener('install', (event) => {
@@ -55,7 +55,7 @@ self.addEventListener('push', (event) => {
     } catch (e) {
         data = { title: event.data ? event.data.text() : '' };
     }
-    event.waitUntil(self.registration.showNotification(data.title || 'Coop', {
+    event.waitUntil(self.registration.showNotification(data.title || 'Koopio', {
         body: data.body || '',
         icon: '/icons/icon-192.png',
         badge: '/icons/icon-192.png',

@@ -32,7 +32,7 @@ final class CalendarFeedController extends AbstractController
 
         return new Response($invitation->feed($user), 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',
-            'Content-Disposition' => 'inline; filename="coop.ics"',
+            'Content-Disposition' => 'inline; filename="koopio.ics"',
             'Cache-Control' => 'private, max-age=900',
         ]);
     }

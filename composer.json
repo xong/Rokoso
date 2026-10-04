@@ -141,6 +141,6 @@
         "symfony/stopwatch": "8.0.*",
         "symfony/web-profiler-bundle": "8.0.*"
     },
-    "name": "coop/coop",
+    "name": "koopio/koopio",
     "description": "Kollaborationssoftware für Stadtelternvertretungen"
 }

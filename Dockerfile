@@ -1,5 +1,5 @@
 # Produktions-Image: FrankenPHP (Caddy + PHP, MIT) mit automatischem HTTPS.
-# Bauen:  docker build -t coop .
+# Bauen:  docker build -t koopio .
 # Start:  siehe compose.prod.yaml und docs/BETRIEB.md
 FROM dunglas/frankenphp:1-php8.4 AS base
 
@@ -11,7 +11,7 @@ ENV APP_ENV=prod \
     SERVER_NAME=:80
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-COPY docker/php.ini $PHP_INI_DIR/conf.d/zz-coop.ini
+COPY docker/php.ini $PHP_INI_DIR/conf.d/zz-koopio.ini
 
 WORKDIR /app
 
@@ -28,10 +28,10 @@ RUN composer dump-autoload --no-dev --classmap-authoritative \
     && mkdir -p var/storage public/uploads \
     && chown -R www-data:www-data var public/uploads
 
-COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/coop-entrypoint
-COPY --chmod=755 docker/cron.sh /usr/local/bin/coop-cron
+COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/koopio-entrypoint
+COPY --chmod=755 docker/cron.sh /usr/local/bin/koopio-cron
 
 VOLUME ["/app/var/storage", "/app/public/uploads"]
 
-ENTRYPOINT ["coop-entrypoint"]
+ENTRYPOINT ["koopio-entrypoint"]
 CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]

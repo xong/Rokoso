@@ -79,7 +79,7 @@ class MailAccount
     #[Assert\NotBlank]
     private string $inboxFolder = 'INBOX';
 
-    /** IMAP folder that receives a copy of every mail sent from Coop (null = no copy). */
+    /** IMAP folder that receives a copy of every mail sent from Koopio (null = no copy). */
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $sentFolder = null;
 

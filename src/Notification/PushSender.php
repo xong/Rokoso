@@ -58,7 +58,7 @@ final readonly class PushSender
                 $payload = json_encode([
                     'title' => $this->text->text($notification),
                     'url' => $this->text->link($notification),
-                    'tag' => 'coop-'.$notification->getId(),
+                    'tag' => 'koopio-'.$notification->getId(),
                 ], \JSON_THROW_ON_ERROR);
                 foreach ($this->subscriptions->findBy(['user' => $notification->getRecipient()]) as $subscription) {
                     $webPush->queueNotification(Subscription::create([
