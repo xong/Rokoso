@@ -3,24 +3,47 @@
 
 {% block title %}{{ 'nav.contacts'|trans }}{% endblock %}
 {% block list_title %}{{ 'nav.contacts'|trans }}{% endblock %}
-{% block back_url %}{{ path('contact_index', query ? {q: query} : {}) }}{% endblock %}
+{# Such- und Gruppenfilter bleiben beim Blättern erhalten #}
+{% set list_params = {q: query ?: null, group: group ? group.id : null}|filter(v => v) %}
+{% block back_url %}{{ path('contact_index', list_params) }}{% endblock %}
 
 {% block list_actions %}
+    <a href="{{ path('contact_group_index') }}" class="btn-icon" aria-label="{{ 'contact_group.title'|trans }}" title="{{ 'contact_group.title'|trans }}">
+        {{ ux_icon('lucide:users', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+    <a href="{{ path('contact_import') }}" class="btn-icon" aria-label="{{ 'contact.import'|trans }}" title="{{ 'contact.import'|trans }}">
+        {{ ux_icon('lucide:upload', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+    <a href="{{ path('contact_export', list_params) }}" class="btn-icon" aria-label="{{ 'contact.export'|trans }}" title="{{ 'contact.export'|trans }}" data-turbo="false">
+        {{ ux_icon('lucide:download', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
     <a href="{{ path('contact_new') }}" class="btn-icon" aria-label="{{ 'contact.new'|trans }}" title="{{ 'contact.new'|trans }}">
         {{ ux_icon('lucide:user-plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
     </a>
 {% endblock %}
 
 {% block list %}
-    <form method="get" action="{{ path('contact_index') }}" role="search" class="sticky top-0 z-10 border-b border-slate-200 bg-surface p-2">
+    <form method="get" action="{{ path('contact_index') }}" role="search" data-controller="autosubmit" class="sticky top-0 z-10 border-b border-slate-200 bg-surface p-2">
         <div class="relative">
             {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-2.5 left-2.5 size-4 text-slate-400', 'aria-hidden': 'true'}) }}
             <label for="contact-q" class="sr-only">{{ 'action.search'|trans }}</label>
             <input type="search" id="contact-q" name="q" value="{{ query }}" placeholder="{{ 'contact.search'|trans }}" class="input pl-8">
         </div>
+        {% if groups is not empty %}
+            <div class="mt-2 flex items-center gap-2">
+                <label for="contact-group" class="shrink-0 text-xs text-slate-500">{{ 'contact_group.filter'|trans }}</label>
+                <select id="contact-group" name="group" class="input py-1 text-sm" data-action="autosubmit#submit">
+                    <option value="">{{ 'contact_group.all'|trans }}</option>
+                    {% for g in groups %}
+                        <option value="{{ g.id }}" {{ group and group.id == g.id ? 'selected' }}>{{ g.name }}{% if groups|map(x => x.organization)|reduce((carry, o) => carry or o != g.organization, false) %} ({{ g.organization.name }}){% endif %}</option>
+                    {% endfor %}
+                </select>
+                <noscript><button type="submit" class="btn-secondary py-1">{{ 'action.show'|trans }}</button></noscript>
+            </div>
+        {% endif %}
     </form>
     {% if contacts is empty %}
-        {{ ui.empty(query ? 'contact.no_match' : 'contact.none', 'lucide:contact') }}
+        {{ ui.empty(query or group ? 'contact.no_match' : 'contact.none', 'lucide:contact') }}
     {% else %}
         {% set letter = null %}
         <ul role="list">
@@ -32,7 +55,7 @@
                 {% endif %}
                 {% set active = contact is defined and contact and contact.id == c.id %}
                 <li>
-                    <a href="{{ path('contact_show', {id: c.id}|merge(query ? {q: query} : {})) }}" {% if active %}aria-current="page"{% endif %}
+                    <a href="{{ path('contact_show', {id: c.id}|merge(list_params)) }}" {% if active %}aria-current="page"{% endif %}
                        class="flex items-center gap-3 border-b border-slate-100 px-4 py-2.5 {{ active ? 'bg-brand-50' : 'hover:bg-slate-50' }}">
                         <twig:Avatar name="{{ c.displayName }}" image="{{ c.photo }}" size="size-9 text-xs" />
                         <span class="min-w-0 flex-1">

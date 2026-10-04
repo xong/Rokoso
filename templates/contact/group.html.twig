@@ -1,0 +1,63 @@
+{% extends 'contact/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ group.name }}{% endblock %}
+{% block detail_title %}{{ group.name }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('contact_group_vcard', {id: group.id}) }}" class="btn-icon" data-turbo="false" aria-label="{{ 'contact.export'|trans }}" title="{{ 'contact.export'|trans }}">
+        {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+    <a href="{{ path('contact_group_edit', {id: group.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">
+        {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+    {{ ui.post_button(path('contact_group_delete', {id: group.id}), 'delete-contact-group-' ~ group.id, 'contact_group.delete',
+        {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'contact_group.delete_confirm'}) }}
+{% endblock %}
+
+{% block detail %}
+    {% set addresses = group.addresses %}
+    <div class="max-w-2xl space-y-6 p-4 lg:p-6">
+        <div>
+            <p class="text-xs text-slate-500">{{ group.organization.name }}</p>
+            {% if group.description %}<p class="mt-1 whitespace-pre-line text-slate-700">{{ group.description }}</p>{% endif %}
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            {% if addresses is not empty %}
+                <a href="{{ path('mail_compose', {group: group.id}) }}" class="btn-primary">{{ ux_icon('lucide:mails', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'contact_group.circular'|trans }}</a>
+            {% endif %}
+            <a href="{{ path('contact_group_edit', {id: group.id}) }}" class="btn-secondary">{{ ux_icon('lucide:user-plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'contact_group.edit_members'|trans }}</a>
+        </div>
+
+        <section aria-labelledby="members-heading">
+            <h3 id="members-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                {{ 'contact_group.members'|trans }} ({{ group.contacts|length }})
+            </h3>
+            {% if group.contacts is empty %}
+                <p class="text-sm text-slate-500">{{ 'contact_group.empty'|trans }}</p>
+            {% else %}
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for c in group.contacts %}
+                        <li>
+                            <a href="{{ path('contact_show', {id: c.id, group: group.id}) }}" class="flex items-center gap-3 px-4 py-2 hover:bg-slate-50">
+                                <twig:Avatar name="{{ c.displayName }}" image="{{ c.photo }}" size="size-7 text-[10px]" />
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate">{{ c.displayName }}</span>
+                                    <span class="block truncate text-xs text-slate-500">{{ [c.position, c.firstName or c.lastName ? c.company : null]|filter(v => v)|join(' · ') }}</span>
+                                </span>
+                                {% if c.email or c.email2 %}
+                                    <span class="shrink-0 truncate text-xs text-slate-500">{{ c.email ?: c.email2 }}</span>
+                                {% else %}
+                                    <span class="badge shrink-0 bg-amber-50 text-amber-800">{{ 'contact_group.no_email'|trans }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

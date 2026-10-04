@@ -1,0 +1,41 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Repository;
+
+use App\Entity\ContactGroup;
+use App\Entity\Membership;
+use App\Entity\User;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends ServiceEntityRepository<ContactGroup>
+ */
+class ContactGroupRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, ContactGroup::class);
+    }
+
+    /**
+     * Groups of all organizations the user is a full member of.
+     *
+     * @return list<ContactGroup>
+     */
+    public function findForUser(User $user): array
+    {
+        /* @var list<ContactGroup> */
+        return $this->createQueryBuilder('g')
+            ->addSelect('o')
+            ->join('g.organization', 'o')
+            ->join(Membership::class, 'cm', 'WITH', 'cm.organization = o AND cm.user = :viewer AND '.Membership::fullDql('cm'))
+            ->setParameter('viewer', $user)
+            ->orderBy('o.name')
+            ->addOrderBy('g.name')
+            ->getQuery()
+            ->getResult();
+    }
+}

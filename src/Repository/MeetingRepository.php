@@ -44,6 +44,29 @@ class MeetingRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * Visible meetings with one of the addresses among the guests, newest first.
+     *
+     * @param list<string> $addresses
+     *
+     * @return list<Meeting>
+     */
+    public function findWithGuest(User $user, array $addresses, int $limit = 20): array
+    {
+        if ([] === $addresses) {
+            return [];
+        }
+        $qb = $this->visibleQuery($user)->orderBy('m.startsAt', 'DESC')->setMaxResults($limit);
+        $or = $qb->expr()->orX();
+        foreach ($addresses as $i => $address) {
+            $or->add('m.guestEmails LIKE :g'.$i);
+            $qb->setParameter('g'.$i, '%'.addcslashes($address, '%_\\').'%');
+        }
+
+        /* @var list<Meeting> */
+        return $qb->andWhere($or)->getQuery()->getResult();
+    }
+
     public function visibleQuery(User $user, string $alias = 'm'): QueryBuilder
     {
         return $this->createQueryBuilder($alias)

@@ -7,6 +7,7 @@ namespace App\Tests\Controller;
 use App\Entity\ForumBoard;
 use App\Entity\ForumPost;
 use App\Entity\ForumTopic;
+use App\Entity\ForumTopicRead;
 use App\Entity\ForumUpload;
 use App\Entity\Organization;
 use App\Entity\Project;
@@ -50,6 +51,9 @@ final class ForumTest extends AppTestCase
 
         $topic = $this->em()->getRepository(ForumTopic::class)->findOneBy(['title' => 'Elternabend']);
         self::assertNotNull($topic);
+        // read marks have second precision: move the member's mark into the past so the reply is newer
+        $this->em()->createQuery('UPDATE '.ForumTopicRead::class.' r SET r.readAt = :past')
+            ->setParameter('past', new \DateTimeImmutable('-1 minute'))->execute();
         $this->client->request('GET', '/forum/topic/'.$topic->getId());
         $this->client->submitForm('Antwort senden', ['forum_post_form[body]' => 'Ich bin dabei.']);
         self::assertResponseRedirects();

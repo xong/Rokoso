@@ -1,0 +1,55 @@
+{% extends 'contact/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ (edited ? 'contact_group.edit' : 'contact_group.new')|trans }}{% endblock %}
+{% block detail_title %}{{ (edited ? 'contact_group.edit' : 'contact_group.new')|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        {% if organizations|length > 1 %}
+            {# Organisation wechseln lädt die passende Kontaktauswahl #}
+            <form method="get" action="{{ path('contact_group_new') }}" class="mb-4 flex items-end gap-2" data-controller="autosubmit">
+                <div class="flex-1">
+                    <label for="group-organization" class="label">{{ 'contact.organization'|trans }}</label>
+                    <select id="group-organization" name="organization" class="input" data-action="autosubmit#submit">
+                        {% for o in organizations %}
+                            <option value="{{ o.id }}" {{ o == organization ? 'selected' }}>{{ o.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <noscript><button type="submit" class="btn-secondary">{{ 'action.show'|trans }}</button></noscript>
+            </form>
+        {% else %}
+            <p class="mb-4 text-sm text-slate-500">{{ 'contact.organization'|trans }}: {{ organization.name }}</p>
+        {% endif %}
+
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.name) }}
+            {{ form_row(form.description) }}
+            <fieldset class="card mb-4 p-4">
+                <legend class="px-1 font-semibold">{{ 'contact_group.members'|trans }}</legend>
+                {% if form.contacts.children is empty %}
+                    <p class="text-sm text-slate-500">{{ 'contact_group.no_contacts'|trans }}</p>
+                {% else %}
+                    {{ form_errors(form.contacts) }}
+                    <ul role="list" class="max-h-96 space-y-1 overflow-y-auto">
+                        {% for child in form.contacts %}
+                            <li class="flex items-center gap-2">
+                                {{ form_widget(child) }}
+                                {{ form_label(child, null, {label_attr: {class: 'text-sm'}}) }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% do form.contacts.setRendered %}
+            </fieldset>
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ edited ? path('contact_group_show', {id: edited.id}) : path('contact_group_index') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

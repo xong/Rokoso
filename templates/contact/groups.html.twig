@@ -1,0 +1,37 @@
+{% extends 'contact/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ 'contact_group.title'|trans }}{% endblock %}
+{% block detail_title %}{{ 'contact_group.title'|trans }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('contact_group_new') }}" class="btn-icon" aria-label="{{ 'contact_group.new'|trans }}" title="{{ 'contact_group.new'|trans }}">
+        {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl space-y-4 p-4 lg:p-6">
+        <p class="text-sm text-slate-600">{{ 'contact_group.intro'|trans }}</p>
+        {% if groups is empty %}
+            <p class="text-sm text-slate-500">{{ 'contact_group.none'|trans }}</p>
+        {% else %}
+            <ul role="list" class="card divide-y divide-slate-100">
+                {% for g in groups %}
+                    <li>
+                        <a href="{{ path('contact_group_show', {id: g.id}) }}" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50">
+                            {{ ux_icon('lucide:users', {class: 'size-5 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate font-medium">{{ g.name }}</span>
+                                <span class="block truncate text-xs text-slate-500">{{ g.organization.name }}{% if g.description %} · {{ g.description }}{% endif %}</span>
+                            </span>
+                            <span class="badge bg-slate-100 text-slate-600">{{ 'contact_group.member_count'|trans({'%count%': g.contacts|length}) }}</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <a href="{{ path('contact_group_new') }}" class="btn-primary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'contact_group.new'|trans }}</a>
+    </div>
+{% endblock %}

@@ -8,8 +8,8 @@
 | | |
 |---|---|
 | **Aktuelle Phase** | Ausbau 2 nach Systemvergleich (Phasen 20–34) |
-| **Nächster Schritt** | Phase 27 (Verteiler/Kontakte) – Kontaktgruppen auch in die Empfängervorschläge aufnehmen (26.3) |
-| **Letzte Sitzung** | 2026-10-04: Phase 26 (Entwürfe mit automatischem Speichern, Kollisionshinweis, Adressvorschläge, Signaturen pro Konto, Textbausteine pro Organisation, Markdown-Werkzeugleiste mit Versand HTML + Text, Senden rückgängig über Warteschlange, Kopie in den IMAP-Gesendet-Ordner; Cron `app:mail:outbox`; Entscheidung 54); davor Phase 25 (Mitgliedschaft mit Funktion und Amtszeit, ehemalige Mitglieder ohne Zugriff, Gastzugang pro Projekt, Übergabe beim Amtswechsel, Projektleitung, Projekte archivieren, Handbuch mit Seitenbaum und Versionen; Entscheidung 53); davor Phase 24 (Abstimmungen offen/geheim, Entscheidung/Auswahl/Terminfindung, Umlaufbeschluss → Beschlussliste, gewählter Termin → Sitzung bzw. Kalender, Abstimmungen in Forenthemen und Sitzungen; Entscheidung 52); davor Phase 23 (Sitzungen mit Tagesordnung, TOP-Vorschlägen, Einladung per E-Mail mit .ics, Anwesenheit/Beschlussfähigkeit, Protokoll mit Freigabe und Druckansicht, Beschlussliste, Aufgaben aus TOPs, Stimmrecht pro Mitgliedschaft; Entscheidung 51); davor Phase 22 (Aufgaben ohne Pflichtfrist, Status offen/in Arbeit/erledigt, Liste Meine/Alle/Projekt, Board, Aufgabe aus Nachricht/Forenthema, Projektseite mit Terminen und Aufgaben; Entscheidung 50); davor Phase 21 (Benachrichtigungen mit Glocke, @-Erwähnungen, Beobachten, E-Mail sofort/täglich/aus, Web-Push; Cron `app:notify`; Entscheidung 49); davor Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
+| **Nächster Schritt** | Phase 28 (Öffentliche Mitwirkung) |
+| **Letzte Sitzung** | 2026-10-04: Phase 27 (Kontakte mit Institution/Funktion, Verteiler pro Organisation mit Filter und Empfängervorschlag, Rundschreiben einzeln adressiert mit Fehlerprotokoll, Kontakt-Verlauf aus Nachrichten und Sitzungen, Notizen mit @-Erwähnungen, vCard-Import/-Export; Entscheidung 55); davor Phase 26 (Entwürfe mit automatischem Speichern, Kollisionshinweis, Adressvorschläge, Signaturen pro Konto, Textbausteine pro Organisation, Markdown-Werkzeugleiste mit Versand HTML + Text, Senden rückgängig über Warteschlange, Kopie in den IMAP-Gesendet-Ordner; Cron `app:mail:outbox`; Entscheidung 54); davor Phase 25 (Mitgliedschaft mit Funktion und Amtszeit, ehemalige Mitglieder ohne Zugriff, Gastzugang pro Projekt, Übergabe beim Amtswechsel, Projektleitung, Projekte archivieren, Handbuch mit Seitenbaum und Versionen; Entscheidung 53); davor Phase 24 (Abstimmungen offen/geheim, Entscheidung/Auswahl/Terminfindung, Umlaufbeschluss → Beschlussliste, gewählter Termin → Sitzung bzw. Kalender, Abstimmungen in Forenthemen und Sitzungen; Entscheidung 52); davor Phase 23 (Sitzungen mit Tagesordnung, TOP-Vorschlägen, Einladung per E-Mail mit .ics, Anwesenheit/Beschlussfähigkeit, Protokoll mit Freigabe und Druckansicht, Beschlussliste, Aufgaben aus TOPs, Stimmrecht pro Mitgliedschaft; Entscheidung 51); davor Phase 22 (Aufgaben ohne Pflichtfrist, Status offen/in Arbeit/erledigt, Liste Meine/Alle/Projekt, Board, Aufgabe aus Nachricht/Forenthema, Projektseite mit Terminen und Aufgaben; Entscheidung 50); davor Phase 21 (Benachrichtigungen mit Glocke, @-Erwähnungen, Beobachten, E-Mail sofort/täglich/aus, Web-Push; Cron `app:notify`; Entscheidung 49); davor Phase 20 (Status-Modell, Rückgängig, Wiedervorlage, Verlauf, Mehrfachauswahl, Threads, Regeln; Entscheidung 48); davor 2026-10-03: Dunkelmodus (Hell/Dunkel/System im Profil, Entscheidung 38); davor 2026-10-02: App.md 38–48 umgesetzt (Phasen 13–18: Drag&Drop, Hover-Leiste, Kalender-Layout, Projekt-Kommentare, Dateien, persönliche Ablage, Forum), je Phase ein Commit; 62 Tests grün; Sichtprüfung im Browser steht noch aus (Browser-Erweiterung war nicht verbunden) |
 
 **Starten:** `docker compose up -d` · `php bin/console doctrine:migrations:migrate -n` · `php bin/console app:demo --mails` · `php bin/console tailwind:build --watch` · `php -S 127.0.0.1:8000 -t public public/index.php` → http://127.0.0.1:8000 (Login `demo@coop.test` / `demo-passwort`)
 
@@ -174,18 +174,18 @@ Grundlage: Vergleich mit Front/Help Scout/Zammad (gemeinsames Postfach), Nextclo
 ## Phase 26 – Postfach: Schreiben
 - [x] 26.1 **Entwürfe** (automatisch gespeichert, Ordner „Entwürfe“)
 - [x] 26.2 **Kollisionshinweis** „X schreibt gerade eine Antwort“ (offener Entwurf zur selben Nachricht)
-- [~] 26.3 **Empfänger-Autovervollständigung** aus Kontakten und Kontaktgruppen (Kontakte + Mitglieder erledigt; Gruppen folgen mit Phase 27)
+- [x] 26.3 **Empfänger-Autovervollständigung** aus Kontakten und Kontaktgruppen
 - [x] 26.4 **Signaturen** (pro Person und Konto) und **Textbausteine** (pro Organisation)
 - [x] 26.5 **Senden rückgängig** (kurze Verzögerung mit Abbrechen)
 - [x] 26.6 **Rich-Text** per Markdown-Editor mit Werkzeugleiste; Versand als HTML + Text
 - [x] 26.7 Gesendete Mails zusätzlich per IMAP in den **Gesendet-Ordner** des Servers kopieren (pro Konto abschaltbar)
 
 ## Phase 27 – Verteiler und Kontakte
-- [ ] 27.1 Kontakt: **Institution** (z. B. Schule) und **Funktion** (Schulleitung, Elternbeirat, Schulamt …)
-- [ ] 27.2 **Kontaktgruppen** (Verteiler)
-- [ ] 27.3 **Rundschreiben** an Gruppen über ein Org-Konto (einzeln adressiert, keine offenen Empfängerlisten), im Ausgang nachvollziehbar
-- [ ] 27.4 **Kontakt-Verlauf**: Nachrichten, Termine, Notizen zum Kontakt
-- [ ] 27.5 **vCard** importieren/exportieren
+- [x] 27.1 Kontakt: **Institution** (z. B. Schule) und **Funktion** (Schulleitung, Elternbeirat, Schulamt …)
+- [x] 27.2 **Kontaktgruppen** (Verteiler)
+- [x] 27.3 **Rundschreiben** an Gruppen über ein Org-Konto (einzeln adressiert, keine offenen Empfängerlisten), im Ausgang nachvollziehbar
+- [x] 27.4 **Kontakt-Verlauf**: Nachrichten, Termine, Notizen zum Kontakt
+- [x] 27.5 **vCard** importieren/exportieren
 
 ## Phase 28 – Öffentliche Mitwirkung (ohne Konto, je Funktion in der Organisationsverwaltung an-/abschaltbar)
 - [ ] 28.1 Öffentliche Seite pro Organisation (eigene URL, einbettbar), Spamschutz **konfigurierbar** durch Org-Admins: unsichtbar (Lockfeld, Mindestzeit, Drosselung) und optional E-Mail-Bestätigung

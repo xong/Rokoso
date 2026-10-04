@@ -15,11 +15,13 @@ use App\Mail\ComposeAssistant;
 use App\Mail\ComposeData;
 use App\Mail\MailSender;
 use App\Mail\Outbox;
+use App\Repository\ContactGroupRepository;
 use App\Repository\DraftRepository;
 use App\Repository\MailAccountRepository;
 use App\Repository\MessageRepository;
 use App\Repository\ProjectRepository;
 use App\Security\Voter\MessageVoter;
+use App\Security\Voter\OrganizationVoter;
 use App\Service\AttachmentStorage;
 use App\Service\Shelf;
 use Doctrine\ORM\EntityManagerInterface;
@@ -48,6 +50,7 @@ final class ComposeController extends AbstractController
         MessageRepository $messages,
         ProjectRepository $projects,
         DraftRepository $drafts,
+        ContactGroupRepository $groups,
         MailSender $sender,
         Outbox $outbox,
         ComposeAssistant $assistant,
@@ -83,6 +86,15 @@ final class ComposeController extends AbstractController
             $data = new ComposeData();
             $data->account = $available[0];
             $data->to = $request->query->getString('to');
+            if ($request->query->getInt('group') > 0) {
+                $group = $groups->find($request->query->getInt('group'));
+                if (null === $group) {
+                    throw $this->createNotFoundException();
+                }
+                $this->denyAccessUnlessGranted(OrganizationVoter::VIEW, $group->getOrganization());
+                $data->to = implode(', ', $group->getAddresses());
+                $data->circular = true;
+            }
             $originalId = $request->query->getInt('reply') ?: $request->query->getInt('forward');
             if ($originalId > 0) {
                 $original = $messages->find($originalId);

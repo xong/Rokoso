@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Internal note on a message, project or file, visible to everyone who can see the target.
+ * Internal note on a message, project, file or contact, visible to everyone who can see the target.
  * Exactly one target relation is set.
  */
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
@@ -40,6 +40,10 @@ class Comment
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?StoredFile $file = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    private ?Contact $contact = null;
 
     private function __construct(
         #[ORM\ManyToOne]
@@ -73,6 +77,14 @@ class Comment
         return $comment;
     }
 
+    public static function onContact(Contact $contact, ?User $author): self
+    {
+        $comment = new self($author);
+        $comment->contact = $contact;
+
+        return $comment;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -93,10 +105,15 @@ class Comment
         return $this->file;
     }
 
-    /** The commented object, for permission checks. */
-    public function getTarget(): Message|Project|StoredFile
+    public function getContact(): ?Contact
     {
-        return $this->message ?? $this->project ?? $this->file ?? throw new \LogicException('Comment without target');
+        return $this->contact;
+    }
+
+    /** The commented object, for permission checks. */
+    public function getTarget(): Message|Project|StoredFile|Contact
+    {
+        return $this->message ?? $this->project ?? $this->file ?? $this->contact ?? throw new \LogicException('Comment without target');
     }
 
     public function getAuthor(): ?User

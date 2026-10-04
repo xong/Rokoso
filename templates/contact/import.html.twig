@@ -1,0 +1,28 @@
+{% extends 'contact/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ 'contact.import'|trans }}{% endblock %}
+{% block detail_title %}{{ 'contact.import'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        <p class="mb-4 text-sm text-slate-600">{{ 'contact.import_intro'|trans }}</p>
+        <form method="post" action="{{ path('contact_import') }}" enctype="multipart/form-data" class="card p-4">
+            <input type="hidden" name="_token" value="{{ csrf_token('contact-import') }}">
+            <div class="mb-4">
+                <label for="import-file" class="label">{{ 'contact.import_file'|trans }}</label>
+                <input type="file" id="import-file" name="file" accept=".vcf,text/vcard,text/x-vcard" required class="input">
+            </div>
+            <div class="mb-4">
+                <label for="import-organization" class="label">{{ 'contact.organization'|trans }}</label>
+                <select id="import-organization" name="organization" class="input" aria-describedby="import-organization-help">
+                    {% for o in organizations %}<option value="{{ o.id }}">{{ o.name }}</option>{% endfor %}
+                    <option value="0">{{ 'contact.private'|trans }}</option>
+                </select>
+                <p id="import-organization-help" class="help">{{ 'contact.import_duplicates'|trans }}</p>
+            </div>
+            <button type="submit" class="btn-primary">{{ ux_icon('lucide:upload', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'contact.import'|trans }}</button>
+        </form>
+    </div>
+{% endblock %}

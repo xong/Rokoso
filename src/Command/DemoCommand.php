@@ -7,7 +7,9 @@ namespace App\Command;
 use App\Entity\AgendaItem;
 use App\Entity\Attendance;
 use App\Entity\CalendarItem;
+use App\Entity\Comment;
 use App\Entity\Contact;
+use App\Entity\ContactGroup;
 use App\Entity\Draft;
 use App\Entity\Folder;
 use App\Entity\ForumBoard;
@@ -111,9 +113,25 @@ final readonly class DemoCommand
             $org->addMember($school, OrganizationRole::Guest)->setVotingRight(false)->setPosition('Schulleitung GS Nord')->addGuestProject($projects[0]);
             $this->createWiki($org, $user, $colleague);
 
-            foreach ([['Eva', 'Elternteil', 'Elternbeirat GS Nord', 'eva@example.org'], [null, null, 'Schulamt Musterstadt', 'info@schulamt.example.org']] as [$first, $last, $company, $email]) {
-                $this->em->persist((new Contact($user))->setFirstName($first)->setLastName($last)->setCompany($company)->setEmail($email)->setOrganization($org));
+            $principals = (new ContactGroup($org))->setName('Schulleitungen')->setDescription('Alle Schulleitungen im Stadtgebiet');
+            $councils = (new ContactGroup($org))->setName('Elternbeiräte')->setDescription('Vorsitzende der Schulelternbeiräte');
+            $this->em->persist($principals);
+            $this->em->persist($councils);
+            $contacts = [];
+            foreach ([
+                ['Eva', 'Elternteil', 'GS Nord', 'Vorsitzende Elternbeirat', 'eva@example.org', $councils],
+                ['Jonas', 'Becker', 'Gymnasium am Park', 'Vorsitzender Elternbeirat', 'jonas.becker@example.org', $councils],
+                ['Petra', 'Lang', 'GS Nord', 'Schulleiterin', 'lang@gs-nord.example.org', $principals],
+                ['Uwe', 'Krämer', 'Gymnasium am Park', 'Schulleiter', 'kraemer@gymnasium.example.org', $principals],
+                ['Aylin', 'Demir', 'Gesamtschule Süd', 'Schulleiterin', 'demir@gesamtschule.example.org', $principals],
+                [null, null, 'Schulamt Musterstadt', null, 'info@schulamt.example.org', null],
+            ] as [$first, $last, $company, $position, $email, $group]) {
+                $contacts[] = $contact = (new Contact($user))->setFirstName($first)->setLastName($last)->setCompany($company)
+                    ->setPosition($position)->setEmail($email)->setOrganization($org);
+                $group?->addContact($contact);
+                $this->em->persist($contact);
             }
+            $this->em->persist(Comment::onContact($contacts[2], $colleague)->setBody('Bevorzugt Anrufe vormittags, E-Mails beantwortet sie meist erst am Wochenende.'));
 
             $monday = new \DateTimeImmutable('monday this week');
             $this->em->persist((new CalendarItem($user))->setTitle('Vorstandstreffen')->setOrganization($org)->setLocation('Rathaus, Raum 2')

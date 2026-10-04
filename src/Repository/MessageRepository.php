@@ -45,6 +45,32 @@ class MessageRepository extends ServiceEntityRepository
             ->setParameter('viewer', $user);
     }
 
+    /**
+     * Visible messages from or to one of the addresses (contact history), newest first.
+     *
+     * @param list<string> $addresses
+     *
+     * @return list<Message>
+     */
+    public function findForAddresses(User $user, array $addresses, int $limit = 30): array
+    {
+        if ([] === $addresses) {
+            return [];
+        }
+        $qb = $this->visibleQuery($user)
+            ->andWhere('m.trashedAt IS NULL')
+            ->orderBy('m.date', 'DESC')
+            ->setMaxResults($limit);
+        $or = $qb->expr()->orX('m.fromAddress IN (:addresses)');
+        foreach ($addresses as $i => $address) {
+            $or->add('m.toRecipients LIKE :a'.$i.' OR m.ccRecipients LIKE :a'.$i);
+            $qb->setParameter('a'.$i, '%"'.addcslashes($address, '%_\\').'"%');
+        }
+
+        /* @var list<Message> */
+        return $qb->andWhere($or)->setParameter('addresses', $addresses)->getQuery()->getResult();
+    }
+
     public function isVisibleTo(Message $message, User $user): bool
     {
         return null !== $this->visibleQuery($user)

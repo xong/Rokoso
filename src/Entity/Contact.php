@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\ContactRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Address book entry. Belongs to an organization (shared) or – without organization – to its creator.
@@ -97,12 +100,18 @@ class Contact
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    /** @var Collection<int, ContactGroup> */
+    #[ORM\ManyToMany(targetEntity: ContactGroup::class, mappedBy: 'contacts')]
+    #[ORM\OrderBy(['name' => 'ASC'])]
+    private Collection $groups;
+
     public function __construct(
         #[ORM\ManyToOne]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
         private User $createdBy,
     ) {
         $this->createdAt = new \DateTimeImmutable();
+        $this->groups = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -353,6 +362,49 @@ class Contact
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    /** @return list<string> both addresses, lower case */
+    public function getEmails(): array
+    {
+        return array_values(array_filter([$this->email, $this->email2]));
+    }
+
+    /** @return Collection<int, ContactGroup> */
+    public function getGroups(): Collection
+    {
+        return $this->groups;
+    }
+
+    public function addGroup(ContactGroup $group): static
+    {
+        if (!$this->groups->contains($group)) {
+            $this->groups->add($group);
+            $group->addContact($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroup(ContactGroup $group): static
+    {
+        if ($this->groups->removeElement($group)) {
+            $group->removeContact($this);
+        }
+
+        return $this;
+    }
+
+    #[Assert\Callback]
+    public function validateGroups(ExecutionContextInterface $context): void
+    {
+        foreach ($this->groups as $group) {
+            if ($group->getOrganization() !== $this->organization) {
+                $context->buildViolation('contact_group.wrong_organization')->atPath('groups')->addViolation();
+
+                return;
+            }
+        }
     }
 
     private static function clean(?string $value): ?string

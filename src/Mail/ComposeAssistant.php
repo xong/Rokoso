@@ -8,9 +8,11 @@ use App\Entity\MailAccount;
 use App\Entity\Signature;
 use App\Entity\TextSnippet;
 use App\Entity\User;
+use App\Repository\ContactGroupRepository;
 use App\Repository\ContactRepository;
 use App\Repository\OrganizationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Helpers while writing: recipient suggestions, signatures and text snippets.
@@ -19,15 +21,18 @@ final readonly class ComposeAssistant
 {
     public function __construct(
         private ContactRepository $contacts,
+        private ContactGroupRepository $groups,
+        private TranslatorInterface $translator,
         private OrganizationRepository $organizations,
         private EntityManagerInterface $em,
     ) {
     }
 
     /**
-     * Suggestions for the address fields: contacts and members of the own organizations, as "Name <address>".
+     * Suggestions for the address fields: contacts and members of the own organizations, as "Name <address>",
+     * then contact groups (choosing one inserts all addresses).
      *
-     * @return list<string>
+     * @return list<string|array{label: string, value: string}>
      */
     public function recipients(User $user): array
     {
@@ -48,6 +53,15 @@ final readonly class ComposeAssistant
         }
         $options = array_values($options);
         sort($options, \SORT_NATURAL | \SORT_FLAG_CASE);
+        foreach ($this->groups->findForUser($user) as $group) {
+            $addresses = $group->getAddresses();
+            if ([] !== $addresses) {
+                $options[] = [
+                    'label' => $this->translator->trans('contact_group.suggestion', ['%name%' => $group->getName(), '%count%' => \count($addresses)]),
+                    'value' => implode(', ', $addresses),
+                ];
+            }
+        }
 
         return $options;
     }

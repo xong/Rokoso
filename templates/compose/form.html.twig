@@ -54,6 +54,7 @@
             {{ form_errors(form) }}
             {{ form_row(form.account, {attr: {'data-signature-target': 'account', 'data-action': 'signature#swap'}}) }}
             {{ compose.address_row(form.to, recipients) }}
+            {{ form_row(form.circular) }}
             <details class="mb-4" {{ form.cc.vars.value or form.bcc.vars.value ? 'open' }}>
                 <summary class="link cursor-pointer text-sm">{{ 'compose.cc_bcc'|trans }}</summary>
                 <div class="mt-3 grid gap-x-4 sm:grid-cols-2">

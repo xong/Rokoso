@@ -8,6 +8,7 @@ use App\Entity\MailAccount;
 use App\Enum\MailEncryption;
 use App\Service\SecretBox;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\Smtp\SmtpTransport;
 use Symfony\Component\Mailer\Transport\TransportInterface;
@@ -22,13 +23,15 @@ final readonly class SmtpTransportFactory
         /** e.g. "null://null" in tests: replaces every account transport */
         #[Autowire(env: 'default::MAIL_ACCOUNT_TRANSPORT_OVERRIDE')]
         private ?string $override = null,
+        /** lets tests count the emails sent through the override transport */
+        private ?EventDispatcherInterface $dispatcher = null,
     ) {
     }
 
     public function create(MailAccount $account): TransportInterface
     {
         if (null !== $this->override && '' !== $this->override) {
-            return Transport::fromDsn($this->override);
+            return Transport::fromDsn($this->override, $this->dispatcher);
         }
 
         $username = $account->getSmtpUsername() ?? $account->getImapUsername();

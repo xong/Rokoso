@@ -22,6 +22,7 @@
 - E-Mails und interne Nachrichten: eine Entity `Message` (Typ email/internal). Sichtbarkeit zentral in `MessageRepository::visibleQuery()`, Voter `MessageVoter` nutzt sie.
 - IMAP: `MailboxReader` (Interface) → `ImapMailboxReader` (webklex, read-only); in Tests `tests/Fake/FakeMailboxReader`. Parser: `MessageParser` (zbateson). Abruf: `MailSynchronizer`, Befehl `app:mail:sync`.
 - Versand: `SmtpTransportFactory` (in Tests `MAIL_ACCOUNT_TRANSPORT_OVERRIDE=null://null`), `MailSender` (verschickt einen `Draft`). Senden rückgängig: `Outbox` mit `MAIL_SEND_DELAY` (Tests: 0 = sofort), Versand nach der Antwort (`OutboxListener`) bzw. Cron `app:mail:outbox`. Gesendet-Kopie per `SentFolderWriter` (Tests: `FakeSentFolderWriter`).
+- Kontakte: Verteiler `ContactGroup` (pro Organisation); Rundschreiben = `ComposeData::$circular` → `MailSender` schickt je „An“-Adresse eine E-Mail; vCard über `Service\VCard` (eigener Code). In Tests zählt `assertEmailCount` auch Konto-Mails (Override-Transport mit Dispatcher).
 - Kalender: `CalendarService` expandiert Wiederholungen (rlanvin/php-rrule) zu `Occurrence`s.
 - Zugriff: `Organization::getMembership()` liefert nur Vollmitglieder (kein Gast, Amtszeit läuft), `findMembership()` jede. In Queries `Membership::fullDql()` bzw. `guestDql()` für Gäste mit freigegebenen Projekten; Voter nutzen `canSeeProject()`/`isVisibleTo()`.
 - Twig-Makros für Buttons/Listen: `templates/_partials/ui.html.twig` (in jedem Kind-Template importieren).

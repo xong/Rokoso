@@ -38,6 +38,7 @@ final class ComposeFormType extends AbstractType
             ->add('bcc', TextType::class, ['label' => 'compose.bcc', 'empty_data' => '', 'required' => false, 'attr' => ['autocomplete' => 'off']])
             ->add('subject', TextType::class, ['label' => 'compose.subject', 'empty_data' => '', 'required' => false])
             ->add('body', TextareaType::class, ['label' => 'compose.body', 'empty_data' => '', 'required' => false, 'help' => 'compose.body_help', 'attr' => ['rows' => 16]])
+            ->add('circular', CheckboxType::class, ['label' => 'compose.circular', 'required' => false, 'help' => 'compose.circular_help'])
             ->add('draft', HiddenType::class, ['mapped' => false, 'data' => $options['draft_id']])
             ->add('files', FileType::class, [
                 'label' => 'compose.attachments',

@@ -19,6 +19,8 @@
                     {{ form_row(form.company) }}
                     {{ form_row(form.position) }}
                 </div>
+                <datalist id="contact-institutions">{% for v in institutions %}<option value="{{ v }}">{% endfor %}</datalist>
+                <datalist id="contact-positions">{% for v in positions %}<option value="{{ v }}">{% endfor %}</datalist>
                 <div class="flex items-center gap-4">
                     {% if contact %}<twig:Avatar name="{{ contact.displayName }}" image="{{ contact.photo }}" size="size-14 text-lg" />{% endif %}
                     <div class="flex-1">
@@ -51,6 +53,11 @@
             <fieldset class="card mb-4 p-4">
                 <legend class="px-1 font-semibold">{{ 'contact.section_more'|trans }}</legend>
                 {{ form_row(form.organization) }}
+                {% if form.groups.vars.choices is empty %}
+                    {% do form.groups.setRendered %}
+                {% else %}
+                    {{ form_row(form.groups) }}
+                {% endif %}
                 <div class="grid gap-x-4 sm:grid-cols-2">
                     {{ form_row(form.birthday) }}
                     {{ form_row(form.tags) }}

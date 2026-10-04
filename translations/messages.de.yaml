@@ -415,6 +415,7 @@ mail:
     nothing_changed: Es gab nichts zu ändern.
     thread: 'Unterhaltung (%count% Nachrichten)'
     history: Verlauf
+    circular: 'Rundschreiben – einzeln versandt an %count% Empfänger'
     snooze:
         label: Wiedervorlage
         tomorrow: Morgen, 8:00 Uhr
@@ -453,6 +454,7 @@ mail:
         trashed: '%user% hat die Nachricht in den Papierkorb gelegt'
         restored: '%user% hat die Nachricht wiederhergestellt'
         rule: 'Regel „%detail%“ wurde angewendet'
+        send_failed: 'Versand fehlgeschlagen an: %detail%'
     no_accounts: Noch kein E-Mail-Konto verbunden.
     setup_account: E-Mail-Konto in einer Organisation einrichten
     no_subject: (kein Betreff)
@@ -558,6 +560,8 @@ compose:
     forward_header: "---------- Weitergeleitete Nachricht ----------\nVon: %from%\nDatum: %date%\nBetreff: %subject%"
     body_help: 'Markdown möglich: **fett**, _kursiv_, Listen mit „-“, Links. Empfänger erhalten Text und formatierte Fassung.'
     draft_saved: Entwurf gespeichert.
+    circular: Als Rundschreiben einzeln versenden
+    circular_help: Jede Adresse unter „An“ erhält eine eigene E-Mail und sieht die anderen Empfänger nicht.
     draft_deleted: Entwurf gelöscht.
     cancelled: Senden abgebrochen – die E-Mail liegt wieder als Entwurf vor.
     cancel_too_late: Die E-Mail ist bereits verschickt.
@@ -636,7 +640,23 @@ contact:
     salutation: Anrede
     first_name: Vorname
     last_name: Nachname
-    company: Organisation / Firma / Schule
+    company: Institution
+    company_help: Schule, Kita, Behörde, Verein oder Firma.
+    import: Kontakte importieren
+    import_intro: Lade eine vCard-Datei (.vcf) hoch, z. B. aus Outlook, Thunderbird oder einem Smartphone exportiert.
+    import_file: vCard-Datei
+    import_duplicates: Kontakte, deren E-Mail-Adresse schon bekannt ist, werden übersprungen.
+    import_invalid: Die Datei konnte nicht gelesen werden (vCard, höchstens 5 MB).
+    imported: '%count% Kontakte importiert, %skipped% übersprungen.'
+    export: Als vCard exportieren
+    vcard: vCard herunterladen
+    colleagues: 'Weitere Kontakte bei %institution%'
+    history: Verlauf
+    history_empty: Noch keine Nachrichten oder Sitzungen mit diesem Kontakt.
+    history_circular: Rundschreiben
+    history_sent: Gesendet
+    history_received: Empfangen
+    history_meeting: Sitzung (Gast)
     position: Funktion
     email: E-Mail
     email2: E-Mail (weitere)
@@ -652,6 +672,28 @@ contact:
     notes: Notizen
     photo: Foto
     remove_photo: Foto entfernen
+contact_group:
+    title: Verteiler
+    intro: Verteiler bündeln Kontakte einer Organisation, z. B. alle Schulleitungen. Aus einem Verteiler lässt sich ein Rundschreiben schreiben.
+    none: Noch keine Verteiler.
+    new: Verteiler anlegen
+    edit: Verteiler bearbeiten
+    edit_members: Mitglieder bearbeiten
+    created: Verteiler angelegt.
+    delete: Verteiler löschen
+    delete_confirm: Verteiler wirklich löschen? Die Kontakte bleiben erhalten.
+    name: Name
+    description: Beschreibung
+    members: Mitglieder
+    member_count: '{0} leer|{1} 1 Kontakt|]1,Inf[ %count% Kontakte'
+    empty: Dieser Verteiler hat noch keine Mitglieder.
+    no_contacts: Diese Organisation hat noch keine Kontakte.
+    no_email: ohne E-Mail
+    circular: Rundschreiben schreiben
+    filter: Verteiler
+    all: Alle Kontakte
+    suggestion: 'Verteiler %name% (%count%)'
+    field_help: Der Kontakt kann nur in Verteilern seiner eigenen Organisation stehen.
 
 calendar:
     today: Heute

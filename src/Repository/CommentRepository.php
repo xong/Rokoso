@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Comment;
+use App\Entity\Contact;
 use App\Entity\Project;
 use App\Entity\StoredFile;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -23,13 +24,17 @@ class CommentRepository extends ServiceEntityRepository
     /**
      * @return list<Comment>
      */
-    public function forTarget(Project|StoredFile $target): array
+    public function forTarget(Project|StoredFile|Contact $target): array
     {
         /* @var list<Comment> */
         return $this->createQueryBuilder('c')
             ->addSelect('a')
             ->leftJoin('c.author', 'a')
-            ->andWhere($target instanceof Project ? 'c.project = :target' : 'c.file = :target')
+            ->andWhere(match (true) {
+                $target instanceof Project => 'c.project = :target',
+                $target instanceof StoredFile => 'c.file = :target',
+                default => 'c.contact = :target',
+            })
             ->setParameter('target', $target)
             ->orderBy('c.createdAt', 'ASC')
             ->addOrderBy('c.id', 'ASC')

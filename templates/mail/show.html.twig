@@ -78,6 +78,10 @@
                                 <dt class="text-slate-400">{{ 'mail.to'|trans }}</dt>
                                 <dd class="truncate">{% for r in message.toRecipients %}{{ r.name ?: r.address }}{% if not loop.last %}, {% endif %}{% endfor %}</dd>
                             {% endif %}
+                            {% if message.circular %}
+                                <dt class="text-slate-400">{{ ux_icon('lucide:mails', {class: 'inline size-3.5', 'aria-hidden': 'true'}) }}</dt>
+                                <dd>{{ 'mail.circular'|trans({'%count%': message.toRecipients|length}) }}</dd>
+                            {% endif %}
                             {% if message.ccRecipients is not empty %}
                                 <dt class="text-slate-400">{{ 'mail.cc'|trans }}</dt>
                                 <dd class="truncate">{% for r in message.ccRecipients %}{{ r.name ?: r.address }}{% if not loop.last %}, {% endif %}{% endfor %}</dd>

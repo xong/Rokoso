@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\Contact;
+use App\Entity\ContactGroup;
 use App\Entity\Organization;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -42,8 +43,8 @@ final class ContactFormType extends AbstractType
             ->add('salutation', TextType::class, $text('salutation', ['attr' => ['autocomplete' => 'off']]))
             ->add('firstName', TextType::class, $text('first_name'))
             ->add('lastName', TextType::class, $text('last_name'))
-            ->add('company', TextType::class, $text('company'))
-            ->add('position', TextType::class, $text('position'))
+            ->add('company', TextType::class, $text('company', ['help' => 'contact.company_help', 'attr' => ['list' => 'contact-institutions', 'autocomplete' => 'off']]))
+            ->add('position', TextType::class, $text('position', ['attr' => ['list' => 'contact-positions', 'autocomplete' => 'off']]))
             ->add('email', EmailType::class, $text('email'))
             ->add('email2', EmailType::class, $text('email2'))
             ->add('phone', TelType::class, $text('phone'))
@@ -53,6 +54,18 @@ final class ContactFormType extends AbstractType
             ->add('city', TextType::class, $text('city'))
             ->add('website', UrlType::class, $text('website', ['default_protocol' => 'https']))
             ->add('birthday', BirthdayType::class, $text('birthday', ['widget' => 'single_text', 'input' => 'datetime_immutable']))
+            ->add('groups', EntityType::class, [
+                'label' => 'contact_group.title',
+                'class' => ContactGroup::class,
+                'choices' => $options['groups'],
+                'choice_label' => static fn (ContactGroup $g): string => $g->getName(),
+                'group_by' => static fn (ContactGroup $g): string => $g->getOrganization()->getName(),
+                'multiple' => true,
+                'expanded' => true,
+                'required' => false,
+                'by_reference' => false,
+                'help' => 'contact_group.field_help',
+            ])
             ->add('tags', TextType::class, $text('tags', ['help' => 'contact.tags_help']))
             ->add('notes', TextareaType::class, $text('notes'))
             ->add('photoFile', FileType::class, [
@@ -68,7 +81,8 @@ final class ContactFormType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => Contact::class, 'organizations' => []]);
+        $resolver->setDefaults(['data_class' => Contact::class, 'organizations' => [], 'groups' => []]);
         $resolver->setAllowedTypes('organizations', 'array');
+        $resolver->setAllowedTypes('groups', 'array');
     }
 }

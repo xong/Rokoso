@@ -12,6 +12,9 @@
             {{ ux_icon('lucide:mail-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
         </a>
     {% endif %}
+    <a href="{{ path('contact_vcard', {id: contact.id}) }}" class="btn-icon" data-turbo="false" aria-label="{{ 'contact.vcard'|trans }}" title="{{ 'contact.vcard'|trans }}">
+        {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
     <a href="{{ path('contact_edit', {id: contact.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">
         {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
     </a>
@@ -29,51 +32,121 @@
 {% endmacro %}
 
 {% block detail %}
-    <div class="max-w-2xl space-y-6 p-4 lg:p-6">
-        <div class="flex items-center gap-4">
-            <twig:Avatar name="{{ contact.displayName }}" image="{{ contact.photo }}" size="size-20 text-2xl" />
-            <div class="min-w-0">
-                <p class="text-xl font-semibold">{{ contact.salutation }} {{ contact.displayName }}</p>
-                {% if contact.position or (contact.company and (contact.firstName or contact.lastName)) %}
-                    <p class="text-slate-600">{{ [contact.position, contact.firstName or contact.lastName ? contact.company : null]|filter(v => v)|join(', ') }}</p>
-                {% endif %}
-                <p class="mt-1 text-xs text-slate-500">{{ contact.organization ? contact.organization.name : 'contact.private'|trans }}</p>
-                {% if contact.tagList is not empty %}
-                    <p class="mt-2 flex flex-wrap gap-1">{% for tag in contact.tagList %}<span class="badge bg-slate-100 text-slate-600">{{ tag }}</span>{% endfor %}</p>
-                {% endif %}
+    <div class="flex min-h-full flex-col xl:flex-row">
+        <div class="min-w-0 flex-1 space-y-6 p-4 lg:p-6">
+            <div class="flex items-center gap-4">
+                <twig:Avatar name="{{ contact.displayName }}" image="{{ contact.photo }}" size="size-20 text-2xl" />
+                <div class="min-w-0">
+                    <p class="text-xl font-semibold">{{ contact.salutation }} {{ contact.displayName }}</p>
+                    {% if contact.position or (contact.company and (contact.firstName or contact.lastName)) %}
+                        <p class="text-slate-600">{{ [contact.position, contact.firstName or contact.lastName ? contact.company : null]|filter(v => v)|join(', ') }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-slate-500">{{ contact.organization ? contact.organization.name : 'contact.private'|trans }}</p>
+                    {% if contact.tagList is not empty or contact.groups is not empty %}
+                        <p class="mt-2 flex flex-wrap gap-1">
+                            {% for g in contact.groups %}
+                                <a href="{{ path('contact_group_show', {id: g.id}) }}" class="badge bg-brand-50 text-brand-700 hover:underline">{{ ux_icon('lucide:users', {class: 'size-3', 'aria-hidden': 'true'}) }} {{ g.name }}</a>
+                            {% endfor %}
+                            {% for tag in contact.tagList %}<span class="badge bg-slate-100 text-slate-600">{{ tag }}</span>{% endfor %}
+                        </p>
+                    {% endif %}
+                </div>
             </div>
+
+            <section aria-labelledby="reach-heading">
+                <h3 id="reach-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.section_reach'|trans }}</h3>
+                <dl class="card divide-y divide-slate-100 px-4">
+                    {{ _self.field('contact.email', contact.email, 'mailto:' ~ contact.email) }}
+                    {{ _self.field('contact.email2', contact.email2, 'mailto:' ~ contact.email2) }}
+                    {{ _self.field('contact.phone', contact.phone, 'tel:' ~ contact.phone) }}
+                    {{ _self.field('contact.mobile', contact.mobile, 'tel:' ~ contact.mobile) }}
+                    {{ _self.field('contact.website', contact.website, contact.website) }}
+                </dl>
+            </section>
+
+            {% if contact.street or contact.city %}
+                <section aria-labelledby="address-heading">
+                    <h3 id="address-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.section_address'|trans }}</h3>
+                    <address class="card px-4 py-3 not-italic">{{ contact.street }}<br>{{ contact.postalCode }} {{ contact.city }}</address>
+                </section>
+            {% endif %}
+
+            {% if contact.birthday or contact.notes %}
+                <section aria-labelledby="more-heading">
+                    <h3 id="more-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.section_more'|trans }}</h3>
+                    <dl class="card divide-y divide-slate-100 px-4">
+                        {{ _self.field('contact.birthday', contact.birthday ? contact.birthday|date('d.m.Y') : null) }}
+                    </dl>
+                    {% if contact.notes %}<p class="card mt-2 px-4 py-3 whitespace-pre-line">{{ contact.notes }}</p>{% endif %}
+                </section>
+            {% endif %}
+
+            {% if colleagues is not empty %}
+                <section aria-labelledby="colleagues-heading">
+                    <h3 id="colleagues-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.colleagues'|trans({'%institution%': contact.company}) }}</h3>
+                    <ul role="list" class="card divide-y divide-slate-100">
+                        {% for c in colleagues %}
+                            <li>
+                                <a href="{{ path('contact_show', {id: c.id}) }}" class="flex items-center gap-3 px-4 py-2 hover:bg-slate-50">
+                                    <twig:Avatar name="{{ c.displayName }}" image="{{ c.photo }}" size="size-7 text-[10px]" />
+                                    <span class="min-w-0 flex-1 truncate">{{ c.displayName }}{% if c.position %} <span class="text-sm text-slate-500">· {{ c.position }}</span>{% endif %}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
+
+            <section aria-labelledby="history-heading">
+                <div class="mb-1 flex items-center justify-between gap-2">
+                    <h3 id="history-heading" class="text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.history'|trans }}</h3>
+                    {% if contact.email %}
+                        <a class="link text-sm" href="{{ path('mail_inbox', {q: contact.email}) }}">{{ 'contact.messages'|trans }}</a>
+                    {% endif %}
+                </div>
+                {% if history is empty %}
+                    <p class="text-sm text-slate-500">{{ 'contact.history_empty'|trans }}</p>
+                {% else %}
+                    <ol role="list" class="card divide-y divide-slate-100">
+                        {% for entry in history %}
+                            <li>
+                                {% if entry.message %}
+                                    {% set m = entry.message %}
+                                    {% set outgoing = m.folder.value == 'sent' %}
+                                    {% set kind = m.circular ? 'circular' : (outgoing ? 'sent' : 'received') %}
+                                    <a href="{{ path('mail_show', {folder: outgoing ? 'sent' : 'inbox', id: m.id}) }}" class="flex items-center gap-3 px-4 py-2 hover:bg-slate-50">
+                                        {{ ux_icon({circular: 'lucide:mails', sent: 'lucide:send', received: 'lucide:inbox'}[kind], {class: 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                                        <span class="min-w-0 flex-1">
+                                            <span class="block truncate">{{ m.subject ?: 'mail.no_subject'|trans }}</span>
+                                            <span class="block truncate text-xs text-slate-500">{{ ('contact.history_' ~ kind)|trans }}</span>
+                                        </span>
+                                        <time datetime="{{ m.date|date('c') }}" class="shrink-0 text-xs text-slate-500">{{ m.date|short_date }}</time>
+                                    </a>
+                                {% else %}
+                                    {% set mt = entry.meeting %}
+                                    <a href="{{ path('meeting_show', {id: mt.id}) }}" class="flex items-center gap-3 px-4 py-2 hover:bg-slate-50">
+                                        {{ ux_icon('lucide:presentation', {class: 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                                        <span class="min-w-0 flex-1">
+                                            <span class="block truncate">{{ mt.title }}</span>
+                                            <span class="block truncate text-xs text-slate-500">{{ 'contact.history_meeting'|trans }}</span>
+                                        </span>
+                                        <time datetime="{{ mt.startsAt|date('c') }}" class="shrink-0 text-xs text-slate-500">{{ mt.startsAt|date('d.m.Y', 'Europe/Berlin') }}</time>
+                                    </a>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% endif %}
+            </section>
         </div>
 
-        <section aria-labelledby="reach-heading">
-            <h3 id="reach-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.section_reach'|trans }}</h3>
-            <dl class="card divide-y divide-slate-100 px-4">
-                {{ _self.field('contact.email', contact.email, 'mailto:' ~ contact.email) }}
-                {{ _self.field('contact.email2', contact.email2, 'mailto:' ~ contact.email2) }}
-                {{ _self.field('contact.phone', contact.phone, 'tel:' ~ contact.phone) }}
-                {{ _self.field('contact.mobile', contact.mobile, 'tel:' ~ contact.mobile) }}
-                {{ _self.field('contact.website', contact.website, contact.website) }}
-            </dl>
-        </section>
-
-        {% if contact.street or contact.city %}
-            <section aria-labelledby="address-heading">
-                <h3 id="address-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.section_address'|trans }}</h3>
-                <address class="card px-4 py-3 not-italic">{{ contact.street }}<br>{{ contact.postalCode }} {{ contact.city }}</address>
-            </section>
-        {% endif %}
-
-        {% if contact.birthday or contact.notes %}
-            <section aria-labelledby="more-heading">
-                <h3 id="more-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.section_more'|trans }}</h3>
-                <dl class="card divide-y divide-slate-100 px-4">
-                    {{ _self.field('contact.birthday', contact.birthday ? contact.birthday|date('d.m.Y') : null) }}
-                </dl>
-                {% if contact.notes %}<p class="card mt-2 px-4 py-3 whitespace-pre-line">{{ contact.notes }}</p>{% endif %}
-            </section>
-        {% endif %}
-
-        {% if contact.email %}
-            <a class="btn-secondary" href="{{ path('mail_inbox', {q: contact.email}) }}">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'contact.messages'|trans }}</a>
-        {% endif %}
+        {{ include('_partials/comments.html.twig', {
+            comments: comments,
+            add_url: path('contact_comment', {id: contact.id}),
+            delete_route: 'contact_comment_delete',
+            delete_params: {id: contact.id},
+            token: 'contact-comment',
+            mention_org: contact.organization,
+        }) }}
     </div>
 {% endblock %}

@@ -56,6 +56,9 @@ class Draft
     #[ORM\Column]
     private bool $keepAttachments = true;
 
+    #[ORM\Column]
+    private bool $circular = false;
+
     /** @var list<array{name: string, mime: string, size: int, path: string}> files stored for a queued send */
     #[ORM\Column(type: Types::JSON)]
     private array $files = [];
@@ -219,6 +222,7 @@ class Draft
         $this->original = $data->original;
         $this->forward = $data->forward;
         $this->keepAttachments = $data->keepAttachments;
+        $this->circular = $data->circular;
         $this->updatedAt = new \DateTimeImmutable();
 
         return $this;
@@ -237,6 +241,7 @@ class Draft
         $data->original = $this->original;
         $data->forward = $this->forward;
         $data->keepAttachments = $this->keepAttachments;
+        $data->circular = $this->circular;
 
         return $data;
     }

@@ -115,6 +115,10 @@ class Message
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Project $project = null;
 
+    /** Circular letter: sent as a separate email to each "to" recipient. */
+    #[ORM\Column]
+    private bool $circular = false;
+
     /** @var Collection<int, User> */
     #[ORM\ManyToMany(targetEntity: User::class)]
     #[ORM\JoinTable(name: 'message_assignee')]
@@ -491,6 +495,18 @@ class Message
     public function getProject(): ?Project
     {
         return $this->project;
+    }
+
+    public function isCircular(): bool
+    {
+        return $this->circular;
+    }
+
+    public function setCircular(bool $circular): static
+    {
+        $this->circular = $circular;
+
+        return $this;
     }
 
     public function setProject(?Project $project): static

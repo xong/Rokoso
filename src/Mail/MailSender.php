@@ -68,37 +68,19 @@ final readonly class MailSender
 
     /**
      * Sends the draft and replaces it by the sent message (flushes).
+     * A circular letter goes out as one email per "to" address; it fails only if no email could be sent.
      */
     public function send(Draft $draft): Message
     {
         $data = $draft->toComposeData();
         $author = $draft->getOwner();
         $account = $draft->getAccount();
-        $from = new Address($account->getEmailAddress(), $account->getSenderName() ?? '');
         $to = array_map(Address::create(...), ComposeData::splitAddresses($data->to));
         $cc = array_map(Address::create(...), ComposeData::splitAddresses($data->cc));
         $bcc = array_map(Address::create(...), ComposeData::splitAddresses($data->bcc));
-
         $html = '<div style="font-family: sans-serif; font-size: 14px; line-height: 1.5">'.$this->markdown->renderEmail($data->body).'</div>';
-        $email = (new Email())
-            ->from($from)
-            ->to(...$to)
-            ->subject($data->subject)
-            ->text($data->body)
-            ->html($html);
-        if ([] !== $cc) {
-            $email->cc(...$cc);
-        }
-        if ([] !== $bcc) {
-            $email->bcc(...$bcc);
-        }
-
         $original = $data->original;
-        if (null !== $original && !$data->forward && null !== $original->getMessageIdHeader()) {
-            $id = '<'.$original->getMessageIdHeader().'>';
-            $email->getHeaders()->addIdHeader('In-Reply-To', $original->getMessageIdHeader());
-            $email->getHeaders()->addTextHeader('References', trim(($original->getReferencesHeader() ?? '').' '.$id));
-        }
+        $isReply = null !== $original && !$data->forward && null !== $original->getMessageIdHeader();
 
         $message = (new Message())
             ->setMailAccount($account)
@@ -110,26 +92,70 @@ final readonly class MailSender
             ->setSubject($data->subject)
             ->setBody($data->body, $html)
             ->setProject($data->project)
-            ->setInReplyTo($data->forward ? null : $original?->getMessageIdHeader());
-        if (null !== $original && !$data->forward && null !== $original->getMessageIdHeader()) {
+            ->setCircular($data->circular)
+            ->setInReplyTo($isReply ? $original->getMessageIdHeader() : null);
+        if ($isReply) {
             $message->setReferencesHeader(trim(($original->getReferencesHeader() ?? '').' <'.$original->getMessageIdHeader().'>'));
         }
 
+        $files = [];
         foreach ($draft->getFiles() as $file) {
-            $email->attach($this->storage->read($file['path']), $file['name'], $file['mime']);
+            $files[] = [$this->storage->read($file['path']), $file['name'], $file['mime']];
             $message->addAttachment(new Attachment($message, $file['name'], $file['mime'], $file['size'], $file['path']));
         }
         if (null !== $original && $data->forward && $data->keepAttachments) {
             foreach ($original->getVisibleAttachments() as $attachment) {
                 $content = $this->storage->read($attachment->getStoragePath());
-                $email->attach($content, $attachment->getFilename(), $attachment->getMimeType());
+                $files[] = [$content, $attachment->getFilename(), $attachment->getMimeType()];
                 $message->addAttachment(new Attachment($message, $attachment->getFilename(), $attachment->getMimeType(), \strlen($content), $this->storage->store($content)));
             }
         }
 
-        $sent = $this->transports->create($account)->send($email);
-        $message->setMessageIdHeader($sent?->getMessageId());
+        $transport = $this->transports->create($account);
+        $first = null;
+        $failed = [];
+        $error = null;
+        foreach ($data->circular ? array_map(static fn (Address $a): array => [$a], $to) : [$to] as $recipients) {
+            $email = (new Email())
+                ->from(new Address($account->getEmailAddress(), $account->getSenderName() ?? ''))
+                ->to(...$recipients)
+                ->subject($data->subject)
+                ->text($data->body)
+                ->html($html);
+            if (!$data->circular && [] !== $cc) {
+                $email->cc(...$cc);
+            }
+            if (!$data->circular && [] !== $bcc) {
+                $email->bcc(...$bcc);
+            }
+            if ($isReply) {
+                $email->getHeaders()->addIdHeader('In-Reply-To', $original->getMessageIdHeader());
+                $email->getHeaders()->addTextHeader('References', trim(($original->getReferencesHeader() ?? '').' <'.$original->getMessageIdHeader().'>'));
+            }
+            foreach ($files as [$content, $name, $mime]) {
+                $email->attach($content, $name, $mime);
+            }
+            try {
+                $sent = $transport->send($email);
+                $first ??= $sent;
+            } catch (\Throwable $e) {
+                if (!$data->circular) {
+                    throw $e;
+                }
+                $error ??= $e;
+                $failed[] = $recipients[0]->getAddress();
+                $this->logger->warning('Circular to {address} failed: {error}', ['address' => $recipients[0]->getAddress(), 'error' => $e->getMessage()]);
+            }
+        }
+        if (null !== $error && \count($failed) === \count($to)) {
+            throw $error;
+        }
+
+        $message->setMessageIdHeader($first?->getMessageId());
         $message->setThreadKey(null !== $original && !$data->forward ? ($original->getThreadKey() ?? $message->deriveThreadKey()) : $message->deriveThreadKey());
+        if ([] !== $failed) {
+            $message->log(MessageEventType::SendFailed, $author, implode(', ', $failed));
+        }
         $original?->log($data->forward ? MessageEventType::Forwarded : MessageEventType::Replied, $author, $data->to);
 
         $this->em->persist($message);
@@ -137,9 +163,9 @@ final readonly class MailSender
         $this->em->flush();
         $this->readTracker->markRead($message, $author);
 
-        if (null !== $account->getSentFolder() && null !== $sent) {
+        if (null !== $account->getSentFolder() && null !== $first) {
             try {
-                $this->sentFolder->append($account, $sent->toString());
+                $this->sentFolder->append($account, $first->toString());
             } catch (\Throwable $e) {
                 $this->logger->warning('Copy to sent folder failed: {error}', ['error' => $e->getMessage()]);
             }

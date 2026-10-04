@@ -45,6 +45,9 @@ final class ComposeData
 
     public bool $forward = false;
 
+    /** Circular letter: one separate email per "to" address, nobody sees the others. */
+    public bool $circular = false;
+
     /**
      * Splits "a@b.de, Name <c@d.de>; e@f.de" into single addresses.
      *
@@ -70,6 +73,9 @@ final class ComposeData
                         ->addViolation();
                 }
             }
+        }
+        if ($this->circular && ('' !== trim($this->cc) || '' !== trim($this->bcc))) {
+            $context->buildViolation('compose.circular_only_to')->atPath('cc')->addViolation();
         }
     }
 }

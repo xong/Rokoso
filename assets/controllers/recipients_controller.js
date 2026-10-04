@@ -1,8 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 
 /*
- * Adressvorschläge (Combobox): Der Text nach dem letzten Komma/Semikolon wird mit Kontakten
- * und Mitgliedern verglichen. ↑/↓ wählen, Enter oder Tab übernimmt, Esc schließt.
+ * Adressvorschläge (Combobox): Der Text nach dem letzten Komma/Semikolon wird mit Kontakten,
+ * Mitgliedern und Kontaktgruppen verglichen. Optionen sind Text oder {label, value} (Gruppe → alle Adressen). ↑/↓ wählen, Enter oder Tab übernimmt, Esc schließt.
  */
 export default class extends Controller {
     static targets = ['input', 'list', 'status'];
@@ -33,9 +33,10 @@ export default class extends Controller {
         const query = text.toLocaleLowerCase();
         const chosen = this.inputTarget.value.toLocaleLowerCase();
         this.matches = this.optionsValue
+            .map((option) => (typeof option === 'string' ? { label: option, value: option } : option))
             .filter((option) => {
-                const lower = option.toLocaleLowerCase();
-                return lower.includes(query) && !chosen.includes(`${this.address(lower)}>,`);
+                const lower = option.label.toLocaleLowerCase();
+                return lower.includes(query) && !chosen.includes(`${this.address(option.value.toLocaleLowerCase())}>,`);
             })
             .slice(0, 8);
         if (this.matches.length === 0) {
@@ -99,7 +100,7 @@ export default class extends Controller {
         const input = this.inputTarget;
         const { start } = this.token();
         const head = input.value.slice(0, start).trimEnd();
-        input.value = `${head}${head ? ' ' : ''}${option}, `;
+        input.value = `${head}${head ? ' ' : ''}${option.value}, `;
         input.setSelectionRange(input.value.length, input.value.length);
         input.focus();
         this.close();
@@ -107,17 +108,17 @@ export default class extends Controller {
     }
 
     render() {
-        const options = this.matches.map((text, index) => {
+        const options = this.matches.map((match, index) => {
             const option = document.createElement('li');
             option.id = `${this.listTarget.id}-${index}`;
             option.setAttribute('role', 'option');
             option.setAttribute('aria-selected', index === this.active ? 'true' : 'false');
             option.className = `cursor-pointer truncate px-3 py-1.5 ${index === this.active ? 'bg-brand-50 text-brand-700' : 'hover:bg-slate-100'}`;
-            option.textContent = text;
+            option.textContent = match.label;
             // mousedown statt click: die Eingabe verliert so nicht den Fokus
             option.addEventListener('mousedown', (event) => {
                 event.preventDefault();
-                this.choose(text);
+                this.choose(match);
             });
             return option;
         });

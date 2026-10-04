@@ -6,6 +6,7 @@ namespace App\Notification;
 
 use App\Entity\CalendarItem;
 use App\Entity\Comment;
+use App\Entity\Contact;
 use App\Entity\ForumPost;
 use App\Entity\ForumTopic;
 use App\Entity\Message;
@@ -16,6 +17,7 @@ use App\Enum\NotificationType;
 use App\Mail\ParticipantResolver;
 use App\Repository\CommentRepository;
 use App\Repository\WatchRepository;
+use App\Security\Voter\ContactVoter;
 use App\Security\Voter\FolderVoter;
 use App\Security\Voter\ForumVoter;
 use App\Security\Voter\MessageVoter;
@@ -61,6 +63,13 @@ final readonly class ActivityNotifier
                 [FolderVoter::VIEW, $target],
                 $target->getOrganization()->getMembers(),
                 [$target->getUploadedBy(), ...$this->authors($this->comments->forTarget($target))],
+            ],
+            $target instanceof Contact => [
+                $this->urls->generate('contact_show', ['id' => $target->getId()]),
+                $target->getDisplayName(),
+                [ContactVoter::EDIT, $target],
+                $target->getOrganization()?->getMembers() ?? [],
+                $this->authors($this->comments->forTarget($target)),
             ],
         };
 
