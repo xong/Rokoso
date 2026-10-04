@@ -34,6 +34,7 @@ docker compose up -d                       # MariaDB (3307), Mailpit (http://loc
 php bin/console doctrine:migrations:migrate -n
 php bin/console app:demo --mails           # Demodaten: demo@koopio.test / demo-passwort, Postfach mit Beispiel-Mails
 php bin/console tailwind:build --watch     # in eigenem Terminal
+php bin/console app:js:build --watch       # in eigenem Terminal (JavaScript-Bündel)
 php -S 127.0.0.1:8000 -t public public/index.php   # oder: symfony serve
 ```
 

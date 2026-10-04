@@ -2,7 +2,17 @@ framework:
     asset_mapper:
         # The paths to make available to the asset mapper.
         paths:
-            - assets/
+            assets/: ''
+            # JavaScript bundle from app:js:build (esbuild) → asset('build/app.js')
+            var/js/build/: build
+        # JavaScript sources only end up in the bundle, not as single files
+        excluded_patterns:
+            - '*/assets/app.js'
+            - '*/assets/pwa.js'
+            - '*/assets/stimulus_bootstrap.js'
+            - '*/assets/controllers/*'
+            - '*/assets/controllers.json'
+            - '*/assets/vendor/*'
         missing_import_mode: strict
 
 when@prod:

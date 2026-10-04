@@ -39,6 +39,7 @@ Datenbank, Assets und Cache vorbereiten:
 ```bash
 php bin/console doctrine:database:create --if-not-exists
 php bin/console doctrine:migrations:migrate -n
+php bin/console app:js:build --minify
 php bin/console tailwind:build --minify
 php bin/console asset-map:compile
 php bin/console cache:clear
@@ -127,6 +128,7 @@ Ein Dauer-Worker (Messenger) ist **nicht** nötig: Systemmails werden direkt ver
 git pull
 composer install --no-dev --optimize-autoloader
 php bin/console doctrine:migrations:migrate -n
+php bin/console app:js:build --minify
 php bin/console tailwind:build --minify
 php bin/console asset-map:compile
 php bin/console cache:clear

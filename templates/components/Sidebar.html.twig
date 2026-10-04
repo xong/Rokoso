@@ -53,7 +53,7 @@
                             {{ ux_icon(item.icon, {class: 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
                             <span class="truncate lg:collapsed:sr-only">{{ item.label|trans }}</span>
                             {% if item.live %}
-                                <span data-live-count="{{ item.live }}" {{ item.badge > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-500 px-1.5 text-[10px] leading-4 font-semibold text-brand-950 lg:collapsed:absolute lg:collapsed:top-0.5 lg:collapsed:right-0.5"><span data-live-number>{{ item.badge > 99 ? '99+' : item.badge }}</span><span class="sr-only"> {{ item.badge_label|trans }}</span></span>
+                                <span data-live-count="{{ item.live }}" {{ item.badge > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white lg:collapsed:absolute lg:collapsed:top-0.5 lg:collapsed:right-0.5"><span data-live-number>{{ item.badge > 99 ? '99+' : item.badge }}</span><span class="sr-only"> {{ item.badge_label|trans }}</span></span>
                             {% endif %}
                         </a>
 
@@ -129,7 +129,7 @@
                     {% set count = item.route == 'mail_inbox' ? unread : item.badge %}
                     {% set live = item.route == 'mail_inbox' ? 'inbox' : item.live %}
                     {% if live %}
-                        <span data-live-count="{{ live }}" {{ count > 0 ? '' : 'hidden' }} class="absolute top-1 left-1/2 ml-2 rounded-full bg-brand-500 px-1.5 text-[10px] leading-4 font-semibold text-brand-950"><span data-live-number>{{ count > 99 ? '99+' : count }}</span><span class="sr-only"> {{ (live == 'inbox' ? 'mail.unread' : item.badge_label)|trans }}</span></span>
+                        <span data-live-count="{{ live }}" {{ count > 0 ? '' : 'hidden' }} class="absolute top-1 left-1/2 ml-2 rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white"><span data-live-number>{{ count > 99 ? '99+' : count }}</span><span class="sr-only"> {{ (live == 'inbox' ? 'mail.unread' : item.badge_label)|trans }}</span></span>
                     {% endif %}
                 </a>
             </li>
@@ -150,7 +150,7 @@
         {{ ux_icon(child.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
         <span class="truncate">{{ child.label|trans }}</span>
         {% if child.route == 'mail_inbox' %}
-            <span data-live-count="inbox" {{ unread > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-500 px-1.5 text-[10px] leading-4 font-semibold text-brand-950"><span data-live-number>{{ unread > 99 ? '99+' : unread }}</span><span class="sr-only"> {{ 'mail.unread'|trans }}</span></span>
+            <span data-live-count="inbox" {{ unread > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white"><span data-live-number>{{ unread > 99 ? '99+' : unread }}</span><span class="sr-only"> {{ 'mail.unread'|trans }}</span></span>
         {% endif %}
     </a>
 {% endmacro %}

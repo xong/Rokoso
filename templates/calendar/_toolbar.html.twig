@@ -15,7 +15,7 @@
             {% set url = view == 'week' ? path('calendar_week', {year: ref|date('o'), week: ref|date('W')}|merge(pf))
                 : path('calendar_day', {date: (mode == 'week' and ref|date('o-W') == 'now'|date('o-W') ? 'now' : ref)|date('Y-m-d')}|merge(pf)) %}
             <a href="{{ url }}" {% if mode == view %}aria-current="page"{% endif %}
-               class="px-2.5 py-1 text-sm {{ loop.first ? 'rounded-l-md' : '' }} {{ loop.last ? 'rounded-r-md' : '' }} {{ mode == view ? 'bg-brand-500 text-brand-950' : 'hover:bg-slate-50' }}">{{ ('calendar.view_' ~ view)|trans }}</a>
+               class="px-2.5 py-1 text-sm {{ loop.first ? 'rounded-l-md' : '' }} {{ loop.last ? 'rounded-r-md' : '' }} {{ mode == view ? 'bg-brand-600 text-white' : 'hover:bg-slate-50' }}">{{ ('calendar.view_' ~ view)|trans }}</a>
         {% endfor %}
     </nav>
 

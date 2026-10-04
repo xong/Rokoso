@@ -10,6 +10,7 @@
 - Symfony 8, PHP ≥ 8.4 (lokal 8.5), Doctrine ORM, Twig, Symfony UX (Turbo, Stimulus, Twig Components, UX Icons/Lucide)
 - Tailwind 4 über `symfonycasts/tailwind-bundle` + AssetMapper (kein Node); `tailwind:init` ist interaktiv, Version steht in `config/packages/symfonycasts_tailwind.yaml`
 - Lokal: MariaDB 11.8 + Mailpit + GreenMail per `docker compose up -d` (DB-Port 3307, Mailpit http://localhost:8025, IMAP 3143/SMTP 3025); Demodaten: `php bin/console app:demo --mails`
+- JavaScript: ein Bündel per esbuild-Binary (kein Node): `php bin/console app:js:build [--watch|--minify]` → `var/js/build/app.js`, ausgeliefert als `asset('build/app.js')` mit Hash. Neue Stimulus-Controller brauchen einen Neubau (bzw. Neustart von `--watch`); `importmap.php` ist nur noch die Liste der Fremdpakete (`importmap:require`/`importmap:install`). Dateien mit festem Pfad in `public/` über `public_file('/…')` (hängt `?v=<Hash>` an)
 - Nur freie Bibliotheken, Lizenz MIT
 - Vor Abschluss eines Schritts: `composer check` (CS-Fixer, PHPStan Level 8, PHPUnit); stürzt PHPStan unter Windows ab, vorher `cache:clear` + `cache:warmup`
 
@@ -36,7 +37,7 @@
 - Abruf beim Öffnen: `SyncOnOpenListener` (Routen-Liste) → `SyncOnOpen` (Drossel `MAIL_SYNC_INTERVAL`, in Tests 0 = aus); Abrufprobleme über `MailAccount::getSyncProblem()`.
 - Browser-Tests: `tests/Browser` (Panther, `composer test:browser`, eigene `phpunit.browser.xml` ohne DAMA – Daten werden geschrieben, daher eindeutige E-Mails); `AccessibilityTest` prüft mit axe (neue Hauptseiten in `PAGES` ergänzen). Nicht Teil von `composer check`.
 - Docker: `Dockerfile` (FrankenPHP), `docker/entrypoint.sh` (Migrationen), `docker/cron.sh`, Beispiel `compose.prod.yaml`.
-- Logo/Icons: nie von Hand ändern, sondern `python docs/logo/generate.py` (schreibt SVG, PNG, ICO und `templates/_partials/logo.html.twig`). Markenfarbe `brand-500` (#84c232) nur mit dunkler Schrift (`text-brand-950`), Text auf hell `brand-700`; Neutraltöne grau.
+- Logo/Icons: nie von Hand ändern, sondern `python docs/logo/generate.py` (schreibt SVG, PNG, ICO und `templates/_partials/logo.html.twig`). Markenfarbe `brand-600` (#417230, Moosgrün) für Flächen mit weißer Schrift, Text auf hell `brand-700`; Neutraltöne grau.
 - Keine `sed`/`php -r`-Ersetzungen in PHP-Dateien – Edit-Werkzeug nutzen (Escaping-Fallen).
 
 ## Konventionen

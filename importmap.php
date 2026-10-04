@@ -13,16 +13,11 @@ declare(strict_types=1);
  *
  * The "importmap:require" command can be used to add new entries to this file.
  */
+// Only third-party packages: `importmap:install` downloads them to assets/vendor, app:js:build bundles them
+// (aliases from this list) together with assets/app.js into one file.
 return [
-    'app' => [
-        'path' => './assets/app.js',
-        'entrypoint' => true,
-    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
-    ],
-    '@symfony/stimulus-bundle' => [
-        'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
     ],
     '@hotwired/turbo' => [
         'version' => '8.0.23',

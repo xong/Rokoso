@@ -30,7 +30,7 @@
                         {% set current = m == mini_month|date('n') %}
                         <li>
                             <a href="{{ path(here, here_params|merge({month: year ~ '-' ~ '%02d'|format(m)})) }}" {% if current %}aria-current="date"{% endif %}
-                               class="block rounded-md px-2 py-1.5 text-center {{ current ? 'bg-brand-500 text-brand-950' : 'hover:bg-slate-100' }}">{{ ('calendar.months_short.' ~ m)|trans }}</a>
+                               class="block rounded-md px-2 py-1.5 text-center {{ current ? 'bg-brand-600 text-white' : 'hover:bg-slate-100' }}">{{ ('calendar.months_short.' ~ m)|trans }}</a>
                         </li>
                     {% endfor %}
                 </ul>
@@ -69,7 +69,7 @@
                                {% if is_today %}aria-current="date"{% endif %}
                                aria-label="{{ weekdays_sun[day.date|date('w')] }}, {{ day.date|date('d.m.Y') }}{% if day.count %} – {{ 'calendar.entries'|trans({'%count%': day.count}) }}{% endif %}"
                                class="relative mx-auto grid aspect-square w-full max-w-9 place-items-center rounded-full tabular-nums
-                                      {{ is_today ? 'bg-brand-500 font-semibold text-brand-950' : (is_selected ? 'bg-brand-100 font-semibold text-brand-800' : (day.in_month ? 'text-slate-700 hover:bg-slate-100' : 'text-slate-500 hover:bg-slate-100')) }}">
+                                      {{ is_today ? 'bg-brand-600 font-semibold text-white' : (is_selected ? 'bg-brand-100 font-semibold text-brand-800' : (day.in_month ? 'text-slate-700 hover:bg-slate-100' : 'text-slate-500 hover:bg-slate-100')) }}">
                                 {{ day.date|date('j') }}
                                 {% if day.colors is not empty %}
                                     <span class="absolute bottom-0.5 flex gap-0.5" aria-hidden="true">

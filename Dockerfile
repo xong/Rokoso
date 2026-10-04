@@ -22,6 +22,7 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-pr
 COPY . .
 RUN composer dump-autoload --no-dev --classmap-authoritative \
     && php bin/console importmap:install \
+    && php bin/console app:js:build --minify \
     && php bin/console tailwind:build --minify \
     && php bin/console asset-map:compile \
     && php bin/console cache:warmup \
