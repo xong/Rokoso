@@ -12,6 +12,7 @@ use App\Entity\Organization;
 use App\Entity\Project;
 use App\Entity\StoredFile;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Form\FileFormType;
 use App\Form\FolderFormType;
 use App\Form\UploadFormType;
@@ -63,7 +64,7 @@ final class FileController extends AbstractController
     public function index(#[CurrentUser] User $user, OrganizationRepository $organizations): Response
     {
         return $this->render('file/index.html.twig', $this->treeContext($user, null) + [
-            'organizations' => $organizations->findForUser($user),
+            'organizations' => $organizations->findForUser($user, Feature::Files),
         ]);
     }
 
@@ -74,7 +75,7 @@ final class FileController extends AbstractController
         if (null !== $parent) {
             $this->denyAccessUnlessGranted(FolderVoter::EDIT, $parent);
         }
-        $userOrganizations = $organizations->findForUser($user);
+        $userOrganizations = $organizations->findForUser($user, Feature::Files);
         $preselected = $organizations->find($request->query->getInt('organization'));
         $organization = $parent?->getOrganization()
             ?? (\in_array($preselected, $userOrganizations, true) ? $preselected : ($userOrganizations[0] ?? null));

@@ -2,16 +2,16 @@
 
 {% block content %}
     <h1 class="mb-4 text-2xl font-semibold">{{ settings.organization.name }}</h1>
-    {% if settings.infoEnabled and settings.intro %}
+    {% if settings.offers('info') and settings.intro %}
         <div class="markdown mb-8">{{ settings.intro|markdown }}</div>
     {% endif %}
 
     <div class="space-y-8">
-        {% if settings.contactEnabled and settings.contactAccount or groups is not empty %}
+        {% if settings.offers('contact') and settings.contactAccount or groups is not empty %}
             <section aria-labelledby="actions-heading">
                 <h2 id="actions-heading" class="sr-only">{{ 'public.home.actions'|trans }}</h2>
                 <div class="flex flex-wrap gap-2">
-                    {% if settings.contactEnabled and settings.contactAccount %}
+                    {% if settings.offers('contact') and settings.contactAccount %}
                         <a href="{{ path('public_contact', {slug: settings.slug}) }}" class="btn-primary">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.contact.title'|trans }}</a>
                     {% endif %}
                     {% if groups is not empty %}

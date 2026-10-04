@@ -9,6 +9,7 @@ use App\Entity\Attendance;
 use App\Entity\Meeting;
 use App\Entity\User;
 use App\Enum\AttendanceStatus;
+use App\Enum\Feature;
 use App\Form\AgendaItemFormType;
 use App\Form\MeetingFormType;
 use App\Meeting\MeetingService;
@@ -53,7 +54,7 @@ final class MeetingController extends AbstractController
     #[Route('/new', name: 'meeting_new')]
     public function new(Request $request, #[CurrentUser] User $user, OrganizationRepository $organizations, MembershipRepository $memberships): Response
     {
-        $choices = $organizations->findForUser($user);
+        $choices = $organizations->findForUser($user, Feature::Meetings);
         if ([] === $choices) {
             $this->addFlash('error', 'meeting.no_organization');
 

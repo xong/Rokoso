@@ -6,6 +6,7 @@ namespace App\Security\Voter;
 
 use App\Entity\MailAccount;
 use App\Entity\User;
+use App\Enum\Feature;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -29,6 +30,9 @@ final class MailAccountVoter extends Voter
     {
         $user = $token->getUser();
         if (!$user instanceof User) {
+            return false;
+        }
+        if (!$subject->getOrganization()->hasFeature(Feature::Mail)) {
             return false;
         }
         $membership = $subject->getOrganization()->getMembership($user);

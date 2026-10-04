@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\Organization;
+use App\Enum\Feature;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ColorType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -39,6 +41,14 @@ final class OrganizationFormType extends AbstractType
                 'label' => 'organization.remove_logo',
                 'mapped' => false,
                 'required' => false,
+            ])
+            ->add('enabledFeatures', EnumType::class, [
+                'label' => 'organization.features_legend',
+                'class' => Feature::class,
+                'multiple' => true,
+                'expanded' => true,
+                'required' => false,
+                'choice_label' => static fn (Feature $feature): string => $feature->label(),
             ])
             ->add('quorumPercent', IntegerType::class, [
                 'label' => 'organization.quorum_percent',

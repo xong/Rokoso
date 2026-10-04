@@ -15,6 +15,7 @@ use App\Entity\PublicSettings;
 use App\Entity\Survey;
 use App\Entity\SurveyQuestion;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Enum\OrganizationRole;
 use App\Enum\SurveyQuestionType;
 use App\Participation\PublicGuard;
@@ -118,6 +119,26 @@ final class PublicTest extends AppTestCase
         $this->client->submit($crawler->selectButton('Bestätigen')->form());
         self::assertSelectorTextContains('main', 'Deine Nachricht ist angekommen');
         self::assertSame(1, $this->inboxCount());
+    }
+
+    public function testPartsFollowTheAreasOfTheOrganization(): void
+    {
+        $this->org->setEnabledFeatures(array_filter(Feature::cases(), static fn (Feature $f): bool => Feature::Mail !== $f));
+        $this->em()->flush();
+
+        $this->client->request('GET', '/p/sev-test/contact');
+        self::assertResponseStatusCodeSame(404);
+        $this->client->request('GET', '/p/sev-test');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('header a[href$="/contact"]');
+
+        $settings = $this->em()->find(PublicSettings::class, $this->settings->getId());
+        self::assertNotNull($settings);
+        $settings->getOrganization()->setEnabledFeatures(array_filter(Feature::cases(), static fn (Feature $f): bool => Feature::PublicPage !== $f));
+        $this->em()->flush();
+        $this->client->request('GET', '/p/sev-test');
+        self::assertResponseStatusCodeSame(404);
+        self::assertTrue($settings->isContactEnabled(), 'switches stay stored');
     }
 
     public function testDisabledFeaturesAndUnknownPagesAreNotFound(): void

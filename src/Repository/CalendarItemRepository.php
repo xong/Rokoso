@@ -9,8 +9,10 @@ use App\Entity\Membership;
 use App\Entity\Organization;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
+use App\Enum\Feature;
 use App\Enum\Recurrence;
 use App\Enum\TaskStatus;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -20,7 +22,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CalendarItemRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, CalendarItem::class);
     }
@@ -83,9 +85,6 @@ class CalendarItemRepository extends ServiceEntityRepository
     }
 
     /**
-     * Items of the viewer's organizations (full members), of projects released to them as a guest, and their own private ones.
-     */
-    /**
      * Public events of the organization that may have an occurrence in [from, to).
      *
      * @return list<CalendarItem>
@@ -139,10 +138,16 @@ class CalendarItemRepository extends ServiceEntityRepository
             ->getScalarResult();
     }
 
+    /**
+     * Items of the viewer's organizations (full members), of projects released to them as a guest, and their own private ones;
+     * without tasks or appointments of organizations that switched the area off.
+     */
     private function visibleQuery(): QueryBuilder
     {
         return $this->createQueryBuilder('i')
             ->leftJoin(Membership::class, 'im', 'WITH', 'im.organization = i.organization AND im.user = :viewer AND '.Membership::fullDql('im'))
-            ->andWhere('im.id IS NOT NULL OR (i.organization IS NULL AND i.createdBy = :viewer) OR '.Membership::guestDql('i.project'));
+            ->andWhere('im.id IS NOT NULL OR (i.organization IS NULL AND i.createdBy = :viewer) OR '.Membership::guestDql('i.project'))
+            ->andWhere(\sprintf("(i.type = '%1\$s' AND %2\$s) OR (i.type <> '%1\$s' AND %3\$s)", CalendarItemType::Task->value,
+                $this->features->dql('IDENTITY(i.organization)', Feature::Tasks), $this->features->dql('IDENTITY(i.organization)', Feature::Calendar)));
     }
 }

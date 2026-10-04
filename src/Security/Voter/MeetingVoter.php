@@ -8,6 +8,7 @@ use App\Entity\AgendaItem;
 use App\Entity\Meeting;
 use App\Entity\Resolution;
 use App\Entity\User;
+use App\Enum\Feature;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -42,7 +43,7 @@ final class MeetingVoter extends Voter
         };
         $organization = $subject->getOrganization();
         $membership = $organization->getMembership($user);
-        if (null === $membership) {
+        if (null === $membership || !$organization->hasFeature($subject instanceof Resolution ? Feature::Resolutions : Feature::Meetings)) {
             return false;
         }
         if (self::VIEW === $attribute || $membership->isAdmin()) {

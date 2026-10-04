@@ -7,6 +7,8 @@ namespace App\Repository;
 use App\Entity\Meeting;
 use App\Entity\Membership;
 use App\Entity\User;
+use App\Enum\Feature;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,7 +18,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class MeetingRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, Meeting::class);
     }
@@ -71,6 +73,7 @@ class MeetingRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder($alias)
             ->join(Membership::class, $alias.'_vm', 'WITH', $alias.'_vm.organization = '.$alias.'.organization AND '.$alias.'_vm.user = :viewer AND '.Membership::fullDql($alias.'_vm'))
+            ->andWhere($this->features->dql('IDENTITY('.$alias.'.organization)', Feature::Meetings))
             ->setParameter('viewer', $user);
     }
 }

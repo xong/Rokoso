@@ -3,26 +3,28 @@
     Gesteuert vom Stimulus-Controller „palette“ (hängt am Shell-Element in layout/app.html.twig).
 #}
 {% set commands = [
-    {label: 'nav.today', icon: 'lucide:sun', url: path('home'), keys: 'g h'},
-    {label: 'nav.mail_inbox', icon: 'lucide:inbox', url: path('mail_inbox'), keys: 'g i'},
-    {label: 'nav.mail_compose', icon: 'lucide:square-pen', url: path('mail_compose'), keys: 'c'},
-    {label: 'nav.mail_message', icon: 'lucide:message-square-plus', url: path('mail_message_new')},
-    {label: 'nav.calendar', icon: 'lucide:calendar', url: path('calendar_month'), keys: 'g k'},
-    {label: 'nav.tasks', icon: 'lucide:list-checks', url: path('task_index'), keys: 'g t'},
-    {label: 'nav.meetings', icon: 'lucide:presentation', url: path('meeting_index'), keys: 'g s'},
-    {label: 'nav.resolutions', icon: 'lucide:gavel', url: path('resolution_index')},
-    {label: 'nav.polls', icon: 'lucide:vote', url: path('poll_index')},
-    {label: 'nav.surveys', icon: 'lucide:clipboard-list', url: path('survey_index')},
-    {label: 'nav.files', icon: 'lucide:folder', url: path('file_index'), keys: 'g d'},
-    {label: 'nav.shelf', icon: 'lucide:bookmark', url: path('shelf_index')},
-    {label: 'nav.knowledge', icon: 'lucide:book-open', url: path('wiki_index'), keys: 'g w'},
-    {label: 'nav.forum', icon: 'lucide:messages-square', url: path('forum_index'), keys: 'g f'},
-    {label: 'nav.contacts', icon: 'lucide:contact', url: path('contact_index'), keys: 'g a'},
-    {label: 'nav.projects', icon: 'lucide:folder-kanban', url: path('project_index'), keys: 'g p'},
-    {label: 'nav.organizations', icon: 'lucide:building-2', url: path('organization_index')},
-    {label: 'nav.notifications', icon: 'lucide:bell', url: path('notification_index'), keys: 'g n'},
-    {label: 'nav.profile', icon: 'lucide:user', url: path('profile_edit')},
+    {label: 'nav.today', icon: 'lucide:sun', route: 'home', keys: 'g h'},
+    {label: 'nav.mail_inbox', icon: 'lucide:inbox', route: 'mail_inbox', keys: 'g i'},
+    {label: 'nav.mail_compose', icon: 'lucide:square-pen', route: 'mail_compose', keys: 'c'},
+    {label: 'nav.mail_message', icon: 'lucide:message-square-plus', route: 'mail_message_new'},
+    {label: 'nav.calendar', icon: 'lucide:calendar', route: 'calendar_month', keys: 'g k'},
+    {label: 'nav.tasks', icon: 'lucide:list-checks', route: 'task_index', keys: 'g t'},
+    {label: 'nav.meetings', icon: 'lucide:presentation', route: 'meeting_index', keys: 'g s'},
+    {label: 'nav.resolutions', icon: 'lucide:gavel', route: 'resolution_index'},
+    {label: 'nav.polls', icon: 'lucide:vote', route: 'poll_index'},
+    {label: 'nav.surveys', icon: 'lucide:clipboard-list', route: 'survey_index'},
+    {label: 'nav.files', icon: 'lucide:folder', route: 'file_index', keys: 'g d'},
+    {label: 'nav.shelf', icon: 'lucide:bookmark', route: 'shelf_index'},
+    {label: 'nav.knowledge', icon: 'lucide:book-open', route: 'wiki_index', keys: 'g w'},
+    {label: 'nav.forum', icon: 'lucide:messages-square', route: 'forum_index', keys: 'g f'},
+    {label: 'nav.contacts', icon: 'lucide:contact', route: 'contact_index', keys: 'g a'},
+    {label: 'nav.projects', icon: 'lucide:folder-kanban', route: 'project_index', keys: 'g p'},
+    {label: 'nav.organizations', icon: 'lucide:building-2', route: 'organization_index'},
+    {label: 'nav.notifications', icon: 'lucide:bell', route: 'notification_index', keys: 'g n'},
+    {label: 'nav.profile', icon: 'lucide:user', route: 'profile_edit'},
 ] %}
+{# areas switched off in every organization of the user are left out (shortcuts included) #}
+{% set commands = commands|filter(c => route_available(c.route)) %}
 
 <dialog id="command-palette" data-palette-target="dialog" aria-labelledby="palette-heading"
         data-action="close->palette#closed click->palette#backdrop"
@@ -39,7 +41,7 @@
     </div>
     <ul id="palette-list" role="listbox" aria-label="{{ 'palette.results'|trans }}" data-palette-target="list" class="max-h-80 overflow-y-auto p-1">
         {% for command in commands %}
-            <li role="option" id="palette-option-{{ loop.index }}" aria-selected="false" data-url="{{ command.url }}" data-keys="{{ command.keys ?? '' }}" data-palette-target="option"
+            <li role="option" id="palette-option-{{ loop.index }}" aria-selected="false" data-url="{{ path(command.route) }}" data-keys="{{ command.keys ?? '' }}" data-palette-target="option"
                 data-action="click->palette#choose mousemove->palette#hover"
                 class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 aria-selected:bg-brand-50 aria-selected:text-brand-700">
                 {{ ux_icon(command.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}

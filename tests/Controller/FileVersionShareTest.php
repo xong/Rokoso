@@ -10,6 +10,7 @@ use App\Entity\Message;
 use App\Entity\Organization;
 use App\Entity\StoredFile;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Service\FileStorage;
 use App\Tests\AppTestCase;
 use Symfony\Component\DomCrawler\Field\FileFormField;
@@ -198,6 +199,19 @@ final class FileVersionShareTest extends AppTestCase
         $this->client->getResponse()->sendContent();
 
         return (string) ob_get_clean();
+    }
+
+    public function testShareLinkIsGoneWhileFilesAreSwitchedOff(): void
+    {
+        $owner = $this->createUser('owner@example.org', 'Owner');
+        $org = $this->createOrganization($owner);
+        $share = new FileShare($this->createFile($this->createFolder($org, $owner), $owner, 'a.txt', 'text/plain', 'a'), $owner, 30);
+        $this->em()->persist($share);
+        $org->setEnabledFeatures(array_filter(Feature::cases(), static fn (Feature $f): bool => Feature::Files !== $f));
+        $this->em()->flush();
+
+        $this->client->request('GET', '/s/'.$share->getToken());
+        self::assertResponseStatusCodeSame(404);
     }
 
     private function createFolder(Organization $org, User $user): Folder

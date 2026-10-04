@@ -19,6 +19,17 @@
                     {% if organization and organization.logo %}{{ form_row(form.removeLogo, {row_attr: {class: 'mb-0'}}) }}{% else %}{% do form.removeLogo.setRendered %}{% endif %}
                 </div>
             </div>
+            <fieldset class="mb-4" aria-describedby="features-help">
+                <legend class="mb-1 text-sm font-semibold">{{ 'organization.features_legend'|trans }}</legend>
+                <p id="features-help" class="mb-3 text-sm text-slate-600">{{ 'organization.features_help'|trans }}</p>
+                <div class="grid gap-x-4 sm:grid-cols-2">
+                    {% for child in form.enabledFeatures %}
+                        {{ form_row(child, {help: 'feature.' ~ child.vars.value ~ '_help'}) }}
+                    {% endfor %}
+                </div>
+                {{ form_errors(form.enabledFeatures) }}
+                {% do form.enabledFeatures.setRendered %}
+            </fieldset>
             <fieldset class="mb-4 grid gap-x-4 sm:grid-cols-2">
                 <legend class="mb-2 text-sm font-semibold">{{ 'organization.meetings_legend'|trans }}</legend>
                 {{ form_row(form.quorumPercent) }}

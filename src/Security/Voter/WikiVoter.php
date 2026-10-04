@@ -6,6 +6,7 @@ namespace App\Security\Voter;
 
 use App\Entity\User;
 use App\Entity\WikiPage;
+use App\Enum\Feature;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -33,6 +34,6 @@ final class WikiVoter extends Voter
         }
         $membership = $subject->getOrganization()->getMembership($user);
 
-        return null !== $membership && (self::EDIT === $attribute || $membership->isAdmin());
+        return null !== $membership && $subject->getOrganization()->hasFeature(Feature::Wiki) && (self::EDIT === $attribute || $membership->isAdmin());
     }
 }

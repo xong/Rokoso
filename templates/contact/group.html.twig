@@ -26,7 +26,7 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
-            {% if addresses is not empty %}
+            {% if addresses is not empty and route_available('mail_compose') %}
                 <a href="{{ path('mail_compose', {group: group.id}) }}" class="btn-primary">{{ ux_icon('lucide:mails', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'contact_group.circular'|trans }}</a>
             {% endif %}
             <a href="{{ path('contact_group_edit', {id: group.id}) }}" class="btn-secondary">{{ ux_icon('lucide:user-plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'contact_group.edit_members'|trans }}</a>

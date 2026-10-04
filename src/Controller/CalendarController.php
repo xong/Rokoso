@@ -11,6 +11,7 @@ use App\Entity\AgendaItem;
 use App\Entity\CalendarItem;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
+use App\Enum\Feature;
 use App\Form\CalendarExceptionFormType;
 use App\Form\CalendarItemFormType;
 use App\Notification\ActivityNotifier;
@@ -88,7 +89,7 @@ final class CalendarController extends AbstractController
                 $item->setStartsAt(null);
             }
         }
-        $item->setOrganization($organizations->findForUser($user)[0] ?? null);
+        $item->setOrganization($organizations->findForUser($user, $item->isTask() ? Feature::Tasks : Feature::Calendar)[0] ?? null);
         $project = $this->projects->find($request->query->getInt('project'));
         $source = null;
         // Task from a message or forum topic: title, organization and project are taken over
@@ -242,7 +243,7 @@ final class CalendarController extends AbstractController
         $previousAssignees = $item->getAssignees()->toArray();
         $form = $this->createForm(CalendarItemFormType::class, $item, [
             'users' => $this->memberships->colleaguesOf($user),
-            'organizations' => $organizations->findForUser($user),
+            'organizations' => $organizations->findForUser($user, $item->isTask() ? Feature::Tasks : Feature::Calendar),
             'projects' => $this->projects->findVisibleFor($user, $item->getProject()),
         ]);
         $form->handleRequest($request);

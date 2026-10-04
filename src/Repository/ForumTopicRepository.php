@@ -11,6 +11,8 @@ use App\Entity\ForumTopicRead;
 use App\Entity\Membership;
 use App\Entity\Project;
 use App\Entity\User;
+use App\Enum\Feature;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -20,7 +22,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ForumTopicRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, ForumTopic::class);
     }
@@ -125,6 +127,7 @@ class ForumTopicRepository extends ServiceEntityRepository
             ->leftJoin(Membership::class, 'm', 'WITH', 'm.organization = b.organization AND m.user = :user AND '.Membership::fullDql('m'))
             ->andWhere('m.id IS NOT NULL OR '.Membership::guestDql('t.project', 'user', 'gt').' OR '.Membership::guestDql('b.project', 'user', 'gb')
                 .' OR '.Membership::guestDql('pb.project', 'user', 'gpb'))
+            ->andWhere($this->features->dql('IDENTITY(b.organization)', Feature::Forum))
             ->setParameter('user', $user);
     }
 }

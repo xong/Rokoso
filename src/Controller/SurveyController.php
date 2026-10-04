@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Survey;
 use App\Entity\SurveyQuestion;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Form\SurveyFormType;
 use App\Form\SurveyQuestionFormType;
 use App\Participation\SurveyResults;
@@ -48,7 +49,7 @@ final class SurveyController extends AbstractController
     #[Route('/new', name: 'survey_new')]
     public function new(Request $request, #[CurrentUser] User $user, OrganizationRepository $organizations): Response
     {
-        $choices = $organizations->findForUser($user);
+        $choices = $organizations->findForUser($user, Feature::Surveys);
         if ([] === $choices) {
             $this->addFlash('error', 'survey.no_organization');
 

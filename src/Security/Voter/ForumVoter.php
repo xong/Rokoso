@@ -9,6 +9,7 @@ use App\Entity\ForumPost;
 use App\Entity\ForumTopic;
 use App\Entity\ForumUpload;
 use App\Entity\User;
+use App\Enum\Feature;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -44,10 +45,10 @@ final class ForumVoter extends Voter
             $subject instanceof ForumUpload => $subject->getBoard()->isVisibleTo($user),
             default => $subject->isVisibleTo($user),
         };
-        if (!$visible) {
+        $organization = $subject instanceof ForumPost ? $subject->getTopic()->getOrganization() : $subject->getOrganization();
+        if (!$visible || !$organization->hasFeature(Feature::Forum)) {
             return false;
         }
-        $organization = $subject instanceof ForumPost ? $subject->getTopic()->getOrganization() : $subject->getOrganization();
         $isAdmin = $organization->getMembership($user)?->isAdmin() ?? false;
 
         $owner = match (true) {

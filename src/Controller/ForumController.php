@@ -12,6 +12,7 @@ use App\Entity\ForumUpload;
 use App\Entity\Organization;
 use App\Entity\Project;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Form\ForumBoardFormType;
 use App\Form\ForumPostFormType;
 use App\Form\ForumTopicFormType;
@@ -61,7 +62,7 @@ final class ForumController extends AbstractController
         $recent = $this->topics->recentFor($user);
 
         return $this->render('forum/index.html.twig', $this->treeContext($user, null) + [
-            'organizations' => $organizations->findForUser($user),
+            'organizations' => $organizations->findForUser($user, Feature::Forum),
             'recent' => $recent,
             'unread_ids' => $this->topics->unreadIds($user, $recent),
         ]);
@@ -102,7 +103,7 @@ final class ForumController extends AbstractController
         if (null !== $parent) {
             $this->denyAccessUnlessGranted(ForumVoter::VIEW, $parent);
         }
-        $userOrganizations = $organizations->findForUser($user);
+        $userOrganizations = $organizations->findForUser($user, Feature::Forum);
         $preselected = $organizations->find($request->query->getInt('organization'));
         $organization = $parent?->getOrganization()
             ?? (\in_array($preselected, $userOrganizations, true) ? $preselected : ($userOrganizations[0] ?? null));

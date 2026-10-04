@@ -8,6 +8,8 @@ use App\Entity\Membership;
 use App\Entity\Organization;
 use App\Entity\Survey;
 use App\Entity\User;
+use App\Enum\Feature;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,7 +18,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class SurveyRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, Survey::class);
     }
@@ -33,6 +35,7 @@ class SurveyRepository extends ServiceEntityRepository
             ->addSelect('o')
             ->join('s.organization', 'o')
             ->join(Membership::class, 'vm', 'WITH', 'vm.organization = o AND vm.user = :viewer AND '.Membership::fullDql('vm'))
+            ->andWhere($this->features->dql('o.id', Feature::Surveys))
             ->setParameter('viewer', $user)
             ->orderBy('s.createdAt', 'DESC')
             ->getQuery()

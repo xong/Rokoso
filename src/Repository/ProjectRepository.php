@@ -7,6 +7,8 @@ namespace App\Repository;
 use App\Entity\Membership;
 use App\Entity\Project;
 use App\Entity\User;
+use App\Enum\Feature;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,7 +18,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ProjectRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, Project::class);
     }
@@ -54,6 +56,7 @@ class ProjectRepository extends ServiceEntityRepository
         return $this->createQueryBuilder($alias)
             ->leftJoin(Membership::class, 'pm', 'WITH', \sprintf('pm.organization = %s.organization AND pm.user = :viewer AND ', $alias).Membership::fullDql('pm'))
             ->andWhere(\sprintf('pm.id IS NOT NULL OR (%1$s.organization IS NULL AND %1$s.createdBy = :viewer) OR ', $alias).Membership::guestDql($alias))
+            ->andWhere($this->features->dql('IDENTITY('.$alias.'.organization)', Feature::Projects))
             ->setParameter('viewer', $user);
     }
 }

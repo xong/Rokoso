@@ -10,6 +10,7 @@ use App\Entity\Meeting;
 use App\Entity\Poll;
 use App\Entity\PollAnswer;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Enum\PollKind;
 use App\Form\PollFormType;
 use App\Poll\PollService;
@@ -58,7 +59,7 @@ final class PollController extends AbstractController
     #[Route('/new', name: 'poll_new')]
     public function new(Request $request, #[CurrentUser] User $user, OrganizationRepository $organizations, ProjectRepository $projects): Response
     {
-        $choices = $organizations->findForUser($user);
+        $choices = $organizations->findForUser($user, Feature::Polls);
         if ([] === $choices) {
             $this->addFlash('error', 'poll.no_organization');
 

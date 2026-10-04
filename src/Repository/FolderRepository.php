@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Folder;
 use App\Entity\Membership;
 use App\Entity\User;
+use App\Enum\Feature;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -37,7 +38,7 @@ class FolderRepository extends ServiceEntityRepository
             ->addOrderBy('f.name')
             ->getQuery()->getResult();
 
-        return array_values(array_filter($all, static fn (Folder $x): bool => $x->isVisibleTo($user)));
+        return array_values(array_filter($all, static fn (Folder $x): bool => $x->getOrganization()->hasFeature(Feature::Files) && $x->isVisibleTo($user)));
     }
 
     /**

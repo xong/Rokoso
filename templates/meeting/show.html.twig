@@ -165,11 +165,15 @@
                                 </ul>
                             {% endif %}
                             <div class="mt-3 flex flex-wrap gap-2">
-                                {% if can_manage %}
+                                {% if can_manage and meeting.organization.hasFeature('resolutions') %}
                                     <a href="{{ path('resolution_new', {agenda: item.id}) }}" class="btn-secondary py-1 text-xs">{{ ux_icon('lucide:gavel', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'resolution.new'|trans }}<span class="sr-only"> – {{ item.title }}</span></a>
                                 {% endif %}
-                                <a href="{{ path('poll_new', {agenda: item.id}) }}" class="btn-secondary py-1 text-xs">{{ ux_icon('lucide:vote', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'poll.start_here'|trans }}<span class="sr-only"> – {{ item.title }}</span></a>
-                                <a href="{{ path('calendar_item_new', {agenda: item.id}) }}" class="btn-secondary py-1 text-xs">{{ ux_icon('lucide:list-plus', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'task.create_from'|trans }}<span class="sr-only"> – {{ item.title }}</span></a>
+                                {% if meeting.organization.hasFeature('polls') %}
+                                    <a href="{{ path('poll_new', {agenda: item.id}) }}" class="btn-secondary py-1 text-xs">{{ ux_icon('lucide:vote', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'poll.start_here'|trans }}<span class="sr-only"> – {{ item.title }}</span></a>
+                                {% endif %}
+                                {% if meeting.organization.hasFeature('tasks') %}
+                                    <a href="{{ path('calendar_item_new', {agenda: item.id}) }}" class="btn-secondary py-1 text-xs">{{ ux_icon('lucide:list-plus', {class: 'size-3.5', 'aria-hidden': 'true'}) }} {{ 'task.create_from'|trans }}<span class="sr-only"> – {{ item.title }}</span></a>
+                                {% endif %}
                             </div>
                         </li>
                     {% endfor %}
@@ -177,10 +181,12 @@
             {% endif %}
         </section>
 
-        {{ include('poll/_list.html.twig', {polls: polls, new_links: {
-            'poll.start_schedule': path('poll_new', {meeting: meeting.id, kind: 'schedule'}),
-            'poll.start_here': path('poll_new', {meeting: meeting.id}),
-        }}) }}
+        {% if meeting.organization.hasFeature('polls') %}
+            {{ include('poll/_list.html.twig', {polls: polls, new_links: {
+                'poll.start_schedule': path('poll_new', {meeting: meeting.id, kind: 'schedule'}),
+                'poll.start_here': path('poll_new', {meeting: meeting.id}),
+            }}) }}
+        {% endif %}
 
         {% set proposals = meeting.proposals %}
         {% if proposals is not empty %}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\Feature;
 use App\Repository\PublicSettingsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -119,6 +120,24 @@ class PublicSettings
     public function isActive(): bool
     {
         return $this->infoEnabled || $this->contactEnabled || $this->surveysEnabled || $this->eventsEnabled || $this->subscribeEnabled;
+    }
+
+    /**
+     * Whether the public page shows the part (info, contact, surveys, events, subscribe): switched on here and
+     * its area used by the organization – the switches stay stored while an area is off.
+     */
+    public function offers(string $part): bool
+    {
+        [$enabled, $feature] = match ($part) {
+            'info' => [$this->infoEnabled, null],
+            'contact' => [$this->contactEnabled, Feature::Mail],
+            'surveys' => [$this->surveysEnabled, Feature::Surveys],
+            'events' => [$this->eventsEnabled, Feature::Calendar],
+            'subscribe' => [$this->subscribeEnabled, Feature::Contacts],
+            default => throw new \InvalidArgumentException($part),
+        };
+
+        return $enabled && $this->organization->hasFeature(Feature::PublicPage) && (null === $feature || $this->organization->hasFeature($feature));
     }
 
     public function getSlug(): ?string

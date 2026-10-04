@@ -9,6 +9,8 @@ use App\Entity\ContactGroup;
 use App\Entity\Membership;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Enum\Feature;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -18,7 +20,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ContactRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, Contact::class);
     }
@@ -28,6 +30,7 @@ class ContactRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->leftJoin(Membership::class, 'cm', 'WITH', 'cm.organization = c.organization AND cm.user = :viewer AND '.Membership::fullDql('cm'))
             ->andWhere('cm.id IS NOT NULL OR (c.organization IS NULL AND c.createdBy = :viewer)')
+            ->andWhere($this->features->dql('IDENTITY(c.organization)', Feature::Contacts))
             ->setParameter('viewer', $user);
     }
 

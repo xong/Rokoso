@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Twig\Components;
 
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Repository\ForumTopicRepository;
 use App\Repository\MessageRepository;
 use App\Repository\NotificationRepository;
+use App\Service\Features;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
@@ -17,6 +19,7 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
  *
  * Neue Menüpunkte werden in {@see self::GROUPS} ergänzt. Aktiv ist der Punkt mit dem längsten
  * `match`-Präfix, mit dem die aktuelle Route beginnt. Neues anlegen läuft über {@see self::COMPOSE}.
+ * Punkte eines Bereichs, den keine Organisation des Benutzers nutzt, entfallen ({@see Feature::forRoute()}).
  */
 #[AsTwigComponent]
 final class Sidebar
@@ -77,14 +80,14 @@ final class Sidebar
     /**
      * Entries of the "Compose" menu.
      *
-     * @var list<array{label: string, icon: string, route: string, params: array<string, string>}>
+     * @var list<array{label: string, icon: string, route: string, params: array<string, string>, feature?: Feature}>
      */
     private const array COMPOSE = [
         ['label' => 'compose_menu.email', 'icon' => 'lucide:mail', 'route' => 'mail_compose', 'params' => []],
         ['label' => 'compose_menu.direct', 'icon' => 'lucide:message-square', 'route' => 'mail_message_new', 'params' => []],
         ['label' => 'compose_menu.topic', 'icon' => 'lucide:messages-square', 'route' => 'forum_topic_choose', 'params' => []],
-        ['label' => 'compose_menu.event', 'icon' => 'lucide:calendar-plus', 'route' => 'calendar_item_new', 'params' => []],
-        ['label' => 'compose_menu.task', 'icon' => 'lucide:list-plus', 'route' => 'calendar_item_new', 'params' => ['type' => 'task']],
+        ['label' => 'compose_menu.event', 'icon' => 'lucide:calendar-plus', 'route' => 'calendar_item_new', 'params' => [], 'feature' => Feature::Calendar],
+        ['label' => 'compose_menu.task', 'icon' => 'lucide:list-plus', 'route' => 'calendar_item_new', 'params' => ['type' => 'task'], 'feature' => Feature::Tasks],
     ];
 
     public function __construct(
@@ -93,6 +96,7 @@ final class Sidebar
         private readonly ForumTopicRepository $topics,
         private readonly Security $security,
         private readonly NotificationRepository $notifications,
+        private readonly Features $features,
     ) {
     }
 
@@ -128,7 +132,14 @@ final class Sidebar
      */
     public function getCompose(): array
     {
-        return self::COMPOSE;
+        return array_values(array_filter(self::COMPOSE, fn (array $item): bool => $this->isAvailable($item['feature'] ?? Feature::forRoute($item['route']))));
+    }
+
+    private function isAvailable(?Feature $feature): bool
+    {
+        $user = $this->security->getUser();
+
+        return null === $feature || !$user instanceof User || $this->features->isAvailable($user, $feature);
     }
 
     /**
@@ -159,7 +170,7 @@ final class Sidebar
         foreach (self::GROUPS as $group) {
             $items = [];
             foreach ($group['items'] as $item) {
-                if (isset($item['role']) && !$this->security->isGranted($item['role'])) {
+                if ((isset($item['role']) && !$this->security->isGranted($item['role'])) || !$this->isAvailable(Feature::forRoute($item['route']))) {
                     continue;
                 }
                 $item['active'] = $item['route'] === $best;
@@ -182,7 +193,9 @@ final class Sidebar
                 };
                 $items[] = $item;
             }
-            $groups[] = ['label' => $group['label'], 'items' => $items];
+            if ([] !== $items) {
+                $groups[] = ['label' => $group['label'], 'items' => $items];
+            }
         }
 
         return $groups;

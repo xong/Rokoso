@@ -86,6 +86,8 @@
                 {% endif %}
             </section>
 
+            {# Bereiche, die keine Organisation des Benutzers nutzt, entfallen #}
+            {% if has_feature('tasks') %}
             <section aria-labelledby="today-tasks" class="card flex flex-col">
                 {{ _self.header('tasks', 'today.tasks', 'lucide:list-checks', path('task_index')) }}
                 {% if tasks is empty %}{{ _self.nothing() }}{% else %}
@@ -102,9 +104,11 @@
                     </ul>
                 {% endif %}
             </section>
+            {% endif %}
 
+            {% if has_feature('calendar') or has_feature('meetings') %}
             <section aria-labelledby="today-events" class="card flex flex-col">
-                {{ _self.header('events', 'today.events', 'lucide:calendar', path('calendar_month')) }}
+                {{ _self.header('events', 'today.events', 'lucide:calendar', has_feature('calendar') ? path('calendar_month') : path('meeting_index')) }}
                 {% if events is empty and meetings is empty %}{{ _self.nothing() }}{% else %}
                     <ul role="list" class="divide-y divide-slate-100">
                         {% for o in events %}
@@ -127,7 +131,9 @@
                     {% endif %}
                 {% endif %}
             </section>
+            {% endif %}
 
+            {% if has_feature('polls') %}
             <section aria-labelledby="today-polls" class="card flex flex-col">
                 {{ _self.header('polls', 'today.polls', 'lucide:vote', path('poll_index')) }}
                 {% if polls is empty %}{{ _self.nothing() }}{% else %}
@@ -141,7 +147,9 @@
                     </ul>
                 {% endif %}
             </section>
+            {% endif %}
 
+            {% if has_feature('forum') %}
             <section aria-labelledby="today-topics" class="card flex flex-col">
                 {{ _self.header('topics', 'today.topics', 'lucide:messages-square', path('forum_index')) }}
                 {% if topics is empty %}{{ _self.nothing() }}{% else %}
@@ -155,6 +163,7 @@
                     </ul>
                 {% endif %}
             </section>
+            {% endif %}
 
             <section aria-labelledby="today-mentions" class="card flex flex-col">
                 {{ _self.header('mentions', 'today.mentions', 'lucide:at-sign', path('notification_index', {unread: 1})) }}

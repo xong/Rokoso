@@ -38,52 +38,66 @@
                 </div>
             </div>
 
+            {# areas of the project's organization (without organization: any of the user's) #}
+            {% set org = project.organization %}
+            {% set uses = {} %}
+            {% for area in ['calendar', 'tasks', 'files', 'forum'] %}
+                {% set uses = uses|merge({(area): org ? org.hasFeature(area) : has_feature(area)}) %}
+            {% endfor %}
             {% block project_sections %}
                 <div class="flex flex-wrap gap-2">
                     <a class="btn-secondary" href="{{ path('mail_all', {project: project.id}) }}">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'project.messages'|trans }}</a>
-                    <a class="btn-secondary" href="{{ path('calendar_month', {project: project.id}) }}">{{ ux_icon('lucide:calendar', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'project.calendar'|trans }}</a>
-                    <a class="btn-secondary" href="{{ path('task_index', {scope: 'all', view: 'board', project: project.id}) }}">{{ ux_icon('lucide:list-checks', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'project.task_board'|trans }}</a>
+                    {% if uses.calendar %}
+                        <a class="btn-secondary" href="{{ path('calendar_month', {project: project.id}) }}">{{ ux_icon('lucide:calendar', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'project.calendar'|trans }}</a>
+                    {% endif %}
+                    {% if uses.tasks %}
+                        <a class="btn-secondary" href="{{ path('task_index', {scope: 'all', view: 'board', project: project.id}) }}">{{ ux_icon('lucide:list-checks', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'project.task_board'|trans }}</a>
+                    {% endif %}
                 </div>
             {% endblock %}
 
             <div class="grid gap-6 lg:grid-cols-2">
-                <section aria-labelledby="project-events-heading">
-                    <div class="mb-2 flex items-center justify-between gap-2">
-                        <h2 id="project-events-heading" class="text-sm font-semibold">{{ 'project.upcoming_events'|trans }}</h2>
-                        <a class="link text-sm" href="{{ path('calendar_item_new', {project: project.id}) }}">{{ 'calendar.new_event'|trans }}</a>
-                    </div>
-                    {% if upcoming_events is empty %}
-                        <p class="text-sm text-slate-500">{{ 'project.no_events'|trans }}</p>
-                    {% else %}
-                        <ul role="list" class="card divide-y divide-slate-100">
-                            {% for o in upcoming_events %}
-                                <li>
-                                    <a href="{{ path('calendar_item_show', {id: o.item.id, date: o.day}) }}" class="flex items-baseline gap-3 px-3 py-2 hover:bg-slate-50">
-                                        <time datetime="{{ o.start|date('c') }}" class="w-28 shrink-0 text-xs text-slate-500 tabular-nums">{{ o.start|date(o.item.allDay ? 'd.m.Y' : 'd.m.Y H:i') }}</time>
-                                        <span class="min-w-0 flex-1 truncate">{{ o.title }}</span>
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </section>
+                {% if uses.calendar %}
+                    <section aria-labelledby="project-events-heading">
+                        <div class="mb-2 flex items-center justify-between gap-2">
+                            <h2 id="project-events-heading" class="text-sm font-semibold">{{ 'project.upcoming_events'|trans }}</h2>
+                            <a class="link text-sm" href="{{ path('calendar_item_new', {project: project.id}) }}">{{ 'calendar.new_event'|trans }}</a>
+                        </div>
+                        {% if upcoming_events is empty %}
+                            <p class="text-sm text-slate-500">{{ 'project.no_events'|trans }}</p>
+                        {% else %}
+                            <ul role="list" class="card divide-y divide-slate-100">
+                                {% for o in upcoming_events %}
+                                    <li>
+                                        <a href="{{ path('calendar_item_show', {id: o.item.id, date: o.day}) }}" class="flex items-baseline gap-3 px-3 py-2 hover:bg-slate-50">
+                                            <time datetime="{{ o.start|date('c') }}" class="w-28 shrink-0 text-xs text-slate-500 tabular-nums">{{ o.start|date(o.item.allDay ? 'd.m.Y' : 'd.m.Y H:i') }}</time>
+                                            <span class="min-w-0 flex-1 truncate">{{ o.title }}</span>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </section>
+                {% endif %}
 
-                <section aria-labelledby="project-tasks-heading">
-                    <div class="mb-2 flex items-center justify-between gap-2">
-                        <h2 id="project-tasks-heading" class="text-sm font-semibold">{{ 'project.open_tasks'|trans }}</h2>
-                        <a class="link text-sm" href="{{ path('task_index', {scope: 'all', project: project.id}) }}">{{ 'project.all_tasks'|trans }}</a>
-                    </div>
-                    {% if open_tasks is empty %}
-                        <p class="text-sm text-slate-500">{{ 'project.no_tasks'|trans }}</p>
-                    {% else %}
-                        <ul role="list" class="card divide-y divide-slate-100">
-                            {% for task in open_tasks %}
-                                <li class="flex items-start gap-2 px-3 py-2">{{ include('task/_row.html.twig', {compact: true}) }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                    <a class="link mt-2 inline-block text-sm" href="{{ path('calendar_item_new', {type: 'task', project: project.id}) }}">{{ 'task.new'|trans }}</a>
-                </section>
+                {% if uses.tasks %}
+                    <section aria-labelledby="project-tasks-heading">
+                        <div class="mb-2 flex items-center justify-between gap-2">
+                            <h2 id="project-tasks-heading" class="text-sm font-semibold">{{ 'project.open_tasks'|trans }}</h2>
+                            <a class="link text-sm" href="{{ path('task_index', {scope: 'all', project: project.id}) }}">{{ 'project.all_tasks'|trans }}</a>
+                        </div>
+                        {% if open_tasks is empty %}
+                            <p class="text-sm text-slate-500">{{ 'project.no_tasks'|trans }}</p>
+                        {% else %}
+                            <ul role="list" class="card divide-y divide-slate-100">
+                                {% for task in open_tasks %}
+                                    <li class="flex items-start gap-2 px-3 py-2">{{ include('task/_row.html.twig', {compact: true}) }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <a class="link mt-2 inline-block text-sm" href="{{ path('calendar_item_new', {type: 'task', project: project.id}) }}">{{ 'task.new'|trans }}</a>
+                    </section>
+                {% endif %}
             </div>
 
             <section aria-labelledby="project-messages-heading">
@@ -105,44 +119,48 @@
                 {% endif %}
             </section>
 
-            <section aria-labelledby="project-files-heading">
-                <div class="mb-2 flex items-center justify-between gap-2">
-                    <h2 id="project-files-heading" class="text-sm font-semibold">{{ 'project.files'|trans }}</h2>
-                    {% if project.organization %}
-                        <a class="link text-sm" href="{{ path('folder_new', {project: project.id}) }}">{{ 'folder.new_for_project'|trans }}</a>
+            {% if uses.files %}
+                <section aria-labelledby="project-files-heading">
+                    <div class="mb-2 flex items-center justify-between gap-2">
+                        <h2 id="project-files-heading" class="text-sm font-semibold">{{ 'project.files'|trans }}</h2>
+                        {% if project.organization %}
+                            <a class="link text-sm" href="{{ path('folder_new', {project: project.id}) }}">{{ 'folder.new_for_project'|trans }}</a>
+                        {% endif %}
+                    </div>
+                    {% if files is empty %}
+                        <p class="text-sm text-slate-500">{{ 'project.no_files'|trans }}</p>
+                    {% else %}
+                        <ul role="list" class="card divide-y divide-slate-100">
+                            {% for f in files %}
+                                <li>
+                                    <a href="{{ path('file_show', {id: f.id}) }}" class="flex items-center gap-3 px-3 py-2 hover:bg-slate-50">
+                                        {{ include('file/_icon.html.twig', {mime: f.mimeType}) }}
+                                        <span class="min-w-0 flex-1 truncate">{{ f.filename }}</span>
+                                        <span class="shrink-0 text-xs text-slate-500 max-sm:hidden">{{ f.folder.name }}</span>
+                                        <span class="shrink-0 text-xs text-slate-500 tabular-nums">{{ f.size|filesize }}</span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     {% endif %}
-                </div>
-                {% if files is empty %}
-                    <p class="text-sm text-slate-500">{{ 'project.no_files'|trans }}</p>
-                {% else %}
-                    <ul role="list" class="card divide-y divide-slate-100">
-                        {% for f in files %}
-                            <li>
-                                <a href="{{ path('file_show', {id: f.id}) }}" class="flex items-center gap-3 px-3 py-2 hover:bg-slate-50">
-                                    {{ include('file/_icon.html.twig', {mime: f.mimeType}) }}
-                                    <span class="min-w-0 flex-1 truncate">{{ f.filename }}</span>
-                                    <span class="shrink-0 text-xs text-slate-500 max-sm:hidden">{{ f.folder.name }}</span>
-                                    <span class="shrink-0 text-xs text-slate-500 tabular-nums">{{ f.size|filesize }}</span>
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-            </section>
+                </section>
+            {% endif %}
 
-            <section aria-labelledby="project-forum-heading">
-                <div class="mb-2 flex items-center justify-between gap-2">
-                    <h2 id="project-forum-heading" class="text-sm font-semibold">{{ 'project.forum'|trans }}</h2>
-                    {% if project.organization %}
-                        <a class="link text-sm" href="{{ path('forum_board_new', {project: project.id}) }}">{{ 'forum.board_new_for_project'|trans }}</a>
+            {% if uses.forum %}
+                <section aria-labelledby="project-forum-heading">
+                    <div class="mb-2 flex items-center justify-between gap-2">
+                        <h2 id="project-forum-heading" class="text-sm font-semibold">{{ 'project.forum'|trans }}</h2>
+                        {% if project.organization %}
+                            <a class="link text-sm" href="{{ path('forum_board_new', {project: project.id}) }}">{{ 'forum.board_new_for_project'|trans }}</a>
+                        {% endif %}
+                    </div>
+                    {% if topics is empty %}
+                        <p class="text-sm text-slate-500">{{ 'project.no_topics'|trans }}</p>
+                    {% else %}
+                        {{ include('forum/_topics.html.twig', {show_board: true}) }}
                     {% endif %}
-                </div>
-                {% if topics is empty %}
-                    <p class="text-sm text-slate-500">{{ 'project.no_topics'|trans }}</p>
-                {% else %}
-                    {{ include('forum/_topics.html.twig', {show_board: true}) }}
-                {% endif %}
-            </section>
+                </section>
+            {% endif %}
         </div>
 
         {{ include('_partials/comments.html.twig', {

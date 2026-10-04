@@ -8,6 +8,7 @@ use App\Entity\Membership;
 use App\Entity\Organization;
 use App\Entity\Project;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Enum\OrganizationRole;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -46,6 +47,7 @@ final class ProjectFormType extends AbstractType
                     ->setParameter('user', $user)
                     ->setParameter('admin', OrganizationRole::Admin->value)
                     ->orderBy('o.name'),
+                'choice_filter' => static fn (?Organization $o): bool => null === $o || $o->hasFeature(Feature::Projects),
             ])
             ->add('description', TextareaType::class, ['label' => 'project.description', 'required' => false])
             ->add('lead', EntityType::class, [

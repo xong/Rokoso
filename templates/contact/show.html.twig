@@ -8,9 +8,11 @@
 
 {% block detail_actions %}
     {% if contact.email %}
-        <a href="{{ path('mail_compose') }}?to={{ contact.email|url_encode }}" class="btn-icon" aria-label="{{ 'contact.write_mail'|trans }}" title="{{ 'contact.write_mail'|trans }}">
-            {{ ux_icon('lucide:mail-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
-        </a>
+        {% if route_available('mail_compose') %}
+            <a href="{{ path('mail_compose') }}?to={{ contact.email|url_encode }}" class="btn-icon" aria-label="{{ 'contact.write_mail'|trans }}" title="{{ 'contact.write_mail'|trans }}">
+                {{ ux_icon('lucide:mail-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+            </a>
+        {% endif %}
     {% endif %}
     <a href="{{ path('contact_vcard', {id: contact.id}) }}" class="btn-icon" data-turbo="false" aria-label="{{ 'contact.vcard'|trans }}" title="{{ 'contact.vcard'|trans }}">
         {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}

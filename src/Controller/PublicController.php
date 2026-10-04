@@ -11,6 +11,7 @@ use App\Entity\PublicRequest;
 use App\Entity\PublicSettings;
 use App\Entity\Survey;
 use App\Entity\SurveyResponse;
+use App\Enum\Feature;
 use App\Enum\SurveyQuestionType;
 use App\Form\PublicForm\ContactType;
 use App\Form\PublicForm\SignupType;
@@ -79,10 +80,10 @@ final class PublicController extends AbstractController
 
         return $this->render('public/home.html.twig', [
             'settings' => $settings,
-            'resolutions' => $settings->isInfoEnabled() ? $resolutions->findPublic($organization) : [],
-            'events' => $settings->isEventsEnabled() ? \array_slice($calendar->publicOccurrences($organization, $today, $today->modify('+6 months')), 0, 20) : [],
-            'surveys' => $settings->isSurveysEnabled() ? $surveys->findListed($organization) : [],
-            'groups' => $settings->isSubscribeEnabled() ? $this->subscribableGroups($settings) : [],
+            'resolutions' => $settings->offers('info') && $organization->hasFeature(Feature::Resolutions) ? $resolutions->findPublic($organization) : [],
+            'events' => $settings->offers('events') ? \array_slice($calendar->publicOccurrences($organization, $today, $today->modify('+6 months')), 0, 20) : [],
+            'surveys' => $settings->offers('surveys') ? $surveys->findListed($organization) : [],
+            'groups' => $settings->offers('subscribe') ? $this->subscribableGroups($settings) : [],
         ]);
     }
 
@@ -218,18 +219,11 @@ final class PublicController extends AbstractController
         return $this->render('public/privacy.html.twig', ['settings' => $this->load($slug)]);
     }
 
-    /** Settings of an active public page, optionally requiring a feature */
-    private function load(string $slug, ?string $feature = null): PublicSettings
+    /** Settings of an active public page (organization using it), optionally requiring a part ({@see PublicSettings::offers()}) */
+    private function load(string $slug, ?string $part = null): PublicSettings
     {
         $settings = $this->settings->findActiveBySlug($slug);
-        $enabled = match ($feature) {
-            'contact' => $settings?->isContactEnabled(),
-            'surveys' => $settings?->isSurveysEnabled(),
-            'events' => $settings?->isEventsEnabled(),
-            'subscribe' => $settings?->isSubscribeEnabled(),
-            default => null !== $settings,
-        };
-        if (null === $settings || true !== $enabled) {
+        if (null === $settings || !$settings->getOrganization()->hasFeature(Feature::PublicPage) || (null !== $part && !$settings->offers($part))) {
             throw new NotFoundHttpException();
         }
 

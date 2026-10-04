@@ -8,7 +8,9 @@ use App\Entity\MailAccount;
 use App\Entity\Membership;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Enum\OrganizationRole;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,7 +19,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class MailAccountRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, MailAccount::class);
     }
@@ -40,6 +42,7 @@ class MailAccountRepository extends ServiceEntityRepository
         /* @var list<MailAccount> */
         return $this->createQueryBuilder('a')
             ->join(Membership::class, 'm', 'WITH', 'm.organization = a.organization AND m.user = :user AND '.Membership::fullDql('m'))
+            ->andWhere($this->features->dql('IDENTITY(a.organization)', Feature::Mail))
             ->setParameter('user', $user)
             ->orderBy('a.name')
             ->getQuery()
@@ -57,6 +60,7 @@ class MailAccountRepository extends ServiceEntityRepository
         $accounts = $this->createQueryBuilder('a')
             ->join(Membership::class, 'm', 'WITH', 'm.organization = a.organization AND m.user = :user AND m.role = :admin AND '.Membership::fullDql('m'))
             ->andWhere('a.enabled = true')
+            ->andWhere($this->features->dql('IDENTITY(a.organization)', Feature::Mail))
             ->setParameter('user', $user)
             ->setParameter('admin', OrganizationRole::Admin)
             ->orderBy('a.name')

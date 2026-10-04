@@ -27,6 +27,8 @@
             </div>
         </div>
 
+        {% set mail = organization.hasFeature('mail') %}
+        {% if mail %}
         <section aria-labelledby="accounts-heading">
             <div class="mb-3 flex items-center justify-between gap-2">
                 <h3 id="accounts-heading" class="font-semibold">{{ 'mail_account.title'|trans }}</h3>
@@ -68,8 +70,9 @@
                 </ul>
             {% endif %}
         </section>
+        {% endif %}
 
-        {% if is_admin and mail_accounts is not empty %}
+        {% if mail and is_admin and mail_accounts is not empty %}
             <section aria-labelledby="rules-heading">
                 <div class="mb-3 flex items-center justify-between gap-2">
                     <h3 id="rules-heading" class="font-semibold">{{ 'mail_rule.title'|trans }}</h3>
@@ -96,7 +99,7 @@
             </section>
         {% endif %}
 
-        {% if is_admin %}
+        {% if is_admin and organization.hasFeature('public_page') %}
             <section aria-labelledby="public-heading">
                 <div class="mb-3 flex items-center justify-between gap-2">
                     <h3 id="public-heading" class="font-semibold">{{ 'public.settings.title'|trans }}</h3>
@@ -106,6 +109,7 @@
             </section>
         {% endif %}
 
+        {% if mail %}
         <section aria-labelledby="snippets-heading">
             <div class="mb-3 flex items-center justify-between gap-2">
                 <h3 id="snippets-heading" class="font-semibold">{{ 'snippet.title'|trans }}</h3>
@@ -130,7 +134,9 @@
                 </ul>
             {% endif %}
         </section>
+        {% endif %}
 
+        {% if organization.hasFeature('projects') %}
         <section aria-labelledby="projects-heading">
             <div class="mb-3 flex items-center justify-between gap-2">
                 <h3 id="projects-heading" class="font-semibold">{{ 'nav.projects'|trans }}</h3>
@@ -154,6 +160,7 @@
                 </ul>
             {% endif %}
         </section>
+        {% endif %}
 
         <section aria-labelledby="members-heading">
             <div class="mb-3 flex items-center justify-between gap-2">

@@ -6,6 +6,7 @@ namespace App\Security\Voter;
 
 use App\Entity\Project;
 use App\Entity\User;
+use App\Enum\Feature;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -35,6 +36,9 @@ final class ProjectVoter extends Voter
         $organization = $subject->getOrganization();
         if (null === $organization) {
             return $subject->getCreatedBy() === $user;
+        }
+        if (!$organization->hasFeature(Feature::Projects)) {
+            return false;
         }
 
         return self::VIEW === $attribute ? $organization->canSeeProject($user, $subject) : ($organization->getMembership($user)?->isAdmin() ?? false);

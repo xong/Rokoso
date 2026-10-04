@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\ForumBoard;
 use App\Entity\Membership;
 use App\Entity\User;
+use App\Enum\Feature;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -21,7 +22,7 @@ class ForumBoardRepository extends ServiceEntityRepository
     }
 
     /**
-     * All areas of the user's organizations, ordered by organization and name.
+     * All areas of the user's organizations using the forum, ordered by organization and name.
      *
      * @return list<ForumBoard>
      */
@@ -37,7 +38,7 @@ class ForumBoardRepository extends ServiceEntityRepository
             ->addOrderBy('b.name')
             ->getQuery()->getResult();
 
-        return array_values(array_filter($all, static fn (ForumBoard $x): bool => $x->isVisibleTo($user)));
+        return array_values(array_filter($all, static fn (ForumBoard $x): bool => $x->getOrganization()->hasFeature(Feature::Forum) && $x->isVisibleTo($user)));
     }
 
     /**

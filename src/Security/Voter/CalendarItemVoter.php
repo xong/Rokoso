@@ -6,6 +6,8 @@ namespace App\Security\Voter;
 
 use App\Entity\CalendarItem;
 use App\Entity\User;
+use App\Enum\CalendarItemType;
+use App\Enum\Feature;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -31,6 +33,9 @@ final class CalendarItemVoter extends Voter
             return false;
         }
         $organization = $subject->getOrganization();
+        if (null !== $organization && !$organization->hasFeature(CalendarItemType::Task === $subject->getType() ? Feature::Tasks : Feature::Calendar)) {
+            return false;
+        }
 
         return null === $organization ? $subject->getCreatedBy() === $user : $organization->canSeeProject($user, $subject->getProject());
     }

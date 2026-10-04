@@ -9,6 +9,8 @@ use App\Entity\Meeting;
 use App\Entity\Membership;
 use App\Entity\Poll;
 use App\Entity\User;
+use App\Enum\Feature;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -18,7 +20,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PollRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, Poll::class);
     }
@@ -57,21 +59,30 @@ class PollRepository extends ServiceEntityRepository
     /** @return list<Poll> */
     public function forTopic(ForumTopic $topic): array
     {
-        /* @var list<Poll> */
-        return $this->findBy(['topic' => $topic], ['createdAt' => 'ASC']);
+        return $this->enabled($this->findBy(['topic' => $topic], ['createdAt' => 'ASC']));
     }
 
     /** @return list<Poll> */
     public function forMeeting(Meeting $meeting): array
     {
-        /* @var list<Poll> */
-        return $this->findBy(['meeting' => $meeting], ['createdAt' => 'ASC']);
+        return $this->enabled($this->findBy(['meeting' => $meeting], ['createdAt' => 'ASC']));
+    }
+
+    /**
+     * @param array<Poll> $polls
+     *
+     * @return list<Poll>
+     */
+    private function enabled(array $polls): array
+    {
+        return array_values(array_filter($polls, static fn (Poll $p): bool => $p->getOrganization()->hasFeature(Feature::Polls)));
     }
 
     public function visibleQuery(User $user, string $alias = 'p'): QueryBuilder
     {
         return $this->createQueryBuilder($alias)
             ->join(Membership::class, $alias.'_vm', 'WITH', $alias.'_vm.organization = '.$alias.'.organization AND '.$alias.'_vm.user = :viewer AND '.Membership::fullDql($alias.'_vm'))
+            ->andWhere($this->features->dql('IDENTITY('.$alias.'.organization)', Feature::Polls))
             ->setParameter('viewer', $user);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Enum\Feature;
 use App\Mail\MailSynchronizer;
 use App\Repository\MailAccountRepository;
 use Symfony\Component\Console\Attribute\Argument;
@@ -11,7 +12,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Fetches new mails of all active accounts. Run via cron, e.g. every 5 minutes.
+ * Fetches new mails of all active accounts (organizations using e-mail). Run via cron, e.g. every 5 minutes.
  */
 #[AsCommand(name: 'app:mail:sync', description: 'Neue E-Mails aller aktiven Konten abrufen')]
 final readonly class MailSyncCommand
@@ -27,6 +28,9 @@ final readonly class MailSyncCommand
         $list = null === $account ? $this->accounts->findBy(['enabled' => true]) : array_filter([$this->accounts->find($account)]);
 
         foreach ($list as $mailAccount) {
+            if (!$mailAccount->getOrganization()->hasFeature(Feature::Mail)) {
+                continue;
+            }
             $count = $this->synchronizer->sync($mailAccount);
             $error = $mailAccount->getLastSyncError();
             if (null === $error) {

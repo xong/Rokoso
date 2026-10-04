@@ -51,7 +51,9 @@
         {% if file_items is not empty %}
           <section aria-labelledby="shelf-files-heading" class="space-y-2">
             <h2 id="shelf-files-heading" class="text-sm font-semibold">{{ 'shelf.section_files'|trans }}</h2>
-            <form id="shelf-send" method="get" action="{{ path('mail_compose') }}"></form>
+            {% if route_available('mail_compose') %}
+                <form id="shelf-send" method="get" action="{{ path('mail_compose') }}"></form>
+            {% endif %}
             <div class="card overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="border-b border-slate-200 text-left text-xs text-slate-500">
@@ -106,9 +108,11 @@
                     </tbody>
                 </table>
             </div>
-            <button type="submit" form="shelf-send" class="btn-primary">
-                {{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'shelf.send'|trans }}
-            </button>
+            {% if route_available('mail_compose') %}
+                <button type="submit" form="shelf-send" class="btn-primary">
+                    {{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'shelf.send'|trans }}
+                </button>
+            {% endif %}
           </section>
         {% endif %}
     </div>

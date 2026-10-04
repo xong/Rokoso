@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Repository\CalendarItemRepository;
 use App\Repository\ForumBoardRepository;
 use App\Repository\InvitationRepository;
@@ -19,7 +20,10 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  */
 final readonly class SetupChecklist
 {
+    private const array FEATURES = ['mail_account' => Feature::Mail, 'board' => Feature::Forum, 'event' => Feature::Calendar];
+
     public function __construct(
+        private Features $features,
         private OrganizationRepository $organizations,
         private InvitationRepository $invitations,
         private MailAccountRepository $accounts,
@@ -76,6 +80,9 @@ final readonly class SetupChecklist
                 'url' => $this->urls->generate('calendar_item_new'),
             ],
         ];
+        // steps of areas switched off in all of the user's organizations are left out
+        $steps = array_values(array_filter($steps, fn (array $step): bool => null === ($feature = self::FEATURES[$step['key']] ?? null)
+            || $this->features->isAvailable($user, $feature)));
 
         foreach ($steps as $step) {
             if (!$step['done']) {

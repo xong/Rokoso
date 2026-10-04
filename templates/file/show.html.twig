@@ -10,9 +10,11 @@
         {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
     </a>
     {{ include('_partials/shelf_button.html.twig', {target: file, url: path('shelf_toggle_file', {id: file.id})}) }}
-    <a href="{{ path('mail_compose', {'file[]': file.id}) }}" class="btn-icon" aria-label="{{ 'file.send_mail'|trans }}" title="{{ 'file.send_mail'|trans }}">
-        {{ ux_icon('lucide:mail-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
-    </a>
+    {% if route_available('mail_compose') %}
+        <a href="{{ path('mail_compose', {'file[]': file.id}) }}" class="btn-icon" aria-label="{{ 'file.send_mail'|trans }}" title="{{ 'file.send_mail'|trans }}">
+            {{ ux_icon('lucide:mail-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+        </a>
+    {% endif %}
     {% if is_granted('FOLDER_DELETE', file) %}
         {{ ui.post_button(path('file_delete', {id: file.id}), 'delete-file-' ~ file.id, 'file.delete',
             {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'file.delete_confirm'}) }}

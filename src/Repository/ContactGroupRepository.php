@@ -7,6 +7,8 @@ namespace App\Repository;
 use App\Entity\ContactGroup;
 use App\Entity\Membership;
 use App\Entity\User;
+use App\Enum\Feature;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -15,7 +17,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ContactGroupRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, ContactGroup::class);
     }
@@ -32,6 +34,7 @@ class ContactGroupRepository extends ServiceEntityRepository
             ->addSelect('o')
             ->join('g.organization', 'o')
             ->join(Membership::class, 'cm', 'WITH', 'cm.organization = o AND cm.user = :viewer AND '.Membership::fullDql('cm'))
+            ->andWhere($this->features->dql('o.id', Feature::Contacts))
             ->setParameter('viewer', $user)
             ->orderBy('o.name')
             ->addOrderBy('g.name')

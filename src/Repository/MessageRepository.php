@@ -9,9 +9,11 @@ use App\Entity\Message;
 use App\Entity\MessageRead;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Enum\MessageFolder;
 use App\Enum\MessageType;
 use App\Mail\MessageFilter;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -23,7 +25,7 @@ class MessageRepository extends ServiceEntityRepository
 {
     public const int PAGE_SIZE = 50;
 
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, Message::class);
     }
@@ -32,7 +34,8 @@ class MessageRepository extends ServiceEntityRepository
      * Messages the user may see:
      * - everything belonging to one of the user's organizations (account mails, messages to the org or its projects)
      * - internal messages the user wrote or received personally
-     * - internal messages to the user's personal projects.
+     * - internal messages to the user's personal projects
+     * – without e-mails of organizations that switched mail off.
      */
     public function visibleQuery(User $user): QueryBuilder
     {
@@ -42,6 +45,7 @@ class MessageRepository extends ServiceEntityRepository
                 .' OR m.author = :viewer'
                 .' OR :viewer MEMBER OF m.recipientUsers'
                 .' OR (m.organization IS NULL AND p.createdBy = :viewer)')
+            ->andWhere(\sprintf("m.type <> '%s' OR %s", MessageType::Email->value, $this->features->dql('IDENTITY(m.organization)', Feature::Mail)))
             ->setParameter('viewer', $user);
     }
 

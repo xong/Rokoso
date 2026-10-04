@@ -346,6 +346,8 @@ organization:
     revoke: Einladung zurückziehen
     invitation_revoked: Einladung zurückgezogen.
     meetings_legend: Sitzungen
+    features_legend: Bereiche
+    features_help: Abgeschaltete Bereiche verschwinden für die Mitglieder aus Menü, Listen und Suche. Die Inhalte bleiben erhalten und sind nach dem Einschalten wieder da.
     quorum_percent: Beschlussfähigkeit (%)
     quorum_percent_help: Anteil der stimmberechtigten Mitglieder, die anwesend sein müssen.
     invitation_days: Ladungsfrist (Tage)
@@ -1019,6 +1021,33 @@ folder:
     empty: Dieser Ordner ist leer.
     subfolders: '{1} 1 Unterordner|]1,Inf[ %count% Unterordner'
 
+feature:
+    mail: E-Mails
+    mail_help: Postfächer der Organisation, Regeln, Textbausteine und Rundschreiben.
+    forum: Forum
+    forum_help: Bereiche und Themen für Diskussionen.
+    calendar: Kalender
+    calendar_help: Termine, Abo-Feed und Einladungen.
+    tasks: Aufgaben
+    tasks_help: Aufgaben mit Zuständigen, Fälligkeit und Board.
+    meetings: Sitzungen
+    meetings_help: Tagesordnung, Anwesenheit und Protokoll.
+    resolutions: Beschlüsse
+    resolutions_help: Beschlusssammlung mit Abstimmungsergebnissen.
+    polls: Abstimmungen
+    polls_help: Abstimmungen und Terminfindung unter Mitgliedern.
+    surveys: Umfragen
+    surveys_help: Fragebögen, auch öffentlich für Eltern.
+    projects: Projekte
+    projects_help: Arbeitsgruppen, die Nachrichten, Termine, Aufgaben und Dateien bündeln.
+    files: Dateien
+    files_help: Ordner, Versionen und Freigabelinks.
+    wiki: Wiki
+    wiki_help: Gemeinsame Wissensseiten.
+    contacts: Kontakte
+    contacts_help: Adressbuch und Verteiler.
+    public_page: Öffentliche Seite
+    public_page_help: Infoseite, Kontaktformular und Newsletter-Anmeldung für Außenstehende.
 file:
     upload: Dateien hochladen
     upload_submit: Hochladen

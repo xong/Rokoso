@@ -47,9 +47,11 @@
                     <h2 id="share-text-heading" class="text-sm font-semibold">{{ 'share.text'|trans }}</h2>
                     {% if shared.title %}<p class="font-medium">{{ shared.title }}</p>{% endif %}
                     {% if mail_body %}<p class="text-sm break-words whitespace-pre-line text-slate-700">{{ mail_body }}</p>{% endif %}
-                    <a class="btn-secondary" href="{{ path('mail_compose', {subject: shared.title, body: mail_body}) }}">
-                        {{ ux_icon('lucide:mail-plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'share.as_mail'|trans }}
-                    </a>
+                    {% if route_available('mail_compose') %}
+                        <a class="btn-secondary" href="{{ path('mail_compose', {subject: shared.title, body: mail_body}) }}">
+                            {{ ux_icon('lucide:mail-plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'share.as_mail'|trans }}
+                        </a>
+                    {% endif %}
                 </section>
             {% endif %}
 

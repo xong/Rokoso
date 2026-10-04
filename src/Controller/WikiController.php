@@ -8,6 +8,7 @@ use App\Entity\Organization;
 use App\Entity\User;
 use App\Entity\WikiPage;
 use App\Entity\WikiRevision;
+use App\Enum\Feature;
 use App\Form\WikiPageFormType;
 use App\Repository\OrganizationRepository;
 use App\Repository\WikiPageRepository;
@@ -58,7 +59,7 @@ final class WikiController extends AbstractController
             $this->denyAccessUnlessGranted(WikiVoter::EDIT, $parent);
             $organization = $parent->getOrganization();
         } else {
-            $choices = $this->organizations->findForUser($user);
+            $choices = $this->organizations->findForUser($user, Feature::Wiki);
             $organization = $this->organizations->find($request->query->getInt('organization'));
             $organization = \in_array($organization, $choices, true) ? $organization : ($choices[0] ?? null);
             if (null === $organization) {
@@ -184,7 +185,7 @@ final class WikiController extends AbstractController
     private function listContext(Request $request, User $user, ?WikiPage $current = null): array
     {
         $query = trim($request->query->getString('q'));
-        $organizations = $this->organizations->findForUser($user);
+        $organizations = $this->organizations->findForUser($user, Feature::Wiki);
         $pages = $this->pages->findVisibleFor($user);
 
         return [

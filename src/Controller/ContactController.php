@@ -9,6 +9,7 @@ use App\Entity\Contact;
 use App\Entity\ContactGroup;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Form\ContactFormType;
 use App\Form\ContactGroupFormType;
 use App\Notification\ActivityNotifier;
@@ -59,7 +60,7 @@ final class ContactController extends AbstractController
     public function new(Request $request, #[CurrentUser] User $user): Response
     {
         $contact = new Contact($user);
-        $organizations = $this->organizations->findForUser($user);
+        $organizations = $this->organizations->findForUser($user, Feature::Contacts);
         $contact->setOrganization($organizations[0] ?? null);
         if ('' !== $request->query->getString('email')) {
             $contact->setEmail($request->query->getString('email'));
@@ -163,7 +164,7 @@ final class ContactController extends AbstractController
     #[Route('/import', name: 'contact_import')]
     public function import(Request $request, #[CurrentUser] User $user, TranslatorInterface $translator): Response
     {
-        $organizations = $this->organizations->findForUser($user);
+        $organizations = $this->organizations->findForUser($user, Feature::Contacts);
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('contact-import', $request->getPayload()->getString('_token'))) {
                 throw $this->createAccessDeniedException();
@@ -215,7 +216,7 @@ final class ContactController extends AbstractController
     #[Route('/groups/new', name: 'contact_group_new')]
     public function newGroup(Request $request, #[CurrentUser] User $user): Response
     {
-        $organizations = $this->organizations->findForUser($user);
+        $organizations = $this->organizations->findForUser($user, Feature::Contacts);
         $organization = $organizations[0] ?? null;
         foreach ($organizations as $candidate) {
             if ($candidate->getId() === $request->query->getInt('organization')) {
@@ -308,7 +309,7 @@ final class ContactController extends AbstractController
     {
         $isNew = null === $contact->getId();
         $form = $this->createForm(ContactFormType::class, $contact, [
-            'organizations' => $this->organizations->findForUser($user),
+            'organizations' => $this->organizations->findForUser($user, Feature::Contacts),
             'groups' => $this->groups->findForUser($user),
         ]);
         $form->handleRequest($request);

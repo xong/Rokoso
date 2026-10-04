@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Membership;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Enum\Feature;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -21,17 +22,21 @@ class OrganizationRepository extends ServiceEntityRepository
     }
 
     /**
+     * Organizations the user is a full member of; with $feature only those using the area (choices when creating).
+     *
      * @return list<Organization>
      */
-    public function findForUser(User $user): array
+    public function findForUser(User $user, ?Feature $feature = null): array
     {
-        /* @var list<Organization> */
-        return $this->createQueryBuilder('o')
+        /** @var list<Organization> $organizations */
+        $organizations = $this->createQueryBuilder('o')
             ->join('o.memberships', 'm')
             ->andWhere('m.user = :user AND '.Membership::fullDql('m'))
             ->setParameter('user', $user)
             ->orderBy('o.name')
             ->getQuery()
             ->getResult();
+
+        return null === $feature ? $organizations : array_values(array_filter($organizations, static fn (Organization $o): bool => $o->hasFeature($feature)));
     }
 }

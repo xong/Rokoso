@@ -8,6 +8,8 @@ use App\Entity\Membership;
 use App\Entity\Organization;
 use App\Entity\Resolution;
 use App\Entity\User;
+use App\Enum\Feature;
+use App\Service\Features;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,7 +18,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ResolutionRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Features $features)
     {
         parent::__construct($registry, Resolution::class);
     }
@@ -48,6 +50,7 @@ class ResolutionRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('r')
             ->join(Membership::class, 'vm', 'WITH', 'vm.organization = r.organization AND vm.user = :viewer AND '.Membership::fullDql('vm'))
+            ->andWhere($this->features->dql('IDENTITY(r.organization)', Feature::Resolutions))
             ->setParameter('viewer', $user)
             ->orderBy('r.decidedOn', 'DESC')
             ->addOrderBy('r.id', 'DESC')
@@ -83,6 +86,7 @@ class ResolutionRepository extends ServiceEntityRepository
         $dates = $this->createQueryBuilder('r')
             ->select('r.decidedOn')
             ->join(Membership::class, 'vm', 'WITH', 'vm.organization = r.organization AND vm.user = :viewer AND '.Membership::fullDql('vm'))
+            ->andWhere($this->features->dql('IDENTITY(r.organization)', Feature::Resolutions))
             ->setParameter('viewer', $user)
             ->getQuery()
             ->getSingleColumnResult();

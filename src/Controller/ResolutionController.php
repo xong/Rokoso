@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\AgendaItem;
 use App\Entity\Resolution;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Form\ResolutionFormType;
 use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
@@ -64,7 +65,7 @@ final class ResolutionController extends AbstractController
             $resolution->setAgendaItem($item)->setTitle($item->getTitle())->setProject($item->getMeeting()->getProject())
                 ->setDecidedOn($item->getMeeting()->getStartsAt()->setTime(0, 0));
         } else {
-            $choices = $this->organizations->findForUser($user);
+            $choices = $this->organizations->findForUser($user, Feature::Resolutions);
             $organization = $this->organizations->find($request->query->getInt('organization'));
             $organization = \in_array($organization, $choices, true) ? $organization : ($choices[0] ?? null);
             if (null === $organization) {
@@ -143,7 +144,7 @@ final class ResolutionController extends AbstractController
             'filter_params' => array_filter($filters),
             'years' => $this->resolutions->years($user),
             'projects' => $this->projects->findVisibleFor($user),
-            'organizations' => $this->organizations->findForUser($user),
+            'organizations' => $this->organizations->findForUser($user, Feature::Resolutions),
             'current' => $current,
         ];
     }

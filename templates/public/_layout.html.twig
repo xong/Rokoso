@@ -20,8 +20,8 @@
                         {% set route = app.request.attributes.get('_route') %}
                         {% for item in [
                             {route: 'public_home', label: 'public.home.title', show: true},
-                            {route: 'public_contact', label: 'public.contact.title', show: settings.contactEnabled and settings.contactAccount},
-                            {route: 'public_subscribe', label: 'public.subscribe.title', show: settings.subscribeEnabled},
+                            {route: 'public_contact', label: 'public.contact.title', show: settings.offers('contact') and settings.contactAccount},
+                            {route: 'public_subscribe', label: 'public.subscribe.title', show: settings.offers('subscribe')},
                         ]|filter(i => i.show) %}
                             <li><a href="{{ path(item.route, {slug: settings.slug}) }}" {% if route == item.route %}aria-current="page"{% endif %}
                                    class="rounded-md px-3 py-1.5 {{ route == item.route ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">{{ item.label|trans }}</a></li>

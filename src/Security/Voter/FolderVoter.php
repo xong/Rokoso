@@ -7,6 +7,7 @@ namespace App\Security\Voter;
 use App\Entity\Folder;
 use App\Entity\StoredFile;
 use App\Entity\User;
+use App\Enum\Feature;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -35,7 +36,7 @@ final class FolderVoter extends Voter
         if (!$user instanceof User) {
             return false;
         }
-        if (!$subject->isVisibleTo($user)) {
+        if (!$subject->getOrganization()->hasFeature(Feature::Files) || !$subject->isVisibleTo($user)) {
             return false;
         }
         if (self::DELETE !== $attribute) {

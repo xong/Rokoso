@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\FileShare;
+use App\Enum\Feature;
 use App\Repository\FileShareRepository;
 use App\Service\FileStorage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -48,6 +49,12 @@ final class FileShareController extends AbstractController
 
     private function find(string $token): FileShare
     {
-        return $this->shares->findValid($token) ?? throw $this->createNotFoundException();
+        $share = $this->shares->findValid($token);
+        // links stop working while the organization has files switched off
+        if (null === $share || !$share->getFile()->getOrganization()->hasFeature(Feature::Files)) {
+            throw $this->createNotFoundException();
+        }
+
+        return $share;
     }
 }

@@ -6,6 +6,7 @@ namespace App\Security\Voter;
 
 use App\Entity\Survey;
 use App\Entity\User;
+use App\Enum\Feature;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -32,7 +33,7 @@ final class SurveyVoter extends Voter
             return false;
         }
         $membership = $subject->getOrganization()->getMembership($user);
-        if (null === $membership) {
+        if (null === $membership || !$subject->getOrganization()->hasFeature(Feature::Surveys)) {
             return false;
         }
 

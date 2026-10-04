@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\Feature;
 use App\Enum\OrganizationRole;
 use App\Repository\OrganizationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -60,6 +61,14 @@ class Organization
     #[ORM\Column(nullable: true, options: ['default' => 2])]
     #[Assert\Range(min: 1, max: 30)]
     private ?int $submissionRetentionYears = 2;
+
+    /**
+     * Switched-off areas (values of {@see Feature}); stored this way round so new areas start switched on.
+     *
+     * @var list<string>
+     */
+    #[ORM\Column(type: Types::JSON, options: ['default' => '[]'])]
+    private array $disabledFeatures = [];
 
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
@@ -197,6 +206,33 @@ class Organization
     {
         return array_values(array_map(static fn (Membership $m): User => $m->getUser(),
             array_filter($this->memberships->toArray(), static fn (Membership $m): bool => $m->isFull() && $m->hasVotingRight())));
+    }
+
+    public function hasFeature(Feature|string $feature): bool
+    {
+        return !\in_array($feature instanceof Feature ? $feature->value : $feature, $this->disabledFeatures, true);
+    }
+
+    /**
+     * @return list<Feature>
+     */
+    public function getEnabledFeatures(): array
+    {
+        return array_values(array_filter(Feature::cases(), $this->hasFeature(...)));
+    }
+
+    /**
+     * @param iterable<Feature> $features
+     */
+    public function setEnabledFeatures(iterable $features): static
+    {
+        $enabled = [];
+        foreach ($features as $feature) {
+            $enabled[] = $feature->value;
+        }
+        $this->disabledFeatures = array_values(array_diff(array_map(static fn (Feature $f): string => $f->value, Feature::cases()), $enabled));
+
+        return $this;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

@@ -6,6 +6,7 @@ namespace App\Security\Voter;
 
 use App\Entity\Contact;
 use App\Entity\User;
+use App\Enum\Feature;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -31,6 +32,9 @@ final class ContactVoter extends Voter
             return false;
         }
         $organization = $subject->getOrganization();
+        if (null !== $organization && !$organization->hasFeature(Feature::Contacts)) {
+            return false;
+        }
 
         return null === $organization ? $subject->getCreatedBy() === $user : null !== $organization->getMembership($user);
     }
