@@ -27,7 +27,7 @@ nav:
     mail_compose: Neue E-Mail
     mail_message: Neue Nachricht
     files: Dateien
-    shelf: Ablage
+    shelf: Gemerkt
     forum: Forum
     knowledge: Wissen
     calendar: Kalender
@@ -553,7 +553,9 @@ mail:
         reset: Filter zurücksetzen
 
 compose:
-    from_shelf: Aus der Ablage anhängen
+    from_shelf: Aus „Gemerkt“ anhängen
+    from_files: Aus den Dateien anhängen
+    files_search: Dateien durchsuchen
     title_reply: Antworten
     title_forward: Weiterleiten
     from: Von
@@ -891,23 +893,66 @@ file:
     download_named: '„%name%“ herunterladen'
     open: Im Browser öffnen
     preview: 'Vorschau von %name%'
+    preview_heading: Vorschau
+    preview_truncated: Die Vorschau zeigt nur den Anfang der Datei.
+    uploaded_versions: Dateien hochgeladen. Gleichnamige Dateien wurden als neue Version gespeichert.
+    send_mail: Per E-Mail senden
+    version:
+        heading: Versionen
+        current: Aktuell
+        upload: Neue Version hochladen
+        submit: Als neue Version hochladen
+        uploaded: Neue Version gespeichert.
+        download: 'Version vom %date% herunterladen'
+        restore: 'Version vom %date% wiederherstellen'
+        restore_confirm: Diese Version wiederherstellen? Der aktuelle Stand bleibt als Version erhalten.
+        restored: Version wiederhergestellt.
+    share:
+        heading: Freigabelinks
+        intro: Mit einem Freigabelink können auch Personen ohne Zugang die Datei herunterladen, bis der Link abläuft.
+        link: Freigabelink
+        valid_for: Gültig für
+        days: '{1} 1 Tag|]1,Inf[ %count% Tage'
+        create: Link erstellen
+        created: Freigabelink erstellt.
+        revoke: Freigabelink widerrufen
+        revoked: Freigabelink widerrufen.
+        meta: 'Gültig bis %date% · %count% Downloads · erstellt von %name%'
+        public_title: Geteilte Datei
+        valid_until: 'Dieser Link ist gültig bis %date%.'
     properties: Eigenschaften
     delete: Datei löschen
     delete_confirm: Datei löschen?
 
 shelf:
-    intro: In deiner persönlichen Ablage sammelst du Verweise auf Dateien und E-Mail-Anhänge, um sie schnell wiederzufinden oder per E-Mail zu versenden. Es werden keine Kopien angelegt.
-    empty: Deine Ablage ist leer. Lege Dateien oder E-Mail-Anhänge über das Lesezeichen-Symbol hier ab.
-    add: In die Ablage legen
-    add_named: '„%name%“ in die Ablage legen'
-    remove: Aus der Ablage nehmen
-    remove_named: '„%name%“ aus der Ablage nehmen'
-    added: In die Ablage gelegt.
-    removed: Aus der Ablage genommen.
+    intro: Hier sammelst du Dateien, E-Mail-Anhänge, Nachrichten und Forenthemen, die du dir gemerkt hast, um sie schnell wiederzufinden. Dateien kannst du direkt per E-Mail versenden. Es werden keine Kopien angelegt.
+    empty: Du hast dir noch nichts gemerkt. Nutze das Lesezeichen-Symbol an Dateien, Anhängen, Nachrichten und Forenthemen.
+    add: Merken
+    add_named: '„%name%“ merken'
+    remove: Nicht mehr merken
+    remove_named: '„%name%“ nicht mehr merken'
+    added: Gemerkt.
+    removed: Nicht mehr gemerkt.
+    section_entries: Nachrichten und Themen
+    section_files: Dateien
     select: Auswählen
     source: Herkunft
     actions: Aktionen
     send: Ausgewählte per E-Mail senden
+
+share:
+    title: Geteilt
+    empty: Es wurde nichts geteilt. Teile Dateien oder Links aus einer anderen App über das Teilen-Menü an Coop (dazu muss Coop als App installiert sein).
+    files: '{1} Eine geteilte Datei|]1,Inf[ %count% geteilte Dateien'
+    folder: Speichern in Ordner
+    folder_choose: Ordner wählen …
+    folder_required: Bitte wähle einen Ordner, in dem du Dateien hochladen darfst.
+    no_folder: Du hast keinen Ordner, in den du Dateien hochladen darfst.
+    save: Speichern
+    text: Geteilter Text
+    as_mail: Als E-Mail senden
+    discard: Verwerfen
+    discarded: Geteiltes verworfen.
 
 forum:
     intro: Im Forum tauscht ihr euch in Bereichen und Themen aus. Bereiche gehören zu einer Organisation, alle Mitglieder können lesen und schreiben.

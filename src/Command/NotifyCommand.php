@@ -15,6 +15,7 @@ use App\Notification\NotificationMailer;
 use App\Participation\PublicSubmissionHandler;
 use App\Repository\NotificationRepository;
 use App\Repository\UserRepository;
+use App\Service\FileStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -22,7 +23,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Reminders (per item: 15 minutes to one week before the start), leftover instant mails the daily digest and removal of expired public requests. Run via cron, e.g. every 15 minutes.
+ * Reminders (per item: 15 minutes to one week before the start), leftover instant mails the daily digest removal of expired public requests and of unsaved shared files. Run via cron, e.g. every 15 minutes.
  */
 #[AsCommand(name: 'app:notify', description: 'Erinnerungen und Zusammenfassungen verschicken')]
 final readonly class NotifyCommand
@@ -39,6 +40,7 @@ final readonly class NotifyCommand
         private EntityManagerInterface $em,
         private ClockInterface $clock,
         private PublicSubmissionHandler $public,
+        private FileStorage $files,
     ) {
     }
 
@@ -59,8 +61,10 @@ final readonly class NotifyCommand
         $this->em->flush();
 
         $purged = $this->public->purgeExpired();
+        // files shared to the app (PWA) that were not saved within a day
+        $incoming = $this->files->purgeIncoming($now->modify('-1 day'));
 
-        $io->writeln(\sprintf('%d Erinnerung(en), %d E-Mail(s), %d abgelaufene Anfrage(n) entfernt', $reminders, $mails, $purged));
+        $io->writeln(\sprintf('%d Erinnerung(en), %d E-Mail(s), %d abgelaufene Anfrage(n), %d geteilte Datei(en) entfernt', $reminders, $mails, $purged, $incoming));
 
         return 0;
     }

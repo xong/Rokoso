@@ -7,6 +7,7 @@ namespace App\Form;
 use App\Entity\MailAccount;
 use App\Entity\Project;
 use App\Entity\ShelfItem;
+use App\Entity\StoredFile;
 use App\Mail\ComposeData;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -57,6 +58,15 @@ final class ComposeFormType extends AbstractType
                 'expanded' => true,
                 'required' => false,
             ])
+            ->add('storedFiles', EntityType::class, [
+                'label' => 'compose.from_files',
+                'class' => StoredFile::class,
+                'choices' => $options['stored_files'],
+                'choice_label' => static fn (StoredFile $f): string => $f->getFilename().' – '.$f->getFolder()->getName(),
+                'multiple' => true,
+                'expanded' => true,
+                'required' => false,
+            ])
             ->add('project', EntityType::class, [
                 'label' => 'nav.projects',
                 'class' => Project::class,
@@ -79,10 +89,12 @@ final class ComposeFormType extends AbstractType
             'projects' => [],
             'forward_attachments' => false,
             'shelf' => [],
+            'stored_files' => [],
             'draft_id' => null,
         ]);
         $resolver->setAllowedTypes('draft_id', ['null', 'int']);
         $resolver->setAllowedTypes('shelf', 'array');
+        $resolver->setAllowedTypes('stored_files', 'array');
         $resolver->setAllowedTypes('accounts', 'array');
         $resolver->setAllowedTypes('projects', 'array');
         $resolver->setAllowedTypes('forward_attachments', 'bool');

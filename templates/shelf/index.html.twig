@@ -10,9 +10,47 @@
     <div class="mx-auto max-w-4xl space-y-4 p-4 lg:p-6">
         <p class="text-sm text-slate-600">{{ 'shelf.intro'|trans }}</p>
 
+        {% set file_items = items|filter(i => i.isFile) %}
+        {% set message_items = items|filter(i => i.message) %}
+        {% set topic_items = items|filter(i => i.topic) %}
         {% if items is empty %}
             {{ ui.empty('shelf.empty', 'lucide:bookmark') }}
-        {% else %}
+        {% endif %}
+
+        {% if message_items is not empty or topic_items is not empty %}
+            <section aria-labelledby="shelf-entries-heading" class="space-y-2">
+                <h2 id="shelf-entries-heading" class="text-sm font-semibold">{{ 'shelf.section_entries'|trans }}</h2>
+                <ul class="card divide-y divide-slate-100 text-sm">
+                    {% for item in message_items|merge(topic_items) %}
+                        <li class="flex items-center gap-2 px-3 py-2">
+                            {% if item.message %}
+                                {% set m = item.message %}
+                                <a class="link flex min-w-0 flex-1 items-center gap-2" href="{{ path('mail_show', {folder: 'all', id: m.id}) }}">
+                                    {{ ux_icon(m.internal ? 'lucide:message-square' : 'lucide:mail', {class: 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                                    <span class="truncate">{{ m.subject ?: 'mail.no_subject'|trans }}</span>
+                                </a>
+                                <time class="text-xs whitespace-nowrap text-slate-500" datetime="{{ m.date|date('c') }}">{{ m.date|date('d.m.Y') }}</time>
+                                {% set label = m.subject ?: 'mail.no_subject'|trans %}
+                            {% else %}
+                                {% set t = item.topic %}
+                                <a class="link flex min-w-0 flex-1 items-center gap-2" href="{{ path('forum_topic_show', {id: t.id}) }}">
+                                    {{ ux_icon('lucide:messages-square', {class: 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                                    <span class="truncate">{{ t.title }}</span>
+                                </a>
+                                <span class="truncate text-xs text-slate-500 max-md:hidden">{{ t.board.name }}</span>
+                                {% set label = t.title %}
+                            {% endif %}
+                            {{ ui.post_button(path('shelf_remove', {id: item.id}), 'shelf', 'shelf.remove_named'|trans({'%name%': label}),
+                                {class: 'btn-icon size-8 hover:text-red-600', icon: 'lucide:bookmark-x', icon_only: true}) }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        {% if file_items is not empty %}
+          <section aria-labelledby="shelf-files-heading" class="space-y-2">
+            <h2 id="shelf-files-heading" class="text-sm font-semibold">{{ 'shelf.section_files'|trans }}</h2>
             <form id="shelf-send" method="get" action="{{ path('mail_compose') }}"></form>
             <div class="card overflow-x-auto">
                 <table class="w-full text-sm">
@@ -26,7 +64,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        {% for item in items %}
+                        {% for item in file_items %}
                             {% set file = item.file %}
                             {% set attachment = item.attachment %}
                             <tr class="hover:bg-slate-50">
@@ -71,6 +109,7 @@
             <button type="submit" form="shelf-send" class="btn-primary">
                 {{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'shelf.send'|trans }}
             </button>
+          </section>
         {% endif %}
     </div>
 {% endblock %}

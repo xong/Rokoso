@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Attachment;
+use App\Entity\ForumTopic;
+use App\Entity\Message;
 use App\Entity\ShelfItem;
 use App\Entity\StoredFile;
 use App\Entity\User;
@@ -28,9 +30,11 @@ class ShelfItemRepository extends ServiceEntityRepository
     {
         /* @var list<ShelfItem> */
         return $this->createQueryBuilder('s')
-            ->addSelect('f', 'a')
+            ->addSelect('f', 'a', 'm', 't')
             ->leftJoin('s.file', 'f')
             ->leftJoin('s.attachment', 'a')
+            ->leftJoin('s.message', 'm')
+            ->leftJoin('s.topic', 't')
             ->andWhere('s.owner = :owner')
             ->setParameter('owner', $owner)
             ->orderBy('s.createdAt', 'DESC')
@@ -39,8 +43,15 @@ class ShelfItemRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findFor(User $owner, StoredFile|Attachment $target): ?ShelfItem
+    public function findFor(User $owner, StoredFile|Attachment|Message|ForumTopic $target): ?ShelfItem
     {
-        return $this->findOneBy(['owner' => $owner, $target instanceof StoredFile ? 'file' : 'attachment' => $target]);
+        $field = match (true) {
+            $target instanceof StoredFile => 'file',
+            $target instanceof Attachment => 'attachment',
+            $target instanceof Message => 'message',
+            $target instanceof ForumTopic => 'topic',
+        };
+
+        return $this->findOneBy(['owner' => $owner, $field => $target]);
     }
 }

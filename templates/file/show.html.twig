@@ -9,9 +9,10 @@
     <a href="{{ path('file_download', {id: file.id}) }}" class="btn-icon" data-turbo="false" aria-label="{{ 'file.download'|trans }}" title="{{ 'file.download'|trans }}">
         {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
     </a>
-    {% set shelved = in_shelf(file) %}
-    {{ ui.post_button(path('shelf_toggle_file', {id: file.id}), 'shelf', shelved ? 'shelf.remove' : 'shelf.add',
-        {class: 'btn-icon' ~ (shelved ? ' text-indigo-600' : ''), icon: shelved ? 'lucide:bookmark-check' : 'lucide:bookmark-plus', icon_only: true}) }}
+    {{ include('_partials/shelf_button.html.twig', {target: file, url: path('shelf_toggle_file', {id: file.id})}) }}
+    <a href="{{ path('mail_compose', {'file[]': file.id}) }}" class="btn-icon" aria-label="{{ 'file.send_mail'|trans }}" title="{{ 'file.send_mail'|trans }}">
+        {{ ux_icon('lucide:mail-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
     {% if is_granted('FOLDER_DELETE', file) %}
         {{ ui.post_button(path('file_delete', {id: file.id}), 'delete-file-' ~ file.id, 'file.delete',
             {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'file.delete_confirm'}) }}
@@ -50,10 +51,24 @@
 
             <div class="flex flex-wrap gap-2">
                 <a href="{{ path('file_download', {id: file.id}) }}" class="btn-primary" data-turbo="false">{{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'file.download'|trans }}</a>
-                {% if file.mimeType == 'application/pdf' %}
+                {% if file.pdf %}
                     <a href="{{ path('file_download', {id: file.id, inline: 1}) }}" class="btn-secondary" target="_blank" rel="noopener">{{ ux_icon('lucide:external-link', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'file.open'|trans }}</a>
                 {% endif %}
             </div>
+
+            {% if file.pdf %}
+                <section aria-labelledby="file-preview-heading">
+                    <h2 id="file-preview-heading" class="sr-only">{{ 'file.preview_heading'|trans }}</h2>
+                    <iframe src="{{ path('file_download', {id: file.id, inline: 1}) }}" title="{{ 'file.preview'|trans({'%name%': file.filename}) }}"
+                            class="h-[70vh] w-full rounded-lg bg-white ring-1 ring-slate-200" loading="lazy"></iframe>
+                </section>
+            {% elseif text_preview is not null %}
+                <section aria-labelledby="file-preview-heading">
+                    <h2 id="file-preview-heading" class="mb-2 text-sm font-semibold">{{ 'file.preview_heading'|trans }}</h2>
+                    <pre class="card max-h-[60vh] overflow-auto p-4 text-xs whitespace-pre-wrap" tabindex="0">{{ text_preview }}</pre>
+                    {% if file.size > text_preview|length %}<p class="mt-1 text-xs text-slate-500">{{ 'file.preview_truncated'|trans }}</p>{% endif %}
+                </section>
+            {% endif %}
 
             <section aria-labelledby="file-edit-heading" class="max-w-xl">
                 <h2 id="file-edit-heading" class="mb-2 text-sm font-semibold">{{ 'file.properties'|trans }}</h2>
@@ -62,6 +77,77 @@
                     <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
                 {{ form_end(form) }}
             </section>
+
+            <section aria-labelledby="file-versions-heading" class="max-w-xl">
+                <h2 id="file-versions-heading" class="mb-2 text-sm font-semibold">{{ 'file.version.heading'|trans }}</h2>
+                <ul class="card divide-y divide-slate-100 text-sm">
+                    <li class="px-4 py-2">
+                        <span class="badge bg-emerald-50 text-emerald-700">{{ 'file.version.current'|trans }}</span>
+                        <time datetime="{{ file.createdAt|date('c') }}">{{ file.createdAt|date('d.m.Y H:i') }}</time>
+                        · {{ file.uploadedBy ? file.uploadedBy.name : 'mail.comments.deleted_user'|trans }} · <span class="tabular-nums">{{ file.size|filesize }}</span>
+                    </li>
+                    {% for version in file.versions %}
+                        <li class="flex items-center gap-2 px-4 py-2">
+                            <span class="min-w-0 flex-1">
+                                <time datetime="{{ version.createdAt|date('c') }}">{{ version.createdAt|date('d.m.Y H:i') }}</time>
+                                · {{ version.uploadedBy ? version.uploadedBy.name : 'mail.comments.deleted_user'|trans }} · <span class="tabular-nums">{{ version.size|filesize }}</span>
+                                {% if version.filename != file.filename %}<span class="block truncate text-xs text-slate-500">{{ version.filename }}</span>{% endif %}
+                            </span>
+                            <a href="{{ path('file_version_download', {id: file.id, version: version.id}) }}" class="btn-icon size-8" data-turbo="false"
+                               aria-label="{{ 'file.version.download'|trans({'%date%': version.createdAt|date('d.m.Y H:i')}) }}" title="{{ 'file.download'|trans }}">
+                                {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            </a>
+                            {% if is_granted('FOLDER_EDIT', file) %}
+                                {{ ui.post_button(path('file_version_restore', {id: file.id, version: version.id}), 'file-version-' ~ file.id,
+                                    'file.version.restore'|trans({'%date%': version.createdAt|date('d.m.Y H:i')}),
+                                    {class: 'btn-icon size-8', icon: 'lucide:history', icon_only: true, confirm: 'file.version.restore_confirm'}) }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+                {% if is_granted('FOLDER_EDIT', file) %}
+                    {{ form_start(version_form, {attr: {class: 'mt-3 space-y-2'}}) }}
+                        {{ form_row(version_form.files) }}
+                        <button type="submit" class="btn-secondary">{{ ux_icon('lucide:upload', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'file.version.submit'|trans }}</button>
+                    {{ form_end(version_form) }}
+                {% endif %}
+            </section>
+
+            {% if is_granted('FOLDER_EDIT', file) %}
+                <section id="shares" aria-labelledby="file-shares-heading" class="max-w-xl">
+                    <h2 id="file-shares-heading" class="mb-1 text-sm font-semibold">{{ 'file.share.heading'|trans }}</h2>
+                    <p class="mb-2 text-sm text-slate-600">{{ 'file.share.intro'|trans }}</p>
+                    {% set shares = file.shares|filter(s => not s.expired) %}
+                    {% if shares is not empty %}
+                        <ul class="card mb-3 divide-y divide-slate-100 text-sm">
+                            {% for share in shares %}
+                                <li class="space-y-1 px-4 py-2">
+                                    <div class="flex items-center gap-2">
+                                        <label class="sr-only" for="share-url-{{ share.id }}">{{ 'file.share.link'|trans }}</label>
+                                        <input id="share-url-{{ share.id }}" class="input min-w-0 flex-1 py-1 font-mono text-xs" value="{{ url('file_share_show', {token: share.token}) }}" readonly>
+                                        {{ ui.post_button(path('file_share_revoke', {id: file.id, share: share.id}), 'file-share-' ~ file.id, 'file.share.revoke',
+                                            {class: 'btn-icon size-8 hover:text-red-600', icon: 'lucide:link-2-off', icon_only: true}) }}
+                                    </div>
+                                    <p class="text-xs text-slate-500">
+                                        {{ 'file.share.meta'|trans({'%date%': share.expiresAt|date('d.m.Y H:i'), '%count%': share.downloads, '%name%': share.createdBy ? share.createdBy.name : '–'}) }}
+                                    </p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <form method="post" action="{{ path('file_share_create', {id: file.id}) }}" class="flex flex-wrap items-end gap-2">
+                        <input type="hidden" name="_token" value="{{ csrf_token('file-share-' ~ file.id) }}">
+                        <label class="text-sm">{{ 'file.share.valid_for'|trans }}
+                            <select name="days" class="input mt-1 py-1.5">
+                                {% for days in share_days %}
+                                    <option value="{{ days }}" {{ days == 7 ? 'selected' }}>{{ 'file.share.days'|trans({'%count%': days}) }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <button type="submit" class="btn-secondary">{{ ux_icon('lucide:link', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'file.share.create'|trans }}</button>
+                    </form>
+                </section>
+            {% endif %}
         </div>
 
         {{ include('_partials/comments.html.twig', {

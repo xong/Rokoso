@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Comment;
+use App\Entity\FileShare;
+use App\Entity\FileVersion;
 use App\Entity\Folder;
 use App\Entity\Organization;
 use App\Entity\Project;
@@ -24,6 +26,7 @@ use App\Service\FileStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -44,12 +47,15 @@ final class FileController extends AbstractController
     /** Images that may be shown inline (no SVG: could contain scripts) */
     private const array INLINE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf'];
 
+    private const int TEXT_PREVIEW_BYTES = 20000;
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly FolderRepository $folders,
         private readonly StoredFileRepository $files,
         private readonly ProjectRepository $projects,
         private readonly FileStorage $storage,
+        private readonly FormFactoryInterface $formFactory,
     ) {
     }
 
@@ -144,7 +150,7 @@ final class FileController extends AbstractController
         $parent = $folder->getParent();
         // Files of the whole subtree leave the storage; rows go via ON DELETE CASCADE
         foreach ($this->files->inFolders(FolderRepository::subtree($folder)) as $file) {
-            $this->storage->remove($file->getStoragePath());
+            $this->removeContent($file);
         }
         $this->em->remove($folder);
         $this->em->flush();
@@ -167,19 +173,22 @@ final class FileController extends AbstractController
 
         /** @var list<UploadedFile> $uploads */
         $uploads = $form->get('files')->getData();
+        $versions = 0;
         foreach ($uploads as $upload) {
-            $file = new StoredFile(
-                $folder,
-                $upload->getClientOriginalName(),
-                $upload->getMimeType() ?? 'application/octet-stream',
-                (int) $upload->getSize(),
-                $this->storage->storeUpload($upload),
-                $user,
-            );
-            $this->em->persist($file);
+            $name = $upload->getClientOriginalName();
+            $mime = $upload->getMimeType() ?? 'application/octet-stream';
+            $size = (int) $upload->getSize();
+            // same name in the same folder: new version of the existing file
+            $existing = $this->files->findInFolder($folder, $name);
+            if (null !== $existing) {
+                $existing->replaceWith($name, $mime, $size, $this->storage->storeUpload($upload), $user);
+                ++$versions;
+                continue;
+            }
+            $this->em->persist(new StoredFile($folder, $name, $mime, $size, $this->storage->storeUpload($upload), $user));
         }
         $this->em->flush();
-        $this->addFlash('success', 'file.uploaded');
+        $this->addFlash('success', $versions > 0 ? 'file.uploaded_versions' : 'file.uploaded');
 
         return $this->redirectToRoute('folder_show', ['id' => $folder->getId()]);
     }
@@ -188,14 +197,7 @@ final class FileController extends AbstractController
     #[IsGranted(FolderVoter::VIEW, 'file')]
     public function show(Request $request, StoredFile $file, #[CurrentUser] User $user, CommentRepository $comments): Response
     {
-        $form = $this->createForm(FileFormType::class, $file, [
-            'projects' => $this->projectChoices($user, $file->getOrganization(), $file->getProject()),
-            'folders' => array_values(array_filter(
-                $this->folders->findVisibleFor($user),
-                static fn (Folder $f): bool => $f->getOrganization() === $file->getOrganization(),
-            )),
-            'action' => $this->generateUrl('file_show', ['id' => $file->getId()]),
-        ]);
+        $form = $this->createEditForm($file, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted()) {
             $this->denyAccessUnlessGranted(FolderVoter::EDIT, $file);
@@ -208,24 +210,103 @@ final class FileController extends AbstractController
             $this->em->refresh($file);
         }
 
-        return $this->render('file/show.html.twig', $this->treeContext($user, $file->getFolder()) + [
-            'file' => $file,
-            'form' => $form,
-            'comments' => $comments->forTarget($file),
-        ]);
+        return $this->renderShow($file, $user, $form, $this->createVersionForm($file), $comments);
     }
 
     #[Route('/{id<\d+>}/download', name: 'file_download')]
     #[IsGranted(FolderVoter::VIEW, 'file')]
     public function download(Request $request, StoredFile $file): BinaryFileResponse
     {
-        $inline = $request->query->getBoolean('inline') && \in_array($file->getMimeType(), self::INLINE_TYPES, true);
-        $response = new BinaryFileResponse($this->storage->absolutePath($file->getStoragePath()));
-        $response->headers->set('Content-Type', $inline ? $file->getMimeType() : 'application/octet-stream');
+        return self::fileResponse($this->storage->absolutePath($file->getStoragePath()), $file->getFilename(), $file->getMimeType(), $request->query->getBoolean('inline'));
+    }
+
+    #[Route('/{id<\d+>}/version', name: 'file_version_upload', methods: ['POST'])]
+    #[IsGranted(FolderVoter::EDIT, 'file')]
+    public function uploadVersion(Request $request, StoredFile $file, #[CurrentUser] User $user, CommentRepository $comments): Response
+    {
+        $form = $this->createVersionForm($file);
+        $form->handleRequest($request);
+        $upload = $form->get('files')->getData();
+        if (!$form->isSubmitted() || !$form->isValid() || !$upload instanceof UploadedFile) {
+            return $this->renderShow($file, $user, $this->createEditForm($file, $user), $form, $comments)->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        $file->replaceWith($upload->getClientOriginalName(), $upload->getMimeType() ?? 'application/octet-stream', (int) $upload->getSize(), $this->storage->storeUpload($upload), $user);
+        $this->em->flush();
+        $this->addFlash('success', 'file.version.uploaded');
+
+        return $this->redirectToRoute('file_show', ['id' => $file->getId()]);
+    }
+
+    #[Route('/{id<\d+>}/version/{version<\d+>}/download', name: 'file_version_download')]
+    #[IsGranted(FolderVoter::VIEW, 'file')]
+    public function downloadVersion(StoredFile $file, FileVersion $version): BinaryFileResponse
+    {
+        if ($version->getFile() !== $file) {
+            throw $this->createNotFoundException();
+        }
+
+        return self::fileResponse($this->storage->absolutePath($version->getStoragePath()), $version->getFilename(), $version->getMimeType(), false);
+    }
+
+    #[Route('/{id<\d+>}/version/{version<\d+>}/restore', name: 'file_version_restore', methods: ['POST'])]
+    #[IsGranted(FolderVoter::EDIT, 'file')]
+    #[IsCsrfTokenValid(new Expression('"file-version-" ~ args["file"].getId()'))]
+    public function restoreVersion(StoredFile $file, FileVersion $version, #[CurrentUser] User $user): Response
+    {
+        if ($version->getFile() !== $file) {
+            throw $this->createNotFoundException();
+        }
+        // the restored content becomes the newest version; nothing is lost
+        $file->replaceWith($version->getFilename(), $version->getMimeType(), $version->getSize(), $this->storage->copy($version->getStoragePath()), $user);
+        $this->em->flush();
+        $this->addFlash('success', 'file.version.restored');
+
+        return $this->redirectToRoute('file_show', ['id' => $file->getId()]);
+    }
+
+    #[Route('/{id<\d+>}/share', name: 'file_share_create', methods: ['POST'])]
+    #[IsGranted(FolderVoter::EDIT, 'file')]
+    #[IsCsrfTokenValid(new Expression('"file-share-" ~ args["file"].getId()'))]
+    public function createShare(Request $request, StoredFile $file, #[CurrentUser] User $user): Response
+    {
+        $days = $request->getPayload()->getInt('days');
+        if (!\in_array($days, FileShare::DAY_CHOICES, true)) {
+            $days = 7;
+        }
+        $this->em->persist(new FileShare($file, $user, $days));
+        $this->em->flush();
+        $this->addFlash('success', 'file.share.created');
+
+        return $this->redirect($this->generateUrl('file_show', ['id' => $file->getId()]).'#shares');
+    }
+
+    #[Route('/{id<\d+>}/share/{share<\d+>}/revoke', name: 'file_share_revoke', methods: ['POST'])]
+    #[IsGranted(FolderVoter::EDIT, 'file')]
+    #[IsCsrfTokenValid(new Expression('"file-share-" ~ args["file"].getId()'))]
+    public function revokeShare(StoredFile $file, FileShare $share): Response
+    {
+        if ($share->getFile() !== $file) {
+            throw $this->createNotFoundException();
+        }
+        $this->em->remove($share);
+        $this->em->flush();
+        $this->addFlash('success', 'file.share.revoked');
+
+        return $this->redirect($this->generateUrl('file_show', ['id' => $file->getId()]).'#shares');
+    }
+
+    /**
+     * Download response; inline only for safe types (images without SVG, PDF).
+     */
+    public static function fileResponse(string $path, string $filename, string $mimeType, bool $inline): BinaryFileResponse
+    {
+        $inline = $inline && \in_array($mimeType, self::INLINE_TYPES, true);
+        $response = new BinaryFileResponse($path);
+        $response->headers->set('Content-Type', $inline ? $mimeType : 'application/octet-stream');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->setContentDisposition(
             $inline ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            $file->getFilename(),
+            $filename,
             'datei',
         );
 
@@ -238,7 +319,7 @@ final class FileController extends AbstractController
     public function delete(StoredFile $file): Response
     {
         $folder = $file->getFolder();
-        $this->storage->remove($file->getStoragePath());
+        $this->removeContent($file);
         $this->em->remove($file);
         $this->em->flush();
         $this->addFlash('success', 'flash.deleted');
@@ -284,6 +365,71 @@ final class FileController extends AbstractController
         return $this->render('file/folder.html.twig', $this->treeContext($user, $folder) + [
             'folder' => $folder,
             'upload_form' => $uploadForm,
+        ]);
+    }
+
+    /**
+     * @param FormInterface<mixed> $form
+     * @param FormInterface<mixed> $versionForm
+     */
+    private function renderShow(StoredFile $file, User $user, FormInterface $form, FormInterface $versionForm, CommentRepository $comments): Response
+    {
+        return $this->render('file/show.html.twig', $this->treeContext($user, $file->getFolder()) + [
+            'file' => $file,
+            'form' => $form,
+            'version_form' => $versionForm,
+            'text_preview' => $file->isText() ? $this->textPreview($file) : null,
+            'share_days' => FileShare::DAY_CHOICES,
+            'comments' => $comments->forTarget($file),
+        ]);
+    }
+
+    /**
+     * Beginning of a text file for the preview, as valid UTF-8.
+     */
+    private function textPreview(StoredFile $file): string
+    {
+        $content = (string) @file_get_contents($this->storage->absolutePath($file->getStoragePath()), false, null, 0, self::TEXT_PREVIEW_BYTES);
+        if (!mb_check_encoding($content, 'UTF-8')) {
+            $content = mb_convert_encoding($content, 'UTF-8', 'Windows-1252');
+        }
+
+        return mb_scrub($content, 'UTF-8');
+    }
+
+    /**
+     * Removes the content of the file and of all its versions from the storage.
+     */
+    private function removeContent(StoredFile $file): void
+    {
+        foreach ($file->getAllStoragePaths() as $path) {
+            $this->storage->remove($path);
+        }
+    }
+
+    /**
+     * @return FormInterface<mixed>
+     */
+    private function createEditForm(StoredFile $file, User $user): FormInterface
+    {
+        return $this->createForm(FileFormType::class, $file, [
+            'projects' => $this->projectChoices($user, $file->getOrganization(), $file->getProject()),
+            'folders' => array_values(array_filter(
+                $this->folders->findVisibleFor($user),
+                static fn (Folder $f): bool => $f->getOrganization() === $file->getOrganization(),
+            )),
+            'action' => $this->generateUrl('file_show', ['id' => $file->getId()]),
+        ]);
+    }
+
+    /**
+     * @return FormInterface<mixed>
+     */
+    private function createVersionForm(StoredFile $file): FormInterface
+    {
+        return $this->formFactory->createNamed('file_version', UploadFormType::class, null, [
+            'version' => true,
+            'action' => $this->generateUrl('file_version_upload', ['id' => $file->getId()]),
         ]);
     }
 

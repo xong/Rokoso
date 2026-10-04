@@ -27,6 +27,7 @@
 - Zugriff: `Organization::getMembership()` liefert nur Vollmitglieder (kein Gast, Amtszeit läuft), `findMembership()` jede. In Queries `Membership::fullDql()` bzw. `guestDql()` für Gäste mit freigegebenen Projekten; Voter nutzen `canSeeProject()`/`isVisibleTo()`.
 - Öffentliche Seiten: `PublicController` unter `/p/{slug}` (Layout `templates/public/_layout.html.twig`, eigene Formulare in `src/Form/PublicForm`). Spamschutz `PublicGuard::addFields()`/`check()`, Verarbeitung und Bestätigungen `PublicSubmissionHandler`; in Tests Feld `started` per `PublicGuard::stamp(time() - 30)` setzen.
 - Twig-Makros für Buttons/Listen: `templates/_partials/ui.html.twig` (in jedem Kind-Template importieren).
+- Dateien: `StoredFile::replaceWith()` legt eine `FileVersion` an (Löschen über `getAllStoragePaths()`); Freigabelinks `FileShare` unter `/s/{token}` (öffentlich); „Merken“ = `ShelfItem::for()` (Datei, Anhang, Nachricht, Forenthema), Zugriff in `Shelf::isAccessible()`; PWA-Teilen-Ziel `ShareTargetController` mit Zwischenablage `FileStorage::storeIncoming()`.
 - Keine `sed`/`php -r`-Ersetzungen in PHP-Dateien – Edit-Werkzeug nutzen (Escaping-Fallen).
 
 ## Konventionen

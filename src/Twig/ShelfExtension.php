@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Twig;
 
 use App\Entity\Attachment;
+use App\Entity\ForumTopic;
+use App\Entity\Message;
 use App\Entity\StoredFile;
 use App\Entity\User;
 use App\Service\Shelf;
@@ -18,7 +20,7 @@ final readonly class ShelfExtension
     }
 
     #[AsTwigFunction('in_shelf')]
-    public function inShelf(StoredFile|Attachment $target): bool
+    public function inShelf(StoredFile|Attachment|Message|ForumTopic $target): bool
     {
         $user = $this->security->getUser();
 

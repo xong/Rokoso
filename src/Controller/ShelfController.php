@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Attachment;
+use App\Entity\ForumTopic;
 use App\Entity\Message;
 use App\Entity\ShelfItem;
 use App\Entity\StoredFile;
 use App\Entity\User;
 use App\Security\Voter\FolderVoter;
+use App\Security\Voter\ForumVoter;
 use App\Security\Voter\MessageVoter;
 use App\Service\Shelf;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,7 +25,7 @@ use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
- * Personal shelf: references to shared files and email attachments.
+ * Personal shelf ("Merken"): files, email attachments, messages and forum topics.
  */
 #[Route('/shelf')]
 final class ShelfController extends AbstractController
@@ -45,7 +47,7 @@ final class ShelfController extends AbstractController
     #[IsCsrfTokenValid('shelf')]
     public function toggleFile(Request $request, StoredFile $file, #[CurrentUser] User $user): Response
     {
-        $this->toggle($user, $file, static fn (): ShelfItem => ShelfItem::forFile($user, $file));
+        $this->toggle($user, $file);
 
         return $this->back($request, $this->generateUrl('file_show', ['id' => $file->getId()]));
     }
@@ -58,9 +60,29 @@ final class ShelfController extends AbstractController
         if ($attachment->getMessage() !== $message) {
             throw $this->createNotFoundException();
         }
-        $this->toggle($user, $attachment, static fn (): ShelfItem => ShelfItem::forAttachment($user, $attachment));
+        $this->toggle($user, $attachment);
 
         return $this->back($request, $this->generateUrl('shelf_index'));
+    }
+
+    #[Route('/message/{id<\d+>}', name: 'shelf_toggle_message', methods: ['POST'])]
+    #[IsGranted(MessageVoter::VIEW, 'message')]
+    #[IsCsrfTokenValid('shelf')]
+    public function toggleMessage(Request $request, Message $message, #[CurrentUser] User $user): Response
+    {
+        $this->toggle($user, $message);
+
+        return $this->back($request, $this->generateUrl('shelf_index'));
+    }
+
+    #[Route('/topic/{id<\d+>}', name: 'shelf_toggle_topic', methods: ['POST'])]
+    #[IsGranted(ForumVoter::VIEW, 'topic')]
+    #[IsCsrfTokenValid('shelf')]
+    public function toggleTopic(Request $request, ForumTopic $topic, #[CurrentUser] User $user): Response
+    {
+        $this->toggle($user, $topic);
+
+        return $this->back($request, $this->generateUrl('forum_topic_show', ['id' => $topic->getId()]));
     }
 
     #[Route('/{id<\d+>}/remove', name: 'shelf_remove', methods: ['POST'])]
@@ -80,8 +102,8 @@ final class ShelfController extends AbstractController
     #[Route('/{id<\d+>}/download', name: 'shelf_download')]
     public function download(ShelfItem $item, #[CurrentUser] User $user): Response
     {
-        $target = $item->getTarget();
-        if ($item->getOwner() !== $user || !$this->shelf->isAccessible($item)) {
+        $target = $item->getFileTarget();
+        if ($item->getOwner() !== $user || null === $target || !$this->shelf->isAccessible($item)) {
             throw $this->createAccessDeniedException();
         }
 
@@ -90,17 +112,14 @@ final class ShelfController extends AbstractController
             : $this->redirectToRoute('mail_attachment', ['id' => $target->getMessage()->getId(), 'attachment' => $target->getId()]);
     }
 
-    /**
-     * @param \Closure(): ShelfItem $create
-     */
-    private function toggle(User $user, StoredFile|Attachment $target, \Closure $create): void
+    private function toggle(User $user, StoredFile|Attachment|Message|ForumTopic $target): void
     {
         $existing = $this->shelf->find($user, $target);
         if (null !== $existing) {
             $this->em->remove($existing);
             $this->addFlash('success', 'shelf.removed');
         } else {
-            $this->em->persist($create());
+            $this->em->persist(ShelfItem::for($user, $target));
             $this->addFlash('success', 'shelf.added');
         }
         $this->em->flush();

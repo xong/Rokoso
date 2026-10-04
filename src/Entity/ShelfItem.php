@@ -8,12 +8,14 @@ use App\Repository\ShelfItemRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Entry in a user's personal shelf ("Persönliche Ablage"): a reference to a shared file
- * or an email attachment, no copy. Disappears together with its target.
+ * Entry in a user's personal shelf ("Merken"): a reference to a shared file, an email
+ * attachment, a message or a forum topic, no copy. Disappears together with its target.
  */
 #[ORM\Entity(repositoryClass: ShelfItemRepository::class)]
 #[ORM\UniqueConstraint(name: 'shelf_owner_file', columns: ['owner_id', 'file_id'])]
 #[ORM\UniqueConstraint(name: 'shelf_owner_attachment', columns: ['owner_id', 'attachment_id'])]
+#[ORM\UniqueConstraint(name: 'shelf_owner_message', columns: ['owner_id', 'message_id'])]
+#[ORM\UniqueConstraint(name: 'shelf_owner_topic', columns: ['owner_id', 'topic_id'])]
 class ShelfItem
 {
     #[ORM\Id]
@@ -29,6 +31,14 @@ class ShelfItem
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?Attachment $attachment = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    private ?Message $message = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    private ?ForumTopic $topic = null;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -40,20 +50,27 @@ class ShelfItem
         $this->createdAt = new \DateTimeImmutable();
     }
 
-    public static function forFile(User $owner, StoredFile $file): self
+    public static function for(User $owner, StoredFile|Attachment|Message|ForumTopic $target): self
     {
         $item = new self($owner);
-        $item->file = $file;
+        match (true) {
+            $target instanceof StoredFile => $item->file = $target,
+            $target instanceof Attachment => $item->attachment = $target,
+            $target instanceof Message => $item->message = $target,
+            $target instanceof ForumTopic => $item->topic = $target,
+        };
 
         return $item;
     }
 
+    public static function forFile(User $owner, StoredFile $file): self
+    {
+        return self::for($owner, $file);
+    }
+
     public static function forAttachment(User $owner, Attachment $attachment): self
     {
-        $item = new self($owner);
-        $item->attachment = $attachment;
-
-        return $item;
+        return self::for($owner, $attachment);
     }
 
     public function getId(): ?int
@@ -76,24 +93,47 @@ class ShelfItem
         return $this->attachment;
     }
 
-    public function getTarget(): StoredFile|Attachment
+    public function getMessage(): ?Message
     {
-        return $this->file ?? $this->attachment ?? throw new \LogicException('Shelf item without target');
+        return $this->message;
+    }
+
+    public function getTopic(): ?ForumTopic
+    {
+        return $this->topic;
+    }
+
+    public function getTarget(): StoredFile|Attachment|Message|ForumTopic
+    {
+        return $this->file ?? $this->attachment ?? $this->message ?? $this->topic ?? throw new \LogicException('Shelf item without target');
+    }
+
+    /**
+     * The file behind the entry, if it is a shared file or an attachment.
+     */
+    public function getFileTarget(): StoredFile|Attachment|null
+    {
+        return $this->file ?? $this->attachment;
+    }
+
+    public function isFile(): bool
+    {
+        return null !== $this->getFileTarget();
     }
 
     public function getFilename(): string
     {
-        return $this->getTarget()->getFilename();
+        return $this->getFileTarget()?->getFilename() ?? '';
     }
 
     public function getMimeType(): string
     {
-        return $this->getTarget()->getMimeType();
+        return $this->getFileTarget()?->getMimeType() ?? '';
     }
 
     public function getSize(): int
     {
-        return $this->getTarget()->getSize();
+        return $this->getFileTarget()?->getSize() ?? 0;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

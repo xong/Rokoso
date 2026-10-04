@@ -1,0 +1,22 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'file.share.public_title'|trans }}{% endblock %}
+
+{% block content %}
+    {% set file = share.file %}
+    <div class="mb-4 flex items-center gap-3">
+        <span class="grid size-12 shrink-0 place-items-center rounded-lg bg-slate-100">
+            {{ include('file/_icon.html.twig', {mime: file.mimeType, class: 'size-6 text-slate-500'}) }}
+        </span>
+        <div class="min-w-0">
+            <p class="font-medium break-all">{{ file.filename }}</p>
+            <p class="text-sm text-slate-600">{{ file.size|filesize }} · {{ file.organization.name }}</p>
+        </div>
+    </div>
+    <a class="btn-primary w-full" href="{{ path('file_share_download', {token: share.token}) }}" data-turbo="false">
+        {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'file.download'|trans }}
+    </a>
+    <p class="mt-4 text-xs text-slate-500">
+        {{ 'file.share.valid_until'|trans({'%date%': share.expiresAt|date('d.m.Y H:i')}) }}
+    </p>
+{% endblock %}

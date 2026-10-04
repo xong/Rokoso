@@ -1,0 +1,5 @@
+{# Merken an/aus; Variablen: target (Datei, Nachricht oder Forenthema), url (Umschalt-Route) #}
+{% import '_partials/ui.html.twig' as ui %}
+{% set shelved = in_shelf(target) %}
+{{ ui.post_button(url, 'shelf', shelved ? 'shelf.remove' : 'shelf.add',
+    {class: 'btn-icon' ~ (shelved ? ' text-indigo-600' : ''), icon: shelved ? 'lucide:bookmark-check' : 'lucide:bookmark-plus', icon_only: true}) }}

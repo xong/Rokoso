@@ -12,6 +12,7 @@ use App\Entity\Contact;
 use App\Entity\ContactGroup;
 use App\Entity\Draft;
 use App\Entity\EventSignup;
+use App\Entity\FileShare;
 use App\Entity\Folder;
 use App\Entity\ForumBoard;
 use App\Entity\ForumPost;
@@ -30,7 +31,9 @@ use App\Entity\Project;
 use App\Entity\PublicSettings;
 use App\Entity\PublicTopic;
 use App\Entity\Resolution;
+use App\Entity\ShelfItem;
 use App\Entity\Signature;
+use App\Entity\StoredFile;
 use App\Entity\Survey;
 use App\Entity\SurveyQuestion;
 use App\Entity\SurveyResponse;
@@ -53,6 +56,7 @@ use App\Mail\ComposeData;
 use App\Mail\MailSynchronizer;
 use App\Meeting\MeetingService;
 use App\Repository\UserRepository;
+use App\Service\FileStorage;
 use App\Service\SecretBox;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -78,6 +82,7 @@ final readonly class DemoCommand
         private MailSynchronizer $synchronizer,
         private UrlGeneratorInterface $urls,
         private MeetingService $meetings,
+        private FileStorage $files,
     ) {
     }
 
@@ -188,6 +193,7 @@ final readonly class DemoCommand
                 ->setOrganization($org)->setProject($projects[1])->setStartsAt($monday->modify('-2 days')->setTime(12, 0))->setStatus(TaskStatus::Done));
             $this->createMeetings($org, $user, $colleague, $guest, $projects);
             $this->createPolls($org, $user, $colleague, $topic, $projects);
+            $this->createFiles($minutes, $user, $colleague, $note, $topic);
             $this->em->persist(new Watch($user, $general));
             $this->em->persist(new Watch($user, $projects[0]));
             $this->em->persist(new Watch($colleague, $topic));
@@ -348,6 +354,22 @@ final readonly class DemoCommand
         $howto = $page('Anleitungen', 'Schritt-für-Schritt-Hilfen für wiederkehrende Aufgaben.', $colleague);
         $page('Protokoll schreiben', "1. Vorlage aus *Dateien → Protokolle* nehmen\n2. Beschlüsse mit Nummer festhalten\n3. Protokoll zur Freigabe in der Sitzung hochladen", $colleague, $howto);
         $page('Übergabe bei Amtswechsel', "Unter *Organisationen → Übergabe* gehen offene Nachrichten, Aufgaben und Projekte an die Nachfolge.\n\nDanach Amtszeit beenden.", $user, $howto);
+    }
+
+    /**
+     * A minutes file with an older version, a share link and remembered entries.
+     */
+    private function createFiles(Folder $folder, User $user, User $colleague, Message $note, ForumTopic $topic): void
+    {
+        $draft = "# Protokoll Elternabend\n\n- Begrüßung\n- Schulwege\n";
+        $final = $draft."- Termine für das neue Schuljahr\n\nProtokoll: Kim\n";
+        $file = new StoredFile($folder, 'Protokoll-Elternabend.md', 'text/markdown', \strlen($draft), $this->files->store($draft), $colleague);
+        $file->replaceWith('Protokoll-Elternabend.md', 'text/markdown', \strlen($final), $this->files->store($final), $user);
+        $this->em->persist($file);
+        $this->em->persist(new FileShare($file, $user, 7));
+        $this->em->persist(ShelfItem::for($user, $file));
+        $this->em->persist(ShelfItem::for($user, $note));
+        $this->em->persist(ShelfItem::for($user, $topic));
     }
 
     /** @param list<Project> $projects */

@@ -8,9 +8,11 @@ use App\Entity\Attachment;
 use App\Entity\Draft;
 use App\Entity\Message;
 use App\Entity\ShelfItem;
+use App\Entity\StoredFile;
 use App\Enum\MessageEventType;
 use App\Enum\MessageFolder;
 use App\Service\AttachmentStorage;
+use App\Service\FileStorage;
 use App\Service\MarkdownRenderer;
 use App\Service\Shelf;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,6 +31,7 @@ final readonly class MailSender
         private SmtpTransportFactory $transports,
         private AttachmentStorage $storage,
         private Shelf $shelf,
+        private FileStorage $files,
         private ReadTracker $readTracker,
         private MarkdownRenderer $markdown,
         private SentFolderWriter $sentFolder,
@@ -42,8 +45,9 @@ final readonly class MailSender
      *
      * @param list<UploadedFile> $files
      * @param list<ShelfItem>    $shelfItems
+     * @param list<StoredFile>   $storedFiles
      */
-    public function attach(Draft $draft, array $files, array $shelfItems): void
+    public function attach(Draft $draft, array $files, array $shelfItems, array $storedFiles = []): void
     {
         foreach ($files as $file) {
             $content = (string) file_get_contents($file->getPathname());
@@ -52,6 +56,10 @@ final readonly class MailSender
         foreach ($shelfItems as $item) {
             $content = $this->shelf->read($item);
             $draft->addFile($item->getFilename(), $item->getMimeType(), \strlen($content), $this->storage->store($content));
+        }
+        foreach ($storedFiles as $file) {
+            $content = (string) file_get_contents($this->files->absolutePath($file->getStoragePath()));
+            $draft->addFile($file->getFilename(), $file->getMimeType(), \strlen($content), $this->storage->store($content));
         }
     }
 

@@ -50,6 +50,11 @@ class StoredFileRepository extends ServiceEntityRepository
             ->getQuery()->getResult();
     }
 
+    public function findInFolder(Folder $folder, string $filename): ?StoredFile
+    {
+        return $this->findOneBy(['folder' => $folder, 'filename' => $filename], ['id' => 'ASC']);
+    }
+
     /**
      * Files in the given folders (e.g. a subtree before deleting it).
      *
@@ -59,10 +64,15 @@ class StoredFileRepository extends ServiceEntityRepository
      */
     public function inFolders(array $folders): array
     {
+        if ([] === $folders) {
+            return [];
+        }
+
         /* @var list<StoredFile> */
         return $this->createQueryBuilder('f')
             ->andWhere('f.folder IN (:folders)')
             ->setParameter('folders', $folders)
+            ->orderBy('f.filename')
             ->getQuery()->getResult();
     }
 }

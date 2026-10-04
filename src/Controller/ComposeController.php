@@ -8,6 +8,7 @@ use App\Entity\Draft;
 use App\Entity\MailAccount;
 use App\Entity\Message;
 use App\Entity\ShelfItem;
+use App\Entity\StoredFile;
 use App\Entity\User;
 use App\Enum\MessageFolder;
 use App\Form\ComposeFormType;
@@ -17,9 +18,11 @@ use App\Mail\MailSender;
 use App\Mail\Outbox;
 use App\Repository\ContactGroupRepository;
 use App\Repository\DraftRepository;
+use App\Repository\FolderRepository;
 use App\Repository\MailAccountRepository;
 use App\Repository\MessageRepository;
 use App\Repository\ProjectRepository;
+use App\Repository\StoredFileRepository;
 use App\Security\Voter\MessageVoter;
 use App\Security\Voter\OrganizationVoter;
 use App\Service\AttachmentStorage;
@@ -56,6 +59,8 @@ final class ComposeController extends AbstractController
         ComposeAssistant $assistant,
         AttachmentStorage $storage,
         Shelf $shelf,
+        FolderRepository $folders,
+        StoredFileRepository $storedFiles,
         EntityManagerInterface $em,
         TranslatorInterface $translator,
         LoggerInterface $logger,
@@ -86,6 +91,9 @@ final class ComposeController extends AbstractController
             $data = new ComposeData();
             $data->account = $available[0];
             $data->to = $request->query->getString('to');
+            // e.g. text shared from another app
+            $data->subject = mb_substr($request->query->getString('subject'), 0, 500);
+            $data->body = mb_substr($request->query->getString('body'), 0, 10000);
             if ($request->query->getInt('group') > 0) {
                 $group = $groups->find($request->query->getInt('group'));
                 if (null === $group) {
@@ -107,14 +115,18 @@ final class ComposeController extends AbstractController
             $data->body = ComposeAssistant::withSignature($data->body, $signatures[$data->account?->getId() ?? 0] ?? '');
         }
 
-        $shelfItems = $shelf->items($user);
+        $shelfItems = $shelf->files($user);
         $preselected = array_map(intval(...), $request->query->all('shelf'));
         $data->shelfItems = array_values(array_filter($shelfItems, static fn (ShelfItem $i): bool => \in_array($i->getId(), $preselected, true)));
+        $visibleFiles = $storedFiles->inFolders($folders->findVisibleFor($user));
+        $preselected = array_map(intval(...), $request->query->all('file'));
+        $data->storedFiles = array_values(array_filter($visibleFiles, static fn (StoredFile $f): bool => \in_array($f->getId(), $preselected, true)));
 
         $form = $this->createForm(ComposeFormType::class, $data, [
             'accounts' => $available,
             'projects' => $projects->findVisibleFor($user),
             'shelf' => $shelfItems,
+            'stored_files' => $visibleFiles,
             'forward_attachments' => $data->forward && null !== $data->original && $data->original->hasAttachments(),
             'draft_id' => $draft?->getId(),
         ]);
@@ -137,7 +149,7 @@ final class ComposeController extends AbstractController
             }
             if ($payload->has('save_draft') && $tokenValid) {
                 $draft = $this->saveDraft($draft, $data, $user, $keep, $available[0], $storage, $em);
-                $sender->attach($draft, $this->uploadedFiles($form->get('files')->getData()), $data->shelfItems);
+                $sender->attach($draft, $this->uploadedFiles($form->get('files')->getData()), $data->shelfItems, $data->storedFiles);
                 $em->flush();
                 $this->addFlash('success', 'compose.draft_saved');
 
@@ -146,7 +158,7 @@ final class ComposeController extends AbstractController
             if (!$payload->has('save_draft') && $form->isValid()) {
                 $draft = $this->saveDraft($draft, $data, $user, $keep, $available[0], $storage, $em);
                 try {
-                    $sender->attach($draft, $this->uploadedFiles($form->get('files')->getData()), $data->shelfItems);
+                    $sender->attach($draft, $this->uploadedFiles($form->get('files')->getData()), $data->shelfItems, $data->storedFiles);
                     $message = $outbox->queue($draft);
                     if (null !== $message) {
                         $this->addFlash('success', 'compose.sent');

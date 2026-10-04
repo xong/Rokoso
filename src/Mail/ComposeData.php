@@ -8,6 +8,7 @@ use App\Entity\MailAccount;
 use App\Entity\Message;
 use App\Entity\Project;
 use App\Entity\ShelfItem;
+use App\Entity\StoredFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -36,6 +37,9 @@ final class ComposeData
 
     /** @var list<ShelfItem> files from the personal shelf to attach */
     public array $shelfItems = [];
+
+    /** @var list<StoredFile> files from the shared file area to attach */
+    public array $storedFiles = [];
 
     /** Keep the attachments of the forwarded message. */
     public bool $keepAttachments = true;

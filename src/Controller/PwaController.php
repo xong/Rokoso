@@ -38,6 +38,18 @@ final class PwaController extends AbstractController
                 ['name' => $translator->trans('nav.calendar'), 'url' => $this->generateUrl('calendar_month')],
                 ['name' => $translator->trans('nav.mail_compose'), 'url' => $this->generateUrl('mail_compose')],
             ],
+            // "Share" from other apps (see ShareTargetController)
+            'share_target' => [
+                'action' => $this->generateUrl('share_target_receive'),
+                'method' => 'POST',
+                'enctype' => 'multipart/form-data',
+                'params' => [
+                    'title' => 'title',
+                    'text' => 'text',
+                    'url' => 'url',
+                    'files' => [['name' => 'files', 'accept' => ['*/*']]],
+                ],
+            ],
         ]);
         $response->headers->set('Content-Type', 'application/manifest+json');
 

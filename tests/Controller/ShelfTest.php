@@ -6,6 +6,9 @@ namespace App\Tests\Controller;
 
 use App\Entity\Attachment;
 use App\Entity\Folder;
+use App\Entity\ForumBoard;
+use App\Entity\ForumPost;
+use App\Entity\ForumTopic;
 use App\Entity\Message;
 use App\Entity\Organization;
 use App\Entity\ShelfItem;
@@ -68,10 +71,50 @@ final class ShelfTest extends AppTestCase
         $this->em()->flush();
 
         $crawler = $this->client->request('GET', '/mail/inbox/'.$message->getId());
-        $this->client->submit($crawler->filter('form[action*="/shelf/message/"]')->form());
+        $this->client->submit($crawler->filter('form[action*="/attachment/"]')->form());
         $this->client->request('GET', '/shelf');
         self::assertSelectorTextContains('main', 'einladung.pdf');
         self::assertSelectorTextContains('main', 'Einladung');
+    }
+
+    public function testMessageAndTopicCanBeRemembered(): void
+    {
+        $user = $this->login();
+        $org = $this->createOrganization($user);
+        $message = (new Message())->setMailAccount($this->createMailAccount($org))->setFolder(MessageFolder::Inbox)
+            ->setFrom('eva@example.org', 'Eva')->setSubject('Haushaltsplan')->setBody('Bitte lesen');
+        $board = (new ForumBoard($org, $user))->setName('Allgemeines');
+        $topic = (new ForumTopic($board, $user))->setTitle('Schulwegsicherheit');
+        $topic->addPost((new ForumPost($topic, $user))->setBody('Start'));
+        $this->em()->persist($message);
+        $this->em()->persist($board);
+        $this->em()->persist($topic);
+        $this->em()->flush();
+
+        $crawler = $this->client->request('GET', '/mail/inbox/'.$message->getId());
+        $this->client->submit($crawler->filter('form[action$="/shelf/message/'.$message->getId().'"]')->form());
+        self::assertResponseRedirects();
+        $crawler = $this->client->request('GET', '/forum/topic/'.$topic->getId());
+        $this->client->submit($crawler->filter('form[action$="/shelf/topic/'.$topic->getId().'"]')->form());
+        self::assertResponseRedirects();
+
+        $this->client->request('GET', '/shelf');
+        self::assertSelectorTextContains('main', 'Nachrichten und Themen');
+        self::assertSelectorTextContains('main', 'Haushaltsplan');
+        self::assertSelectorTextContains('main', 'Schulwegsicherheit');
+        self::assertSelectorNotExists('#shelf-files-heading');
+
+        // Toggling again forgets the entry
+        $crawler = $this->client->request('GET', '/forum/topic/'.$topic->getId());
+        self::assertSelectorExists('form[action$="/shelf/topic/'.$topic->getId().'"] button[aria-label="Nicht mehr merken"]');
+        $this->client->submit($crawler->filter('form[action$="/shelf/topic/'.$topic->getId().'"]')->form());
+        $this->client->request('GET', '/shelf');
+        self::assertSelectorTextNotContains('main', 'Schulwegsicherheit');
+
+        // Others cannot remember what they cannot see
+        $this->login($this->createUser('eve@example.org', 'Eve'));
+        $this->client->request('POST', '/shelf/message/'.$message->getId());
+        self::assertCount(1, $this->em()->getRepository(ShelfItem::class)->findAll());
     }
 
     public function testShelfIsPersonalAndRespectsAccess(): void
