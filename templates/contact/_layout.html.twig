@@ -39,6 +39,11 @@
                     {% endfor %}
                 </select>
                 <noscript><button type="submit" class="btn-secondary py-1">{{ 'action.show'|trans }}</button></noscript>
+                {% if group %}
+                    <a href="{{ path('contact_group_show', {id: group.id}) }}" class="btn-icon shrink-0" aria-label="{{ 'contact_group.open'|trans({'%name%': group.name}) }}" title="{{ 'contact_group.open'|trans({'%name%': group.name}) }}">
+                        {{ ux_icon('lucide:settings', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    </a>
+                {% endif %}
             </div>
         {% endif %}
     </form>

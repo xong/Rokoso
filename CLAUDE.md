@@ -17,7 +17,7 @@
 ## Layout
 - Seiten mit 3-Spalten-Ansicht erweitern `templates/layout/app.html.twig` (Blöcke `list_title`, `list`, `detail_title`, `detail`; `has_detail` + `back_url` für Mobil).
 - Dunkelmodus über umgedrehte Farbvariablen (`assets/styles/app.css`): Flächen mit `bg-surface` statt `bg-white`; `bg-white` nur, wo es immer weiß bleiben soll.
-- Menüpunkte in `src/Twig/Components/Sidebar.php` (`GROUPS`, aktiv = längstes `match`-Präfix; Neues anlegen über `COMPOSE` = Menü „Verfassen“). Tailwind-Varianten `collapsed:` und `nav-open:` hängen am `shell`-Stimulus-Controller. Flyouts der eingeklappten Navigation sind `fixed` (Liste bleibt scrollbar) und werden von `nav_flyout_controller.js` positioniert.
+- Menüpunkte in `src/Twig/Components/Sidebar.php` (`GROUPS`, aktiv = längstes `match`-Präfix, auch bei Unterpunkten; Neues anlegen über `COMPOSE` = Menü „Verfassen“). Tailwind-Varianten `collapsed:` und `nav-open:` hängen am `shell`-Stimulus-Controller. Flyouts der eingeklappten Navigation sind `fixed` (Liste bleibt scrollbar) und werden von `nav_flyout_controller.js` positioniert.
 
 ## Architektur-Notizen
 - E-Mails und interne Nachrichten: eine Entity `Message` (Typ email/internal). Sichtbarkeit zentral in `MessageRepository::visibleQuery()`, Voter `MessageVoter` nutzt sie.
@@ -26,7 +26,7 @@
 - Kontakte: Verteiler `ContactGroup` (pro Organisation); Rundschreiben = `ComposeData::$circular` → `MailSender` schickt je „An“-Adresse eine E-Mail; vCard über `Service\VCard` (eigener Code). In Tests zählt `assertEmailCount` auch Konto-Mails (Override-Transport mit Dispatcher).
 - Kalender: `CalendarService` expandiert Wiederholungen (rlanvin/php-rrule) zu `Occurrence`s. Einzeltermine einer Serie: `CalendarException` je ursprünglichem Tag, Links mit `date: o.day` (nicht `o.start`). .ics immer über `App\Calendar\Ics`; Abo-Feed und Gäste-Einladung in `CalendarInvitation`.
 - Zugriff: `Organization::getMembership()` liefert nur Vollmitglieder (kein Gast, Amtszeit läuft), `findMembership()` jede. In Queries `Membership::fullDql()` bzw. `guestDql()` für Gäste mit freigegebenen Projekten; Voter nutzen `canSeeProject()`/`isVisibleTo()`.
-- Öffentliche Seiten: `PublicController` unter `/p/{slug}` (Layout `templates/public/_layout.html.twig`, eigene Formulare in `src/Form/PublicForm`). Spamschutz `PublicGuard::addFields()`/`check()`, Verarbeitung und Bestätigungen `PublicSubmissionHandler`; in Tests Feld `started` per `PublicGuard::stamp(time() - 30)` setzen.
+- Öffentliche Seiten: `PublicController` unter `/p/{slug}` (Layout `templates/public/_layout.html.twig`, eigene Formulare in `src/Form/PublicForm`; Organisationsfarbe über `.org-theme` + `--org-color`, das die `brand-*`-Variablen umfärbt). Spamschutz `PublicGuard::addFields()`/`check()`, Verarbeitung und Bestätigungen `PublicSubmissionHandler`; in Tests Feld `started` per `PublicGuard::stamp(time() - 30)` setzen.
 - Turbo-Morphing global (`base.html.twig`): nach POST einfach auf dieselbe Seite umleiten, keine eigenen Streams nötig. Wischgesten: `swipe`-Controller mit Formular-Targets `left`/`right`.
 - Direktnachrichten nur an Personen; Altbestand an Organisationen per `app:messages:convert-group` → Forum (`GroupMessageConverter`). „Erste Schritte“: `Service\SetupChecklist`.
 - Passwortfelder: Formular-Theme `password_widget` bringt „Passwort anzeigen“ mit (`password-reveal`-Controller); handgeschriebene Felder nutzen `_partials/password_toggle.html.twig`.

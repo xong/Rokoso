@@ -153,6 +153,7 @@ final class PublicTest extends AppTestCase
         $this->client->request('GET', '/p/sev-test');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('header', 'SEV Musterstadt');
+        self::assertSelectorExists(\sprintf('.org-theme[style="--org-color: %s"]', $this->org->getColor()));
     }
 
     public function testSurveyResponseAndCsvExport(): void

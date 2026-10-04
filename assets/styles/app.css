@@ -88,6 +88,35 @@
     }
 }
 
+/*
+ * Öffentliche Seite in der Organisationsfarbe (--org-color am Wrapper): Farbton und – gedeckelt – Sättigung
+ * kommen aus der Farbe, die Helligkeit aus der Markenskala; so bleiben die Kontraste wie bei brand-*.
+ * Browser ohne relative Farbsyntax behalten das Moosgrün.
+ */
+@layer theme {
+    .org-theme {
+        --color-brand-50: oklch(from var(--org-color) 0.975 min(c, 0.02) h);
+        --color-brand-100: oklch(from var(--org-color) 0.945 min(c, 0.04) h);
+        --color-brand-200: oklch(from var(--org-color) 0.9 min(c, 0.065) h);
+        --color-brand-300: oklch(from var(--org-color) 0.82 min(c, 0.09) h);
+        --color-brand-400: oklch(from var(--org-color) 0.7 min(c, 0.11) h);
+        --color-brand-500: oklch(from var(--org-color) 0.6 min(c, 0.12) h);
+        --color-brand-600: oklch(from var(--org-color) 0.5 min(c, 0.11) h);
+        --color-brand-700: oklch(from var(--org-color) 0.44 min(c, 0.095) h);
+        --color-brand-800: oklch(from var(--org-color) 0.38 min(c, 0.08) h);
+        --color-brand-900: oklch(from var(--org-color) 0.32 min(c, 0.065) h);
+        --color-brand-950: oklch(from var(--org-color) 0.25 min(c, 0.05) h);
+        @variant dark {
+            --color-brand-50: oklch(from var(--org-color) 0.27 min(c, 0.03) h);
+            --color-brand-100: oklch(from var(--org-color) 0.32 min(c, 0.045) h);
+            --color-brand-200: oklch(from var(--org-color) 0.4 min(c, 0.06) h);
+            --color-brand-600: oklch(from var(--org-color) 0.55 min(c, 0.11) h);
+            --color-brand-700: oklch(from var(--org-color) 0.82 min(c, 0.09) h);
+            --color-brand-800: oklch(from var(--org-color) 0.9 min(c, 0.06) h);
+        }
+    }
+}
+
 /* Wiederkehrende Bausteine – Formulare, Buttons, Karten */
 @layer components {
     .btn-primary { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 bg-brand-600 text-white hover:bg-brand-700 dark:hover:bg-brand-500; }

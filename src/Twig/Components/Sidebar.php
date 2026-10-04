@@ -27,7 +27,7 @@ final class Sidebar
     /**
      * Groups of menu items; a group with label null has no heading.
      *
-     * @var list<array{label: ?string, items: list<array{label: string, icon: string, route: string, match: list<string>, role?: string, children?: list<array{label: string, icon: string, route: string}>}>}>
+     * @var list<array{label: ?string, items: list<array{label: string, icon: string, route: string, match: list<string>, role?: string, children?: list<array{label: string, icon: string, route: string, match?: list<string>}>}>}>
      */
     private const array GROUPS = [
         ['label' => null, 'items' => [
@@ -63,7 +63,16 @@ final class Sidebar
             ['label' => 'nav.files', 'icon' => 'lucide:folder', 'route' => 'file_index', 'match' => ['file_', 'folder_']],
             ['label' => 'nav.shelf', 'icon' => 'lucide:bookmark', 'route' => 'shelf_index', 'match' => ['shelf_']],
             ['label' => 'nav.knowledge', 'icon' => 'lucide:book-open', 'route' => 'wiki_index', 'match' => ['wiki_']],
-            ['label' => 'nav.contacts', 'icon' => 'lucide:contact', 'route' => 'contact_index', 'match' => ['contact_']],
+            [
+                'label' => 'nav.contacts',
+                'icon' => 'lucide:contact',
+                'route' => 'contact_index',
+                'match' => ['contact_'],
+                'children' => [
+                    ['label' => 'nav.contacts_all', 'icon' => 'lucide:contact', 'route' => 'contact_index', 'match' => ['contact_']],
+                    ['label' => 'nav.contact_groups', 'icon' => 'lucide:users', 'route' => 'contact_group_index', 'match' => ['contact_group_']],
+                ],
+            ],
         ]],
         ['label' => 'nav.group_admin', 'items' => [
             [
@@ -143,6 +152,38 @@ final class Sidebar
     }
 
     /**
+     * Active sub item: its route is the current one (or _nav), otherwise the longest `match` prefix of the route.
+     *
+     * @param list<array{label: string, icon: string, route: string, match?: list<string>}> $children
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function markActiveChild(array $children, string $route, string $nav): array
+    {
+        $best = null;
+        $bestLength = 0;
+        foreach ($children as $i => $child) {
+            if ($child['route'] === $nav) {
+                $best = $i;
+                break;
+            }
+            foreach ($child['match'] ?? [] as $prefix) {
+                if (str_starts_with($route, $prefix) && \strlen($prefix) > $bestLength) {
+                    $best = $i;
+                    $bestLength = \strlen($prefix);
+                }
+            }
+        }
+
+        $marked = [];
+        foreach ($children as $i => $child) {
+            $marked[] = $child + ['active' => $i === $best];
+        }
+
+        return $marked;
+    }
+
+    /**
      * @return list<array{label: ?string, items: list<array<string, mixed>>}>
      */
     public function getGroups(): array
@@ -174,11 +215,7 @@ final class Sidebar
                     continue;
                 }
                 $item['active'] = $item['route'] === $best;
-                $children = [];
-                foreach ($item['children'] ?? [] as $child) {
-                    $children[] = $child + ['active' => $child['route'] === $nav];
-                }
-                $item['children'] = $children;
+                $item['children'] = $this->markActiveChild($item['children'] ?? [], $route, $nav);
                 $item['badge'] = match ($item['route']) {
                     'forum_index' => $this->getUnreadTopicCount(),
                     'notification_index' => $this->getUnreadNotificationCount(),

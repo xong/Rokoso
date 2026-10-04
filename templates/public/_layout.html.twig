@@ -7,36 +7,39 @@
 {% block title %}{{ org ? org.name : '' }}{% endblock %}
 
 {% block body %}
-    {% if not embed and org %}
-        <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">{{ 'nav.skip_to_content'|trans }}</a>
-        <header class="border-b border-slate-200 bg-surface">
-            <div class="mx-auto flex max-w-3xl flex-wrap items-center gap-3 px-4 py-3">
-                <a href="{{ path('public_home', {slug: settings.slug}) }}" class="flex items-center gap-2 font-semibold">
-                    {% if org.logo %}<img src="{{ asset(org.logo) }}" alt="" class="size-8 rounded-lg object-cover">{% endif %}
-                    {{ org.name }}
-                </a>
-                <nav aria-label="{{ 'public.nav'|trans }}" class="ml-auto">
-                    <ul role="list" class="flex flex-wrap gap-1 text-sm">
-                        {% set route = app.request.attributes.get('_route') %}
-                        {% for item in [
-                            {route: 'public_home', label: 'public.home.title', show: true},
-                            {route: 'public_contact', label: 'public.contact.title', show: settings.offers('contact') and settings.contactAccount},
-                            {route: 'public_subscribe', label: 'public.subscribe.title', show: settings.offers('subscribe')},
-                        ]|filter(i => i.show) %}
-                            <li><a href="{{ path(item.route, {slug: settings.slug}) }}" {% if route == item.route %}aria-current="page"{% endif %}
-                                   class="rounded-md px-3 py-1.5 {{ route == item.route ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">{{ item.label|trans }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </nav>
-            </div>
-        </header>
-    {% endif %}
-    <main id="main" tabindex="-1" class="mx-auto max-w-3xl px-4 {{ embed ? 'py-4' : 'py-8' }}">
-        {% block content %}{% endblock %}
-    </main>
-    {% if not embed and org %}
-        <footer class="mx-auto max-w-3xl border-t border-slate-200 px-4 py-6 text-xs text-slate-500">
-            <a href="{{ path('public_privacy', {slug: settings.slug}) }}" class="link">{{ 'public.privacy.title'|trans }}</a>
-        </footer>
-    {% endif %}
+    {# Organisationsfarbe färbt die Markentöne (Buttons, Links, Markierungen), siehe .org-theme in app.css #}
+    <div class="{{ org ? 'org-theme' : '' }} min-h-full" {% if org %}style="--org-color: {{ org.color }}"{% endif %}>
+        {% if not embed and org %}
+            <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">{{ 'nav.skip_to_content'|trans }}</a>
+            <header class="border-t-4 border-b border-t-brand-600 border-b-slate-200 bg-surface">
+                <div class="mx-auto flex max-w-3xl flex-wrap items-center gap-3 px-4 py-3">
+                    <a href="{{ path('public_home', {slug: settings.slug}) }}" class="flex items-center gap-2 font-semibold">
+                        {% if org.logo %}<img src="{{ asset(org.logo) }}" alt="" class="size-8 rounded-lg object-cover">{% endif %}
+                        {{ org.name }}
+                    </a>
+                    <nav aria-label="{{ 'public.nav'|trans }}" class="ml-auto">
+                        <ul role="list" class="flex flex-wrap gap-1 text-sm">
+                            {% set route = app.request.attributes.get('_route') %}
+                            {% for item in [
+                                {route: 'public_home', label: 'public.home.title', show: true},
+                                {route: 'public_contact', label: 'public.contact.title', show: settings.offers('contact') and settings.contactAccount},
+                                {route: 'public_subscribe', label: 'public.subscribe.title', show: settings.offers('subscribe')},
+                            ]|filter(i => i.show) %}
+                                <li><a href="{{ path(item.route, {slug: settings.slug}) }}" {% if route == item.route %}aria-current="page"{% endif %}
+                                       class="rounded-md px-3 py-1.5 {{ route == item.route ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">{{ item.label|trans }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </nav>
+                </div>
+            </header>
+        {% endif %}
+        <main id="main" tabindex="-1" class="mx-auto max-w-3xl px-4 {{ embed ? 'py-4' : 'py-8' }}">
+            {% block content %}{% endblock %}
+        </main>
+        {% if not embed and org %}
+            <footer class="mx-auto max-w-3xl border-t border-slate-200 px-4 py-6 text-xs text-slate-500">
+                <a href="{{ path('public_privacy', {slug: settings.slug}) }}" class="link">{{ 'public.privacy.title'|trans }}</a>
+            </footer>
+        {% endif %}
+    </div>
 {% endblock %}

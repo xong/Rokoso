@@ -80,6 +80,9 @@ final class ContactTest extends AppTestCase
         $this->client->request('GET', '/contacts?group='.$group->getId());
         self::assertSelectorTextContains('main', 'Eva Lang');
         self::assertSelectorTextNotContains('main', 'Außenstehend');
+        // Verteiler im Menü unter Kontakte und direkt aus dem Filter erreichbar
+        self::assertSelectorExists('#main-nav a[href="/contacts/groups"]');
+        self::assertSelectorExists('a[href="/contacts/groups/'.$group->getId().'"][aria-label*="Schulleitungen"]');
 
         // Verteiler als Vorschlag im Empfängerfeld
         $crawler = $this->client->request('GET', '/mail/new');

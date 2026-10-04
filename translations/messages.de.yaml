@@ -34,6 +34,8 @@ nav:
     knowledge: Wissen
     calendar: Kalender
     contacts: Kontakte
+    contacts_all: Alle Kontakte
+    contact_groups: Verteiler
     projects: Projekte
     organizations: Organisationen
     admin: Verwaltung
@@ -836,6 +838,7 @@ contact_group:
     new: Verteiler anlegen
     edit: Verteiler bearbeiten
     edit_members: Mitglieder bearbeiten
+    open: 'Verteiler %name% bearbeiten'
     created: Verteiler angelegt.
     delete: Verteiler löschen
     delete_confirm: Verteiler wirklich löschen? Die Kontakte bleiben erhalten.
