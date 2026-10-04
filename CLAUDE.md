@@ -16,7 +16,7 @@
 ## Layout
 - Seiten mit 3-Spalten-Ansicht erweitern `templates/layout/app.html.twig` (Blöcke `list_title`, `list`, `detail_title`, `detail`; `has_detail` + `back_url` für Mobil).
 - Dunkelmodus über umgedrehte Farbvariablen (`assets/styles/app.css`): Flächen mit `bg-surface` statt `bg-white`; `bg-white` nur, wo es immer weiß bleiben soll.
-- Menüpunkte in `src/Twig/Components/Sidebar.php` (`GROUPS`, aktiv = längstes `match`-Präfix; Neues anlegen über `COMPOSE` = Menü „Verfassen“). Tailwind-Varianten `collapsed:` und `nav-open:` hängen am `shell`-Stimulus-Controller.
+- Menüpunkte in `src/Twig/Components/Sidebar.php` (`GROUPS`, aktiv = längstes `match`-Präfix; Neues anlegen über `COMPOSE` = Menü „Verfassen“). Tailwind-Varianten `collapsed:` und `nav-open:` hängen am `shell`-Stimulus-Controller. Flyouts der eingeklappten Navigation sind `fixed` (Liste bleibt scrollbar) und werden von `nav_flyout_controller.js` positioniert.
 
 ## Architektur-Notizen
 - E-Mails und interne Nachrichten: eine Entity `Message` (Typ email/internal). Sichtbarkeit zentral in `MessageRepository::visibleQuery()`, Voter `MessageVoter` nutzt sie.
@@ -28,6 +28,7 @@
 - Öffentliche Seiten: `PublicController` unter `/p/{slug}` (Layout `templates/public/_layout.html.twig`, eigene Formulare in `src/Form/PublicForm`). Spamschutz `PublicGuard::addFields()`/`check()`, Verarbeitung und Bestätigungen `PublicSubmissionHandler`; in Tests Feld `started` per `PublicGuard::stamp(time() - 30)` setzen.
 - Turbo-Morphing global (`base.html.twig`): nach POST einfach auf dieselbe Seite umleiten, keine eigenen Streams nötig. Wischgesten: `swipe`-Controller mit Formular-Targets `left`/`right`.
 - Direktnachrichten nur an Personen; Altbestand an Organisationen per `app:messages:convert-group` → Forum (`GroupMessageConverter`). „Erste Schritte“: `Service\SetupChecklist`.
+- Passwortfelder: Formular-Theme `password_widget` bringt „Passwort anzeigen“ mit (`password-reveal`-Controller); handgeschriebene Felder nutzen `_partials/password_toggle.html.twig`.
 - Twig-Makros für Buttons/Listen (`ui.empty(text, icon, cta_url, cta_label)` für Leer-Zustände mit Knopf): `templates/_partials/ui.html.twig` (in jedem Kind-Template importieren).
 - Dateien: `StoredFile::replaceWith()` legt eine `FileVersion` an (Löschen über `getAllStoragePaths()`); Freigabelinks `FileShare` unter `/s/{token}` (öffentlich); „Merken“ = `ShelfItem::for()` (Datei, Anhang, Nachricht, Forenthema), Zugriff in `Shelf::isAccessible()`; PWA-Teilen-Ziel `ShareTargetController` mit Zwischenablage `FileStorage::storeIncoming()`.
 - Startseite „Heute“: `HomeController`; globale Suche: `App\Search\GlobalSearch` (nutzt die Repository-Sichtbarkeit – neue Bereiche dort ergänzen); Befehlspalette/Kürzel: `templates/_partials/palette.html.twig` + `palette_controller.js`; Live-Badges: `[data-live-count]` + `CountsController` + `live_counts_controller.js`.

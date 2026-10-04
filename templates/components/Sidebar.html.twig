@@ -37,14 +37,15 @@
     </details>
 
     {% set unread = this.unreadCount %}
-    <div class="flex-1 space-y-3 overflow-y-auto p-2 lg:collapsed:overflow-visible">
+    <div class="flex-1 space-y-3 overflow-y-auto overscroll-contain p-2 [scrollbar-width:thin] lg:collapsed:overflow-x-hidden lg:collapsed:[scrollbar-width:none]"
+         data-controller="nav-flyout" data-action="mouseover->nav-flyout#place focusin->nav-flyout#place">
         {% for group in this.groups %}
             {% if group.label %}
                 <h2 id="nav-{{ group.label|replace({'.': '-'}) }}" class="px-3 pt-1 text-xs font-semibold tracking-wide text-slate-500 uppercase lg:collapsed:sr-only">{{ group.label|trans }}</h2>
             {% endif %}
             <ul role="list" class="space-y-0.5" {% if group.label %}aria-labelledby="nav-{{ group.label|replace({'.': '-'}) }}"{% endif %}>
                 {% for item in group.items %}
-                    <li class="group/item relative">
+                    <li class="group/item relative" data-flyout-item>
                         <a href="{{ path(item.route) }}" {% if item.active %}aria-current="{{ item.children is empty ? 'page' : 'true' }}"{% endif %}
                            class="flex items-center gap-3 rounded-md px-3 py-2 font-medium
                                   {{ item.active ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-slate-100' }}
@@ -66,7 +67,7 @@
                         {% endif %}
 
                         {# Eingeklappte Navigation: Name und Unterpunkte als Flyout bei Hover/Fokus #}
-                        <div class="absolute top-0 left-full z-50 hidden pl-2 lg:collapsed:group-hover/item:block lg:collapsed:group-focus-within/item:block">
+                        <div data-flyout class="fixed z-50 hidden pl-2 lg:collapsed:group-hover/item:block lg:collapsed:group-focus-within/item:block">
                             <div class="min-w-48 rounded-lg bg-surface p-1 shadow-lg ring-1 ring-slate-200">
                                 <p class="px-3 py-1.5 font-semibold text-slate-900" aria-hidden="true">{{ item.label|trans }}</p>
                                 {% if item.children is not empty %}

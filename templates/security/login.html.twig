@@ -22,7 +22,10 @@
                 <label for="password" class="label">{{ 'user.password'|trans }}</label>
                 <a href="{{ path('app_forgot_password') }}" class="link text-xs">{{ 'security.forgot'|trans }}</a>
             </div>
-            <input type="password" name="_password" id="password" class="input" autocomplete="current-password" required>
+            <div class="relative" data-controller="password-reveal">
+                <input type="password" name="_password" id="password" class="input pr-11" autocomplete="current-password" required data-password-reveal-target="input">
+                {{ include('_partials/password_toggle.html.twig', {target: 'password'}) }}
+            </div>
         </div>
         <div class="mb-5 flex items-center gap-2">
             <input type="checkbox" name="_remember_me" id="remember_me" class="size-4 accent-brand-600">

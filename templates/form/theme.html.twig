@@ -68,6 +68,16 @@
     {{- parent() -}}
 {%- endblock form_widget_simple -%}
 
+{# Passwortfelder mit Knopf „Passwort anzeigen“ #}
+{%- block password_widget -%}
+    <div class="relative" data-controller="password-reveal">
+        {%- set type = type|default('password') -%}
+        {%- set attr = attr|merge({class: (attr.class|default('') ~ ' pr-11')|trim, 'data-password-reveal-target': 'input'}) -%}
+        {{- block('form_widget_simple') -}}
+        {{- include('_partials/password_toggle.html.twig', {target: id}) -}}
+    </div>
+{%- endblock password_widget -%}
+
 {# Mehrfach-Upload: Dateien zusätzlich per Drag&Drop; das native Feld bleibt bedienbar #}
 {%- block file_widget -%}
     {%- if multiple|default(false) -%}

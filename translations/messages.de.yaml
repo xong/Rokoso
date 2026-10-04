@@ -1,6 +1,6 @@
 app:
     name: Koopio
-    short_name: Co
+    short_name: Ko
 
 nav:
     label: Hauptnavigation
@@ -182,6 +182,9 @@ form:
     image_help: JPG, PNG, GIF oder WebP, höchstens 2 MB.
     none: '– keine –'
     optional: optional
+
+password:
+    show: Passwort anzeigen
 
 user:
     name: Name
