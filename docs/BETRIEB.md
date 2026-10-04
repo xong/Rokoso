@@ -148,9 +148,11 @@ Einstellungen im GitHub-Repository unter *Settings → Environments → staging*
 | Variable | `SSH_USER` | SSH-Benutzer |
 | Variable | `SSH_KNOWN_HOSTS` | Ausgabe von `ssh-keyscan <host>` |
 | Variable | `DEPLOY_PATH` | z. B. `/www/staging.rokoso.de` |
-| Variable | `APP_URL` | z. B. `https://staging.rokoso.de` |
+| Variable | `APP_URL` | z. B. `https://rokoso.robert-rupf.host-011.gn2.hosting` (Staging) |
 
 **Zurück auf den vorigen Stand:** per SSH `cd /www/staging.rokoso.de && ln -sfn releases/<älterer Ordner> current.new && mv -Tf current.new current`. Migrationen werden dabei nicht zurückgedreht.
+
+Die Zeitzone kommt aus der `php.ini` (siehe oben); die Tests in GitHub Actions laufen deshalb ebenfalls mit `date.timezone=Europe/Berlin`.
 
 Apache braucht die mitgelieferte `public/.htaccess` (Weiterleitung auf `index.php`).
 
