@@ -18,7 +18,10 @@ use App\Repository\MeetingRepository;
 use App\Repository\MessageRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\PollRepository;
+use App\Service\SetupChecklist;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -40,6 +43,7 @@ final class HomeController extends AbstractController
         PollRepository $polls,
         ForumTopicRepository $topics,
         NotificationRepository $notifications,
+        SetupChecklist $setup,
     ): Response {
         $now = new \DateTimeImmutable();
         $events = array_filter(
@@ -65,7 +69,19 @@ final class HomeController extends AbstractController
             'polls' => \array_slice($polls->findAwaitingVote($user), 0, self::LIMIT),
             'topics' => \array_slice(array_values(array_filter($recentTopics, static fn ($t): bool => \in_array($t->getId(), $unreadTopics, true))), 0, self::LIMIT),
             'mentions' => \array_slice(array_values($mentions), 0, self::LIMIT),
+            'setup' => $setup->stepsFor($user),
             'now' => $now,
         ]);
+    }
+
+    #[Route('/setup/dismiss', name: 'home_setup_dismiss', methods: ['POST'])]
+    public function dismissSetup(Request $request, #[CurrentUser] User $user, EntityManagerInterface $em): Response
+    {
+        if ($this->isCsrfTokenValid('setup-dismiss', $request->getPayload()->getString('_token'))) {
+            $user->setSetupDismissed(true);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('home');
     }
 }

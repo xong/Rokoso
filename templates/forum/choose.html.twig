@@ -1,0 +1,29 @@
+{% extends 'forum/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ 'forum.topic_new'|trans }}{% endblock %}
+{% block detail_title %}{{ 'forum.topic_new'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-3xl p-4 lg:p-6">
+        {% if boards is empty %}
+            {{ ui.empty('forum.no_boards', 'lucide:messages-square') }}
+            <p class="mt-4 text-center"><a href="{{ path('forum_board_new') }}" class="btn-primary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'forum.board_new_root'|trans }}</a></p>
+        {% else %}
+            <p class="mb-4 text-slate-600">{{ 'forum.choose_board'|trans }}</p>
+            <ul role="list" class="card divide-y divide-slate-100">
+                {% for board in boards %}
+                    <li><a href="{{ path('forum_topic_new', {id: board.id}) }}" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50">
+                        {{ ux_icon('lucide:messages-square', {class: 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                        <span class="min-w-0 flex-1">
+                            <span class="block truncate font-medium">{{ board.path|map(b => b.name)|join(' › ') }}</span>
+                            <span class="block truncate text-xs text-slate-500">{{ board.organization.name }}</span>
+                        </span>
+                    </a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock %}

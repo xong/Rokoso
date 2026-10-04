@@ -61,6 +61,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, nullable: true)]
     private ?string $pendingEmail = null;
 
+    /** Hides the setup checklist on the start page. */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $setupDismissed = false;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -194,6 +198,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTheme(Theme $theme): static
     {
         $this->theme = $theme;
+
+        return $this;
+    }
+
+    public function isSetupDismissed(): bool
+    {
+        return $this->setupDismissed;
+    }
+
+    public function setSetupDismissed(bool $setupDismissed): static
+    {
+        $this->setupDismissed = $setupDismissed;
 
         return $this;
     }

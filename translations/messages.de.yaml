@@ -35,8 +35,34 @@ nav:
     contacts: Kontakte
     projects: Projekte
     organizations: Organisationen
+    admin: Verwaltung
+    bottom: Schnellnavigation
+    more: Mehr
+    group_plan: Planen & Entscheiden
+    group_knowledge: Wissen & Dateien
+    group_admin: Einstellungen
     profile: Mein Profil
     logout: Abmelden
+
+compose_menu:
+    label: Verfassen
+    email: E-Mail
+    direct: Direktnachricht
+    topic: Forenthema
+    event: Termin
+    task: Aufgabe
+
+admin:
+    intro: Hier verwaltet ihr Organisationen, Mitglieder, E-Mail-Konten, Regeln, Textbausteine und die öffentliche Mitwirkung.
+
+empty:
+    folder: Ordner anlegen
+    meeting: Sitzung planen
+    poll: Abstimmung starten
+    project: Projekt anlegen
+    resolution: Beschluss eintragen
+    survey: Umfrage erstellen
+    mail_account: E-Mail-Konto verbinden
 
 action:
     save: Speichern
@@ -626,13 +652,11 @@ snippet:
     delete_confirm: Textbaustein wirklich löschen?
 
 internal:
-    intro: Interne Nachrichten bleiben in Coop und erscheinen bei den Empfängern im Eingang – wie E-Mails, mit Kommentaren und Verantwortlichen.
+    intro: Direktnachrichten bleiben in Coop und erscheinen nur bei den gewählten Personen im Eingang – wie E-Mails, mit Kommentaren und Verantwortlichen.
+    forum_hint: Für Gruppen, Projekte und die ganze Organisation ein Forenthema eröffnen.
     to: Empfänger
     recipients: Personen
-    organization: Ganze Organisation
-    organization_help: Alle Mitglieder sehen die Nachricht.
-    project: Projekt
-    project_help: Alle, die das Projekt sehen, erhalten die Nachricht.
+    converted_board: Frühere Rundnachrichten
     sent: Nachricht gesendet.
 
 contact:
@@ -961,6 +985,7 @@ forum:
     path: Bereichspfad
     recent: Neueste Themen
     no_boards: Noch keine Bereiche
+    choose_board: In welchem Bereich soll das Thema erscheinen?
     no_topics: Noch keine Themen
     no_topics_board: In diesem Bereich gibt es noch keine Themen.
     mark_read: Alle als gelesen markieren
@@ -1534,6 +1559,29 @@ today:
     overdue: Überfällig
     no_due: ohne Termin
     until: 'bis %date%'
+
+setup:
+    title: Erste Schritte
+    intro: So richtet ihr Coop für euer Gremium ein. Erledigte Schritte werden automatisch abgehakt.
+    dismiss: Ausblenden
+    progress: '%done% von %total% Schritten erledigt'
+    done: erledigt
+    step:
+        organization:
+            label: Organisation anlegen
+            help: Die Organisation ist euer Gremium – darin liegen Mitglieder, Postfächer, Forum und Kalender.
+        members:
+            label: Mitglieder einladen
+            help: Ladet die anderen per E-Mail ein; sie legen beim ersten Aufruf ihr Passwort fest.
+        mail_account:
+            label: Gemeinsames Postfach verbinden
+            help: Mit IMAP-/SMTP-Zugangsdaten landen eingehende E-Mails in der gemeinsamen Ablage.
+        board:
+            label: Forum anlegen
+            help: Bereiche im Forum ersetzen lange Rundmails – jedes Thema bleibt an einem Ort.
+        event:
+            label: Ersten Termin eintragen
+            help: Termine erscheinen im gemeinsamen Kalender und lassen sich als Abo einbinden.
 
 search:
     title: Suche

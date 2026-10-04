@@ -19,6 +19,37 @@
             <time datetime="{{ now|date('Y-m-d') }}">{{ ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'][now|date('w')] }}, {{ now|date('j') }}. {{ ('calendar.months.' ~ now|date('n'))|trans }} {{ now|date('Y') }}</time>
         </p>
 
+        {% if setup %}
+            {% set done = setup|filter(s => s.done)|length %}
+            <section aria-labelledby="setup-heading" class="card mb-4 p-4">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                        <h2 id="setup-heading" class="font-semibold">{{ 'setup.title'|trans }}</h2>
+                        <p class="text-sm text-slate-600">{{ 'setup.intro'|trans }}</p>
+                    </div>
+                    {{ ui.post_button(path('home_setup_dismiss'), 'setup-dismiss', 'setup.dismiss', {class: 'btn-ghost text-sm'}) }}
+                </div>
+                <progress class="mt-3 h-2 w-full" max="{{ setup|length }}" value="{{ done }}" aria-label="{{ 'setup.progress'|trans({'%done%': done, '%total%': setup|length}) }}"></progress>
+                <p class="mt-1 text-xs text-slate-500">{{ 'setup.progress'|trans({'%done%': done, '%total%': setup|length}) }}</p>
+                <ol class="mt-3 space-y-2">
+                    {% for step in setup %}
+                        <li class="flex items-start gap-3">
+                            {% if step.done %}
+                                {{ ux_icon('lucide:circle-check', {class: 'mt-0.5 size-5 shrink-0 text-emerald-600', 'aria-hidden': 'true'}) }}
+                                <span><span class="text-slate-500 line-through">{{ ('setup.step.' ~ step.key ~ '.label')|trans }}</span> <span class="sr-only">({{ 'setup.done'|trans }})</span></span>
+                            {% else %}
+                                {{ ux_icon('lucide:circle', {class: 'mt-0.5 size-5 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                                <span>
+                                    {% if step.url %}<a href="{{ step.url }}" class="font-medium text-brand-700 hover:underline">{{ ('setup.step.' ~ step.key ~ '.label')|trans }}</a>{% else %}<span class="font-medium">{{ ('setup.step.' ~ step.key ~ '.label')|trans }}</span>{% endif %}
+                                    <span class="block text-sm text-slate-600">{{ ('setup.step.' ~ step.key ~ '.help')|trans }}</span>
+                                </span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ol>
+            </section>
+        {% endif %}
+
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <section aria-labelledby="today-messages" class="card flex flex-col">
                 {{ _self.header('messages', 'today.messages', 'lucide:inbox', path('mail_inbox', {show: 'mine'})) }}

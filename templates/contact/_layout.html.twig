@@ -43,7 +43,7 @@
         {% endif %}
     </form>
     {% if contacts is empty %}
-        {{ ui.empty(query or group ? 'contact.no_match' : 'contact.none', 'lucide:contact') }}
+        {{ ui.empty(query or group ? 'contact.no_match' : 'contact.none', 'lucide:contact', query or group ? null : path('contact_new'), 'contact.new') }}
     {% else %}
         {% set letter = null %}
         <ul role="list">

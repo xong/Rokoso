@@ -1,7 +1,7 @@
 {% extends 'layout/app.html.twig' %}
 {% import '_partials/ui.html.twig' as ui %}
 
-{% block title %}{{ 'nav.organizations'|trans }}{% endblock %}
+{% block title %}{{ 'nav.admin'|trans }}{% endblock %}
 {% block list_title %}{{ 'nav.organizations'|trans }}{% endblock %}
 {% block back_url %}{{ path('organization_index') }}{% endblock %}
 
@@ -13,7 +13,7 @@
 
 {% block list %}
     {% if organizations is empty %}
-        {{ ui.empty('organization.none', 'lucide:building-2') }}
+        {{ ui.empty('organization.none', 'lucide:building-2', path('organization_new'), 'organization.new') }}
     {% else %}
         <ul role="list">
             {% for org in organizations %}

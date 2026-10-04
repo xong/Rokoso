@@ -83,7 +83,7 @@
                 {% endfor %}
             </div>
         {% elseif tasks is empty %}
-            {{ ui.empty(mine ? 'task.empty_mine' : 'task.empty', 'lucide:list-checks') }}
+            {{ ui.empty(mine ? 'task.empty_mine' : 'task.empty', 'lucide:list-checks', path('calendar_item_new', {type: 'task'}), 'compose_menu.task') }}
         {% else %}
             <ul role="list" class="card divide-y divide-slate-100">
                 {% for task in tasks %}

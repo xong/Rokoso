@@ -7,7 +7,7 @@
 
 {% block detail %}
     <div class="mx-auto max-w-3xl p-4 lg:p-6">
-        <p class="mb-4 text-sm text-slate-600">{{ 'internal.intro'|trans }}</p>
+        <p class="mb-4 text-sm text-slate-600">{{ 'internal.intro'|trans }} <a href="{{ path('forum_index') }}" class="text-brand-700 hover:underline">{{ 'internal.forum_hint'|trans }}</a></p>
         {{ form_start(form) }}
             {{ form_errors(form) }}
 
@@ -32,10 +32,6 @@
                     {{ form_errors(form.recipients) }}
                     {% do form.recipients.setRendered %}
                 {% endif %}
-                <div class="grid gap-x-4 sm:grid-cols-2">
-                    {{ form_row(form.organization, {row_attr: {class: 'mb-0'}}) }}
-                    {{ form_row(form.project, {row_attr: {class: 'mb-0'}}) }}
-                </div>
             </fieldset>
 
             {{ form_row(form.subject) }}

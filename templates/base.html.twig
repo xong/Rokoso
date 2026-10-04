@@ -9,6 +9,9 @@
         <meta name="color-scheme" content="{{ theme == 'system' ? 'light dark' : theme }}">
         <meta name="theme-color" content="#2563eb">
         <meta name="description" content="{{ 'pwa.description'|trans }}">
+        {# Aktionen, die auf dieselbe Seite zurückleiten, aktualisieren sie per Morphing statt neu zu laden (Scroll und Fokus bleiben) #}
+        <meta name="turbo-refresh-method" content="morph">
+        <meta name="turbo-refresh-scroll" content="preserve">
         <link rel="manifest" href="{{ path('pwa_manifest') }}">
         <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">

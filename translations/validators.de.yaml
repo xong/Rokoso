@@ -6,7 +6,7 @@ compose:
     invalid_address: '„%address%“ ist keine gültige E-Mail-Adresse.'
     circular_only_to: Ein Rundschreiben geht nur an die Adressen unter „An“ – bitte Cc und Bcc leeren.
 internal:
-    no_recipient: Bitte wähle mindestens eine Person, eine Organisation oder ein Projekt.
+    no_recipient: Bitte wähle mindestens eine Person.
 contact:
     name_required: Bitte gib einen Namen oder eine Institution an.
 contact_group:

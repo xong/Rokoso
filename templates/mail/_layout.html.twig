@@ -59,7 +59,7 @@
     </form>
 
     {% if messages is empty %}
-        {{ ui.empty(accounts is empty and folder == 'inbox' and not filter.active ? 'mail.no_accounts' : (folder == 'inbox' and not filter.active ? 'mail.inbox_zero' : 'mail.empty'), folder == 'inbox' and not filter.active ? 'lucide:party-popper' : 'lucide:inbox') }}
+        {{ ui.empty(accounts is empty and folder == 'inbox' and not filter.active ? 'mail.no_accounts' : (folder == 'inbox' and not filter.active ? 'mail.inbox_zero' : 'mail.empty'), folder == 'inbox' and not filter.active ? 'lucide:party-popper' : 'lucide:inbox', accounts is empty ? path('organization_index') : null, 'empty.mail_account') }}
         {% if accounts is empty and folder == 'inbox' %}
             <p class="-mt-8 px-6 pb-8 text-center"><a class="link" href="{{ path('organization_index') }}">{{ 'mail.setup_account'|trans }}</a></p>
         {% endif %}

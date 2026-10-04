@@ -13,7 +13,7 @@
 
 {% block list %}
     {% if surveys is empty %}
-        {{ ui.empty('survey.none', 'lucide:clipboard-list') }}
+        {{ ui.empty('survey.none', 'lucide:clipboard-list', path('survey_new'), 'empty.survey') }}
     {% else %}
         <ul role="list">
             {% for s in surveys %}

@@ -5,23 +5,17 @@ declare(strict_types=1);
 namespace App\Mail;
 
 use App\Entity\Message;
-use App\Entity\Organization;
-use App\Entity\Project;
 use App\Entity\User;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * Internal message to users, an organization or a project.
+ * Internal message to individual people (group discussions belong in the forum).
  */
 final class InternalMessageData
 {
     /** @var list<User> */
+    #[Assert\Count(min: 1, minMessage: 'internal.no_recipient')]
     public array $recipients = [];
-
-    public ?Organization $organization = null;
-
-    public ?Project $project = null;
 
     #[Assert\NotBlank]
     #[Assert\Length(max: 500)]
@@ -32,12 +26,4 @@ final class InternalMessageData
     public string $body = '';
 
     public ?Message $original = null;
-
-    #[Assert\Callback]
-    public function validateTarget(ExecutionContextInterface $context): void
-    {
-        if ([] === $this->recipients && null === $this->organization && null === $this->project) {
-            $context->buildViolation('internal.no_recipient')->atPath('recipients')->addViolation();
-        }
-    }
 }

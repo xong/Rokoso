@@ -22,9 +22,11 @@ export default class extends Controller {
         }
     }
 
-    open() {
+    open(event) {
+        // several triggers (header, mobile bottom bar): focus returns to the one that was used
+        this.trigger = event?.currentTarget ?? this.openButtonTarget;
         this.element.dataset.navOpen = 'true';
-        this.openButtonTarget.setAttribute('aria-expanded', 'true');
+        this.openButtonTargets.forEach((button) => button.setAttribute('aria-expanded', 'true'));
         this.mainTarget.inert = true;
         this.navTarget.querySelector('a[href]')?.focus();
     }
@@ -34,8 +36,8 @@ export default class extends Controller {
             return;
         }
         delete this.element.dataset.navOpen;
-        this.openButtonTarget.setAttribute('aria-expanded', 'false');
+        this.openButtonTargets.forEach((button) => button.setAttribute('aria-expanded', 'false'));
         this.mainTarget.inert = false;
-        this.openButtonTarget.focus();
+        (this.trigger ?? this.openButtonTarget).focus();
     }
 }

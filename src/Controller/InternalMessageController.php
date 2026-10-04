@@ -13,8 +13,6 @@ use App\Mail\InternalMessageData;
 use App\Mail\ReadTracker;
 use App\Repository\MembershipRepository;
 use App\Repository\MessageRepository;
-use App\Repository\OrganizationRepository;
-use App\Repository\ProjectRepository;
 use App\Security\Voter\MessageVoter;
 use App\Service\AttachmentStorage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,7 +24,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 /**
- * Internal messages: stored as Message (type internal) and shown in the same list as emails.
+ * Internal messages to individual people: stored as Message (type internal) without organization, so only
+ * author and recipients see them; shown in the same list as emails. Group discussions live in the forum.
  */
 final class InternalMessageController extends AbstractController
 {
@@ -35,8 +34,6 @@ final class InternalMessageController extends AbstractController
         Request $request,
         #[CurrentUser] User $user,
         MembershipRepository $memberships,
-        OrganizationRepository $organizations,
-        ProjectRepository $projects,
         MessageRepository $messages,
         AttachmentStorage $storage,
         ReadTracker $readTracker,
@@ -53,8 +50,6 @@ final class InternalMessageController extends AbstractController
             $this->denyAccessUnlessGranted(MessageVoter::VIEW, $original);
             $data->original = $original;
             $data->subject = preg_match('/^(re|aw):/i', $original->getSubject()) ? $original->getSubject() : 'Re: '.$original->getSubject();
-            $data->project = $original->isInternal() ? $original->getProject() : null;
-            $data->organization = $original->isInternal() && null === $data->project ? $original->getOrganization() : null;
             $data->recipients = array_values(array_filter(
                 [$original->getAuthor(), ...$original->getRecipientUsers()->toArray()],
                 static fn (?User $u): bool => null !== $u && $u !== $user && \in_array($u, $users, true),
@@ -68,11 +63,7 @@ final class InternalMessageController extends AbstractController
             }
         }
 
-        $form = $this->createForm(InternalMessageFormType::class, $data, [
-            'users' => $users,
-            'organizations' => $organizations->findForUser($user),
-            'projects' => $projects->findVisibleFor($user),
-        ]);
+        $form = $this->createForm(InternalMessageFormType::class, $data, ['users' => $users]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -81,8 +72,6 @@ final class InternalMessageController extends AbstractController
                 ->setFrom($user->getEmail(), $user->getName())
                 ->setSubject($data->subject)
                 ->setBody($data->body)
-                ->setProject($data->project)
-                ->setOrganization($data->project?->getOrganization() ?? $data->organization)
                 ->setInReplyTo(null !== $data->original ? (string) $data->original->getId() : null);
             foreach ($data->recipients as $recipient) {
                 $message->addRecipientUser($recipient);

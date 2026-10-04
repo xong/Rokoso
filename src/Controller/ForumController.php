@@ -67,6 +67,20 @@ final class ForumController extends AbstractController
         ]);
     }
 
+    /**
+     * "Compose → forum topic": choose the area first (or go straight there if there is only one).
+     */
+    #[Route('/topic/new', name: 'forum_topic_choose')]
+    public function chooseBoard(#[CurrentUser] User $user): Response
+    {
+        $boards = $this->boards->findVisibleFor($user);
+        if (1 === \count($boards)) {
+            return $this->redirectToRoute('forum_topic_new', ['id' => $boards[0]->getId()]);
+        }
+
+        return $this->render('forum/choose.html.twig', $this->treeContext($user, null) + ['boards' => $boards]);
+    }
+
     #[Route('/read', name: 'forum_mark_read', methods: ['POST'])]
     #[IsCsrfTokenValid('forum')]
     public function markAllRead(#[CurrentUser] User $user): Response

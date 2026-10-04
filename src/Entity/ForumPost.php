@@ -80,6 +80,14 @@ class ForumPost
         return $this->createdAt;
     }
 
+    /** Keeps the original time when content is taken over from elsewhere (e.g. converted messages). */
+    public function backdate(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
     public function getEditedAt(): ?\DateTimeImmutable
     {
         return $this->editedAt;

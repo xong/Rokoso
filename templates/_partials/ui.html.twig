@@ -3,7 +3,8 @@
 {# POST-Button mit CSRF-Schutz und Rückfrage #}
 {% macro post_button(url, token_id, label, options = {}) %}
     <form method="post" action="{{ url }}" class="{{ options.form_class|default('inline') }}"
-          {% if options.confirm|default(false) %}data-turbo-confirm="{{ options.confirm|trans }}"{% endif %}>
+          {% if options.confirm|default(false) %}data-turbo-confirm="{{ options.confirm|trans }}"{% endif %}
+          {% for name, value in options.form_attr|default({}) %} {{ name }}="{{ value }}"{% endfor %}>
         <input type="hidden" name="_token" value="{{ csrf_token(token_id) }}">
         {% for name, value in options.fields|default({}) %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
         <button type="submit" class="{{ options.class|default('btn-secondary') }}"
@@ -14,11 +15,14 @@
     </form>
 {% endmacro %}
 
-{# Hinweis, wenn eine Liste leer ist #}
-{% macro empty(text, icon = 'lucide:inbox') %}
+{# Hinweis, wenn eine Liste leer ist – optional mit Handlungsaufforderung (Link) #}
+{% macro empty(text, icon = 'lucide:inbox', cta_url = null, cta_label = null) %}
     <div class="flex flex-col items-center gap-2 px-6 py-12 text-center text-slate-500">
         {{ ux_icon(icon, {class: 'size-8 text-slate-300', 'aria-hidden': 'true'}) }}
         <p>{{ text|trans }}</p>
+        {% if cta_url %}
+            <a href="{{ cta_url }}" class="btn-secondary mt-2">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ cta_label|trans }}</a>
+        {% endif %}
     </div>
 {% endmacro %}
 

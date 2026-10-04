@@ -47,7 +47,7 @@
             {{ ux_icon('lucide:clock', {class: 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}{{ 'forum.recent'|trans }}
         </a>
         {% if tree is empty %}
-            {{ ui.empty('forum.no_boards', 'lucide:messages-square') }}
+            {{ ui.empty('forum.no_boards', 'lucide:messages-square', path('forum_board_new'), 'forum.board_new_root') }}
         {% endif %}
         {% for group in tree %}
             <div>

@@ -159,6 +159,13 @@ class ForumTopic
         return $this->createdAt;
     }
 
+    public function backdate(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
     public function getLastPostAt(): \DateTimeImmutable
     {
         return $this->lastPostAt;

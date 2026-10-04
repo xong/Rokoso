@@ -45,7 +45,7 @@
     </form>
     <p class="sr-only" role="status">{{ 'resolution.count'|trans({'%count%': resolutions|length}) }}</p>
     {% if resolutions is empty %}
-        {{ ui.empty('resolution.none', 'lucide:gavel') }}
+        {{ ui.empty('resolution.none', 'lucide:gavel', path('resolution_new'), 'empty.resolution') }}
     {% else %}
         <ul role="list">
             {% for r in resolutions %}

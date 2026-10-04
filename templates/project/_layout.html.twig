@@ -20,7 +20,7 @@
         {% endfor %}
     </nav>
     {% if projects is empty %}
-        {{ ui.empty(archived ? 'project.none_archived' : 'project.none', 'lucide:folder-kanban') }}
+        {{ ui.empty(archived ? 'project.none_archived' : 'project.none', 'lucide:folder-kanban', archived ? null : path('project_new'), 'empty.project') }}
     {% else %}
         <ul role="list">
             {% for p in projects %}

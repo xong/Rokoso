@@ -21,46 +21,68 @@
         </a>
     </div>
 
+    <details class="relative px-2 pt-2" data-controller="dropdown" data-action="keydown.esc->dropdown#close">
+        <summary class="btn-primary w-full list-none justify-center lg:collapsed:px-0">
+            {{ ux_icon('lucide:plus', {class: 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
+            <span class="truncate lg:collapsed:sr-only">{{ 'compose_menu.label'|trans }}</span>
+        </summary>
+        <ul role="list" class="absolute inset-x-2 z-50 mt-1 space-y-0.5 rounded-lg bg-surface p-1 shadow-lg ring-1 ring-slate-200 lg:collapsed:right-auto lg:collapsed:w-56">
+            {% for entry in this.compose %}
+                <li><a href="{{ path(entry.route, entry.params) }}" class="flex items-center gap-2 rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100">
+                    {{ ux_icon(entry.icon, {class: 'size-4 shrink-0 text-slate-500', 'aria-hidden': 'true'}) }}
+                    <span class="truncate">{{ entry.label|trans }}</span>
+                </a></li>
+            {% endfor %}
+        </ul>
+    </details>
+
     {% set unread = this.unreadCount %}
-    <ul role="list" class="flex-1 space-y-0.5 overflow-y-auto p-2 lg:collapsed:overflow-visible">
-        {% for item in this.items %}
-            <li class="group/item relative">
-                <a href="{{ path(item.route) }}" {% if item.active %}aria-current="{{ item.children is empty ? 'page' : 'true' }}"{% endif %}
-                   class="flex items-center gap-3 rounded-md px-3 py-2 font-medium
-                          {{ item.active ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-slate-100' }}
-                          lg:collapsed:justify-center lg:collapsed:px-0">
-                    {{ ux_icon(item.icon, {class: 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
-                    <span class="truncate lg:collapsed:sr-only">{{ item.label|trans }}</span>
-                    {% if item.live %}
-                        <span data-live-count="{{ item.live }}" {{ item.badge > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white lg:collapsed:absolute lg:collapsed:top-0.5 lg:collapsed:right-0.5"><span data-live-number>{{ item.badge > 99 ? '99+' : item.badge }}</span><span class="sr-only"> {{ item.badge_label|trans }}</span></span>
-                    {% endif %}
-                </a>
+    <div class="flex-1 space-y-3 overflow-y-auto p-2 lg:collapsed:overflow-visible">
+        {% for group in this.groups %}
+            {% if group.label %}
+                <h2 id="nav-{{ group.label|replace({'.': '-'}) }}" class="px-3 pt-1 text-xs font-semibold tracking-wide text-slate-500 uppercase lg:collapsed:sr-only">{{ group.label|trans }}</h2>
+            {% endif %}
+            <ul role="list" class="space-y-0.5" {% if group.label %}aria-labelledby="nav-{{ group.label|replace({'.': '-'}) }}"{% endif %}>
+                {% for item in group.items %}
+                    <li class="group/item relative">
+                        <a href="{{ path(item.route) }}" {% if item.active %}aria-current="{{ item.children is empty ? 'page' : 'true' }}"{% endif %}
+                           class="flex items-center gap-3 rounded-md px-3 py-2 font-medium
+                                  {{ item.active ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-slate-100' }}
+                                  lg:collapsed:justify-center lg:collapsed:px-0">
+                            {{ ux_icon(item.icon, {class: 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
+                            <span class="truncate lg:collapsed:sr-only">{{ item.label|trans }}</span>
+                            {% if item.live %}
+                                <span data-live-count="{{ item.live }}" {{ item.badge > 0 ? '' : 'hidden' }} class="ml-auto rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white lg:collapsed:absolute lg:collapsed:top-0.5 lg:collapsed:right-0.5"><span data-live-number>{{ item.badge > 99 ? '99+' : item.badge }}</span><span class="sr-only"> {{ item.badge_label|trans }}</span></span>
+                            {% endif %}
+                        </a>
 
-                {% if item.children is not empty %}
-                    {# Ausgeklappte Navigation: Unterpunkte des aktiven Bereichs inline #}
-                    <ul role="list" class="mt-0.5 space-y-0.5 pl-8 lg:collapsed:hidden {{ item.active ? '' : 'hidden' }}">
-                        {% for child in item.children %}
-                            <li>{{ _self.child_link(child, unread) }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-
-                {# Eingeklappte Navigation: Name und Unterpunkte als Flyout bei Hover/Fokus #}
-                <div class="absolute top-0 left-full z-50 hidden pl-2 lg:collapsed:group-hover/item:block lg:collapsed:group-focus-within/item:block">
-                    <div class="min-w-48 rounded-lg bg-surface p-1 shadow-lg ring-1 ring-slate-200">
-                        <p class="px-3 py-1.5 font-semibold text-slate-900" aria-hidden="true">{{ item.label|trans }}</p>
                         {% if item.children is not empty %}
-                            <ul role="list" class="space-y-0.5">
+                            {# Ausgeklappte Navigation: Unterpunkte des aktiven Bereichs inline #}
+                            <ul role="list" class="mt-0.5 space-y-0.5 pl-8 lg:collapsed:hidden {{ item.active ? '' : 'hidden' }}">
                                 {% for child in item.children %}
                                     <li>{{ _self.child_link(child, unread) }}</li>
                                 {% endfor %}
                             </ul>
                         {% endif %}
-                    </div>
-                </div>
-            </li>
+
+                        {# Eingeklappte Navigation: Name und Unterpunkte als Flyout bei Hover/Fokus #}
+                        <div class="absolute top-0 left-full z-50 hidden pl-2 lg:collapsed:group-hover/item:block lg:collapsed:group-focus-within/item:block">
+                            <div class="min-w-48 rounded-lg bg-surface p-1 shadow-lg ring-1 ring-slate-200">
+                                <p class="px-3 py-1.5 font-semibold text-slate-900" aria-hidden="true">{{ item.label|trans }}</p>
+                                {% if item.children is not empty %}
+                                    <ul role="list" class="space-y-0.5">
+                                        {% for child in item.children %}
+                                            <li>{{ _self.child_link(child, unread) }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
         {% endfor %}
-    </ul>
+    </div>
 
     {% if app.user %}
         {% set profile_active = app.request.attributes.get('_route') starts with 'profile_' %}
@@ -90,6 +112,35 @@
             <span class="truncate lg:collapsed:hidden" aria-hidden="true">{{ 'nav.collapse'|trans }}</span>
         </button>
     </div>
+</nav>
+
+{# Mobil: Leiste unten mit den wichtigsten Bereichen; „Mehr“ öffnet die volle Navigation #}
+{% set flat = this.groups|map(g => g.items)|reduce((carry, items) => carry|merge(items), []) %}
+<nav aria-label="{{ 'nav.bottom'|trans }}"
+     class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <ul role="list" class="grid h-14 grid-cols-5">
+        {% for item in flat|filter(i => i.route in ['home', 'mail_inbox', 'forum_index', 'calendar_month']) %}
+            <li>
+                <a href="{{ path(item.route) }}" {% if item.active %}aria-current="page"{% endif %}
+                   class="relative flex h-full flex-col items-center justify-center gap-0.5 text-[11px] {{ item.active ? 'font-semibold text-brand-700' : 'text-slate-600' }}">
+                    {{ ux_icon(item.icon, {class: 'size-5', 'aria-hidden': 'true'}) }}
+                    <span>{{ item.label|trans }}</span>
+                    {% set count = item.route == 'mail_inbox' ? unread : item.badge %}
+                    {% set live = item.route == 'mail_inbox' ? 'inbox' : item.live %}
+                    {% if live %}
+                        <span data-live-count="{{ live }}" {{ count > 0 ? '' : 'hidden' }} class="absolute top-1 left-1/2 ml-2 rounded-full bg-brand-600 px-1.5 text-[10px] leading-4 font-semibold text-white"><span data-live-number>{{ count > 99 ? '99+' : count }}</span><span class="sr-only"> {{ (live == 'inbox' ? 'mail.unread' : item.badge_label)|trans }}</span></span>
+                    {% endif %}
+                </a>
+            </li>
+        {% endfor %}
+        <li>
+            <button type="button" data-action="shell#open" aria-controls="main-nav" aria-expanded="false" data-shell-target="openButton"
+                    class="flex h-full w-full flex-col items-center justify-center gap-0.5 text-[11px] text-slate-600">
+                {{ ux_icon('lucide:menu', {class: 'size-5', 'aria-hidden': 'true'}) }}
+                <span>{{ 'nav.more'|trans }}</span>
+            </button>
+        </li>
+    </ul>
 </nav>
 
 {% macro child_link(child, unread = 0) %}

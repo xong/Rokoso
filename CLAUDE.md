@@ -16,7 +16,7 @@
 ## Layout
 - Seiten mit 3-Spalten-Ansicht erweitern `templates/layout/app.html.twig` (Blöcke `list_title`, `list`, `detail_title`, `detail`; `has_detail` + `back_url` für Mobil).
 - Dunkelmodus über umgedrehte Farbvariablen (`assets/styles/app.css`): Flächen mit `bg-surface` statt `bg-white`; `bg-white` nur, wo es immer weiß bleiben soll.
-- Menüpunkte in `src/Twig/Components/Sidebar.php`. Tailwind-Varianten `collapsed:` und `nav-open:` hängen am `shell`-Stimulus-Controller.
+- Menüpunkte in `src/Twig/Components/Sidebar.php` (`GROUPS`, aktiv = längstes `match`-Präfix; Neues anlegen über `COMPOSE` = Menü „Verfassen“). Tailwind-Varianten `collapsed:` und `nav-open:` hängen am `shell`-Stimulus-Controller.
 
 ## Architektur-Notizen
 - E-Mails und interne Nachrichten: eine Entity `Message` (Typ email/internal). Sichtbarkeit zentral in `MessageRepository::visibleQuery()`, Voter `MessageVoter` nutzt sie.
@@ -26,7 +26,9 @@
 - Kalender: `CalendarService` expandiert Wiederholungen (rlanvin/php-rrule) zu `Occurrence`s. Einzeltermine einer Serie: `CalendarException` je ursprünglichem Tag, Links mit `date: o.day` (nicht `o.start`). .ics immer über `App\Calendar\Ics`; Abo-Feed und Gäste-Einladung in `CalendarInvitation`.
 - Zugriff: `Organization::getMembership()` liefert nur Vollmitglieder (kein Gast, Amtszeit läuft), `findMembership()` jede. In Queries `Membership::fullDql()` bzw. `guestDql()` für Gäste mit freigegebenen Projekten; Voter nutzen `canSeeProject()`/`isVisibleTo()`.
 - Öffentliche Seiten: `PublicController` unter `/p/{slug}` (Layout `templates/public/_layout.html.twig`, eigene Formulare in `src/Form/PublicForm`). Spamschutz `PublicGuard::addFields()`/`check()`, Verarbeitung und Bestätigungen `PublicSubmissionHandler`; in Tests Feld `started` per `PublicGuard::stamp(time() - 30)` setzen.
-- Twig-Makros für Buttons/Listen: `templates/_partials/ui.html.twig` (in jedem Kind-Template importieren).
+- Turbo-Morphing global (`base.html.twig`): nach POST einfach auf dieselbe Seite umleiten, keine eigenen Streams nötig. Wischgesten: `swipe`-Controller mit Formular-Targets `left`/`right`.
+- Direktnachrichten nur an Personen; Altbestand an Organisationen per `app:messages:convert-group` → Forum (`GroupMessageConverter`). „Erste Schritte“: `Service\SetupChecklist`.
+- Twig-Makros für Buttons/Listen (`ui.empty(text, icon, cta_url, cta_label)` für Leer-Zustände mit Knopf): `templates/_partials/ui.html.twig` (in jedem Kind-Template importieren).
 - Dateien: `StoredFile::replaceWith()` legt eine `FileVersion` an (Löschen über `getAllStoragePaths()`); Freigabelinks `FileShare` unter `/s/{token}` (öffentlich); „Merken“ = `ShelfItem::for()` (Datei, Anhang, Nachricht, Forenthema), Zugriff in `Shelf::isAccessible()`; PWA-Teilen-Ziel `ShareTargetController` mit Zwischenablage `FileStorage::storeIncoming()`.
 - Startseite „Heute“: `HomeController`; globale Suche: `App\Search\GlobalSearch` (nutzt die Repository-Sichtbarkeit – neue Bereiche dort ergänzen); Befehlspalette/Kürzel: `templates/_partials/palette.html.twig` + `palette_controller.js`; Live-Badges: `[data-live-count]` + `CountsController` + `live_counts_controller.js`.
 - Keine `sed`/`php -r`-Ersetzungen in PHP-Dateien – Edit-Werkzeug nutzen (Escaping-Fallen).

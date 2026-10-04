@@ -1,9 +1,42 @@
 {% extends 'organization/_layout.html.twig' %}
 
+{% block title %}{{ 'nav.admin'|trans }}{% endblock %}
+{% block detail_title %}{{ 'nav.admin'|trans }}{% endblock %}
+
 {% block detail %}
-    <div class="flex flex-col items-center gap-4 px-6 py-16 text-center">
-        {{ ux_icon('lucide:building-2', {class: 'size-10 text-slate-300', 'aria-hidden': 'true'}) }}
-        <p class="max-w-sm text-slate-600">{{ 'organization.intro'|trans }}</p>
-        <a href="{{ path('organization_new') }}" class="btn-primary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'organization.new'|trans }}</a>
+    <div class="max-w-4xl p-4 lg:p-6">
+        <p class="mb-4 text-slate-600">{{ 'admin.intro'|trans }}</p>
+        {% if organizations is not empty %}
+            <div class="mb-6 grid gap-4 sm:grid-cols-2">
+                {% for organization in organizations %}
+                    <section aria-labelledby="admin-org-{{ organization.id }}" class="card p-4">
+                        <h2 id="admin-org-{{ organization.id }}" class="mb-2 font-semibold">
+                            <a href="{{ path('organization_show', {id: organization.id}) }}" class="hover:underline">{{ organization.name }}</a>
+                        </h2>
+                        <ul role="list" class="space-y-1 text-sm">
+                            {% set show = path('organization_show', {id: organization.id}) %}
+                            {% set manage = is_granted('ORG_MANAGE', organization) %}
+                            {% set links = [
+                                [show ~ '#members-heading', 'lucide:users', 'organization.members', true],
+                                [show ~ '#accounts-heading', 'lucide:at-sign', 'mail_account.title', true],
+                                [show ~ '#rules-heading', 'lucide:wand-sparkles', 'mail_rule.title', manage],
+                                [show ~ '#snippets-heading', 'lucide:text-quote', 'snippet.title', true],
+                                [path('public_settings', {id: organization.id}), 'lucide:globe', 'public.settings.title', manage],
+                            ] %}
+                            {% for link in links|filter(l => l[3]) %}
+                                <li><a href="{{ link[0] }}" class="flex items-center gap-2 rounded px-2 py-1 text-slate-700 hover:bg-slate-100">
+                                    {{ ux_icon(link[1], {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }} {{ link[2]|trans }}
+                                </a></li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="flex flex-col items-center gap-4 px-6 py-8 text-center">
+            {{ ux_icon('lucide:building-2', {class: 'size-10 text-slate-300', 'aria-hidden': 'true'}) }}
+            <p class="max-w-sm text-slate-600">{{ 'organization.intro'|trans }}</p>
+            <a href="{{ path('organization_new') }}" class="btn-primary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'organization.new'|trans }}</a>
+        </div>
     </div>
 {% endblock %}

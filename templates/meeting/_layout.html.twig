@@ -20,7 +20,7 @@
         {% endfor %}
     </nav>
     {% if meetings is empty %}
-        {{ ui.empty(past ? 'meeting.none_past' : 'meeting.none_upcoming', 'lucide:presentation') }}
+        {{ ui.empty(past ? 'meeting.none_past' : 'meeting.none_upcoming', 'lucide:presentation', past ? null : path('meeting_new'), 'empty.meeting') }}
     {% else %}
         <ul role="list">
             {% for m in meetings %}

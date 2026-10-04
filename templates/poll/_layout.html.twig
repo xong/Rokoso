@@ -20,7 +20,7 @@
         {% endfor %}
     </nav>
     {% if polls is empty %}
-        {{ ui.empty(ended ? 'poll.none_ended' : 'poll.none_running', 'lucide:vote') }}
+        {{ ui.empty(ended ? 'poll.none_ended' : 'poll.none_running', 'lucide:vote', ended ? null : path('poll_new'), 'empty.poll') }}
     {% else %}
         <ul role="list">
             {% for p in polls %}

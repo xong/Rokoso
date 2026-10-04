@@ -167,8 +167,8 @@ final readonly class DemoCommand
                 ->setStartsAt($monday->modify('+3 days')->setTime(12, 0))->addAssignee($colleague));
 
             $note = (new Message(MessageType::Internal))->setAuthor($colleague)->setFrom($colleague->getEmail(), $colleague->getName())
-                ->setOrganization($org)->setSubject('Willkommen in Coop')
-                ->setBody("Hallo zusammen,\n\nhier können wir Mails gemeinsam bearbeiten, kommentieren und Verantwortliche festlegen.\n\nKim");
+                ->addRecipientUser($user)->setSubject('Willkommen in Coop')
+                ->setBody("Hallo,\n\nhier können wir Mails gemeinsam bearbeiten, kommentieren und Verantwortliche festlegen. Für Absprachen in der Gruppe nutzen wir das Forum.\n\nKim");
             $this->em->persist($note);
 
             $minutes = (new Folder($org, $user))->setName('Protokolle');

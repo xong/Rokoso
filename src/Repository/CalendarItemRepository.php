@@ -124,6 +124,21 @@ class CalendarItemRepository extends ServiceEntityRepository
             ->getQuery()->getResult();
     }
 
+    /**
+     * Whether the user sees at least one event (not a task) – used by the setup checklist.
+     */
+    public function hasVisibleEvent(User $user): bool
+    {
+        return [] !== $this->visibleQuery()
+            ->select('i.id')
+            ->andWhere('i.type != :task')
+            ->setParameter('viewer', $user)
+            ->setParameter('task', CalendarItemType::Task->value)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getScalarResult();
+    }
+
     private function visibleQuery(): QueryBuilder
     {
         return $this->createQueryBuilder('i')

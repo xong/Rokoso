@@ -51,7 +51,7 @@
             </ul>
         {% endif %}
     {% elseif trees is empty %}
-        {{ ui.empty('wiki.no_organization', 'lucide:book-open') }}
+        {{ ui.empty('wiki.no_organization', 'lucide:book-open', path('organization_new'), 'organization.new') }}
     {% else %}
         {% for tree in trees %}
             <section aria-labelledby="wiki-org-{{ tree.organization.id }}">

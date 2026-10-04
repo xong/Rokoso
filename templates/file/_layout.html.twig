@@ -42,7 +42,7 @@
 
 {% block list %}
     {% if tree is empty %}
-        {{ ui.empty('folder.none', 'lucide:folder') }}
+        {{ ui.empty('folder.none', 'lucide:folder', path('folder_new'), 'empty.folder') }}
     {% else %}
         <nav aria-label="{{ 'folder.tree'|trans }}" class="space-y-4 p-2">
             {% for group in tree %}

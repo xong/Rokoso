@@ -24,7 +24,7 @@
             </ul>
         {% endif %}
         {% if recent is empty %}
-            {{ ui.empty('forum.no_topics', 'lucide:message-circle') }}
+            {{ ui.empty('forum.no_topics', 'lucide:message-circle', tree is empty ? null : path('forum_topic_choose'), 'forum.topic_new') }}
         {% else %}
             {{ include('forum/_topics.html.twig', {topics: recent, show_board: true}) }}
         {% endif %}

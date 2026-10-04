@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Form;
 
-use App\Entity\Organization;
-use App\Entity\Project;
 use App\Entity\User;
 use App\Mail\InternalMessageData;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -32,25 +30,8 @@ final class InternalMessageFormType extends AbstractType
                 'choice_label' => 'name',
                 'multiple' => true,
                 'expanded' => true,
+                // validated via Count; HTML required on checkboxes would demand all of them
                 'required' => false,
-            ])
-            ->add('organization', EntityType::class, [
-                'label' => 'internal.organization',
-                'class' => Organization::class,
-                'choices' => $options['organizations'],
-                'choice_label' => 'name',
-                'required' => false,
-                'placeholder' => 'form.none',
-                'help' => 'internal.organization_help',
-            ])
-            ->add('project', EntityType::class, [
-                'label' => 'internal.project',
-                'class' => Project::class,
-                'choices' => $options['projects'],
-                'choice_label' => 'name',
-                'required' => false,
-                'placeholder' => 'form.none',
-                'help' => 'internal.project_help',
             ])
             ->add('subject', TextType::class, ['label' => 'compose.subject', 'empty_data' => ''])
             ->add('body', TextareaType::class, ['label' => 'compose.body', 'empty_data' => '', 'attr' => ['rows' => 10]])
@@ -68,8 +49,6 @@ final class InternalMessageFormType extends AbstractType
         $resolver->setDefaults([
             'data_class' => InternalMessageData::class,
             'users' => [],
-            'organizations' => [],
-            'projects' => [],
         ]);
     }
 }
