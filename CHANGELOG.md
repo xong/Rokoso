@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.10.0 – 2026-10-05
+
+### Neu
+
+- **Spaltenbreite anpassen:** die Liste und die Kommentarspalte lassen sich am Rand mit der Maus (oder per Tab und Pfeiltasten) breiter oder schmaler ziehen. Die Breite merkt sich dein Gerät, ein Doppelklick auf den Rand stellt sie zurück.
+
 ## 0.9.0 – 2026-10-05
 
 Die erste Testversion von Rokoso.

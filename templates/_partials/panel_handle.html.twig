@@ -1,0 +1,11 @@
+{#
+    Trenner zum Verschieben einer Spalte (panel_resize_controller.js). Variablen:
+    panel (aus panel_width()), controls (ID der Spalte), label (Übersetzungsschlüssel), edge ('right' | 'left'),
+    show (Tailwind-Klasse ab der Breite, ab der die Spalten nebeneinander stehen, z. B. 'lg:block')
+#}
+<div role="separator" aria-orientation="vertical" tabindex="0" aria-controls="{{ controls }}"
+     aria-label="{{ label|trans }}" title="{{ 'nav.resize_hint'|trans }}"
+     aria-valuemin="{{ panel.min }}" aria-valuemax="{{ panel.max }}" aria-valuenow="{{ (panel.value ?? panel.min)|round }}"
+     data-panel-resize-target="handle"
+     data-action="pointerdown->panel-resize#start keydown->panel-resize#key dblclick->panel-resize#reset"
+     class="absolute inset-y-0 z-20 hidden w-2 cursor-col-resize touch-none transition-colors hover:bg-brand-600/30 focus-visible:bg-brand-600/30 {{ edge == 'left' ? '-left-1' : '-right-1' }} {{ show }}"></div>

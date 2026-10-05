@@ -4,8 +4,13 @@
     mention_org (Organisation für @-Erwähnungen, optional)
 #}
 {% set fields = fields ?? {} %}
+{% set comments_panel = panel_width('comments') %}
 <aside id="comments" aria-labelledby="comments-heading" tabindex="-1"
-       class="flex flex-col border-t border-slate-200 bg-slate-50 xl:w-80 xl:shrink-0 xl:border-t-0 xl:border-l">
+       class="relative flex flex-col border-t border-slate-200 bg-slate-50 xl:w-[var(--panel-width,20rem)] xl:min-w-60 xl:shrink-0 xl:border-t-0 xl:border-l"
+       {% if comments_panel.value %}style="--panel-width: {{ comments_panel.value }}%"{% endif %}
+       data-controller="panel-resize" data-panel-resize-name-value="comments" data-panel-resize-edge-value="left"
+       data-panel-resize-min-value="{{ comments_panel.min }}" data-panel-resize-max-value="{{ comments_panel.max }}">
+    {{ include('_partials/panel_handle.html.twig', {panel: comments_panel, controls: 'comments', label: 'nav.resize_comments', edge: 'left', show: 'xl:block'}) }}
     <h3 id="comments-heading" class="border-b border-slate-200 px-4 py-3 text-sm font-semibold">
         {{ 'mail.comments.title'|trans }} <span class="font-normal text-slate-500">({{ comments|length }})</span>
     </h3>

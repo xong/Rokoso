@@ -176,6 +176,15 @@
     input[type="file"]:not(:disabled) {
         cursor: pointer;
     }
+
+    /* while a column is resized (panel_resize_controller): no text selection, iframes must not swallow the pointer */
+    :root[data-resizing] {
+        cursor: col-resize;
+        user-select: none;
+    }
+    :root[data-resizing] iframe {
+        pointer-events: none;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {#
-    Dreispaltiges App-Layout: Navigation (20 %) · Liste (25 %) · Detail (Rest, 55 %).
+    Dreispaltiges App-Layout: Navigation (20 %) · Liste (25 %, verschiebbar über panel_width('list')) · Detail (Rest).
     Kind-Templates füllen die Blöcke `list` und `detail`.
     Mobil ist immer nur eine Spalte sichtbar: die Liste, oder – wenn has_detail – die Detailansicht.
 #}
@@ -28,8 +28,13 @@
 
         <main id="main" tabindex="-1" data-shell-target="main" class="flex min-w-0 flex-1">
             {% if show_list %}
-            <section aria-labelledby="list-heading"
-                     class="flex w-full min-w-0 shrink-0 flex-col border-r border-slate-200 bg-surface lg:w-[25vw] lg:min-w-72{{ has_detail ? ' max-lg:hidden' }}">
+            {% set list_panel = panel_width('list') %}
+            <section id="list-panel" aria-labelledby="list-heading"
+                     class="relative flex w-full min-w-0 shrink-0 flex-col border-r border-slate-200 bg-surface lg:w-[var(--panel-width,25vw)] lg:min-w-72{{ has_detail ? ' max-lg:hidden' }}"
+                     {% if list_panel.value %}style="--panel-width: {{ list_panel.value }}%"{% endif %}
+                     data-controller="panel-resize" data-panel-resize-name-value="list"
+                     data-panel-resize-min-value="{{ list_panel.min }}" data-panel-resize-max-value="{{ list_panel.max }}">
+                {{ include('_partials/panel_handle.html.twig', {panel: list_panel, controls: 'list-panel', label: 'nav.resize_list', edge: 'right', show: 'lg:block'}) }}
                 <header class="flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 px-3">
                     <button type="button" data-shell-target="openButton" data-action="shell#open"
                             aria-label="{{ 'nav.open'|trans }}" aria-controls="main-nav" aria-expanded="false"

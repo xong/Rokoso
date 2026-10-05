@@ -18,6 +18,9 @@ nav:
     collapse: Navigation einklappen
     expand: Navigation ausklappen
     back: Zurück zur Liste
+    resize_list: Breite der Liste
+    resize_comments: Breite der Kommentarspalte
+    resize_hint: Ziehen oder Pfeiltasten zum Verschieben, Doppelklick setzt zurück
     mail: E-Mails
     mail_inbox: Eingang
     mail_all: Alle E-Mails

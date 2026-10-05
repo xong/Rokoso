@@ -9,6 +9,7 @@ use App\Entity\Project;
 use App\Entity\User;
 use App\Enum\OrganizationRole;
 use App\Tests\AppTestCase;
+use Symfony\Component\BrowserKit\Cookie;
 
 final class MailCollaborationTest extends AppTestCase
 {
@@ -55,6 +56,16 @@ final class MailCollaborationTest extends AppTestCase
         self::assertResponseRedirects($this->showUrl().'#comments');
         $this->client->followRedirect();
         self::assertSelectorTextContains('#comments', 'Ich kümmere mich drum.');
+    }
+
+    public function testResizedColumnsAreRendered(): void
+    {
+        $this->client->getCookieJar()->set(new Cookie('panel_list', '40'));
+        $this->client->getCookieJar()->set(new Cookie('panel_comments', '99'));
+        $this->client->request('GET', $this->showUrl());
+
+        self::assertSelectorExists('#list-panel[style="--panel-width: 40%"] [role="separator"][aria-controls="list-panel"]');
+        self::assertSelectorExists('#comments[style="--panel-width: 60%"] [role="separator"][aria-controls="comments"]');
     }
 
     public function testAssignMeAndAssignees(): void
