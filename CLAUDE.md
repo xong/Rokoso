@@ -41,6 +41,7 @@
 - Versionen: `CHANGELOG.md` (oberster Abschnitt = laufende Version, Text für Nutzer:innen auf Deutsch) über `Service\Changelog`; vor einem Deployment mit sichtbaren Änderungen dort einen Abschnitt ergänzen. Seite `/profile/changelog`, Hinweis auf „Heute“ bis gelesen (`User::$seenVersion`).
 - Deployment: `.github/workflows/deploy.yml` (Push auf `main` → Staging bei GN2, Release-Ordner + `shared/`), Migrationen über den Deploy-Hook `DeployController` (`/_deploy`, `DEPLOY_TOKEN`), weil per SSH nur PHP 8.2 läuft; Ablauf in `docs/BETRIEB.md`. Persistente Pfade neu? Dann im Workflow verlinken.
 - Docker: `Dockerfile` (FrankenPHP), `docker/entrypoint.sh` (Migrationen), `docker/cron.sh`, Beispiel `compose.prod.yaml`.
+- UX Icons nur aus `assets/icons` (Iconify-Download nur in dev, legt die Datei dort ab – mit committen; `IconsTest` prüft das, der Webhoster kann zur Laufzeit nichts laden).
 - Logo/Icons: nie von Hand ändern, sondern `python docs/logo/generate.py` (schreibt SVG, PNG, ICO und `templates/_partials/logo.html.twig`). Markenfarbe `brand-600` (#417230, Moosgrün) für Flächen mit weißer Schrift, Text auf hell `brand-700`; Neutraltöne grau.
 - Keine `sed`/`php -r`-Ersetzungen in PHP-Dateien – Edit-Werkzeug nutzen (Escaping-Fallen).
 

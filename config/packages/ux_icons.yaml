@@ -14,10 +14,15 @@ ux_icons:
     # Throw an exception if an icon is not
     ignore_not_found: false
 
+    # Icons come only from assets/icons (committed); downloading on demand only in dev,
+    # the web hosting cannot fetch them at runtime (curl_multi_exec disabled)
+    iconify:
+        enabled: false
 
 when@dev:
     ux_icons:
         iconify:
+            enabled: true
             # Persist each on-demand icon to disk on first render, so you don't forget to commit it before deploying (like `ux:icons:lock`)
             auto_lock: true
 
