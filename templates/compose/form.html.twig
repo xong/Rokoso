@@ -29,7 +29,9 @@
 
 {% block detail %}
     {% import _self as compose %}
+    {% import '_partials/ui.html.twig' as ui %}
     <div class="mx-auto max-w-3xl p-4 lg:p-6">
+        {% if not original %}{{ ui.intro('compose.new_intro') }}{% endif %}
         {% if original %}
             <p class="mb-4 flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-600">
                 {{ ux_icon(is_forward ? 'lucide:forward' : 'lucide:reply', {class: 'size-4', 'aria-hidden': 'true'}) }}

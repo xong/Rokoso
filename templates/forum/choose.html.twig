@@ -12,6 +12,7 @@
             {{ ui.empty('forum.no_boards', 'lucide:messages-square') }}
             <p class="mt-4 text-center"><a href="{{ path('forum_board_new') }}" class="btn-primary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'forum.board_new_root'|trans }}</a></p>
         {% else %}
+            {{ ui.intro('forum.topic_intro') }}
             <p class="mb-4 text-slate-600">{{ 'forum.choose_board'|trans }}</p>
             <ul role="list" class="card divide-y divide-slate-100">
                 {% for board in boards %}

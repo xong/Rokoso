@@ -1,4 +1,5 @@
 {% extends 'calendar/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
 
 {% block detail_title %}{{ (item ? 'calendar.edit' : 'calendar.new')|trans }}{% endblock %}
 
@@ -20,7 +21,7 @@
 {% endmacro %}
 
 {% block detail %}
-    <div class="mx-auto max-w-2xl p-4 lg:p-6">
+    <div class="group/item mx-auto max-w-2xl p-4 lg:p-6">
         {% set recurrence_labels = {} %}
         {% for key in ['weekly', 'monthly', 'monthly_weekday', 'monthly_last'] %}
             {% set recurrence_labels = recurrence_labels|merge({(key|upper): ('calendar.recurrence.show.' ~ key)|trans({'%count%': 1})}) %}
@@ -37,6 +38,11 @@
             'data-recurrence-weekdays-value': (0..6)|map(d => ('calendar.weekdays.' ~ d)|trans)|json_encode,
         }}) }}
             {{ form_errors(form) }}
+            {% if not item %}
+                {# follows the chosen type without a reload #}
+                {{ ui.intro('calendar.new_intro', 'group-has-[input[value=task]:checked]/item:hidden') }}
+                {{ ui.intro('task.new_intro', 'hidden group-has-[input[value=task]:checked]/item:block') }}
+            {% endif %}
             {% if source is defined and source %}
                 <p class="mb-4 flex items-center gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600">
                     {{ ux_icon('lucide:link', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}

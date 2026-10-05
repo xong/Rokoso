@@ -68,7 +68,7 @@ final class NavigationTest extends AppTestCase
         self::assertSame('Verfassen', trim($compose->text()));
         self::assertCount(1, $crawler->filter('details a[href="/forum/topic/new"]'));
         self::assertCount(1, $crawler->filter('details a[href="/calendar/new?type=task"]'));
-        self::assertStringContainsString('ohne Konto', $crawler->filter('details a[href="/surveys/new"]')->text());
+        self::assertSame('Umfrage', trim($crawler->filter('details a[href="/surveys/new"]')->text()));
         self::assertSelectorExists('nav[aria-label="Schnellnavigation"] button[data-action="shell#open"][aria-expanded="false"]');
     }
 
@@ -113,6 +113,28 @@ final class NavigationTest extends AppTestCase
         $this->client->request('GET', '/forum/topic/new');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main', 'Schulen');
+        self::assertSelectorTextContains('main', 'Mit @Name holst du jemanden dazu');
+    }
+
+    public function testCreatePagesExplainWhatTheyAreFor(): void
+    {
+        $this->createMailAccount($this->createOrganization($this->login()));
+        $pages = [
+            '/mail/new' => 'gemeinsamen Eingang',
+            '/meetings/new' => 'Tagesordnung',
+            '/polls/new' => 'Umlaufbeschluss',
+            '/surveys/new' => 'ohne Konto',
+        ];
+        foreach ($pages as $url => $text) {
+            $this->client->request('GET', $url);
+            self::assertResponseIsSuccessful($url);
+            self::assertSelectorTextContains('main p.max-w-prose', $text, $url);
+        }
+
+        // both intros are rendered, CSS shows the one of the chosen type
+        $crawler = $this->client->request('GET', '/calendar/new?type=task');
+        self::assertCount(2, $crawler->filter('main p.max-w-prose'));
+        self::assertSelectorTextContains('main p.max-w-prose.hidden', 'Verantwortliche werden benachrichtigt');
     }
 
     public function testEmptyStatesOfferNextStep(): void

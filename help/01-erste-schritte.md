@@ -17,7 +17,7 @@ Rokoso ist der gemeinsame Arbeitsplatz eures Gremiums: E-Mails, Diskussionen, Te
 
 Links steht die **Navigation**, daneben die **Liste** des gewählten Bereichs und rechts die **Ansicht** des gewählten Eintrags. Auf dem Handy siehst du immer nur eine dieser Spalten; mit dem Pfeil oben links kommst du zurück zur Liste.
 
-Neues legst du über **Verfassen** oben in der Navigation an. Bei jedem Eintrag steht dort, wofür er gedacht ist.
+Neues legst du über **Verfassen** oben in der Navigation an. Oben auf jeder Seite zum Anlegen steht, wofür der Eintrag gedacht ist und was danach passiert.
 
 ## Heute
 

@@ -15,6 +15,11 @@
     </form>
 {% endmacro %}
 
+{# Kurze Erklärung oben auf einer Seite zum Anlegen: wofür das Neue gedacht ist #}
+{% macro intro(text, class = '') %}
+    <p class="mb-4 max-w-prose text-sm text-slate-600 {{ class }}">{{ text|trans }}</p>
+{% endmacro %}
+
 {# Hinweis, wenn eine Liste leer ist – optional mit Handlungsaufforderung (Link) #}
 {% macro empty(text, icon = 'lucide:inbox', cta_url = null, cta_label = null) %}
     <div class="flex flex-col items-center gap-2 px-6 py-12 text-center text-slate-500">

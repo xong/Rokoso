@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.14.1 – 2026-10-06
+
+### Verbessert
+
+- **Menü „Verfassen“:** Wieder kompakt – nur noch die Namen der Einträge. Die Erklärungen stehen jetzt ausführlicher oben auf der jeweiligen Seite zum Anlegen: wofür eine E-Mail, ein Forenthema, ein Termin, eine Aufgabe, eine Sitzung, eine Abstimmung oder eine Umfrage gedacht ist und was danach passiert.
+
 ## 0.14.0 – 2026-10-06
 
 ### Neu

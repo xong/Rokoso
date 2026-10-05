@@ -56,21 +56,13 @@ nav:
 compose_menu:
     label: Verfassen
     email: E-Mail
-    email_help: Über ein E-Mail-Konto der Organisation, an beliebige Adressen
     direct: Direktnachricht
-    direct_help: Bleibt in Rokoso – an einzelne Personen
     topic: Forenthema
-    topic_help: Diskussion im Forum, für alle Mitglieder sichtbar
     event: Termin
-    event_help: Im gemeinsamen Kalender, auf Wunsch mit Einladung
     task: Aufgabe
-    task_help: Mit Zuständigen und auf Wunsch einer Frist
     meeting: Sitzung
-    meeting_help: Mit Tagesordnung, Einladung und Protokoll
     poll: Abstimmung
-    poll_help: Entscheidung oder Terminfindung unter Mitgliedern
     survey: Umfrage
-    survey_help: Öffentliches Meinungsbild, z. B. von Eltern – ohne Konto
 
 two_factor:
     title: Zwei-Faktor-Anmeldung
@@ -745,6 +737,7 @@ mail:
         reset: Filter zurücksetzen
 
 compose:
+    new_intro: Die E-Mail geht über ein E-Mail-Konto eurer Organisation an beliebige Adressen – auch an Kontakte und Verteiler. Antworten darauf landen im gemeinsamen Eingang, sodass alle Mitglieder den Verlauf sehen. Für Nachrichten an Personen, die nur in Rokoso bleiben sollen, nimm eine Direktnachricht.
     from_shelf: Aus „Gemerkt“ anhängen
     from_files: Aus den Dateien anhängen
     files_search: Dateien durchsuchen
@@ -906,6 +899,7 @@ contact_group:
     public_subscribe_help: Externe können sich über die öffentliche Seite selbst eintragen (mit Bestätigung per E-Mail).
 
 calendar:
+    new_intro: Termine einer Organisation sehen alle ihre Mitglieder im Kalender, persönliche Termine nur du. Du kannst eine Wiederholung, Teilnehmende und eine Erinnerung festlegen und Gäste ohne Konto per E-Mail mit Kalenderdatei einladen.
     timeline_region: Tagesablauf (scrollbar)
     today: Heute
     public_title: Öffentlich
@@ -1196,6 +1190,7 @@ share:
     discarded: Geteiltes verworfen.
 
 forum:
+    topic_intro: Ein Thema ist eine Diskussion, die alle Mitglieder der Organisation lesen und beantworten können – Gäste nur in den Bereichen ihrer Projekte. Mit @Name holst du jemanden dazu. Aus einem Thema lassen sich später eine Abstimmung oder Aufgaben machen.
     intro: Im Forum tauscht ihr euch in Bereichen und Themen aus. Bereiche gehören zu einer Organisation, alle Mitglieder können lesen und schreiben.
     tree: Forumsbereiche
     path: Bereichspfad
@@ -1348,6 +1343,7 @@ watch:
     added: Du wirst jetzt bei Neuigkeiten benachrichtigt.
     removed: Du wirst nicht mehr benachrichtigt.
 task:
+    new_intro: Aufgaben halten fest, wer was erledigt. Verantwortliche werden benachrichtigt, wenn sie zugewiesen werden und kurz bevor die Frist abläuft. Die Frist ist freiwillig – Aufgaben mit Frist erscheinen zusätzlich im Kalender.
     title: Aufgaben
     new: Neue Aufgabe
     scope: Aufgaben anzeigen
@@ -1384,6 +1380,7 @@ task:
         done: Erledigt
 
 meeting:
+    new_intro: Lege zuerst Termin und Ort fest. Danach baust du die Tagesordnung auf – Mitglieder können Themen vorschlagen – und verschickst die Einladung per E-Mail mit Kalenderdatei. In der Sitzung erfasst ihr Anwesenheit, Protokoll und Beschlüsse an derselben Stelle.
     single: Sitzung
     open: Sitzung öffnen
     new: Sitzung anlegen
@@ -1506,6 +1503,7 @@ resolution:
     count: '{0}Keine Beschlüsse|{1}1 Beschluss|]1,Inf[%count% Beschlüsse'
 
 poll:
+    new_intro: Mit einer Abstimmung entscheiden die Mitglieder eurer Organisation – als Entscheidung (Ja, Nein, Enthaltung), als Auswahl aus eigenen Antworten oder als Terminfindung, offen oder geheim. Als Umlaufbeschluss wird das Ergebnis beim Beenden in die Beschlusssammlung eingetragen. Fragen an Außenstehende stellt ihr mit einer Umfrage.
     single: Abstimmung
     new: Neue Abstimmung
     start: Abstimmung starten
@@ -1600,6 +1598,7 @@ poll:
     delete_confirm: Abstimmung mit allen Stimmen löschen?
 
 survey:
+    new_intro: Umfragen richten sich an Außenstehende, z. B. Eltern. Sie antworten ohne Konto über einen Link der öffentlichen Seite, auf Wunsch anonym. Die Ergebnisse seht ihr laufend und könnt sie als CSV exportieren. Für Entscheidungen unter Mitgliedern nimm eine Abstimmung.
     new: Neue Umfrage
     edit: Umfrage bearbeiten
     delete: Umfrage löschen
