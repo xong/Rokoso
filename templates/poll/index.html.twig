@@ -1,6 +1,9 @@
 {% extends 'poll/_layout.html.twig' %}
-{% import '_partials/ui.html.twig' as ui %}
 
 {% block detail %}
-    {{ ui.empty('poll.choose', 'lucide:vote') }}
+    <div class="flex flex-col items-center gap-4 px-6 py-16 text-center">
+        {{ ux_icon('lucide:vote', {class: 'size-10 text-slate-300', 'aria-hidden': 'true'}) }}
+        <p class="max-w-md text-slate-600">{{ 'poll.intro'|trans }}</p>
+        <a href="{{ path('poll_new') }}" class="btn-primary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'empty.poll'|trans }}</a>
+    </div>
 {% endblock %}

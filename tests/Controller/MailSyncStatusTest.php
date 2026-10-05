@@ -28,7 +28,7 @@ final class MailSyncStatusTest extends AppTestCase
 
         $this->login($admin);
         $this->client->request('GET', '/');
-        self::assertSelectorTextContains('#sync-heading', 'Postfach-Abruf gestört');
+        self::assertSelectorTextContains('#sync-heading', 'E-Mail-Abruf gestört');
         self::assertSelectorTextContains('body', 'connection refused');
 
         $this->login($member);

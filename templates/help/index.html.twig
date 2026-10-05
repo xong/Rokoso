@@ -1,0 +1,56 @@
+{% extends 'layout/app.html.twig' %}
+
+{% set has_detail = article is defined %}
+
+{% block title %}{{ article is defined ? article.title ~ ' – ' ~ 'help.title'|trans : 'help.title'|trans }}{% endblock %}
+{% block list_title %}{{ 'help.title'|trans }}{% endblock %}
+{% block back_url %}{{ path('help_index') }}{% endblock %}
+
+{% macro entries(articles, current) %}
+    <ul role="list" class="px-2 pb-2">
+        {% for a in articles %}
+            {% set active = current == a.slug %}
+            <li>
+                <a href="{{ path('help_show', {slug: a.slug}) }}" {% if active %}aria-current="page"{% endif %}
+                   class="block rounded-md px-3 py-2 {{ active ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-700 hover:bg-slate-100' }}">
+                    {{ a.title }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+{% block list %}
+    {% set current = article is defined ? article.slug : '' %}
+    <nav aria-label="{{ 'help.title'|trans }}">
+        <h2 class="px-5 pt-4 pb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'help.areas'|trans }}</h2>
+        {{ _self.entries(areas, current) }}
+        {% if guides is not empty %}
+            <h2 class="px-5 pt-3 pb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'help.guides'|trans }}</h2>
+            {{ _self.entries(guides, current) }}
+        {% endif %}
+    </nav>
+{% endblock %}
+
+{% block detail_title %}{{ 'help.title'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-3xl p-4 lg:p-6">
+        <p class="mb-6 text-slate-600">{{ 'help.intro'|trans }}</p>
+        {% for group, articles in {'help.guides': guides, 'help.areas': areas} %}
+            {% if articles is not empty %}
+                <h3 class="mb-2 text-sm font-semibold">{{ group|trans }}</h3>
+                <ul role="list" class="mb-6 grid gap-2 sm:grid-cols-2">
+                    {% for a in articles %}
+                        <li>
+                            <a href="{{ path('help_show', {slug: a.slug}) }}" class="card block h-full p-3 hover:bg-slate-50">
+                                <span class="block font-medium text-brand-700">{{ a.title }}</span>
+                                <span class="mt-1 line-clamp-2 block text-sm text-slate-600">{{ a.summary }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}

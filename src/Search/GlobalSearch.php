@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Search;
 
 use App\Entity\User;
+use App\Help\HelpCenter;
 use App\Mail\MessageFilter;
 use App\Repository\CalendarItemRepository;
 use App\Repository\ContactRepository;
@@ -32,6 +33,7 @@ final readonly class GlobalSearch
         private CalendarItemRepository $items,
         private ResolutionRepository $resolutions,
         private WikiPageRepository $wiki,
+        private HelpCenter $help,
     ) {
     }
 
@@ -55,6 +57,7 @@ final readonly class GlobalSearch
             'events' => $this->items->search($user, $query, self::LIMIT),
             'resolutions' => $this->resolutions->search($user, $query, limit: self::LIMIT),
             'wiki' => \array_slice($this->wiki->findVisibleFor($user, $query), 0, self::LIMIT),
+            'help' => $this->help->search($query, $user, self::LIMIT),
         ];
 
         return array_filter($groups, static fn (array $group): bool => [] !== $group);

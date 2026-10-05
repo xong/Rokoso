@@ -4,6 +4,23 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.14.0 – 2026-10-06
+
+### Neu
+
+- **Hilfe:** Unter „Verwaltung → Hilfe“ erklärt Rokoso jetzt jeden Bereich kurz und gibt Schritt-für-Schritt-Anleitungen für typische Abläufe – z. B. jemanden einladen, ein E-Mail-Konto verbinden, ein Rundschreiben verschicken, einen Umlaufbeschluss fassen, einen Termin finden, eine Sitzung vorbereiten oder eine Umfrage durchführen. Das Fragezeichen oben in jedem Bereich führt direkt zum passenden Artikel; die Hilfe ist auch über die Suche und die Befehlspalette (Strg+K) zu finden.
+- **Erste Schritte für Mitglieder:** Wer einer Organisation beitritt, sieht auf „Heute“ jetzt eigene erste Schritte: Profilbild hochladen, Kalender abonnieren und die Zwei-Faktor-Anmeldung einrichten.
+
+### Verbessert
+
+- **Menü „Verfassen“:** Jeder Eintrag sagt in einer Zeile, wofür er gedacht ist. Sitzung, Abstimmung und Umfrage lassen sich jetzt ebenfalls direkt dort anlegen.
+- **Einleitungen:** E-Mails, Abstimmungen und Umfragen erklären auf ihrer Übersichtsseite, wofür sie da sind – und worin sich Abstimmungen (für Mitglieder) und Umfragen (für Außenstehende) unterscheiden.
+- **Einheitliche Begriffe:** Überall heißt es jetzt „Organisation“ (statt teils „Gremium“), „E-Mail-Konto“ (statt „Postfach“), „Mitglied“ (statt „Nutzer“) und „Handbuch“ (statt „Wiki“ oder „Wissen“).
+
+### Behoben
+
+- **Verwaltung:** Der Einleitungstext der Verwaltungsseite fehlte.
+
 ## 0.13.3 – 2026-10-05
 
 ### Verbessert

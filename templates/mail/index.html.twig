@@ -1,8 +1,9 @@
 {% extends 'mail/_layout.html.twig' %}
 
 {% block detail %}
-    <div class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-slate-500">
-        {{ ux_icon('lucide:mail-open', {class: 'size-10', 'aria-hidden': 'true'}) }}
-        <p>{{ 'mail.choose'|trans }}</p>
+    <div class="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
+        {{ ux_icon('lucide:mail-open', {class: 'size-10 text-slate-300', 'aria-hidden': 'true'}) }}
+        <p class="max-w-md text-slate-600">{{ 'mail.intro'|trans }}</p>
+        <p class="text-sm text-slate-500">{{ 'mail.choose'|trans }}</p>
     </div>
 {% endblock %}

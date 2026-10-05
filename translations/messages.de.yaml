@@ -36,7 +36,7 @@ nav:
     shelf: Gemerkt
     forum: Forum
     confidential: Vertraulich
-    knowledge: Wissen
+    knowledge: Handbuch
     calendar: Kalender
     contacts: Kontakte
     contacts_all: Alle Kontakte
@@ -44,6 +44,7 @@ nav:
     projects: Projekte
     organizations: Organisationen
     admin: Verwaltung
+    help: Hilfe
     bottom: Schnellnavigation
     more: Mehr
     group_plan: Planen & Entscheiden
@@ -55,10 +56,21 @@ nav:
 compose_menu:
     label: Verfassen
     email: E-Mail
+    email_help: Über ein E-Mail-Konto der Organisation, an beliebige Adressen
     direct: Direktnachricht
+    direct_help: Bleibt in Rokoso – an einzelne Personen
     topic: Forenthema
+    topic_help: Diskussion im Forum, für alle Mitglieder sichtbar
     event: Termin
+    event_help: Im gemeinsamen Kalender, auf Wunsch mit Einladung
     task: Aufgabe
+    task_help: Mit Zuständigen und auf Wunsch einer Frist
+    meeting: Sitzung
+    meeting_help: Mit Tagesordnung, Einladung und Protokoll
+    poll: Abstimmung
+    poll_help: Entscheidung oder Terminfindung unter Mitgliedern
+    survey: Umfrage
+    survey_help: Öffentliches Meinungsbild, z. B. von Eltern – ohne Konto
 
 two_factor:
     title: Zwei-Faktor-Anmeldung
@@ -154,7 +166,7 @@ account:
     deleted: Dein Konto wurde gelöscht.
 
 admin:
-    intro:Hier verwaltet ihr Organisationen, Mitglieder, E-Mail-Konten, Regeln, Textbausteine und die öffentliche Mitwirkung.
+    intro: Hier verwaltet ihr Organisationen, Mitglieder, E-Mail-Konten, Regeln, Textbausteine und die öffentliche Mitwirkung.
 
 empty:
     folder: Ordner anlegen
@@ -336,7 +348,7 @@ organization:
     role:
         label: Rolle
         admin: Administrator
-        member: Nutzer
+        member: Mitglied
         guest: Gast
     leave: Organisation verlassen
     leave_confirm: Organisation wirklich verlassen?
@@ -581,6 +593,7 @@ mail_rule:
 
 mail:
     choose: Wähle eine Nachricht aus der Liste.
+    intro: Hier kommen die E-Mails an die gemeinsamen Konten eurer Organisation und eure Direktnachrichten an. Alle Mitglieder sehen denselben Eingang – ordnet Verantwortliche zu, besprecht euch in Kommentaren und markiert Erledigtes, dann bleibt nichts liegen.
     empty: Keine Nachrichten.
     inbox_zero: Alles erledigt – der Eingang ist leer.
     open: Offen
@@ -1083,7 +1096,7 @@ folder:
 
 feature:
     mail: E-Mails
-    mail_help: Postfächer der Organisation, Regeln, Textbausteine und Rundschreiben.
+    mail_help: E-Mail-Konten der Organisation, Regeln, Textbausteine und Rundschreiben.
     forum: Forum
     forum_help: Bereiche und Themen für Diskussionen.
     calendar: Kalender
@@ -1102,12 +1115,12 @@ feature:
     projects_help: Arbeitsgruppen, die Nachrichten, Termine, Aufgaben und Dateien bündeln.
     files: Dateien
     files_help: Ordner, Versionen und Freigabelinks.
-    wiki: Wiki
-    wiki_help: Gemeinsame Wissensseiten.
+    wiki: Handbuch
+    wiki_help: Gemeinsame Wissensseiten – Abläufe, Ansprechpartner, Vorlagen.
     contacts: Kontakte
     contacts_help: Adressbuch und Verteiler.
     public_page: Öffentliche Seite
-    public_page_help: Infoseite, Kontaktformular und Newsletter-Anmeldung für Außenstehende.
+    public_page_help: Infoseite, Kontaktformular, Umfragen und Verteiler-Anmeldung für Außenstehende.
 file:
     upload: Dateien hochladen
     upload_submit: Hochladen
@@ -1378,7 +1391,7 @@ meeting:
     delete: Sitzung löschen
     delete_confirm: Sitzung mit Tagesordnung, Anwesenheit und Protokoll löschen? Beschlüsse bleiben erhalten.
     title: Titel
-    organization: Gremium
+    organization: Organisation
     starts_at: Beginn
     ends_at: Ende
     ends_at_help: Leer lassen, um die geplante Dauer der Tagesordnung zu verwenden.
@@ -1396,7 +1409,7 @@ meeting:
     past: Vergangen
     none_upcoming: Keine anstehenden Sitzungen.
     none_past: Keine vergangenen Sitzungen.
-    intro: Plane Sitzungen deiner Gremien mit Tagesordnung, lade per E-Mail ein, erfasse Anwesenheit und Protokoll und halte Beschlüsse fest.
+    intro: Plane die Sitzungen deiner Organisation mit Tagesordnung, lade per E-Mail ein, erfasse Anwesenheit und Protokoll und halte Beschlüsse fest.
     no_organization: Für Sitzungen musst du Mitglied einer Organisation sein.
     print: Drucken
     ics: Kalenderdatei
@@ -1435,7 +1448,7 @@ meeting:
         responsible_none: '– niemand –'
         duration: Dauer (Minuten)
         attachments: Unterlagen
-        attachments_help: Dateien aus der Ablage der Organisation.
+        attachments_help: Dateien der Organisation.
         number: 'TOP %n%'
         new: Tagesordnungspunkt hinzufügen
         edit: Tagesordnungspunkt bearbeiten
@@ -1483,12 +1496,12 @@ resolution:
     votes_abstain: Enthaltung
     votes_summary: '%yes% Ja · %no% Nein · %abstain% Enthaltungen'
     recorded_by: Erfasst von
-    intro: Die Beschlusssammlung enthält alle Beschlüsse deiner Gremien – durchsuchbar nach Text, Jahr und Projekt.
+    intro: Die Beschlusssammlung enthält alle Beschlüsse deiner Organisationen – durchsuchbar nach Text, Jahr und Projekt.
     none: Keine Beschlüsse gefunden.
     search: Beschlüsse durchsuchen
     year: Jahr
     all_years: Alle Jahre
-    all_organizations: Alle Gremien
+    all_organizations: Alle Organisationen
     reset: Zurücksetzen
     count: '{0}Keine Beschlüsse|{1}1 Beschluss|]1,Inf[%count% Beschlüsse'
 
@@ -1500,6 +1513,7 @@ poll:
     start_schedule: Termin finden
     schedule_title: 'Terminfindung: %title%'
     choose: Wähle links eine Abstimmung aus.
+    intro: Mit Abstimmungen entscheiden die Mitglieder eurer Organisation – offen oder geheim, mit Ja/Nein, einer Auswahl oder als Terminfindung. Als Umlaufbeschluss landet das Ergebnis direkt in der Beschlusssammlung. Meinungen von Außenstehenden sammelt ihr mit einer Umfrage.
     period: Zeitraum
     running: Laufend
     ended: Beendet
@@ -1508,7 +1522,7 @@ poll:
     until: 'bis %date%'
     deadline_was: 'Frist war %date%'
     awaiting: Deine Stimme fehlt
-    no_organization: Du bist noch in keinem Gremium und kannst daher keine Abstimmung starten.
+    no_organization: Abstimmungen gehören zu einer Organisation – du bist noch in keiner Mitglied.
     for_topic: 'Zum Forenthema „%title%“'
     for_agenda: 'Zum TOP „%title%“ der Sitzung „%meeting%“'
     for_meeting: 'Zur Sitzung „%title%“'
@@ -1519,7 +1533,7 @@ poll:
         schedule: Terminfindung
     title: Frage bzw. Titel
     description: Erläuterung
-    organization: Gremium
+    organization: Organisation
     options: Antwortmöglichkeiten
     options_help: Eine Möglichkeit pro Zeile, mindestens zwei.
     options_min: Bitte gib mindestens zwei Antwortmöglichkeiten an.
@@ -1592,6 +1606,7 @@ survey:
     delete_confirm: Umfrage mit allen Antworten löschen?
     none: Noch keine Umfragen.
     choose: Wähle links eine Umfrage aus.
+    intro: Umfragen sind Fragebögen für Außenstehende, z. B. Eltern. Sie antworten ohne Konto über einen Link der öffentlichen Seite – mit Auswahlfragen, Skalen oder Freitext. Die Ergebnisse seht ihr laufend und könnt sie als CSV exportieren. Entscheidungen im Gremium trefft ihr mit einer Abstimmung.
     no_organization: Umfragen gehören zu einer Organisation – du bist noch in keiner Mitglied.
     created: Die Umfrage wurde angelegt. Füge jetzt Fragen hinzu.
     new_hint: Hier legst du Titel und Einstellungen fest. Fragen und Antwortmöglichkeiten fügst du im nächsten Schritt hinzu.
@@ -1795,9 +1810,9 @@ public:
         intro: Einleitungstext
         intro_help: Markdown ist möglich.
         contact: Kontaktformular
-        contact_help: Nachrichten landen im Posteingang des gewählten Postfachs.
-        account: Postfach für Kontaktanfragen
-        account_none: – kein Postfach –
+        contact_help: Nachrichten landen im Eingang des gewählten E-Mail-Kontos.
+        account: E-Mail-Konto für Kontaktanfragen
+        account_none: – kein E-Mail-Konto –
         topics: Themenauswahl
         topics_help: Absender wählen ein Thema; es bestimmt Projekt und Zuständige.
         surveys: Umfragen
@@ -1843,7 +1858,7 @@ changelog:
 today:
     title: Heute
     sync:
-        title: Postfach-Abruf gestört
+        title: E-Mail-Abruf gestört
         error: 'letzter Abruf fehlgeschlagen –'
         stale: 'seit über einer Stunde nicht abgerufen (zuletzt: %date%). Läuft der Cron-Job app:mail:sync?'
     greeting: 'Hallo %name%, heute ist'
@@ -1862,32 +1877,43 @@ today:
 
 setup:
     title: Erste Schritte
-    intro: So richtet ihr Rokoso für euer Gremium ein. Erledigte Schritte werden automatisch abgehakt.
+    intro: So richtet ihr Rokoso für eure Organisation ein. Erledigte Schritte werden automatisch abgehakt.
+    intro_member: Willkommen! Mit diesen Schritten richtest du dein Konto ein. Erledigte Schritte werden automatisch abgehakt.
+    help: Mehr in der Hilfe
     dismiss: Ausblenden
     progress: '%done% von %total% Schritten erledigt'
     done: erledigt
     step:
         organization:
             label: Organisation anlegen
-            help: Die Organisation ist euer Gremium – darin liegen Mitglieder, Postfächer, Forum und Kalender.
+            help: Die Organisation steht für euer Gremium, z. B. die Stadtelternvertretung – darin liegen Mitglieder, E-Mail-Konten, Forum und Kalender.
         members:
             label: Mitglieder einladen
             help: Ladet die anderen per E-Mail ein; sie legen beim ersten Aufruf ihr Passwort fest.
         mail_account:
-            label: Gemeinsames Postfach verbinden
-            help: Mit IMAP-/SMTP-Zugangsdaten landen eingehende E-Mails in der gemeinsamen Ablage.
+            label: Gemeinsames E-Mail-Konto verbinden
+            help: Mit IMAP-/SMTP-Zugangsdaten landen eingehende E-Mails im gemeinsamen Eingang.
         board:
             label: Forum anlegen
             help: Bereiche im Forum ersetzen lange Rundmails – jedes Thema bleibt an einem Ort.
         event:
             label: Ersten Termin eintragen
             help: Termine erscheinen im gemeinsamen Kalender und lassen sich als Abo einbinden.
+        avatar:
+            label: Profilbild hochladen
+            help: Mit Bild erkennen dich die anderen schneller – in Forum, Nachrichten und Aufgaben.
+        calendar_feed:
+            label: Kalender abonnieren
+            help: Bindet die Termine deiner Organisationen in den Kalender auf Handy oder Rechner ein.
+        two_factor:
+            label: Zwei-Faktor-Anmeldung einrichten
+            help: Ein Code aus einer Authenticator-App schützt dein Konto zusätzlich zum Passwort.
 
 search:
     title: Suche
     title_for: 'Suche: %q%'
     label: Suchbegriff
-    placeholder: Nachrichten, Dateien, Forum, Kontakte, Termine, Beschlüsse, Wissen …
+    placeholder: Nachrichten, Dateien, Forum, Kontakte, Termine, Beschlüsse, Handbuch, Hilfe …
     too_short: Bitte mindestens zwei Zeichen eingeben.
     count: '{0}Keine Treffer für „%q%“.|{1}Ein Treffer für „%q%“.|]1,Inf[%count% Treffer für „%q%“.'
     none: Versuch es mit einem anderen Begriff.
@@ -1898,7 +1924,15 @@ search:
         contacts: Kontakte
         events: Termine und Aufgaben
         resolutions: Beschlüsse
-        wiki: Wissen
+        wiki: Handbuch
+        help: Hilfe
+
+help:
+    title: Hilfe
+    intro: Hier steht, wie Rokoso funktioniert – je Bereich ein kurzer Überblick und Anleitungen für typische Abläufe. Das Fragezeichen oben in jedem Bereich führt direkt zum passenden Artikel. Was eure Organisation selbst festhält, steht im Handbuch.
+    areas: Bereiche
+    guides: Anleitungen
+    link: 'Hilfe: %title%'
 
 palette:
     title: Befehlspalette

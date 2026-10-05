@@ -58,6 +58,8 @@
                                 {{ _self.result(path('resolution_show', {id: r.id}), r.number ~ ' ' ~ r.title, r.decidedOn|date('d.m.Y')) }}
                             {% elseif area == 'wiki' %}
                                 {{ _self.result(path('wiki_show', {id: r.id}), r.title, r.updatedAt|short_date) }}
+                            {% elseif area == 'help' %}
+                                {{ _self.result(path('help_show', {slug: r.slug}), r.title, r.summary) }}
                             {% endif %}
                         {% endfor %}
                     </ul>

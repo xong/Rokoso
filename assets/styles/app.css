@@ -169,6 +169,7 @@
     .markdown table { @apply block overflow-x-auto border-collapse text-left; }
     .markdown th, .markdown td { @apply border border-slate-200 px-2 py-1; }
     .markdown th { @apply bg-slate-50 font-semibold; }
+    .help-article h3 { @apply mt-6 text-base; }
 }
 
 @layer base {

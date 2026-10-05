@@ -8,6 +8,7 @@ use App\Entity\CalendarItem;
 use App\Entity\ForumBoard;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Enum\OrganizationRole;
 use App\Tests\AppTestCase;
 use Symfony\Component\BrowserKit\Cookie;
 
@@ -67,6 +68,7 @@ final class NavigationTest extends AppTestCase
         self::assertSame('Verfassen', trim($compose->text()));
         self::assertCount(1, $crawler->filter('details a[href="/forum/topic/new"]'));
         self::assertCount(1, $crawler->filter('details a[href="/calendar/new?type=task"]'));
+        self::assertStringContainsString('ohne Konto', $crawler->filter('details a[href="/surveys/new"]')->text());
         self::assertSelectorExists('nav[aria-label="Schnellnavigation"] button[data-action="shell#open"][aria-expanded="false"]');
     }
 
@@ -138,5 +140,26 @@ final class NavigationTest extends AppTestCase
         $this->client->submitForm('Ausblenden');
         $this->client->followRedirect();
         self::assertSelectorNotExists('section[aria-labelledby="setup-heading"]');
+    }
+
+    public function testMembersGetTheirOwnFirstSteps(): void
+    {
+        $admin = $this->createUser('admin@example.org', 'Ada Admin');
+        $org = $this->createOrganization($admin);
+        $member = $this->createUser();
+        $org->addMember($member, OrganizationRole::Member);
+        $this->em()->flush();
+        $this->login($member);
+
+        $this->client->request('GET', '/');
+        self::assertSelectorTextContains('section[aria-labelledby="setup-heading"]', '0 von 3');
+        self::assertSelectorExists('section[aria-labelledby="setup-heading"] a[href="/profile/security"]');
+        self::assertSelectorExists('section[aria-labelledby="setup-heading"] a[href="/help/erste-schritte"]');
+        self::assertSelectorNotExists('section[aria-labelledby="setup-heading"] a[href="/organizations/new"]');
+
+        $this->client->request('GET', '/profile/calendar');
+        $this->client->submitForm('Abo-Link erzeugen');
+        $this->client->request('GET', '/');
+        self::assertSelectorTextContains('section[aria-labelledby="setup-heading"]', '1 von 3');
     }
 }

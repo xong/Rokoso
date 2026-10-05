@@ -24,6 +24,7 @@
     {label: 'nav.notifications', icon: 'lucide:bell', route: 'notification_index', keys: 'g n'},
     {label: 'nav.profile', icon: 'lucide:user', route: 'profile_edit'},
     {label: 'changelog.title', icon: 'lucide:sparkles', route: 'profile_changelog'},
+    {label: 'help.title', icon: 'lucide:circle-help', route: 'help_index'},
 ] %}
 {# areas switched off in every organization of the user are left out (shortcuts included) #}
 {% set commands = commands|filter(c => route_available(c.route)) %}
@@ -49,6 +50,15 @@
                 {{ ux_icon(command.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                 <span class="truncate">{{ command.label|trans }}</span>
                 {% if command.keys is defined %}<kbd class="ml-auto font-mono text-xs text-slate-500" aria-hidden="true">{{ command.keys }}</kbd>{% endif %}
+            </li>
+        {% endfor %}
+        {# help articles: only shown when typing (data-on-query) #}
+        {% for article in help_articles() %}
+            <li role="option" id="palette-help-{{ article.slug }}" aria-selected="false" data-url="{{ path('help_show', {slug: article.slug}) }}" data-on-query data-palette-target="option" hidden
+                data-action="click->palette#choose mousemove->palette#hover"
+                class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 aria-selected:bg-brand-50 aria-selected:text-brand-700">
+                {{ ux_icon('lucide:circle-help', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                <span class="truncate">{{ 'help.link'|trans({'%title%': article.title}) }}</span>
             </li>
         {% endfor %}
         <li role="option" id="palette-option-search" aria-selected="false" data-url="{{ path('search') }}" data-search="1" data-palette-target="option"

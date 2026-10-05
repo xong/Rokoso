@@ -15,12 +15,13 @@ use App\Repository\OrganizationRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Setup assistant on the start page: the first steps a new team takes, each marked done
- * as soon as the data exists. Shown until all steps are done or the user hides it.
+ * Setup assistant on the start page: the first steps a new team takes (people without an organization and admins)
+ * or a new member takes (profile, calendar, security), each marked done as soon as the data exists.
+ * Shown until all steps are done or the user hides it.
  */
 final readonly class SetupChecklist
 {
-    private const array FEATURES = ['mail_account' => Feature::Mail, 'board' => Feature::Forum, 'event' => Feature::Calendar];
+    private const array FEATURES = ['mail_account' => Feature::Mail, 'board' => Feature::Forum, 'event' => Feature::Calendar, 'calendar_feed' => Feature::Calendar];
 
     public function __construct(
         private Features $features,
@@ -34,9 +35,10 @@ final readonly class SetupChecklist
     }
 
     /**
-     * Steps for the user, or null if the checklist should not be shown.
+     * Steps for the user (`member`: the variant for members who set nothing up), or null if the checklist
+     * should not be shown.
      *
-     * @return list<array{key: string, done: bool, url: string}>|null
+     * @return array{member: bool, steps: list<array{key: string, done: bool, url: string}>}|null
      */
     public function stepsFor(User $user): ?array
     {
@@ -46,14 +48,54 @@ final readonly class SetupChecklist
 
         $organizations = $this->organizations->findForUser($user);
         $admin = array_values(array_filter($organizations, static fn (Organization $o): bool => $o->isAdmin($user)));
-        // only for people who set things up: without an organization or as admin of one
-        if ([] !== $organizations && [] === $admin) {
-            return null;
+        $member = [] !== $organizations && [] === $admin;
+        $steps = $this->filter($user, $member ? $this->memberSteps($user) : $this->adminSteps($user, $admin));
+
+        foreach ($steps as $step) {
+            if (!$step['done']) {
+                return ['member' => $member, 'steps' => $steps];
+            }
         }
+
+        return null;
+    }
+
+    /**
+     * @return list<array{key: string, done: bool, url: string}>
+     */
+    private function memberSteps(User $user): array
+    {
+        return [
+            ['key' => 'avatar', 'done' => null !== $user->getAvatar(), 'url' => $this->urls->generate('profile_edit')],
+            ['key' => 'calendar_feed', 'done' => null !== $user->getCalendarToken(), 'url' => $this->urls->generate('profile_calendar')],
+            ['key' => 'two_factor', 'done' => $user->isTotpAuthenticationEnabled(), 'url' => $this->urls->generate('profile_security')],
+        ];
+    }
+
+    /**
+     * Steps of areas switched off in all of the user's organizations are left out.
+     *
+     * @param list<array{key: string, done: bool, url: string}> $steps
+     *
+     * @return list<array{key: string, done: bool, url: string}>
+     */
+    private function filter(User $user, array $steps): array
+    {
+        return array_values(array_filter($steps, fn (array $step): bool => null === ($feature = self::FEATURES[$step['key']] ?? null)
+            || $this->features->isAvailable($user, $feature)));
+    }
+
+    /**
+     * @param list<Organization> $admin organizations the user administers
+     *
+     * @return list<array{key: string, done: bool, url: string}>
+     */
+    private function adminSteps(User $user, array $admin): array
+    {
         $first = $admin[0] ?? null;
         $show = null !== $first ? $this->urls->generate('organization_show', ['id' => $first->getId()]) : null;
 
-        $steps = [
+        return [
             [
                 'key' => 'organization',
                 'done' => null !== $first,
@@ -80,16 +122,5 @@ final readonly class SetupChecklist
                 'url' => $this->urls->generate('calendar_item_new'),
             ],
         ];
-        // steps of areas switched off in all of the user's organizations are left out
-        $steps = array_values(array_filter($steps, fn (array $step): bool => null === ($feature = self::FEATURES[$step['key']] ?? null)
-            || $this->features->isAvailable($user, $feature)));
-
-        foreach ($steps as $step) {
-            if (!$step['done']) {
-                return $steps;
-            }
-        }
-
-        return null;
     }
 }

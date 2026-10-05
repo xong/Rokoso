@@ -1,0 +1,11 @@
+{% extends 'help/index.html.twig' %}
+
+{% set detail_scroll_focus = true %}
+
+{% block detail_title %}{{ article.title }}{% endblock %}
+
+{% block detail %}
+    <article class="max-w-3xl p-4 lg:p-6">
+        <div class="markdown help-article">{{ article.body|markdown }}</div>
+    </article>
+{% endblock %}

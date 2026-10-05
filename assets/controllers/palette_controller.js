@@ -58,7 +58,9 @@ export default class extends Controller {
                 const label = this.searchLabelTarget;
                 label.textContent = query === '' ? label.textContent : label.dataset.template.replace('__Q__', query);
             } else {
-                option.hidden = needle !== '' && !option.textContent.toLocaleLowerCase('de').includes(needle);
+                // help articles (data-on-query) only appear once something is typed
+                const hideEmpty = option.dataset.onQuery !== undefined;
+                option.hidden = needle === '' ? hideEmpty : !option.textContent.toLocaleLowerCase('de').includes(needle);
             }
             if (!option.hidden) {
                 visible++;

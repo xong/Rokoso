@@ -85,13 +85,14 @@ final class Sidebar
                 'route' => 'organization_index',
                 'match' => ['organization_', 'mail_account_', 'mail_rule_', 'snippet_', 'public_settings', 'public_topic_'],
             ],
+            ['label' => 'nav.help', 'icon' => 'lucide:circle-help', 'route' => 'help_index', 'match' => ['help_']],
             // only for platform admins (see getGroups())
             ['label' => 'nav.platform', 'icon' => 'lucide:server-cog', 'route' => 'platform_users', 'match' => ['platform_'], 'role' => 'ROLE_PLATFORM_ADMIN'],
         ]],
     ];
 
     /**
-     * Entries of the "Compose" menu.
+     * Entries of the "Compose" menu; `<label>_help` says in one line what each is for.
      *
      * @var list<array{label: string, icon: string, route: string, params: array<string, string>, feature?: Feature}>
      */
@@ -101,6 +102,9 @@ final class Sidebar
         ['label' => 'compose_menu.topic', 'icon' => 'lucide:messages-square', 'route' => 'forum_topic_choose', 'params' => []],
         ['label' => 'compose_menu.event', 'icon' => 'lucide:calendar-plus', 'route' => 'calendar_item_new', 'params' => [], 'feature' => Feature::Calendar],
         ['label' => 'compose_menu.task', 'icon' => 'lucide:list-plus', 'route' => 'calendar_item_new', 'params' => ['type' => 'task'], 'feature' => Feature::Tasks],
+        ['label' => 'compose_menu.meeting', 'icon' => 'lucide:presentation', 'route' => 'meeting_new', 'params' => []],
+        ['label' => 'compose_menu.poll', 'icon' => 'lucide:vote', 'route' => 'poll_new', 'params' => []],
+        ['label' => 'compose_menu.survey', 'icon' => 'lucide:clipboard-list', 'route' => 'survey_new', 'params' => []],
     ];
 
     public function __construct(

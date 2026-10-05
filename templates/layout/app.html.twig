@@ -9,6 +9,14 @@
 {# show_list = false: nur Detailspalte in voller Breite (z. B. Kalender) #}
 {% set show_list = show_list ?? true %}
 {% set nav_collapsed = app.request.cookies.get('nav_collapsed') == '1' %}
+{# "?" in the column header: help article for the current route (HelpCenter) #}
+{% set current_help = help_article() %}
+{% set help_link %}{% if current_help %}
+    <a href="{{ path('help_show', {slug: current_help.slug}) }}" aria-label="{{ 'help.link'|trans({'%title%': current_help.title}) }}" title="{{ 'help.link'|trans({'%title%': current_help.title}) }}"
+       class="grid size-10 place-items-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-700">
+        {{ ux_icon('lucide:circle-help', {class: 'size-5', 'aria-hidden': 'true'}) }}
+    </a>
+{% endif %}{% endset %}
 
 {% block body %}
     {{ include('_partials/flashes.html.twig') }}
@@ -43,7 +51,7 @@
                         {{ ux_icon('lucide:menu', {class: 'size-5', 'aria-hidden': 'true'}) }}
                     </button>
                     <h1 id="list-heading" class="truncate text-base font-semibold">{% block list_title %}{% endblock %}</h1>
-                    <div class="ml-auto flex items-center gap-1">{% block list_actions %}{% endblock %}</div>
+                    <div class="ml-auto flex items-center gap-1">{% block list_actions %}{% endblock %}{{ help_link }}</div>
                 </header>
                 <div class="min-h-0 flex-1 overflow-y-auto">
                     {% block list %}{% endblock %}
@@ -67,7 +75,7 @@
                     {% endif %}
                     {% set heading_tag = show_list ? 'h2' : 'h1' %}
                     <{{ heading_tag }} id="detail-heading" class="truncate text-base font-semibold">{% block detail_title %}{% endblock %}</{{ heading_tag }}>
-                    <div class="ml-auto flex items-center gap-1">{% block detail_actions %}{% endblock %}</div>
+                    <div class="ml-auto flex items-center gap-1">{% block detail_actions %}{% endblock %}{{ show_list ? '' : help_link }}</div>
                 </header>
                 {# long text without links: keyboard users can scroll after focusing the region #}
                 <div class="min-h-0 flex-1 overflow-y-auto"{% if detail_scroll_focus|default(false) %} tabindex="0"{% endif %}>
