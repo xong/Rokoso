@@ -244,6 +244,7 @@ final class PublicTest extends AppTestCase
     {
         $member = $this->createUser();
         $this->org->addMember($member, OrganizationRole::Member);
+        $this->em()->persist((new ContactGroup($this->org))->setName('Rundbrief')->setPublicSubscribe(true));
         $this->em()->flush();
         $url = '/organizations/'.$this->org->getId().'/public';
 
@@ -258,5 +259,29 @@ final class PublicTest extends AppTestCase
         self::assertResponseRedirects();
         $this->client->request('GET', '/p/neu-name');
         self::assertResponseIsSuccessful();
+    }
+
+    public function testSubscriptionNeedsAPublicGroup(): void
+    {
+        // without a publicly subscribable group neither the navigation nor the page offers it
+        $this->em()->persist((new ContactGroup($this->org))->setName('Rundbrief'));
+        $this->em()->flush();
+        $this->client->request('GET', '/p/sev-test');
+        self::assertSelectorNotExists('a[href="/p/sev-test/subscribe"]');
+        $this->client->request('GET', '/p/sev-test/subscribe');
+        self::assertResponseStatusCodeSame(404);
+
+        $this->login($this->admin);
+        $crawler = $this->client->request('GET', '/organizations/'.$this->org->getId().'/public');
+        $this->client->submit($crawler->selectButton('Speichern')->form());
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('main', 'mindestens ein Verteiler öffentlich abonnierbar');
+
+        $this->em()->getConnection()->executeStatement('UPDATE contact_group SET public_subscribe = 1');
+        $crawler = $this->client->request('GET', '/organizations/'.$this->org->getId().'/public');
+        $this->client->submit($crawler->selectButton('Speichern')->form());
+        self::assertResponseRedirects();
+        $this->client->request('GET', '/p/sev-test');
+        self::assertSelectorCount(2, 'a[href="/p/sev-test/subscribe"]');
     }
 }

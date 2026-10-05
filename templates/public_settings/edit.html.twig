@@ -31,7 +31,7 @@
                 {{ form_row(form.topicsEnabled) }}
                 {{ form_row(form.surveysEnabled) }}
                 {{ form_row(form.eventsEnabled) }}
-                {{ form_row(form.subscribeEnabled) }}
+                {{ form_row(form.subscribeEnabled, {help_translation_parameters: {'%count%': subscribable}}) }}
                 {{ form_row(form.confidentialEnabled, {help_translation_parameters: {'%count%': settings.organization.confidants|length}}) }}
             </fieldset>
             <fieldset class="mb-6">

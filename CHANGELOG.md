@@ -10,6 +10,10 @@ Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nut
 
 - **Vertraulicher Kontakt:** über die öffentliche Seite können Eltern und andere euch anonym etwas mitteilen. Sie bekommen einen Zugangscode, mit dem sie eure Antworten lesen und weiterschreiben – ganz ohne Konto. Lesen und antworten können nur Mitglieder, die in der Mitgliederverwaltung als **Vertrauensperson** markiert sind; die Inhalte werden verschlüsselt gespeichert und nach einer einstellbaren Frist gelöscht. Einschalten unter Verwaltung → Öffentliche Seite.
 
+### Verbessert
+
+- **Verteiler-Abo:** der Link „Verteiler abonnieren“ erscheint auf der öffentlichen Seite nur noch, wenn mindestens ein Verteiler öffentlich abonnierbar ist – vorher führte er sonst auf eine leere Seite. In den Einstellungen siehst du, wie viele Verteiler das gerade sind.
+
 ## 0.10.0 – 2026-10-05
 
 ### Neu

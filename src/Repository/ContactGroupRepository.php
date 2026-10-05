@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\ContactGroup;
 use App\Entity\Membership;
+use App\Entity\Organization;
 use App\Entity\User;
 use App\Enum\Feature;
 use App\Service\Features;
@@ -40,5 +41,16 @@ class ContactGroupRepository extends ServiceEntityRepository
             ->addOrderBy('g.name')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Groups externals may subscribe to on the public page.
+     *
+     * @return list<ContactGroup>
+     */
+    public function findPublicSubscribe(Organization $organization): array
+    {
+        /* @var list<ContactGroup> */
+        return $this->findBy(['organization' => $organization, 'publicSubscribe' => true], ['name' => 'ASC']);
     }
 }

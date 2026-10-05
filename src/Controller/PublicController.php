@@ -309,8 +309,7 @@ final class PublicController extends AbstractController
      */
     private function subscribableGroups(PublicSettings $settings): array
     {
-        /* @var list<ContactGroup> */
-        return $this->em->getRepository(ContactGroup::class)->findBy(['organization' => $settings->getOrganization(), 'publicSubscribe' => true], ['name' => 'ASC']);
+        return $this->em->getRepository(ContactGroup::class)->findPublicSubscribe($settings->getOrganization());
     }
 
     /**

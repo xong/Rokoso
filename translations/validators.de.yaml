@@ -31,6 +31,7 @@ public:
     consent_required: Bitte bestätige den Datenschutzhinweis.
     groups_required: Bitte wähle mindestens einen Verteiler.
     confidants_required: Für den vertraulichen Kontakt braucht die Organisation mindestens eine Vertrauensperson.
+    subscribe_groups_required: Für das Verteiler-Abo muss mindestens ein Verteiler öffentlich abonnierbar sein.
 survey:
     options_required: Auswahlfragen brauchen mindestens zwei Antwortmöglichkeiten.
     answer_required: Bitte beantworte diese Frage.

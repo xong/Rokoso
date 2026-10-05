@@ -9,6 +9,7 @@ use App\Entity\PublicTopic;
 use App\Entity\User;
 use App\Form\PublicSettingsFormType;
 use App\Form\PublicTopicFormType;
+use App\Repository\ContactGroupRepository;
 use App\Repository\MailAccountRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
@@ -16,12 +17,14 @@ use App\Repository\PublicSettingsRepository;
 use App\Security\Voter\OrganizationVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Settings of the public participation pages of an organization (admins only).
@@ -39,11 +42,15 @@ final class PublicSettingsController extends AbstractController
     }
 
     #[Route('', name: 'public_settings')]
-    public function edit(Request $request, Organization $organization, #[CurrentUser] User $user, MailAccountRepository $accounts): Response
+    public function edit(Request $request, Organization $organization, #[CurrentUser] User $user, MailAccountRepository $accounts, ContactGroupRepository $groups, TranslatorInterface $translator): Response
     {
         $settings = $this->settings->forOrganization($organization);
+        $subscribable = \count($groups->findPublicSubscribe($organization));
         $form = $this->createForm(PublicSettingsFormType::class, $settings, ['accounts' => $accounts->findForOrganization($organization)]);
         $form->handleRequest($request);
+        if ($form->isSubmitted() && $settings->isSubscribeEnabled() && 0 === $subscribable) {
+            $form->get('subscribeEnabled')->addError(new FormError($translator->trans('public.subscribe_groups_required', [], 'validators')));
+        }
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($settings);
             $this->em->flush();
@@ -56,6 +63,7 @@ final class PublicSettingsController extends AbstractController
             'organizations' => $this->organizations->findForUser($user),
             'organization' => $organization,
             'settings' => $settings,
+            'subscribable' => $subscribable,
             'form' => $form,
         ], $form->isSubmitted() ? new Response(null, Response::HTTP_UNPROCESSABLE_ENTITY) : null);
     }

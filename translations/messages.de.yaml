@@ -1768,7 +1768,7 @@ public:
         events: Termine
         events_help: Öffentliche Termine anzeigen und Anmeldungen erlauben.
         subscribe: Verteiler-Abo
-        subscribe_help: Externe können sich in öffentlich abonnierbare Verteiler eintragen.
+        subscribe_help: 'Externe können sich in öffentlich abonnierbare Verteiler eintragen (zurzeit %count%). Das stellst du beim jeweiligen Verteiler ein.'
         confidential: Vertraulicher Kontakt
         confidential_help: 'Anonyme Nachrichten mit Verlauf, nur für Vertrauenspersonen lesbar (zurzeit %count%). Vertrauenspersonen legst du bei den Mitgliedern fest.'
         privacy: Datenschutzhinweis
