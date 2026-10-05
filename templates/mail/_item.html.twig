@@ -3,7 +3,7 @@
 {% set sender = m.internal and m.author ? m.author.name : m.fromLabel %}
 {% set org_color = m.organization ? m.organization.color : '#94a3b8' %}
 <div data-controller="swipe" data-action="touchstart->swipe#start:passive touchmove->swipe#move:passive touchend->swipe#end touchcancel->swipe#cancel"
-     class="group/msg relative flex overflow-hidden border-b border-l-4 border-slate-100 {{ active ? 'bg-brand-50' : 'hover:bg-slate-50' }}" style="border-left-color: {{ org_color }}">
+     class="group/msg @container/msg relative flex overflow-hidden border-b border-l-4 border-slate-100 {{ active ? 'bg-brand-50' : 'hover:bg-slate-50' }}" style="border-left-color: {{ org_color }}">
     <label class="flex shrink-0 items-start py-3 pl-2">
         <input type="checkbox" name="ids[]" value="{{ m.id }}" form="bulk-form" class="size-4" data-bulk-target="item" data-action="bulk#update">
         <span class="sr-only">{{ 'mail.bulk.select'|trans({'%subject%': m.subject ?: 'mail.no_subject'|trans}) }}</span>
@@ -48,12 +48,12 @@
             </span>
         </span>
     </a>
-    {# Funktionsleiste bei Hover/Fokus #}
+    {# Funktionsleiste bei Hover/Fokus; in schmalen Spalten ab der Checkbox, notfalls umgebrochen #}
     {% set fields = {folder: folder, return: 'list'} %}
     {% for key, value in filter.params %}{% set fields = fields|merge({('params[' ~ key ~ ']'): value}) %}{% endfor %}
     {% set compose_route = m.internal ? 'mail_message_new' : 'mail_compose' %}
     {% set id_fields = fields|merge({'ids[]': m.id}) %}
-    <div class="absolute bottom-1 left-20 hidden items-center gap-0.5 rounded-md bg-surface p-0.5 shadow-sm ring-1 ring-slate-200 group-focus-within/msg:flex group-hover/msg:flex">
+    <div class="absolute bottom-1 left-1 hidden max-w-[calc(100%-0.5rem)] flex-wrap items-center gap-0.5 @xs/msg:left-20 rounded-md bg-surface p-0.5 shadow-sm ring-1 ring-slate-200 group-focus-within/msg:flex group-hover/msg:flex">
         {% if m.spam and not m.trashed %}
             {{ ui.post_button(path('mail_action'), 'mail-action', 'mail.spam.not_spam',
                 {class: 'btn-icon size-7 hover:text-emerald-600', icon: 'lucide:shield-check', icon_only: true, fields: id_fields|merge({action: 'not_spam'}),
