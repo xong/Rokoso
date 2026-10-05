@@ -7,10 +7,20 @@
 {% block detail %}
     <div class="max-w-2xl p-4 lg:p-6">
         {{ form_start(form) }}
+            {% if not survey %}
+                <p class="mb-4 flex items-start gap-2 rounded-md bg-brand-50 p-3 text-sm text-brand-800">
+                    {{ ux_icon('lucide:info', {class: 'mt-0.5 size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'survey.new_hint'|trans }}
+                </p>
+            {% endif %}
             {{ form_errors(form) }}
             {{ form_rest(form) }}
             <div class="flex gap-2">
-                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                {% if survey %}
+                    <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                {% else %}
+                    <button type="submit" class="btn-primary">{{ 'survey.continue_to_questions'|trans }} {{ ux_icon('lucide:arrow-right', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+                {% endif %}
                 <a href="{{ survey ? path('survey_show', {id: survey.id}) : path('survey_index') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
             </div>
         {{ form_end(form) }}

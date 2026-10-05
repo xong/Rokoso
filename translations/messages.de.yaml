@@ -1594,6 +1594,8 @@ survey:
     choose: Wähle links eine Umfrage aus.
     no_organization: Umfragen gehören zu einer Organisation – du bist noch in keiner Mitglied.
     created: Die Umfrage wurde angelegt. Füge jetzt Fragen hinzu.
+    new_hint: Hier legst du Titel und Einstellungen fest. Fragen und Antwortmöglichkeiten fügst du im nächsten Schritt hinzu.
+    continue_to_questions: Weiter zu den Fragen
     deleted: Die Umfrage wurde gelöscht.
     title: Titel
     description: Beschreibung

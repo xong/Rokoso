@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.13.3 – 2026-10-05
+
+### Verbessert
+
+- **Neue Umfrage:** Beim Anlegen steht jetzt dabei, dass Fragen und Antwortmöglichkeiten im nächsten Schritt folgen; der Knopf heißt „Weiter zu den Fragen“.
+
 ## 0.13.2 – 2026-10-05
 
 ### Behoben
