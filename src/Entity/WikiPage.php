@@ -37,12 +37,12 @@ class WikiPage
 
     /** @var Collection<int, WikiPage> */
     #[ORM\OneToMany(targetEntity: WikiPage::class, mappedBy: 'parent')]
-    #[ORM\OrderBy(['title' => 'ASC'])]
+    #[ORM\OrderBy(['title' => \SortDirection::Ascending])]
     private Collection $children;
 
     /** @var Collection<int, WikiRevision> */
     #[ORM\OneToMany(targetEntity: WikiRevision::class, mappedBy: 'page')]
-    #[ORM\OrderBy(['createdAt' => 'DESC', 'id' => 'DESC'])]
+    #[ORM\OrderBy(['createdAt' => \SortDirection::Descending, 'id' => \SortDirection::Descending])]
     private Collection $revisions;
 
     #[ORM\ManyToOne]

@@ -84,7 +84,7 @@ class Meeting
 
     /** @var Collection<int, AgendaItem> */
     #[ORM\OneToMany(targetEntity: AgendaItem::class, mappedBy: 'meeting', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
+    #[ORM\OrderBy(['position' => \SortDirection::Ascending, 'id' => \SortDirection::Ascending])]
     private Collection $agendaItems;
 
     /** @var Collection<int, Attendance> */

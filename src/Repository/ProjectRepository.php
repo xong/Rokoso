@@ -48,13 +48,13 @@ class ProjectRepository extends ServiceEntityRepository
     public function findArchivedFor(User $user): array
     {
         /* @var list<Project> */
-        return $this->visibleQuery($user)->andWhere('p.archivedAt IS NOT NULL')->orderBy('p.archivedAt', 'DESC')->getQuery()->getResult();
+        return $this->visibleQuery($user)->andWhere('p.archivedAt IS NOT NULL')->orderBy('p.archivedAt', \SortDirection::Descending)->getQuery()->getResult();
     }
 
     public function visibleQuery(User $user, string $alias = 'p'): QueryBuilder
     {
         return $this->createQueryBuilder($alias)
-            ->leftJoin(Membership::class, 'pm', 'WITH', \sprintf('pm.organization = %s.organization AND pm.user = :viewer AND ', $alias).Membership::fullDql('pm'))
+            ->leftJoin(Membership::class, 'pm', 'ON', \sprintf('pm.organization = %s.organization AND pm.user = :viewer AND ', $alias).Membership::fullDql('pm'))
             ->andWhere(\sprintf('pm.id IS NOT NULL OR (%1$s.organization IS NULL AND %1$s.createdBy = :viewer) OR ', $alias).Membership::guestDql($alias))
             ->andWhere($this->features->dql('IDENTITY('.$alias.'.organization)', Feature::Projects))
             ->setParameter('viewer', $user);

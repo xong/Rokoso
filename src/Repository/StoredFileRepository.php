@@ -30,7 +30,7 @@ class StoredFileRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('f')
             ->andWhere('f.project = :project')
             ->setParameter('project', $project)
-            ->orderBy('f.createdAt', 'DESC')
+            ->orderBy('f.createdAt', \SortDirection::Descending)
             ->getQuery()->getResult();
     }
 
@@ -95,7 +95,7 @@ class StoredFileRepository extends ServiceEntityRepository
             ->andWhere('f.filename LIKE :q')
             ->setParameter('folders', $folders)
             ->setParameter('q', '%'.addcslashes($query, '%_\\').'%')
-            ->orderBy('f.createdAt', 'DESC')
+            ->orderBy('f.createdAt', \SortDirection::Descending)
             ->setMaxResults($limit)
             ->getQuery()->getResult();
     }

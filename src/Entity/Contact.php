@@ -102,7 +102,7 @@ class Contact
 
     /** @var Collection<int, ContactGroup> */
     #[ORM\ManyToMany(targetEntity: ContactGroup::class, mappedBy: 'contacts')]
-    #[ORM\OrderBy(['name' => 'ASC'])]
+    #[ORM\OrderBy(['name' => \SortDirection::Ascending])]
     private Collection $groups;
 
     public function __construct(

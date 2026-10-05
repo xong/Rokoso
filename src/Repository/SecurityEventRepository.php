@@ -29,8 +29,8 @@ class SecurityEventRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('e')
             ->leftJoin('e.user', 'u')->addSelect('u')
             ->leftJoin('e.actor', 'a')->addSelect('a')
-            ->orderBy('e.createdAt', 'DESC')
-            ->addOrderBy('e.id', 'DESC')
+            ->orderBy('e.createdAt', \SortDirection::Descending)
+            ->addOrderBy('e.id', \SortDirection::Descending)
             ->setMaxResults($limit);
         if (null !== $user) {
             $qb->andWhere('e.user = :user')->setParameter('user', $user);

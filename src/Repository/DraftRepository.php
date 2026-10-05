@@ -35,7 +35,7 @@ final class DraftRepository extends ServiceEntityRepository
             ->andWhere('d.owner = :user')
             ->andWhere('d.sendAt IS NULL')
             ->setParameter('user', $user)
-            ->orderBy('d.updatedAt', 'DESC')
+            ->orderBy('d.updatedAt', \SortDirection::Descending)
             ->getQuery()
             ->getResult();
     }
@@ -63,7 +63,7 @@ final class DraftRepository extends ServiceEntityRepository
             ->andWhere('d.owner = :user')
             ->andWhere('d.sendAt IS NOT NULL')
             ->setParameter('user', $user)
-            ->orderBy('d.sendAt', 'ASC')
+            ->orderBy('d.sendAt', \SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }
@@ -77,7 +77,7 @@ final class DraftRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('d')
             ->andWhere('d.sendAt <= :now')
             ->setParameter('now', $now)
-            ->orderBy('d.sendAt', 'ASC')
+            ->orderBy('d.sendAt', \SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }

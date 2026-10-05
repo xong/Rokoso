@@ -28,7 +28,7 @@ final class ConfidentialCaseRepository extends ServiceEntityRepository
     public function visibleQuery(User $user, string $alias = 'c'): QueryBuilder
     {
         return $this->createQueryBuilder($alias)
-            ->join(Membership::class, 'cm', 'WITH', \sprintf('cm.organization = %s.organization AND cm.user = :confidant AND cm.confidant = true AND %s', $alias, Membership::fullDql('cm')))
+            ->join(Membership::class, 'cm', 'ON', \sprintf('cm.organization = %s.organization AND cm.user = :confidant AND cm.confidant = true AND %s', $alias, Membership::fullDql('cm')))
             ->setParameter('confidant', $user);
     }
 
@@ -40,7 +40,7 @@ final class ConfidentialCaseRepository extends ServiceEntityRepository
         /* @var list<ConfidentialCase> */
         return $this->visibleQuery($user)
             ->andWhere($closed ? 'c.closedOn IS NOT NULL' : 'c.closedOn IS NULL')
-            ->orderBy('c.staffUnread', 'DESC')->addOrderBy('c.lastActivityOn', 'DESC')->addOrderBy('c.id', 'DESC')
+            ->orderBy('c.staffUnread', \SortDirection::Descending)->addOrderBy('c.lastActivityOn', \SortDirection::Descending)->addOrderBy('c.id', \SortDirection::Descending)
             ->getQuery()->getResult();
     }
 

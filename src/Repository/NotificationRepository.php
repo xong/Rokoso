@@ -26,7 +26,7 @@ class NotificationRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('n')
             ->andWhere('n.recipient = :user')->setParameter('user', $user)
-            ->orderBy('n.createdAt', 'DESC')->addOrderBy('n.id', 'DESC')
+            ->orderBy('n.createdAt', \SortDirection::Descending)->addOrderBy('n.id', \SortDirection::Descending)
             ->setMaxResults($limit);
         if ($unreadOnly) {
             $qb->andWhere('n.readAt IS NULL');
@@ -80,7 +80,7 @@ class NotificationRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('n')
             ->andWhere('n.recipient = :user')->andWhere('n.readAt IS NULL')->andWhere('n.emailedAt IS NULL')
             ->setParameter('user', $user)
-            ->orderBy('n.createdAt', 'ASC');
+            ->orderBy('n.createdAt', \SortDirection::Ascending);
         if (null !== $createdBefore) {
             $qb->andWhere('n.createdAt < :before')->setParameter('before', $createdBefore);
         }

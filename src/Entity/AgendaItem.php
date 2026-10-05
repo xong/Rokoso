@@ -61,12 +61,12 @@ class AgendaItem
 
     /** @var Collection<int, Resolution> */
     #[ORM\OneToMany(targetEntity: Resolution::class, mappedBy: 'agendaItem')]
-    #[ORM\OrderBy(['id' => 'ASC'])]
+    #[ORM\OrderBy(['id' => \SortDirection::Ascending])]
     private Collection $resolutions;
 
     /** @var Collection<int, CalendarItem> */
     #[ORM\OneToMany(targetEntity: CalendarItem::class, mappedBy: 'agendaItem')]
-    #[ORM\OrderBy(['id' => 'ASC'])]
+    #[ORM\OrderBy(['id' => \SortDirection::Ascending])]
     private Collection $tasks;
 
     public function __construct(

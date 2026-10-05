@@ -50,12 +50,12 @@ class Survey
 
     /** @var Collection<int, SurveyQuestion> */
     #[ORM\OneToMany(targetEntity: SurveyQuestion::class, mappedBy: 'survey', cascade: ['persist'], orphanRemoval: true)]
-    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
+    #[ORM\OrderBy(['position' => \SortDirection::Ascending, 'id' => \SortDirection::Ascending])]
     private Collection $questions;
 
     /** @var Collection<int, SurveyResponse> */
     #[ORM\OneToMany(targetEntity: SurveyResponse::class, mappedBy: 'survey', orphanRemoval: true)]
-    #[ORM\OrderBy(['createdAt' => 'ASC'])]
+    #[ORM\OrderBy(['createdAt' => \SortDirection::Ascending])]
     private Collection $responses;
 
     #[ORM\Column]

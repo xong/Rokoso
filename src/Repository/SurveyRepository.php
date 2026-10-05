@@ -34,10 +34,10 @@ class SurveyRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('s')
             ->addSelect('o')
             ->join('s.organization', 'o')
-            ->join(Membership::class, 'vm', 'WITH', 'vm.organization = o AND vm.user = :viewer AND '.Membership::fullDql('vm'))
+            ->join(Membership::class, 'vm', 'ON', 'vm.organization = o AND vm.user = :viewer AND '.Membership::fullDql('vm'))
             ->andWhere($this->features->dql('o.id', Feature::Surveys))
             ->setParameter('viewer', $user)
-            ->orderBy('s.createdAt', 'DESC')
+            ->orderBy('s.createdAt', \SortDirection::Descending)
             ->getQuery()
             ->getResult();
     }
@@ -53,7 +53,7 @@ class SurveyRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('s')
             ->where('s.organization = :org AND s.listed = true AND s.openedAt IS NOT NULL AND s.closedAt IS NULL')
             ->setParameter('org', $organization)
-            ->orderBy('s.openedAt', 'DESC')
+            ->orderBy('s.openedAt', \SortDirection::Descending)
             ->getQuery()
             ->getResult();
     }

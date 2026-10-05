@@ -34,8 +34,8 @@ class ResolutionRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('r')
             ->where('r.organization = :org AND r.public = true')
             ->setParameter('org', $organization)
-            ->orderBy('r.decidedOn', 'DESC')
-            ->addOrderBy('r.id', 'DESC')
+            ->orderBy('r.decidedOn', \SortDirection::Descending)
+            ->addOrderBy('r.id', \SortDirection::Descending)
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
@@ -49,11 +49,11 @@ class ResolutionRepository extends ServiceEntityRepository
     public function search(User $user, ?string $query = null, ?int $year = null, ?int $projectId = null, ?int $organizationId = null, ?int $limit = 200): array
     {
         $qb = $this->createQueryBuilder('r')
-            ->join(Membership::class, 'vm', 'WITH', 'vm.organization = r.organization AND vm.user = :viewer AND '.Membership::fullDql('vm'))
+            ->join(Membership::class, 'vm', 'ON', 'vm.organization = r.organization AND vm.user = :viewer AND '.Membership::fullDql('vm'))
             ->andWhere($this->features->dql('IDENTITY(r.organization)', Feature::Resolutions))
             ->setParameter('viewer', $user)
-            ->orderBy('r.decidedOn', 'DESC')
-            ->addOrderBy('r.id', 'DESC')
+            ->orderBy('r.decidedOn', \SortDirection::Descending)
+            ->addOrderBy('r.id', \SortDirection::Descending)
             ->setMaxResults($limit);
         $query = trim((string) $query);
         if ('' !== $query) {
@@ -85,7 +85,7 @@ class ResolutionRepository extends ServiceEntityRepository
     {
         $dates = $this->createQueryBuilder('r')
             ->select('r.decidedOn')
-            ->join(Membership::class, 'vm', 'WITH', 'vm.organization = r.organization AND vm.user = :viewer AND '.Membership::fullDql('vm'))
+            ->join(Membership::class, 'vm', 'ON', 'vm.organization = r.organization AND vm.user = :viewer AND '.Membership::fullDql('vm'))
             ->andWhere($this->features->dql('IDENTITY(r.organization)', Feature::Resolutions))
             ->setParameter('viewer', $user)
             ->getQuery()

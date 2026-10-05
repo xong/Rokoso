@@ -43,7 +43,7 @@ final readonly class GroupMessageConverter
             ->andWhere('m.type = :internal')
             ->andWhere('m.organization IS NOT NULL')
             ->setParameter('internal', MessageType::Internal->value)
-            ->orderBy('m.date', 'ASC')
+            ->orderBy('m.date', \SortDirection::Ascending)
             ->getQuery()->getResult();
 
         // keyed by spl_object_id: the entities are loaded once, so identity is stable

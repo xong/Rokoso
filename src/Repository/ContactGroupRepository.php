@@ -34,7 +34,7 @@ class ContactGroupRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('g')
             ->addSelect('o')
             ->join('g.organization', 'o')
-            ->join(Membership::class, 'cm', 'WITH', 'cm.organization = o AND cm.user = :viewer AND '.Membership::fullDql('cm'))
+            ->join(Membership::class, 'cm', 'ON', 'cm.organization = o AND cm.user = :viewer AND '.Membership::fullDql('cm'))
             ->andWhere($this->features->dql('o.id', Feature::Contacts))
             ->setParameter('viewer', $user)
             ->orderBy('o.name')

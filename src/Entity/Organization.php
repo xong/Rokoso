@@ -80,7 +80,7 @@ class Organization
 
     /** @var Collection<int, Membership> */
     #[ORM\OneToMany(targetEntity: Membership::class, mappedBy: 'organization', cascade: ['persist'], orphanRemoval: true)]
-    #[ORM\OrderBy(['id' => 'ASC'])]
+    #[ORM\OrderBy(['id' => \SortDirection::Ascending])]
     private Collection $memberships;
 
     public function __construct()

@@ -85,7 +85,7 @@ class PublicSettings
 
     /** @var Collection<int, PublicTopic> */
     #[ORM\OneToMany(targetEntity: PublicTopic::class, mappedBy: 'settings', cascade: ['persist'], orphanRemoval: true)]
-    #[ORM\OrderBy(['name' => 'ASC'])]
+    #[ORM\OrderBy(['name' => \SortDirection::Ascending])]
     private Collection $topics;
 
     public function __construct(

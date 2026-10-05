@@ -30,10 +30,10 @@ class WikiPageRepository extends ServiceEntityRepository
     public function findVisibleFor(User $user, ?string $query = null): array
     {
         $qb = $this->createQueryBuilder('p')
-            ->join(Membership::class, 'm', 'WITH', 'm.organization = p.organization AND m.user = :viewer AND '.Membership::fullDql('m'))
+            ->join(Membership::class, 'm', 'ON', 'm.organization = p.organization AND m.user = :viewer AND '.Membership::fullDql('m'))
             ->andWhere($this->features->dql('IDENTITY(p.organization)', Feature::Wiki))
             ->setParameter('viewer', $user)
-            ->orderBy('p.title', 'ASC');
+            ->orderBy('p.title', \SortDirection::Ascending);
         $query = trim((string) $query);
         if ('' !== $query) {
             $qb->andWhere('p.title LIKE :q OR p.body LIKE :q')

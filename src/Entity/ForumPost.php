@@ -33,7 +33,7 @@ class ForumPost
 
     /** @var Collection<int, ForumUpload> */
     #[ORM\OneToMany(targetEntity: ForumUpload::class, mappedBy: 'post')]
-    #[ORM\OrderBy(['filename' => 'ASC'])]
+    #[ORM\OrderBy(['filename' => \SortDirection::Ascending])]
     private Collection $attachments;
 
     public function __construct(

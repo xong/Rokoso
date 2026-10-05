@@ -41,7 +41,7 @@ class MailAccountRepository extends ServiceEntityRepository
     {
         /* @var list<MailAccount> */
         return $this->createQueryBuilder('a')
-            ->join(Membership::class, 'm', 'WITH', 'm.organization = a.organization AND m.user = :user AND '.Membership::fullDql('m'))
+            ->join(Membership::class, 'm', 'ON', 'm.organization = a.organization AND m.user = :user AND '.Membership::fullDql('m'))
             ->andWhere($this->features->dql('IDENTITY(a.organization)', Feature::Mail))
             ->setParameter('user', $user)
             ->orderBy('a.name')
@@ -58,7 +58,7 @@ class MailAccountRepository extends ServiceEntityRepository
     {
         /** @var list<MailAccount> $accounts */
         $accounts = $this->createQueryBuilder('a')
-            ->join(Membership::class, 'm', 'WITH', 'm.organization = a.organization AND m.user = :user AND m.role = :admin AND '.Membership::fullDql('m'))
+            ->join(Membership::class, 'm', 'ON', 'm.organization = a.organization AND m.user = :user AND m.role = :admin AND '.Membership::fullDql('m'))
             ->andWhere('a.enabled = true')
             ->andWhere($this->features->dql('IDENTITY(a.organization)', Feature::Mail))
             ->setParameter('user', $user)

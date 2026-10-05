@@ -45,7 +45,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         $qb = $this->createQueryBuilder('u')
             ->andWhere('u.deletedAt IS NULL')
-            ->orderBy('u.name', 'ASC')
+            ->orderBy('u.name', \SortDirection::Ascending)
             ->setMaxResults($limit);
         if ('' !== $query = trim($query)) {
             $qb->andWhere('u.name LIKE :q OR u.email LIKE :q')

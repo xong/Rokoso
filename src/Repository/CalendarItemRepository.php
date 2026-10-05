@@ -118,7 +118,7 @@ class CalendarItemRepository extends ServiceEntityRepository
             ->andWhere('i.title LIKE :q OR i.description LIKE :q OR i.location LIKE :q')
             ->setParameter('viewer', $user)
             ->setParameter('q', '%'.addcslashes($query, '%_\\').'%')
-            ->orderBy('i.startsAt', 'DESC')
+            ->orderBy('i.startsAt', \SortDirection::Descending)
             ->setMaxResults($limit)
             ->getQuery()->getResult();
     }
@@ -145,7 +145,7 @@ class CalendarItemRepository extends ServiceEntityRepository
     private function visibleQuery(): QueryBuilder
     {
         return $this->createQueryBuilder('i')
-            ->leftJoin(Membership::class, 'im', 'WITH', 'im.organization = i.organization AND im.user = :viewer AND '.Membership::fullDql('im'))
+            ->leftJoin(Membership::class, 'im', 'ON', 'im.organization = i.organization AND im.user = :viewer AND '.Membership::fullDql('im'))
             ->andWhere('im.id IS NOT NULL OR (i.organization IS NULL AND i.createdBy = :viewer) OR '.Membership::guestDql('i.project'))
             ->andWhere(\sprintf("(i.type = '%1\$s' AND %2\$s) OR (i.type <> '%1\$s' AND %3\$s)", CalendarItemType::Task->value,
                 $this->features->dql('IDENTITY(i.organization)', Feature::Tasks), $this->features->dql('IDENTITY(i.organization)', Feature::Calendar)));

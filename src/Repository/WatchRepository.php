@@ -60,7 +60,7 @@ class WatchRepository extends ServiceEntityRepository
         /* @var list<User> */
         return $this->getEntityManager()->createQueryBuilder()
             ->select('u')->from(User::class, 'u')
-            ->join(Watch::class, 'w', 'WITH', 'w.user = u')
+            ->join(Watch::class, 'w', 'ON', 'w.user = u')
             ->andWhere('w.'.self::field($target).' = :target')->setParameter('target', $target)
             ->getQuery()->getResult();
     }

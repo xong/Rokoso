@@ -37,8 +37,8 @@ class ShelfItemRepository extends ServiceEntityRepository
             ->leftJoin('s.topic', 't')
             ->andWhere('s.owner = :owner')
             ->setParameter('owner', $owner)
-            ->orderBy('s.createdAt', 'DESC')
-            ->addOrderBy('s.id', 'DESC')
+            ->orderBy('s.createdAt', \SortDirection::Descending)
+            ->addOrderBy('s.id', \SortDirection::Descending)
             ->getQuery()
             ->getResult();
     }

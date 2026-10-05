@@ -43,7 +43,7 @@ final class ProjectFormType extends AbstractType
                 'help' => 'project.organization_help',
                 // Nur Organisationen, in denen der Benutzer Administrator ist
                 'query_builder' => static fn (EntityRepository $r): QueryBuilder => $r->createQueryBuilder('o')
-                    ->join(Membership::class, 'm', 'WITH', 'm.organization = o AND m.user = :user AND m.role = :admin AND '.Membership::fullDql('m'))
+                    ->join(Membership::class, 'm', 'ON', 'm.organization = o AND m.user = :user AND m.role = :admin AND '.Membership::fullDql('m'))
                     ->setParameter('user', $user)
                     ->setParameter('admin', OrganizationRole::Admin->value)
                     ->orderBy('o.name'),

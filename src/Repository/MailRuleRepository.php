@@ -27,7 +27,7 @@ class MailRuleRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('r')
             ->andWhere('r.organization = :org')
             ->setParameter('org', $organization)
-            ->orderBy('r.id', 'ASC');
+            ->orderBy('r.id', \SortDirection::Ascending);
         if ($enabledOnly) {
             $qb->andWhere('r.enabled = true');
         }

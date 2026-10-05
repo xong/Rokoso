@@ -38,7 +38,7 @@ class ForumTopicRepository extends ServiceEntityRepository
             ->leftJoin('t.lastPostBy', 'lb')
             ->andWhere('t.board = :board')
             ->setParameter('board', $board)
-            ->orderBy('t.lastPostAt', 'DESC')
+            ->orderBy('t.lastPostAt', \SortDirection::Descending)
             ->getQuery()->getResult();
     }
 
@@ -53,7 +53,7 @@ class ForumTopicRepository extends ServiceEntityRepository
         return $this->visibleQuery($user)
             ->andWhere('t.title LIKE :q OR EXISTS (SELECT 1 FROM '.ForumPost::class.' sp WHERE sp.topic = t AND sp.body LIKE :q)')
             ->setParameter('q', '%'.addcslashes($query, '%_\\').'%')
-            ->orderBy('t.lastPostAt', 'DESC')
+            ->orderBy('t.lastPostAt', \SortDirection::Descending)
             ->setMaxResults($limit)
             ->getQuery()->getResult();
     }
@@ -67,7 +67,7 @@ class ForumTopicRepository extends ServiceEntityRepository
     {
         /* @var list<ForumTopic> */
         return $this->visibleQuery($user)
-            ->orderBy('t.lastPostAt', 'DESC')
+            ->orderBy('t.lastPostAt', \SortDirection::Descending)
             ->setMaxResults($limit)
             ->getQuery()->getResult();
     }
@@ -81,7 +81,7 @@ class ForumTopicRepository extends ServiceEntityRepository
         return $this->visibleQuery($user)
             ->andWhere('t.project = :project')
             ->setParameter('project', $project)
-            ->orderBy('t.lastPostAt', 'DESC')
+            ->orderBy('t.lastPostAt', \SortDirection::Descending)
             ->getQuery()->getResult();
     }
 
@@ -100,7 +100,7 @@ class ForumTopicRepository extends ServiceEntityRepository
 
         return array_values(array_map(intval(...), $this->createQueryBuilder('t')
             ->select('t.id')
-            ->leftJoin(ForumTopicRead::class, 'r', 'WITH', 'r.topic = t AND r.user = :user')
+            ->leftJoin(ForumTopicRead::class, 'r', 'ON', 'r.topic = t AND r.user = :user')
             ->andWhere('t IN (:topics)')
             ->andWhere('r.id IS NULL OR r.readAt < t.lastPostAt')
             ->setParameter('user', $user)
@@ -112,7 +112,7 @@ class ForumTopicRepository extends ServiceEntityRepository
     {
         return (int) $this->visibleQuery($user)
             ->select('COUNT(t.id)')
-            ->leftJoin(ForumTopicRead::class, 'r', 'WITH', 'r.topic = t AND r.user = :user')
+            ->leftJoin(ForumTopicRead::class, 'r', 'ON', 'r.topic = t AND r.user = :user')
             ->andWhere('r.id IS NULL OR r.readAt < t.lastPostAt')
             ->getQuery()->getSingleScalarResult();
     }
@@ -124,7 +124,7 @@ class ForumTopicRepository extends ServiceEntityRepository
             ->join('t.board', 'b')
             ->leftJoin('t.lastPostBy', 'lb')
             ->leftJoin('b.parent', 'pb')
-            ->leftJoin(Membership::class, 'm', 'WITH', 'm.organization = b.organization AND m.user = :user AND '.Membership::fullDql('m'))
+            ->leftJoin(Membership::class, 'm', 'ON', 'm.organization = b.organization AND m.user = :user AND '.Membership::fullDql('m'))
             ->andWhere('m.id IS NOT NULL OR '.Membership::guestDql('t.project', 'user', 'gt').' OR '.Membership::guestDql('b.project', 'user', 'gb')
                 .' OR '.Membership::guestDql('pb.project', 'user', 'gpb'))
             ->andWhere($this->features->dql('IDENTITY(b.organization)', Feature::Forum))

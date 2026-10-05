@@ -35,7 +35,7 @@ class ContactGroup
     /** @var Collection<int, Contact> */
     #[ORM\ManyToMany(targetEntity: Contact::class, inversedBy: 'groups')]
     #[ORM\JoinTable(name: 'contact_group_member')]
-    #[ORM\OrderBy(['lastName' => 'ASC', 'company' => 'ASC', 'firstName' => 'ASC'])]
+    #[ORM\OrderBy(['lastName' => \SortDirection::Ascending, 'company' => \SortDirection::Ascending, 'firstName' => \SortDirection::Ascending])]
     private Collection $contacts;
 
     /** Outsiders may subscribe on the public page */

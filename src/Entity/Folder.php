@@ -39,12 +39,12 @@ class Folder
 
     /** @var Collection<int, Folder> */
     #[ORM\OneToMany(targetEntity: Folder::class, mappedBy: 'parent')]
-    #[ORM\OrderBy(['name' => 'ASC'])]
+    #[ORM\OrderBy(['name' => \SortDirection::Ascending])]
     private Collection $children;
 
     /** @var Collection<int, StoredFile> */
     #[ORM\OneToMany(targetEntity: StoredFile::class, mappedBy: 'folder')]
-    #[ORM\OrderBy(['filename' => 'ASC'])]
+    #[ORM\OrderBy(['filename' => \SortDirection::Ascending])]
     private Collection $files;
 
     #[ORM\Column]

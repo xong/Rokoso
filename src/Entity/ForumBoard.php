@@ -42,7 +42,7 @@ class ForumBoard
 
     /** @var Collection<int, ForumBoard> */
     #[ORM\OneToMany(targetEntity: ForumBoard::class, mappedBy: 'parent')]
-    #[ORM\OrderBy(['name' => 'ASC'])]
+    #[ORM\OrderBy(['name' => \SortDirection::Ascending])]
     private Collection $children;
 
     #[ORM\Column]

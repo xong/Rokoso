@@ -36,8 +36,8 @@ class CommentRepository extends ServiceEntityRepository
                 default => 'c.contact = :target',
             })
             ->setParameter('target', $target)
-            ->orderBy('c.createdAt', 'ASC')
-            ->addOrderBy('c.id', 'ASC')
+            ->orderBy('c.createdAt', \SortDirection::Ascending)
+            ->addOrderBy('c.id', \SortDirection::Ascending)
             ->getQuery()->getResult();
     }
 }

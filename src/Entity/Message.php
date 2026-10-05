@@ -139,12 +139,12 @@ class Message
 
     /** @var Collection<int, Comment> */
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'message', cascade: ['remove'])]
-    #[ORM\OrderBy(['createdAt' => 'ASC'])]
+    #[ORM\OrderBy(['createdAt' => \SortDirection::Ascending])]
     private Collection $comments;
 
     /** @var Collection<int, MessageEvent> */
     #[ORM\OneToMany(targetEntity: MessageEvent::class, mappedBy: 'message', cascade: ['persist', 'remove'])]
-    #[ORM\OrderBy(['createdAt' => 'ASC', 'id' => 'ASC'])]
+    #[ORM\OrderBy(['createdAt' => \SortDirection::Ascending, 'id' => \SortDirection::Ascending])]
     private Collection $events;
 
     public function __construct(

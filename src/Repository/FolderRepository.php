@@ -32,7 +32,7 @@ class FolderRepository extends ServiceEntityRepository
         $all = $this->createQueryBuilder('f')
             ->addSelect('o')
             ->join('f.organization', 'o')
-            ->join(Membership::class, 'm', 'WITH', 'm.organization = o AND m.user = :user')
+            ->join(Membership::class, 'm', 'ON', 'm.organization = o AND m.user = :user')
             ->setParameter('user', $user)
             ->orderBy('o.name')
             ->addOrderBy('f.name')

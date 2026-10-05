@@ -10,6 +10,11 @@ Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nut
 
 - **Termine wie „jeden 2. Donnerstag im Monat“:** bei „Wiederholen“ gibt es jetzt „Monatlich am selben Wochentag“ und „Monatlich am letzten Wochentag“. Die Auswahl richtet sich nach dem Beginn – trag den ersten Termin ein, dann steht dort z. B. „Monatlich am 2. Donnerstag“. Das klappt auch im Kalender-Abo auf dem Handy und in Einladungen.
 
+### Behoben
+
+- Bei langen Listen ließ sich die Seite über ihr Ende hinaus in einen leeren Bereich scrollen.
+- Der Hinweis „Neue Nachrichten sind eingegangen“ war im Dunkelmodus kaum lesbar.
+
 ## 0.11.0 – 2026-10-05
 
 ### Neu

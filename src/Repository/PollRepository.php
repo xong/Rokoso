@@ -34,11 +34,11 @@ class PollRepository extends ServiceEntityRepository
     {
         $qb = $this->visibleQuery($user)->setParameter('now', new \DateTimeImmutable())->setMaxResults($limit);
         if ($ended) {
-            $qb->andWhere('p.closedAt IS NOT NULL OR p.deadline <= :now')->orderBy('p.createdAt', 'DESC');
+            $qb->andWhere('p.closedAt IS NOT NULL OR p.deadline <= :now')->orderBy('p.createdAt', \SortDirection::Descending);
         } else {
             $qb->andWhere('p.closedAt IS NULL AND (p.deadline IS NULL OR p.deadline > :now)')
-                ->addOrderBy('CASE WHEN p.deadline IS NULL THEN 1 ELSE 0 END', 'ASC')
-                ->addOrderBy('p.deadline', 'ASC')->addOrderBy('p.createdAt', 'DESC');
+                ->addOrderBy('CASE WHEN p.deadline IS NULL THEN 1 ELSE 0 END', \SortDirection::Ascending)
+                ->addOrderBy('p.deadline', \SortDirection::Ascending)->addOrderBy('p.createdAt', \SortDirection::Descending);
         }
 
         /* @var list<Poll> */
@@ -81,7 +81,7 @@ class PollRepository extends ServiceEntityRepository
     public function visibleQuery(User $user, string $alias = 'p'): QueryBuilder
     {
         return $this->createQueryBuilder($alias)
-            ->join(Membership::class, $alias.'_vm', 'WITH', $alias.'_vm.organization = '.$alias.'.organization AND '.$alias.'_vm.user = :viewer AND '.Membership::fullDql($alias.'_vm'))
+            ->join(Membership::class, $alias.'_vm', 'ON', $alias.'_vm.organization = '.$alias.'.organization AND '.$alias.'_vm.user = :viewer AND '.Membership::fullDql($alias.'_vm'))
             ->andWhere($this->features->dql('IDENTITY('.$alias.'.organization)', Feature::Polls))
             ->setParameter('viewer', $user);
     }

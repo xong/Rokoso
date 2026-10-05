@@ -34,7 +34,7 @@ class ForumTopic
 
     /** @var Collection<int, ForumPost> */
     #[ORM\OneToMany(targetEntity: ForumPost::class, mappedBy: 'topic', cascade: ['persist'])]
-    #[ORM\OrderBy(['createdAt' => 'ASC', 'id' => 'ASC'])]
+    #[ORM\OrderBy(['createdAt' => \SortDirection::Ascending, 'id' => \SortDirection::Ascending])]
     private Collection $posts;
 
     #[ORM\Column]

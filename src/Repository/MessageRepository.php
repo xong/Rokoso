@@ -64,7 +64,7 @@ class MessageRepository extends ServiceEntityRepository
         $qb = $this->visibleQuery($user)
             ->andWhere('m.trashedAt IS NULL')
             ->andWhere('m.spamAt IS NULL')
-            ->orderBy('m.date', 'DESC')
+            ->orderBy('m.date', \SortDirection::Descending)
             ->setMaxResults($limit);
         $or = $qb->expr()->orX('m.fromAddress IN (:addresses)');
         foreach ($addresses as $i => $address) {
@@ -94,7 +94,7 @@ class MessageRepository extends ServiceEntityRepository
         $qb = $this->visibleQuery($user)
             ->addSelect('a', 'p')
             ->leftJoin('m.mailAccount', 'a')
-            ->orderBy('m.date', 'DESC')
+            ->orderBy('m.date', \SortDirection::Descending)
             ->setFirstResult(($filter->page - 1) * self::PAGE_SIZE)
             ->setMaxResults(self::PAGE_SIZE + 1);
 
@@ -117,9 +117,9 @@ class MessageRepository extends ServiceEntityRepository
             default => $this->applyInbox($qb),
         };
         if ('snoozed' === $filter->folder) {
-            $qb->orderBy('m.snoozedUntil', 'ASC');
+            $qb->orderBy('m.snoozedUntil', \SortDirection::Ascending);
         } elseif ('done' === $filter->folder) {
-            $qb->orderBy('m.doneAt', 'DESC');
+            $qb->orderBy('m.doneAt', \SortDirection::Descending);
         }
 
         match ($filter->show) {
@@ -249,7 +249,7 @@ class MessageRepository extends ServiceEntityRepository
             ->andWhere('(m.trashedAt IS NULL AND m.spamAt IS NULL) OR m = :self')
             ->setParameter('key', $message->getThreadKey())
             ->setParameter('self', $message)
-            ->orderBy('m.date', 'ASC')
+            ->orderBy('m.date', \SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }

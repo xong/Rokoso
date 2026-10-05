@@ -31,12 +31,12 @@ class StoredFile
 
     /** @var Collection<int, FileVersion> */
     #[ORM\OneToMany(targetEntity: FileVersion::class, mappedBy: 'file', cascade: ['persist'])]
-    #[ORM\OrderBy(['createdAt' => 'DESC', 'id' => 'DESC'])]
+    #[ORM\OrderBy(['createdAt' => \SortDirection::Descending, 'id' => \SortDirection::Descending])]
     private Collection $versions;
 
     /** @var Collection<int, FileShare> */
     #[ORM\OneToMany(targetEntity: FileShare::class, mappedBy: 'file')]
-    #[ORM\OrderBy(['createdAt' => 'DESC'])]
+    #[ORM\OrderBy(['createdAt' => \SortDirection::Descending])]
     private Collection $shares;
 
     public function __construct(

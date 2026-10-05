@@ -123,12 +123,12 @@ class CalendarItem
 
     /** @var Collection<int, EventSignup> */
     #[ORM\OneToMany(targetEntity: EventSignup::class, mappedBy: 'item', orphanRemoval: true)]
-    #[ORM\OrderBy(['createdAt' => 'ASC'])]
+    #[ORM\OrderBy(['createdAt' => \SortDirection::Ascending])]
     private Collection $signups;
 
     /** @var Collection<int, CalendarException> */
     #[ORM\OneToMany(targetEntity: CalendarException::class, mappedBy: 'item', cascade: ['persist'], orphanRemoval: true)]
-    #[ORM\OrderBy(['date' => 'ASC'])]
+    #[ORM\OrderBy(['date' => \SortDirection::Ascending])]
     private Collection $exceptions;
 
     /** Minutes before the start for a reminder notification; null = none */

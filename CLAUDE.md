@@ -45,6 +45,7 @@
 - Docker: `Dockerfile` (FrankenPHP), `docker/entrypoint.sh` (Migrationen), `docker/cron.sh`, Beispiel `compose.prod.yaml`.
 - UX Icons nur aus `assets/icons` (Iconify-Download nur in dev, legt die Datei dort ab – mit committen; `IconsTest` prüft das, der Webhoster kann zur Laufzeit nichts laden).
 - Logo/Icons: nie von Hand ändern, sondern `python docs/logo/generate.py` (schreibt SVG, PNG, ICO und `templates/_partials/logo.html.twig`). Markenfarbe `brand-600` (#417230, Moosgrün) für Flächen mit weißer Schrift, Text auf hell `brand-700`; Neutraltöne grau.
+- Doctrine: Sortierrichtung als `\SortDirection::Ascending`/`Descending` (QueryBuilder und `#[ORM\OrderBy]`), Joins auf Entity-Klassen mit `ON` statt `WITH` – sonst Deprecations im Log.
 - Keine `sed`/`php -r`-Ersetzungen in PHP-Dateien – Edit-Werkzeug nutzen (Escaping-Fallen).
 
 ## Konventionen

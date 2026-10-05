@@ -47,7 +47,7 @@ class ConfidentialCase
 
     /** @var Collection<int, ConfidentialMessage> */
     #[ORM\OneToMany(targetEntity: ConfidentialMessage::class, mappedBy: 'confidentialCase', cascade: ['persist'], orphanRemoval: true)]
-    #[ORM\OrderBy(['id' => 'ASC'])]
+    #[ORM\OrderBy(['id' => \SortDirection::Ascending])]
     private Collection $messages;
 
     public function __construct(

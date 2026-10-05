@@ -33,7 +33,7 @@ class MeetingRepository extends ServiceEntityRepository
         $qb = $this->visibleQuery($user)
             ->andWhere($past ? 'm.startsAt < :today' : 'm.startsAt >= :today')
             ->setParameter('today', new \DateTimeImmutable('today'))
-            ->orderBy('m.startsAt', $past ? 'DESC' : 'ASC')
+            ->orderBy('m.startsAt', $past ? \SortDirection::Descending : \SortDirection::Ascending)
             ->setMaxResults($limit);
         if (null !== $organizationId) {
             $qb->andWhere('m.organization = :org')->setParameter('org', $organizationId);
@@ -58,7 +58,7 @@ class MeetingRepository extends ServiceEntityRepository
         if ([] === $addresses) {
             return [];
         }
-        $qb = $this->visibleQuery($user)->orderBy('m.startsAt', 'DESC')->setMaxResults($limit);
+        $qb = $this->visibleQuery($user)->orderBy('m.startsAt', \SortDirection::Descending)->setMaxResults($limit);
         $or = $qb->expr()->orX();
         foreach ($addresses as $i => $address) {
             $or->add('m.guestEmails LIKE :g'.$i);
@@ -72,7 +72,7 @@ class MeetingRepository extends ServiceEntityRepository
     public function visibleQuery(User $user, string $alias = 'm'): QueryBuilder
     {
         return $this->createQueryBuilder($alias)
-            ->join(Membership::class, $alias.'_vm', 'WITH', $alias.'_vm.organization = '.$alias.'.organization AND '.$alias.'_vm.user = :viewer AND '.Membership::fullDql($alias.'_vm'))
+            ->join(Membership::class, $alias.'_vm', 'ON', $alias.'_vm.organization = '.$alias.'.organization AND '.$alias.'_vm.user = :viewer AND '.Membership::fullDql($alias.'_vm'))
             ->andWhere($this->features->dql('IDENTITY('.$alias.'.organization)', Feature::Meetings))
             ->setParameter('viewer', $user);
     }

@@ -88,12 +88,12 @@ class Poll
 
     /** @var Collection<int, PollOption> */
     #[ORM\OneToMany(targetEntity: PollOption::class, mappedBy: 'poll', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
+    #[ORM\OrderBy(['position' => \SortDirection::Ascending, 'id' => \SortDirection::Ascending])]
     private Collection $options;
 
     /** @var Collection<int, PollBallot> */
     #[ORM\OneToMany(targetEntity: PollBallot::class, mappedBy: 'poll', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['createdAt' => 'ASC'])]
+    #[ORM\OrderBy(['createdAt' => \SortDirection::Ascending])]
     private Collection $ballots;
 
     #[ORM\Column]

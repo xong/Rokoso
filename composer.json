@@ -35,6 +35,7 @@
         "symfony/mime": "8.0.*",
         "symfony/monolog-bundle": "^3.0|^4.0",
         "symfony/notifier": "8.0.*",
+        "symfony/polyfill-php86": "^1.43",
         "symfony/process": "8.0.*",
         "symfony/property-access": "8.0.*",
         "symfony/property-info": "8.0.*",
