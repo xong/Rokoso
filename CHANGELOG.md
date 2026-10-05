@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.13.2 – 2026-10-05
+
+### Behoben
+
+- **Dunkelmodus:** Der Hinweis mit den Ersatzcodes der Zwei-Faktor-Anmeldung (und der beim Löschen des Kontos) war kaum lesbar. Auch das Abzeichen „Erledigt“ bei Aufgaben, „Aktiv“ bei der Zwei-Faktor-Anmeldung und einige grüne und blaue Texte haben jetzt genug Kontrast.
+
 ## 0.13.1 – 2026-10-05
 
 ### Verbessert
