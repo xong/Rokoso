@@ -9,14 +9,14 @@
 
 {% block detail_actions %}
     {% block message_actions %}
-        {% if not message.trashed %}
+        {% if not message.trashed and not message.spam %}
             <a href="{{ path(message.internal ? 'mail_message_new' : 'mail_compose', {reply: message.id}) }}" class="btn-icon" aria-label="{{ 'mail.reply'|trans }}" title="{{ 'mail.reply'|trans }}">{{ ux_icon('lucide:reply', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
             {% if not message.internal %}
                 <a href="{{ path('mail_compose', {reply: message.id, all: 1}) }}" class="btn-icon" aria-label="{{ 'mail.reply_all'|trans }}" title="{{ 'mail.reply_all'|trans }}">{{ ux_icon('lucide:reply-all', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
                 <a href="{{ path('mail_compose', {forward: message.id}) }}" class="btn-icon" aria-label="{{ 'mail.forward'|trans }}" title="{{ 'mail.forward'|trans }}">{{ ux_icon('lucide:forward', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
             {% endif %}
         {% endif %}
-        {% if not message.trashed %}
+        {% if not message.trashed and not message.spam %}
             {{ ui.post_button(path('mail_action'), 'mail-action', message.done ? 'mail.reopen' : 'mail.done',
                 {class: 'btn-icon hover:text-emerald-600', icon: message.done ? 'lucide:rotate-ccw' : 'lucide:check', icon_only: true,
                  fields: action_fields|merge({action: message.done ? 'reopen' : 'done', 'ids[]': message.id, return: message.done ? 'message' : 'list'})}) }}
@@ -49,6 +49,15 @@
                 </form>
             </details>
         {% endif %}
+        {% if message.spam %}
+            {{ ui.post_button(path('mail_action'), 'mail-action', 'mail.spam.not_spam',
+                {class: 'btn-secondary', icon: 'lucide:shield-check', fields: action_fields|merge({action: 'not_spam', 'ids[]': message.id, return: 'list'})}) }}
+        {% elseif not message.internal and not message.trashed and message.organization %}
+            {{ ui.post_button(path('mail_action'), 'mail-action', 'mail.spam.mark',
+                {class: 'btn-icon', icon: 'lucide:shield-alert', icon_only: true, fields: action_fields|merge({action: 'spam', 'ids[]': message.id, return: 'list'})}) }}
+            {{ ui.post_button(path('mail_action'), 'mail-action', 'mail.spam.block',
+                {class: 'btn-icon hover:text-red-600', icon: 'lucide:ban', icon_only: true, fields: action_fields|merge({action: 'block', 'ids[]': message.id, return: 'list'})}) }}
+        {% endif %}
         {{ ui.post_button(path('mail_unread', {id: message.id}), 'mail-action', 'mail.mark_unread',
             {class: 'btn-icon', icon: 'lucide:mail', icon_only: true, fields: action_fields}) }}
         {{ ui.post_button(path('mail_trash_message', {id: message.id}), 'mail-action', message.trashed ? 'mail.restore' : 'mail.trash',
@@ -61,6 +70,12 @@
         <article class="flex min-w-0 flex-1 flex-col" aria-labelledby="detail-heading">
             {# Kopfdaten #}
             <div class="space-y-3 border-b border-slate-200 p-4">
+                {% if message.spam %}
+                    <p class="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                        {{ ux_icon('lucide:shield-alert', {class: 'mt-0.5 size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        <span>{{ 'mail.spam.notice'|trans }}{% if sender_blocked %} {{ 'mail.spam.notice_blocked'|trans({'%address%': message.fromAddress}) }}{% endif %}</span>
+                    </p>
+                {% endif %}
                 {{ include('compose/_writers.html.twig') }}
                 <div class="flex items-start gap-3">
                     {% if message.internal and message.author %}

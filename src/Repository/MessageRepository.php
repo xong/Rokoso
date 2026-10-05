@@ -63,6 +63,7 @@ class MessageRepository extends ServiceEntityRepository
         }
         $qb = $this->visibleQuery($user)
             ->andWhere('m.trashedAt IS NULL')
+            ->andWhere('m.spamAt IS NULL')
             ->orderBy('m.date', 'DESC')
             ->setMaxResults($limit);
         $or = $qb->expr()->orX('m.fromAddress IN (:addresses)');
@@ -97,8 +98,12 @@ class MessageRepository extends ServiceEntityRepository
             ->setFirstResult(($filter->page - 1) * self::PAGE_SIZE)
             ->setMaxResults(self::PAGE_SIZE + 1);
 
+        if ('spam' !== $filter->folder && 'trash' !== $filter->folder) {
+            $qb->andWhere('m.spamAt IS NULL');
+        }
         match ($filter->folder) {
             'trash' => $qb->andWhere('m.trashedAt IS NOT NULL'),
+            'spam' => $qb->andWhere('m.trashedAt IS NULL')->andWhere('m.spamAt IS NOT NULL'),
             'all' => $qb->andWhere('m.trashedAt IS NULL'),
             'sent' => $qb->andWhere('m.trashedAt IS NULL')
                 ->andWhere('m.folder = :sent OR (m.type = :internal AND m.author = :viewer)')
@@ -177,13 +182,47 @@ class MessageRepository extends ServiceEntityRepository
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
+    public function countSpam(User $user): int
+    {
+        return (int) $this->visibleQuery($user)
+            ->select('COUNT(m.id)')
+            ->andWhere('m.trashedAt IS NULL')
+            ->andWhere('m.spamAt IS NOT NULL')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     /**
-     * Inbox = everything open: not trashed, not done, not snoozed, not written by the viewer.
+     * Visible, not yet flagged messages of an organization from this address or domain ("@example.org").
+     *
+     * @return list<Message>
+     */
+    public function findFromSender(User $user, Organization $organization, string $address): array
+    {
+        $qb = $this->visibleQuery($user)
+            ->andWhere('m.organization = :org')
+            ->andWhere('m.type = :email')
+            ->andWhere('m.spamAt IS NULL')
+            ->setParameter('org', $organization)
+            ->setParameter('email', MessageType::Email->value);
+        if (str_starts_with($address, '@')) {
+            $qb->andWhere('m.fromAddress LIKE :address')->setParameter('address', '%'.addcslashes($address, '%_\\'));
+        } else {
+            $qb->andWhere('m.fromAddress = :address')->setParameter('address', $address);
+        }
+
+        /* @var list<Message> */
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Inbox = everything open: not trashed, not spam, not done, not snoozed, not written by the viewer.
      * The project does not matter (Entscheidung 39).
      */
     private function applyInbox(QueryBuilder $qb): QueryBuilder
     {
         return $qb->andWhere('m.trashedAt IS NULL')
+            ->andWhere('m.spamAt IS NULL')
             ->andWhere('m.folder = :inbox')
             ->andWhere('m.doneAt IS NULL')
             ->andWhere('m.snoozedUntil IS NULL OR m.snoozedUntil <= :now')
@@ -207,7 +246,7 @@ class MessageRepository extends ServiceEntityRepository
         /* @var list<Message> */
         return $this->visibleQuery($user)
             ->andWhere('m.threadKey = :key')
-            ->andWhere('m.trashedAt IS NULL OR m = :self')
+            ->andWhere('(m.trashedAt IS NULL AND m.spamAt IS NULL) OR m = :self')
             ->setParameter('key', $message->getThreadKey())
             ->setParameter('self', $message)
             ->orderBy('m.date', 'ASC')

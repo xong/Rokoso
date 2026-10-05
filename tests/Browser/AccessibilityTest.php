@@ -13,7 +13,7 @@ final class AccessibilityTest extends BrowserTestCase
 {
     private const string AXE_VERSION = '4.11.0';
 
-    private const array PAGES = ['/', '/mail', '/mail/new', '/calendar', '/tasks', '/meetings', '/polls', '/forum', '/files', '/contacts', '/projects', '/knowledge', '/notifications', '/profile', '/profile/security', '/profile/changelog', '/organizations', '/search?q=Eltern', '/admin', '/admin/organizations', '/admin/log'];
+    private const array PAGES = ['/', '/mail', '/mail/spam', '/mail/new', '/calendar', '/tasks', '/meetings', '/polls', '/forum', '/files', '/contacts', '/projects', '/knowledge', '/notifications', '/profile', '/profile/security', '/profile/changelog', '/organizations', '/search?q=Eltern', '/admin', '/admin/organizations', '/admin/log'];
 
     public function testMainPagesHaveNoSeriousViolations(): void
     {

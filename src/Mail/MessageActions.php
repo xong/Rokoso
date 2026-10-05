@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
+use App\Entity\BlockedSender;
 use App\Entity\Message;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Enum\MessageEventType;
+use App\Enum\MessageType;
+use App\Repository\BlockedSenderRepository;
 use App\Repository\MessageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -17,7 +20,7 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 final readonly class MessageActions
 {
-    public const array ACTIONS = ['done', 'reopen', 'trash', 'restore', 'read', 'unread', 'assign_me', 'unassign_me', 'project', 'snooze', 'unsnooze'];
+    public const array ACTIONS = ['done', 'reopen', 'trash', 'restore', 'read', 'unread', 'assign_me', 'unassign_me', 'project', 'snooze', 'unsnooze', 'spam', 'not_spam', 'block'];
 
     /** Action that reverts another one (for the undo toast). */
     public const array INVERSE = [
@@ -30,6 +33,9 @@ final readonly class MessageActions
         'assign_me' => 'unassign_me',
         'unassign_me' => 'assign_me',
         'snooze' => 'unsnooze',
+        'spam' => 'not_spam',
+        'not_spam' => 'spam',
+        'block' => 'not_spam',
     ];
 
     public function __construct(
@@ -37,6 +43,7 @@ final readonly class MessageActions
         private ReadTracker $readTracker,
         private MessageRepository $messages,
         private ParticipantResolver $participants,
+        private BlockedSenderRepository $blockedSenders,
     ) {
     }
 
@@ -59,7 +66,7 @@ final readonly class MessageActions
     }
 
     /**
-     * "Erledigt" closes the whole conversation.
+     * "Erledigt" closes the whole conversation; "Absender sperren" blocks the sender and catches all of their mails.
      *
      * @param list<Message> $messages
      *
@@ -67,6 +74,9 @@ final readonly class MessageActions
      */
     private function expand(string $action, array $messages, User $user): array
     {
+        if ('block' === $action) {
+            return $this->block($messages, $user);
+        }
         if ('done' !== $action) {
             return $messages;
         }
@@ -83,9 +93,56 @@ final readonly class MessageActions
         return array_values($all);
     }
 
+    /**
+     * @param list<Message> $messages
+     *
+     * @return list<Message>
+     */
+    private function block(array $messages, User $user): array
+    {
+        $all = [];
+        foreach ($messages as $message) {
+            $organization = $message->getOrganization();
+            $address = BlockedSender::normalize($message->getFromAddress());
+            if (MessageType::Email !== $message->getType() || null === $organization || '' === $address) {
+                continue;
+            }
+            if (null === $this->blockedSenders->findOneFor($organization, $address)) {
+                $this->em->persist(new BlockedSender($organization, $address, $user));
+                $this->em->flush();
+            }
+            $all[$message->getId() ?? spl_object_id($message)] = $message;
+            foreach ($this->messages->findFromSender($user, $organization, $address) as $other) {
+                $all[$other->getId() ?? spl_object_id($other)] = $other;
+            }
+        }
+
+        return array_values($all);
+    }
+
     private function applyOne(string $action, Message $message, User $user, ?int $projectId, ?\DateTimeImmutable $until): bool
     {
         switch ($action) {
+            case 'spam':
+            case 'block':
+                if ($message->isSpam() || MessageType::Email !== $message->getType()) {
+                    return false;
+                }
+                $message->setSpam(true)->log('block' === $action ? MessageEventType::Blocked : MessageEventType::Spam, $user, 'block' === $action ? $message->getFromAddress() : null);
+
+                return true;
+            case 'not_spam':
+                // Trusting the mail again also lifts a block of its sender
+                $organization = $message->getOrganization();
+                if (null !== $organization && null !== $blocked = $this->blockedSenders->findOneFor($organization, $message->getFromAddress())) {
+                    $this->em->remove($blocked);
+                }
+                if (!$message->isSpam()) {
+                    return false;
+                }
+                $message->setSpam(false)->log(MessageEventType::NotSpam, $user);
+
+                return true;
             case 'done':
                 if ($message->isDone()) {
                     return false;

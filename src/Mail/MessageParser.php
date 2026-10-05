@@ -60,6 +60,7 @@ final class MessageParser
             text: $message->getTextContent(),
             html: $message->getHtmlContent(),
             attachments: $attachments,
+            spamFlagged: $this->spamFlagged($message),
         );
     }
 
@@ -81,6 +82,17 @@ final class MessageParser
         }
 
         return $result;
+    }
+
+    /**
+     * SpamAssassin, rspamd and most hosting filters only tag; the mail still reaches the mailbox.
+     */
+    private function spamFlagged(IMessage $message): bool
+    {
+        $flag = strtolower(trim((string) $message->getHeaderValue('x-spam-flag', '')));
+        $status = strtolower(trim((string) $message->getHeaderValue('x-spam-status', '')));
+
+        return 'yes' === $flag || str_starts_with($status, 'yes');
     }
 
     private function idHeader(IMessage $message, string $header): ?string

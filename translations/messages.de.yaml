@@ -25,6 +25,7 @@ nav:
     mail_drafts: Entwürfe
     mail_done: Erledigt
     mail_snoozed: Wiedervorlage
+    mail_spam: Spam
     mail_trash: Papierkorb
     mail_compose: Neue E-Mail
     mail_message: Neue Nachricht
@@ -594,6 +595,9 @@ mail:
         snooze: 'Auf Wiedervorlage gelegt.'
         unsnooze: Wiedervorlage aufgehoben.
         project: Projekt geändert.
+        spam: '{1}In den Spam-Ordner verschoben.|]1,Inf[%count% Nachrichten in den Spam-Ordner verschoben.'
+        not_spam: '{1}Kein Spam – zurück im Eingang.|]1,Inf[%count% Nachrichten zurück im Eingang.'
+        block: '{1}Absender gesperrt, die Nachricht liegt im Spam-Ordner.|]1,Inf[Absender gesperrt, %count% Nachrichten liegen im Spam-Ordner.'
     bulk:
         label: Sammelaktionen für ausgewählte Nachrichten
         select: 'Auswählen: %subject%'
@@ -613,6 +617,9 @@ mail:
         trashed: '%user% hat die Nachricht in den Papierkorb gelegt'
         restored: '%user% hat die Nachricht wiederhergestellt'
         rule: 'Regel „%detail%“ wurde angewendet'
+        spam: '%user% hat die Nachricht als Spam markiert'
+        not_spam: '%user% hat die Nachricht als „kein Spam“ markiert'
+        blocked: '%user% hat den Absender %detail% gesperrt'
         send_failed: 'Versand fehlgeschlagen an: %detail%'
     no_accounts: Noch kein E-Mail-Konto verbunden.
     setup_account: E-Mail-Konto in einer Organisation einrichten
@@ -634,6 +641,14 @@ mail:
     restore: Wiederherstellen
     trashed: In den Papierkorb verschoben.
     restored: Wiederhergestellt.
+    spam:
+        mark: Als Spam markieren
+        block: Absender sperren
+        not_spam: Kein Spam
+        notice: Diese Nachricht liegt im Spam-Ordner. Links und Anhänge mit Vorsicht öffnen.
+        notice_blocked: 'Der Absender %address% ist gesperrt.'
+        hint: Hier landen E-Mails, die der Mailserver als Spam gekennzeichnet hat, und E-Mails gesperrter Absender. Sie werden wie der Papierkorb nach der eingestellten Frist gelöscht.
+        empty: Kein Spam – gut so.
     sync: Neue E-Mails abrufen
     reply: Antworten
     reply_all: Allen antworten
@@ -1784,3 +1799,14 @@ shortcuts:
 live:
     new_messages: Neue Nachrichten sind eingegangen.
     reload: Neu laden
+
+blocked_sender:
+    title: Gesperrte Absender
+    intro: E-Mails dieser Absender landen im Spam-Ordner. Mit „@beispiel.de“ sperrst du eine ganze Domain.
+    address: Adresse oder Domain
+    placeholder: name@beispiel.de oder @beispiel.de
+    add: Sperren
+    remove: Entsperren
+    added: Absender gesperrt.
+    removed: Sperre aufgehoben.
+    invalid: Bitte eine E-Mail-Adresse oder eine Domain mit @ davor eingeben.

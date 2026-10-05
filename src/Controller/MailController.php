@@ -16,6 +16,7 @@ use App\Mail\MessageHtmlRenderer;
 use App\Mail\ParticipantResolver;
 use App\Mail\ReadTracker;
 use App\Notification\ActivityNotifier;
+use App\Repository\BlockedSenderRepository;
 use App\Repository\DraftRepository;
 use App\Repository\MailAccountRepository;
 use App\Repository\MessageRepository;
@@ -38,7 +39,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/mail')]
 final class MailController extends AbstractController
 {
-    public const array FOLDERS = ['inbox', 'all', 'sent', 'done', 'snoozed', 'trash'];
+    public const array FOLDERS = ['inbox', 'all', 'sent', 'done', 'snoozed', 'spam', 'trash'];
 
     public function __construct(
         private readonly MessageRepository $messages,
@@ -55,15 +56,16 @@ final class MailController extends AbstractController
     #[Route('/sent', name: 'mail_sent', defaults: ['folder' => 'sent'])]
     #[Route('/done', name: 'mail_done', defaults: ['folder' => 'done'])]
     #[Route('/snoozed', name: 'mail_snoozed', defaults: ['folder' => 'snoozed'])]
+    #[Route('/spam', name: 'mail_spam', defaults: ['folder' => 'spam'])]
     #[Route('/trash', name: 'mail_trash', defaults: ['folder' => 'trash'])]
     public function list(Request $request, string $folder, #[CurrentUser] User $user): Response
     {
         return $this->render('mail/index.html.twig', $this->listContext($request, $folder, $user));
     }
 
-    #[Route('/{folder<inbox|all|sent|done|snoozed|trash>}/{id<\d+>}', name: 'mail_show')]
+    #[Route('/{folder<inbox|all|sent|done|snoozed|spam|trash>}/{id<\d+>}', name: 'mail_show')]
     #[IsGranted(MessageVoter::VIEW, 'message')]
-    public function show(Request $request, string $folder, Message $message, #[CurrentUser] User $user, MessageHtmlRenderer $renderer, ParticipantResolver $participants, DraftRepository $drafts): Response
+    public function show(Request $request, string $folder, Message $message, #[CurrentUser] User $user, MessageHtmlRenderer $renderer, ParticipantResolver $participants, DraftRepository $drafts, BlockedSenderRepository $blockedSenders): Response
     {
         $request->attributes->set('_nav', 'mail_'.$folder);
         $this->readTracker->markRead($message, $user);
@@ -81,6 +83,7 @@ final class MailController extends AbstractController
             'message_projects' => $participants->projects($message),
             'open' => $request->query->getString('open'),
             'thread' => $this->messages->findThread($message, $user),
+            'sender_blocked' => $message->isSpam() && null !== $message->getOrganization() && $blockedSenders->isBlocked($message->getOrganization(), $message->getFromAddress()),
         ]);
     }
 

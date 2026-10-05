@@ -99,6 +99,31 @@
             </section>
         {% endif %}
 
+        {% if mail and is_admin and mail_accounts is not empty %}
+            <section aria-labelledby="blocked-heading">
+                <h3 id="blocked-heading" class="mb-1 font-semibold">{{ 'blocked_sender.title'|trans }}</h3>
+                <p class="mb-3 text-sm text-slate-500">{{ 'blocked_sender.intro'|trans }}</p>
+                {% if blocked_senders is not empty %}
+                    <ul role="list" class="card mb-3 divide-y divide-slate-100">
+                        {% for blocked in blocked_senders %}
+                            <li class="flex items-center gap-3 px-4 py-2">
+                                {{ ux_icon('lucide:ban', {class: 'size-4 text-slate-400', 'aria-hidden': 'true'}) }}
+                                <span class="min-w-0 flex-1 truncate">{{ blocked.address }}</span>
+                                {{ ui.post_button(path('blocked_sender_delete', {id: blocked.id}), 'delete-blocked-sender-' ~ blocked.id, 'blocked_sender.remove',
+                                    {class: 'btn-icon', icon: 'lucide:x', icon_only: true}) }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <form method="post" action="{{ path('blocked_sender_add', {id: organization.id}) }}" class="flex gap-2">
+                    <input type="hidden" name="_token" value="{{ csrf_token('blocked-sender-' ~ organization.id) }}">
+                    <label for="blocked-address" class="sr-only">{{ 'blocked_sender.address'|trans }}</label>
+                    <input type="text" id="blocked-address" name="address" required maxlength="255" class="input min-w-0 flex-1" placeholder="{{ 'blocked_sender.placeholder'|trans }}" aria-describedby="blocked-heading">
+                    <button type="submit" class="btn-secondary">{{ 'blocked_sender.add'|trans }}</button>
+                </form>
+            </section>
+        {% endif %}
+
         {% if is_admin and organization.hasFeature('public_page') %}
             <section aria-labelledby="public-heading">
                 <div class="mb-3 flex items-center justify-between gap-2">

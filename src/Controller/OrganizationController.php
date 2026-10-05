@@ -15,6 +15,7 @@ use App\Form\InvitationFormType;
 use App\Form\MembershipFormType;
 use App\Form\OrganizationFormType;
 use App\Organization\HandoverService;
+use App\Repository\BlockedSenderRepository;
 use App\Repository\InvitationRepository;
 use App\Repository\MailAccountRepository;
 use App\Repository\MailRuleRepository;
@@ -83,7 +84,7 @@ final class OrganizationController extends AbstractController
 
     #[Route('/{id<\d+>}', name: 'organization_show')]
     #[IsGranted(OrganizationVoter::VIEW, 'organization')]
-    public function show(Organization $organization, #[CurrentUser] User $user, InvitationRepository $invitations, MailAccountRepository $mailAccounts, MailRuleRepository $mailRules, ProjectRepository $projects): Response
+    public function show(Organization $organization, #[CurrentUser] User $user, InvitationRepository $invitations, MailAccountRepository $mailAccounts, MailRuleRepository $mailRules, BlockedSenderRepository $blockedSenders, ProjectRepository $projects): Response
     {
         $inviteForm = $this->createForm(InvitationFormType::class, null, [
             'action' => $this->generateUrl('organization_invite', ['id' => $organization->getId()]),
@@ -96,6 +97,7 @@ final class OrganizationController extends AbstractController
             'invite_form' => $inviteForm,
             'mail_accounts' => $mailAccounts->findForOrganization($organization),
             'mail_rules' => $mailRules->findForOrganization($organization),
+            'blocked_senders' => $blockedSenders->findForOrganization($organization),
             'org_projects' => $projects->findBy(['organization' => $organization], ['name' => 'ASC']),
             'snippets' => $this->em->getRepository(TextSnippet::class)->findBy(['organization' => $organization], ['title' => 'ASC']),
         ]);

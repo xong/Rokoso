@@ -221,5 +221,10 @@ final class MailStatusTest extends AppTestCase
         self::assertResponseRedirects();
         $this->client->followRedirect();
         self::assertSelectorTextContains('main', 'Schulamt');
+
+        $rule = $this->em()->getRepository(MailRule::class)->findOneBy(['name' => 'Schulamt']);
+        self::assertNotNull($rule);
+        $this->client->request('GET', '/mail-rules/'.$rule->getId().'/edit');
+        self::assertResponseIsSuccessful();
     }
 }

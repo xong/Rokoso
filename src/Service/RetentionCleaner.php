@@ -41,7 +41,7 @@ final readonly class RetentionCleaner
         $submissions = 0;
         foreach ($this->em->getRepository(Organization::class)->findAll() as $organization) {
             $messages += $this->removeMessages($this->em->createQueryBuilder()->select('m')->from(Message::class, 'm')
-                ->where('m.organization = :org')->andWhere('m.trashedAt < :before')
+                ->where('m.organization = :org')->andWhere('m.trashedAt < :before OR m.spamAt < :before')
                 ->setParameter('org', $organization)->setParameter('before', $now->modify(\sprintf('-%d days', $organization->getTrashDays()))));
             if (null !== $years = $organization->getMessageRetentionYears()) {
                 $messages += $this->removeMessages($this->em->createQueryBuilder()->select('m')->from(Message::class, 'm')

@@ -20,6 +20,9 @@ enum MessageEventType: string
     case Trashed = 'trashed';
     case Restored = 'restored';
     case Rule = 'rule';
+    case Spam = 'spam';
+    case NotSpam = 'not_spam';
+    case Blocked = 'blocked';
     case SendFailed = 'send_failed';
 
     public function label(): string

@@ -45,6 +45,7 @@ final class Sidebar
                     ['label' => 'nav.mail_done', 'icon' => 'lucide:circle-check', 'route' => 'mail_done'],
                     ['label' => 'nav.mail_sent', 'icon' => 'lucide:send', 'route' => 'mail_sent'],
                     ['label' => 'nav.mail_drafts', 'icon' => 'lucide:file-pen-line', 'route' => 'mail_drafts'],
+                    ['label' => 'nav.mail_spam', 'icon' => 'lucide:shield-alert', 'route' => 'mail_spam'],
                     ['label' => 'nav.mail_trash', 'icon' => 'lucide:trash-2', 'route' => 'mail_trash'],
                 ],
             ],

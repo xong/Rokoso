@@ -19,4 +19,5 @@ Die erste Testversion von Rokoso.
 - **Dateien und Handbuch:** Ablage mit Versionen und Freigabelinks, Handbuch für das Wissen des Gremiums.
 - **Öffentliche Seite:** Kontaktformular, Umfragen, Anmeldungen und Verteiler-Abo für Eltern.
 - **Sicherheit:** Zwei-Faktor-Anmeldung, Datenexport und Konto löschen im Profil.
+- **Spam:** vom Mailserver gekennzeichnete E-Mails und E-Mails gesperrter Absender landen im Ordner „Spam“ statt im Eingang – mit „Kein Spam“ holst du sie zurück.
 - **Neuigkeiten:** nach einem Update steht auf „Heute“, was sich geändert hat.

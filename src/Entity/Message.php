@@ -90,6 +90,10 @@ class Message
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $trashedAt = null;
 
+    /** Spam (header of the receiving server, blocked sender or marked by hand): only in the spam folder. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $spamAt = null;
+
     /** Status model: open (null) or done since … (Entscheidung 39). */
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $doneAt = null;
@@ -400,6 +404,23 @@ class Message
     public function setTrashed(bool $trashed): static
     {
         $this->trashedAt = $trashed ? new \DateTimeImmutable() : null;
+
+        return $this;
+    }
+
+    public function isSpam(): bool
+    {
+        return null !== $this->spamAt;
+    }
+
+    public function getSpamAt(): ?\DateTimeImmutable
+    {
+        return $this->spamAt;
+    }
+
+    public function setSpam(bool $spam): static
+    {
+        $this->spamAt = $spam ? ($this->spamAt ?? new \DateTimeImmutable()) : null;
 
         return $this;
     }

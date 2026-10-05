@@ -58,7 +58,12 @@
         {% endif %}
     </form>
 
-    {% if messages is empty %}
+    {% if folder == 'spam' %}
+        <p class="border-b border-slate-200 px-4 py-2 text-xs text-slate-500">{{ 'mail.spam.hint'|trans }}</p>
+    {% endif %}
+    {% if messages is empty and folder == 'spam' and not filter.active %}
+        {{ ui.empty('mail.spam.empty', 'lucide:shield-check') }}
+    {% elseif messages is empty %}
         {{ ui.empty(accounts is empty and folder == 'inbox' and not filter.active ? 'mail.no_accounts' : (folder == 'inbox' and not filter.active ? 'mail.inbox_zero' : 'mail.empty'), folder == 'inbox' and not filter.active ? 'lucide:party-popper' : 'lucide:inbox', accounts is empty ? path('organization_index') : null, 'empty.mail_account') }}
         {% if accounts is empty and folder == 'inbox' %}
             <p class="-mt-8 px-6 pb-8 text-center"><a class="link" href="{{ path('organization_index') }}">{{ 'mail.setup_account'|trans }}</a></p>
@@ -79,6 +84,8 @@
             <span class="mr-auto font-medium" data-bulk-target="count" aria-live="polite"></span>
             {% if folder == 'done' %}
                 <button type="submit" name="action" value="reopen" class="btn-icon size-8" title="{{ 'mail.reopen'|trans }}" aria-label="{{ 'mail.reopen'|trans }}">{{ ux_icon('lucide:rotate-ccw', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+            {% elseif folder == 'spam' %}
+                <button type="submit" name="action" value="not_spam" class="btn-icon size-8" title="{{ 'mail.spam.not_spam'|trans }}" aria-label="{{ 'mail.spam.not_spam'|trans }}">{{ ux_icon('lucide:shield-check', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
             {% elseif folder != 'trash' %}
                 <button type="submit" name="action" value="done" class="btn-icon size-8" title="{{ 'mail.done'|trans }}" aria-label="{{ 'mail.done'|trans }}">{{ ux_icon('lucide:check', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
             {% endif %}
@@ -88,6 +95,9 @@
             {% if folder == 'trash' %}
                 <button type="submit" name="action" value="restore" class="btn-icon size-8" title="{{ 'mail.restore'|trans }}" aria-label="{{ 'mail.restore'|trans }}">{{ ux_icon('lucide:archive-restore', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
             {% else %}
+                {% if folder != 'spam' and folder != 'sent' %}
+                    <button type="submit" name="action" value="spam" class="btn-icon size-8" title="{{ 'mail.spam.mark'|trans }}" aria-label="{{ 'mail.spam.mark'|trans }}">{{ ux_icon('lucide:shield-alert', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+                {% endif %}
                 <button type="submit" name="action" value="trash" class="btn-icon size-8 hover:text-red-600" title="{{ 'mail.trash'|trans }}" aria-label="{{ 'mail.trash'|trans }}">{{ ux_icon('lucide:trash-2', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
             {% endif %}
             {% if projects is not empty %}

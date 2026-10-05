@@ -25,6 +25,8 @@ final readonly class ParsedMessage
         public ?string $text,
         public ?string $html,
         public array $attachments,
+        /** The receiving server's spam filter flagged it (X-Spam-Flag / X-Spam-Status). */
+        public bool $spamFlagged = false,
     ) {
     }
 }

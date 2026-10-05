@@ -39,14 +39,14 @@ final class MailRuleController extends AbstractController
     }
 
     #[Route('/mail-rules/{id<\d+>}/edit', name: 'mail_rule_edit')]
-    #[IsGranted(OrganizationVoter::MANAGE, 'rule.organization')]
+    #[IsGranted(OrganizationVoter::MANAGE, new Expression('args["rule"].getOrganization()'))]
     public function edit(Request $request, MailRule $rule, #[CurrentUser] User $user): Response
     {
         return $this->form($request, $rule, $user);
     }
 
     #[Route('/mail-rules/{id<\d+>}/delete', name: 'mail_rule_delete', methods: ['POST'])]
-    #[IsGranted(OrganizationVoter::MANAGE, 'rule.organization')]
+    #[IsGranted(OrganizationVoter::MANAGE, new Expression('args["rule"].getOrganization()'))]
     #[IsCsrfTokenValid(new Expression('"delete-mail-rule-" ~ args["rule"].getId()'))]
     public function delete(MailRule $rule): Response
     {

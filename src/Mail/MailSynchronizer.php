@@ -10,6 +10,7 @@ use App\Entity\Message;
 use App\Enum\MessageEventType;
 use App\Enum\MessageFolder;
 use App\Notification\ActivityNotifier;
+use App\Repository\BlockedSenderRepository;
 use App\Repository\MailRuleRepository;
 use App\Repository\MessageRepository;
 use App\Service\AttachmentStorage;
@@ -27,6 +28,7 @@ final readonly class MailSynchronizer
         private MessageParser $parser,
         private MessageRepository $messages,
         private MailRuleRepository $rules,
+        private BlockedSenderRepository $blockedSenders,
         private AttachmentStorage $storage,
         private EntityManagerInterface $em,
         private LoggerInterface $logger,
@@ -105,11 +107,18 @@ final readonly class MailSynchronizer
         $parentKey = null === $parsed->inReplyTo ? null : $this->messages->findThreadKey($account->getOrganization(), $parsed->inReplyTo);
         $message->setThreadKey($parentKey ?? $message->deriveThreadKey());
 
-        $this->applyRules($account, $message);
+        // Spam is imported but only shown in the spam folder; rules and notifications are skipped
+        if ($parsed->spamFlagged) {
+            $message->setSpam(true)->log(MessageEventType::Spam, null, 'X-Spam-Flag');
+        } elseif ($this->blockedSenders->isBlocked($account->getOrganization(), $parsed->fromAddress)) {
+            $message->setSpam(true)->log(MessageEventType::Blocked, null, $parsed->fromAddress);
+        } else {
+            $this->applyRules($account, $message);
+        }
 
         $this->em->persist($message);
         $this->em->flush();
-        if (!$message->isDone() && !$message->getAssignees()->isEmpty()) {
+        if (!$message->isSpam() && !$message->isDone() && !$message->getAssignees()->isEmpty()) {
             $this->notifier->messageAssigned($message, $message->getAssignees(), null);
             $this->em->flush();
         }
