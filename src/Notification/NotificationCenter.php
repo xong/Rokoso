@@ -43,10 +43,11 @@ final class NotificationCenter
      *
      * @param iterable<User|null>             $recipients
      * @param array{0: string, 1: mixed}|null $access     voter attribute and subject
+     * @param bool                            $email      false when the caller already sends its own email
      *
      * @return list<User> notified recipients
      */
-    public function notify(iterable $recipients, NotificationType $type, string $subject, string $url, ?User $actor = null, ?array $access = null, ?string $refKey = null): array
+    public function notify(iterable $recipients, NotificationType $type, string $subject, string $url, ?User $actor = null, ?array $access = null, ?string $refKey = null, bool $email = true): array
     {
         $done = [];
         foreach ($recipients as $recipient) {
@@ -64,6 +65,9 @@ final class NotificationCenter
                 continue;
             }
             $notification = new Notification($recipient, $type, $subject, $url, $actor, $refKey);
+            if (!$email) {
+                $notification->markEmailed();
+            }
             $this->em->persist($notification);
             $this->pending[] = $notification;
             $this->notified[$key] = true;
@@ -121,7 +125,7 @@ final class NotificationCenter
 
         foreach ($pending as $notification) {
             try {
-                if (NotificationEmail::Instant === $notification->getRecipient()->getNotificationEmail() && !$notification->isRead()) {
+                if (NotificationEmail::Instant === $notification->getRecipient()->getNotificationEmail() && !$notification->isRead() && null === $notification->getEmailedAt()) {
                     $this->mailer->sendInstant($notification);
                     $notification->markEmailed();
                 }

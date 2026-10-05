@@ -307,6 +307,8 @@ email:
         subject: Einladung zu „%organization%“ in Rokoso
         text: 'Hallo, %inviter% lädt dich in die Organisation „%organization%“ in Rokoso ein.'
         button: Einladung ansehen
+        has_account: 'Mit dieser Adresse hast du schon ein Konto: Melde dich an und nimm die Einladung an. Du findest sie in Rokoso auch unter den Benachrichtigungen.'
+        no_account: Lege mit dieser Adresse ein Konto an, um die Einladung anzunehmen.
         expires: Die Einladung ist 14 Tage gültig.
     meeting:
         text: '%sender% lädt dich im Namen von „%organization%“ zur Sitzung „%title%“ ein.'
@@ -346,6 +348,7 @@ organization:
     invite: Mitglied einladen
     send_invite: Einladen
     invited: Einladung verschickt.
+    invited_account: Einladung verschickt. Die Person hat schon ein Konto und sieht die Einladung auch unter ihren Benachrichtigungen.
     invite_invalid: Bitte gib eine gültige E-Mail-Adresse ein.
     already_member: Diese Person ist bereits Mitglied.
     pending_invitations: Offene Einladungen
@@ -451,6 +454,11 @@ invitation:
     open: Organisation öffnen
     register: Neues Konto anlegen
     login: Ich habe schon ein Konto
+    login_to_accept: Anmelden und annehmen
+    for: 'Die Einladung gilt für %email%.'
+    wrong_account: 'Du bist als %current% angemeldet. Melde dich ab und mit dem eingeladenen Konto wieder an – oder bitte um eine Einladung an deine Adresse.'
+    not_for_you: Diese Einladung gilt für eine andere E-Mail-Adresse.
+    logout: Abmelden
     joined: Willkommen! Du bist jetzt Mitglied.
     registered: Dein Konto ist angelegt und du bist der Organisation beigetreten. Bitte melde dich an.
 
@@ -1292,6 +1300,7 @@ notification:
         poll: '%actor% bittet um deine Stimme: „%subject%“'
         contact: 'Neue Anfrage über das Kontaktformular: „%subject%“'
         confidential: 'Neue vertrauliche Nachricht an %subject%'
+        invitation: '%actor% lädt dich in „%subject%“ ein'
     email:
         legend: Benachrichtigungen per E-Mail
         instant: Sofort

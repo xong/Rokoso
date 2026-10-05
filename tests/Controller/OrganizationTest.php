@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
+use App\Entity\Invitation;
+use App\Entity\Notification;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Enum\NotificationType;
 use App\Enum\OrganizationRole;
 use App\Repository\UserRepository;
+use App\Service\InvitationManager;
 use App\Tests\AppTestCase;
+use Symfony\Component\Mime\Email;
 
 final class OrganizationTest extends AppTestCase
 {
@@ -103,7 +108,7 @@ final class OrganizationTest extends AppTestCase
     {
         $owner = $this->createUser('owner@example.org', 'Owner');
         $org = $this->createOrganization($owner);
-        $invitation = new \App\Entity\Invitation($org, 'anna@example.org', OrganizationRole::Admin, $owner);
+        $invitation = new Invitation($org, 'anna@example.org', OrganizationRole::Admin, $owner);
         $this->em()->persist($invitation);
         $this->em()->flush();
 
@@ -115,5 +120,56 @@ final class OrganizationTest extends AppTestCase
         $this->em()->clear();
         $org = $this->em()->find(Organization::class, $org->getId());
         self::assertTrue($org?->isAdmin($this->em()->find(User::class, $user->getId()) ?? $user));
+    }
+
+    public function testInvitingAnExistingAccountNotifiesItUntilRevoked(): void
+    {
+        $anna = $this->createUser();
+        $owner = $this->login($this->createUser('owner@example.org', 'Owner'));
+        $org = $this->createOrganization($owner);
+        $this->client->request('GET', '/organizations/'.$org->getId());
+        $this->client->submitForm('Einladen', [
+            'invitation_form[email]' => 'Anna@Example.org',
+            'invitation_form[role]' => 'member',
+        ]);
+        // only the invitation itself, no extra notification email
+        self::assertEmailCount(1);
+        $email = self::getMailerMessage();
+        self::assertInstanceOf(Email::class, $email);
+        self::assertStringContainsString('schon ein Konto', (string) $email->getTextBody());
+        $crawler = $this->client->followRedirect();
+        self::assertSelectorTextContains('[role=status]', 'unter ihren Benachrichtigungen');
+
+        $notifications = fn (): array => $this->em()->getRepository(Notification::class)->findBy(['recipient' => $anna->getId()]);
+        self::assertCount(1, $notifications());
+        self::assertSame(NotificationType::Invitation, $notifications()[0]->getType());
+        self::assertStringStartsWith('/invitation/', $notifications()[0]->getUrl());
+
+        $this->client->submit($crawler->filter('form[action$="/revoke"]')->form());
+        $this->em()->clear();
+        self::assertCount(0, $notifications());
+    }
+
+    public function testInvitationOnlyWorksForTheInvitedAddress(): void
+    {
+        $owner = $this->createUser('owner@example.org', 'Owner');
+        $org = $this->createOrganization($owner);
+        $invitation = new Invitation($org, 'anna@example.org', OrganizationRole::Member, $owner);
+        $this->em()->persist($invitation);
+        $this->em()->flush();
+
+        // logged out: the address has an account, so log in instead of registering
+        $this->createUser();
+        $this->client->request('GET', '/invitation/'.$invitation->getToken());
+        self::assertSelectorTextContains('main', 'gilt für anna@example.org');
+        self::assertSelectorExists('a:contains("Anmelden und annehmen")');
+
+        $other = $this->login($this->createUser('other@example.org', 'Other'));
+        $this->client->request('GET', '/invitation/'.$invitation->getToken());
+        self::assertSelectorTextContains('main', 'Du bist als other@example.org angemeldet');
+        self::assertSelectorNotExists('form[action$="/accept"]');
+
+        $this->expectException(\LogicException::class);
+        static::getContainer()->get(InvitationManager::class)->join($invitation, $other);
     }
 }

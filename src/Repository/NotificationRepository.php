@@ -65,6 +65,14 @@ class NotificationRepository extends ServiceEntityRepository
             ->getQuery()->execute();
     }
 
+    /** Removes the notifications about something that no longer exists (e.g. a revoked invitation). */
+    public function deleteByRef(string $refKey): void
+    {
+        $this->createQueryBuilder('n')->delete()
+            ->andWhere('n.refKey = :ref')->setParameter('ref', $refKey)
+            ->getQuery()->execute();
+    }
+
     public function hasRef(User $user, string $refKey): bool
     {
         return null !== $this->findOneBy(['recipient' => $user, 'refKey' => $refKey]);

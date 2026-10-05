@@ -14,7 +14,7 @@ use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 /**
- * Invitation links: accept when logged in, otherwise log in or register first.
+ * Invitation links: accept when logged in with the invited address, otherwise log in or register first.
  */
 final class InvitationController extends AbstractController
 {
@@ -40,6 +40,8 @@ final class InvitationController extends AbstractController
         return $this->render('invitation/show.html.twig', [
             'invitation' => $invitation,
             'already_member' => $user instanceof User && null !== $invitation?->getOrganization()->getMembership($user),
+            'wrong_account' => $user instanceof User && null !== $invitation && !$this->manager->isFor($invitation, $user),
+            'has_account' => !$user instanceof User && null !== $invitation && $this->manager->hasAccount($invitation),
         ]);
     }
 
@@ -54,6 +56,11 @@ final class InvitationController extends AbstractController
         $invitation = $this->manager->findValid($token);
         if (null === $invitation) {
             throw $this->createNotFoundException();
+        }
+        if (!$this->manager->isFor($invitation, $user)) {
+            $this->addFlash('error', 'invitation.not_for_you');
+
+            return $this->redirectToRoute('invitation_show', ['token' => $token]);
         }
 
         $organization = $this->manager->join($invitation, $user);

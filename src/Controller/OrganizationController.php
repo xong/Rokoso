@@ -24,7 +24,7 @@ use App\Repository\ProjectRepository;
 use App\Security\SecurityLog;
 use App\Security\Voter\OrganizationVoter;
 use App\Service\ImageUploader;
-use App\Service\SystemMailer;
+use App\Service\InvitationManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
@@ -33,7 +33,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -258,7 +257,7 @@ final class OrganizationController extends AbstractController
 
     #[Route('/{id<\d+>}/invite', name: 'organization_invite', methods: ['POST'])]
     #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
-    public function invite(Request $request, Organization $organization, #[CurrentUser] User $user, SystemMailer $mailer): Response
+    public function invite(Request $request, Organization $organization, #[CurrentUser] User $user, InvitationManager $invitations): Response
     {
         $form = $this->createForm(InvitationFormType::class);
         $form->handleRequest($request);
@@ -273,16 +272,8 @@ final class OrganizationController extends AbstractController
             if ($alreadyMember) {
                 $this->addFlash('info', 'organization.already_member');
             } else {
-                $invitation = new Invitation($organization, $email, $data['role'], $user);
-                $this->em->persist($invitation);
-                $this->em->flush();
-                $mailer->send($email, 'email.invitation.subject', 'invitation', [
-                    'inviter' => $user->getName(),
-                    'organization' => $organization->getName(),
-                    'url' => $this->generateUrl('invitation_show', ['token' => $invitation->getToken()], UrlGeneratorInterface::ABSOLUTE_URL),
-                    'subject_params' => ['%organization%' => $organization->getName()],
-                ]);
-                $this->addFlash('success', 'organization.invited');
+                $account = $invitations->invite($organization, $email, $data['role'], $user);
+                $this->addFlash('success', null !== $account ? 'organization.invited_account' : 'organization.invited');
             }
         } else {
             $this->addFlash('error', 'organization.invite_invalid');
@@ -294,13 +285,12 @@ final class OrganizationController extends AbstractController
     #[Route('/{id<\d+>}/invitations/{invitation<\d+>}/revoke', name: 'organization_invitation_revoke', methods: ['POST'])]
     #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
     #[IsCsrfTokenValid('invitation-revoke')]
-    public function revokeInvitation(Organization $organization, Invitation $invitation): Response
+    public function revokeInvitation(Organization $organization, Invitation $invitation, InvitationManager $invitations): Response
     {
         if ($invitation->getOrganization() !== $organization) {
             throw $this->createNotFoundException();
         }
-        $this->em->remove($invitation);
-        $this->em->flush();
+        $invitations->revoke($invitation);
         $this->addFlash('success', 'organization.invitation_revoked');
 
         return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);

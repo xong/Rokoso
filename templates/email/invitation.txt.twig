@@ -1,5 +1,7 @@
 {{ 'email.invitation.text'|trans({'%inviter%': inviter, '%organization%': organization}) }}
 
+{{ (has_account ?? false ? 'email.invitation.has_account' : 'email.invitation.no_account')|trans }}
+
 {{ url }}
 
 {{ 'email.invitation.expires'|trans }}

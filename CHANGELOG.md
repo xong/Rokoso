@@ -4,6 +4,16 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.13.0 – 2026-10-05
+
+### Neu
+
+- **Einladungen für bestehende Konten:** Wer schon ein Konto hat, findet eine Einladung in eine Organisation jetzt auch unter den Benachrichtigungen (Glocke) und kann sie dort mit einem Klick annehmen. Die E-Mail sagt dazu, dass man sich einfach anmelden kann. Wird die Einladung zurückgezogen, verschwindet auch die Benachrichtigung.
+
+### Verbessert
+
+- **Einladungen gelten nur für die eingeladene Adresse:** Ein weitergeleiteter Link lässt sich mit einem anderen Konto nicht mehr annehmen. Die Einladungsseite zeigt, für welche Adresse sie gilt, und bietet bei falschem Konto das Abmelden an.
+
 ## 0.12.1 – 2026-10-05
 
 ### Verbessert
