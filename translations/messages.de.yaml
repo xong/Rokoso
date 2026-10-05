@@ -988,10 +988,27 @@ calendar:
         none: Nicht wiederholen
         daily: Täglich
         weekly: Wöchentlich
-        monthly: Monatlich
+        monthly: Monatlich am selben Tag
+        monthly_weekday: Monatlich am selben Wochentag (z. B. 2. Donnerstag)
+        monthly_last: Monatlich am letzten Wochentag
         yearly: Jährlich
         interval: Intervall
         until: Endet am
+        show:
+            daily: Täglich
+            weekly: 'Wöchentlich am %weekday%'
+            monthly: 'Monatlich am %day%.'
+            monthly_weekday: 'Monatlich am %nth%. %weekday%'
+            monthly_last: 'Monatlich am letzten %weekday%'
+            yearly: Jährlich
+    weekdays:
+        0: Sonntag
+        1: Montag
+        2: Dienstag
+        3: Mittwoch
+        4: Donnerstag
+        5: Freitag
+        6: Samstag
     months:
         1: Januar
         2: Februar

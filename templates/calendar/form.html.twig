@@ -21,7 +21,15 @@
 
 {% block detail %}
     <div class="mx-auto max-w-2xl p-4 lg:p-6">
-        {{ form_start(form) }}
+        {% set recurrence_labels = {} %}
+        {% for key in ['weekly', 'monthly', 'monthly_weekday', 'monthly_last'] %}
+            {% set recurrence_labels = recurrence_labels|merge({(key|upper): ('calendar.recurrence.show.' ~ key)|trans}) %}
+        {% endfor %}
+        {{ form_start(form, {attr: {
+            'data-controller': 'recurrence',
+            'data-recurrence-labels-value': recurrence_labels|json_encode,
+            'data-recurrence-weekdays-value': (0..6)|map(d => ('calendar.weekdays.' ~ d)|trans)|json_encode,
+        }}) }}
             {{ form_errors(form) }}
             {% if source is defined and source %}
                 <p class="mb-4 flex items-center gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600">
@@ -40,7 +48,7 @@
             </fieldset>
             {{ form_row(form.title) }}
             <div class="grid gap-x-4 sm:grid-cols-2">
-                {{ form_row(form.startsAt) }}
+                {{ form_row(form.startsAt, {attr: {'data-recurrence-target': 'start', 'data-action': 'recurrence#update'}}) }}
                 {{ form_row(form.endsAt, {help: 'calendar.ends_at_help'}) }}
             </div>
             {{ form_row(form.allDay) }}
@@ -57,8 +65,8 @@
             {% endif %}
             <fieldset class="card mb-4 p-4">
                 <legend class="px-1 font-semibold">{{ 'calendar.recurrence.title'|trans }}</legend>
-                <div class="grid gap-x-4 sm:grid-cols-3">
-                    {{ form_row(form.recurrence, {row_attr: {class: 'mb-0'}}) }}
+                <div class="grid gap-x-4 gap-y-3 sm:grid-cols-2">
+                    {{ form_row(form.recurrence, {row_attr: {class: 'mb-0 sm:col-span-2'}, attr: {'data-recurrence-target': 'select'}}) }}
                     {{ form_row(form.recurrenceInterval, {row_attr: {class: 'mb-0'}}) }}
                     {{ form_row(form.recurrenceUntil, {row_attr: {class: 'mb-0'}}) }}
                 </div>

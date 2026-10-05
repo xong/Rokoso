@@ -14,6 +14,7 @@ contact_group:
 calendar:
     end_before_start: Das Ende muss nach dem Beginn liegen.
     start_required: Termine brauchen einen Beginn.
+    recurrence_last_week: '„Am letzten Wochentag“ passt nur, wenn der Beginn in der letzten Woche des Monats liegt.'
 task:
     recurrence_needs_date: Wiederkehrende Aufgaben brauchen eine Frist.
 folder:

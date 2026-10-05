@@ -260,6 +260,9 @@ class CalendarItem
         if (null === $this->startsAt && $this->isRecurring()) {
             $context->buildViolation('task.recurrence_needs_date')->atPath('startsAt')->addViolation();
         }
+        if (Recurrence::MonthlyLast === $this->recurrence && !$this->isInLastWeekOfMonth()) {
+            $context->buildViolation('calendar.recurrence_last_week')->atPath('recurrence')->addViolation();
+        }
     }
 
     public function getEndsAt(): ?\DateTimeImmutable
@@ -434,12 +437,32 @@ class CalendarItem
         if (!$this->isRecurring()) {
             return null;
         }
-        $rule = 'FREQ='.$this->recurrence->value.';INTERVAL='.$this->recurrenceInterval;
+        $rule = 'FREQ='.$this->recurrence->freq().';INTERVAL='.$this->recurrenceInterval;
+        $weekday = strtoupper(substr($this->getDate()->format('D'), 0, 2));
+        if (Recurrence::MonthlyWeekday === $this->recurrence) {
+            $rule .= ';BYDAY='.$this->getWeekOfMonth().$weekday;
+        } elseif (Recurrence::MonthlyLast === $this->recurrence) {
+            $rule .= ';BYDAY=-1'.$weekday;
+        }
         if (null !== $this->recurrenceUntil) {
             $rule .= ';UNTIL='.$this->recurrenceUntil->setTime(23, 59, 59)->setTimezone(new \DateTimeZone('UTC'))->format('Ymd\THis\Z');
         }
 
         return $rule;
+    }
+
+    /** Which occurrence of its weekday the start day is within the month (1–5) */
+    public function getWeekOfMonth(): int
+    {
+        return intdiv((int) $this->getDate()->format('j') - 1, 7) + 1;
+    }
+
+    /** Whether the start day is the last of its weekday in the month */
+    public function isInLastWeekOfMonth(): bool
+    {
+        $date = $this->getDate();
+
+        return (int) $date->format('j') + 7 > (int) $date->format('t');
     }
 
     public function getOrganization(): ?Organization

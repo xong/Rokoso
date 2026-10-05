@@ -121,6 +121,39 @@ final class CalendarTest extends AppTestCase
         self::assertSame(['05.10.', '12.10.', '19.10.', '26.10.'], array_map(static fn ($o): string => $o->start->format('d.m.'), $occurrences));
     }
 
+    public function testMonthlyOnTheSecondAndLastWeekday(): void
+    {
+        $this->client->request('GET', '/calendar/new');
+        $this->client->submitForm('Speichern', [
+            'calendar_item_form[title]' => 'Stammtisch',
+            'calendar_item_form[startsAt]' => '2026-10-08T19:00',
+            'calendar_item_form[recurrence]' => Recurrence::MonthlyWeekday->value,
+        ]);
+        self::assertResponseRedirects();
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('main', 'Monatlich am 2. Donnerstag');
+
+        $item = $this->em()->getRepository(CalendarItem::class)->findOneBy(['title' => 'Stammtisch']);
+        self::assertNotNull($item);
+        self::assertSame('FREQ=MONTHLY;INTERVAL=1;BYDAY=2TH', $item->getRrule());
+        $occurrences = static::getContainer()->get(CalendarService::class)
+            ->occurrences($this->user, new \DateTimeImmutable('2026-10-01'), new \DateTimeImmutable('2027-01-01'));
+        self::assertSame(['08.10.', '12.11.', '10.12.'], array_map(static fn ($o): string => $o->start->format('d.m.'), $occurrences));
+
+        // "last Thursday" only fits a start in the last week of the month
+        $item->setStartsAt(new \DateTimeImmutable('2026-10-29 19:00'))->setRecurrence(Recurrence::MonthlyLast);
+        self::assertSame('FREQ=MONTHLY;INTERVAL=1;BYDAY=-1TH', $item->getRrule());
+        self::assertTrue($item->occursOn(new \DateTimeImmutable('2026-11-26')));
+        self::assertFalse($item->occursOn(new \DateTimeImmutable('2026-11-19')));
+        $crawler = $this->client->request('GET', '/calendar/item/'.$item->getId().'/edit');
+        $this->client->submit($crawler->selectButton('Speichern')->form([
+            'calendar_item_form[startsAt]' => '2026-10-22T19:00',
+            'calendar_item_form[recurrence]' => Recurrence::MonthlyLast->value,
+        ]));
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('main', 'letzten Woche des Monats');
+    }
+
     public function testTaskCanBeMarkedDone(): void
     {
         $task = (new CalendarItem($this->user))->setTitle('Protokoll schreiben')->setType(CalendarItemType::Task);
