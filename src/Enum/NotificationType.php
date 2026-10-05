@@ -17,6 +17,7 @@ enum NotificationType: string
     case Due = 'due';
     case Poll = 'poll';
     case Contact = 'contact';
+    case Confidential = 'confidential';
 
     public function label(): string
     {
@@ -33,6 +34,7 @@ enum NotificationType: string
             self::Due => 'lucide:alarm-clock',
             self::Poll => 'lucide:vote',
             self::Contact => 'lucide:inbox',
+            self::Confidential => 'lucide:lock',
         };
     }
 }

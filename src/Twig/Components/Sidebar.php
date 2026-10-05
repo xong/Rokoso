@@ -6,6 +6,7 @@ namespace App\Twig\Components;
 
 use App\Entity\User;
 use App\Enum\Feature;
+use App\Repository\ConfidentialCaseRepository;
 use App\Repository\ForumTopicRepository;
 use App\Repository\MessageRepository;
 use App\Repository\NotificationRepository;
@@ -50,6 +51,8 @@ final class Sidebar
                 ],
             ],
             ['label' => 'nav.forum', 'icon' => 'lucide:messages-square', 'route' => 'forum_index', 'match' => ['forum_']],
+            // only for confidants (see getGroups())
+            ['label' => 'nav.confidential', 'icon' => 'lucide:lock', 'route' => 'confidential_index', 'match' => ['confidential_']],
         ]],
         ['label' => 'nav.group_plan', 'items' => [
             ['label' => 'nav.calendar', 'icon' => 'lucide:calendar', 'route' => 'calendar_month', 'match' => ['calendar_']],
@@ -107,6 +110,7 @@ final class Sidebar
         private readonly Security $security,
         private readonly NotificationRepository $notifications,
         private readonly Features $features,
+        private readonly ConfidentialCaseRepository $confidentialCases,
     ) {
     }
 
@@ -128,6 +132,19 @@ final class Sidebar
         $user = $this->security->getUser();
 
         return $user instanceof User ? $this->topics->countUnread($user) : 0;
+    }
+
+    /**
+     * Confidential conversations with unread messages, null if the user is no confidant.
+     */
+    private function getUnreadConfidentialCount(): ?int
+    {
+        $user = $this->security->getUser();
+        if (!$user instanceof User || !$this->confidentialCases->isConfidantAnywhere($user)) {
+            return null;
+        }
+
+        return $this->confidentialCases->countUnread($user);
     }
 
     public function getUnreadNotificationCount(): int
@@ -208,6 +225,7 @@ final class Sidebar
             }
         }
 
+        $confidential = $this->getUnreadConfidentialCount();
         $groups = [];
         foreach (self::GROUPS as $group) {
             $items = [];
@@ -215,18 +233,27 @@ final class Sidebar
                 if ((isset($item['role']) && !$this->security->isGranted($item['role'])) || !$this->isAvailable(Feature::forRoute($item['route']))) {
                     continue;
                 }
+                if ('confidential_index' === $item['route'] && null === $confidential) {
+                    continue;
+                }
                 $item['active'] = $item['route'] === $best;
                 $item['children'] = $this->markActiveChild($item['children'] ?? [], $route, $nav);
                 $item['badge'] = match ($item['route']) {
                     'forum_index' => $this->getUnreadTopicCount(),
                     'notification_index' => $this->getUnreadNotificationCount(),
+                    'confidential_index' => (int) $confidential,
                     default => 0,
                 };
-                $item['badge_label'] = 'notification_index' === $item['route'] ? 'notification.unread' : 'forum.unread';
+                $item['badge_label'] = match ($item['route']) {
+                    'notification_index' => 'notification.unread',
+                    'confidential_index' => 'confidential.unread',
+                    default => 'forum.unread',
+                };
                 // key in the JSON of CountsController, updated by the live_counts Stimulus controller
                 $item['live'] = match ($item['route']) {
                     'forum_index' => 'forum',
                     'notification_index' => 'notifications',
+                    'confidential_index' => 'confidential',
                     default => null,
                 };
                 $items[] = $item;

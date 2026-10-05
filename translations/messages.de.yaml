@@ -35,6 +35,7 @@ nav:
     files: Dateien
     shelf: Gemerkt
     forum: Forum
+    confidential: Vertraulich
     knowledge: Wissen
     calendar: Kalender
     contacts: Kontakte
@@ -365,6 +366,8 @@ organization:
     message_retention_help: Gilt für E-Mails und interne Nachrichten. Leer = unbegrenzt aufbewahren.
     submission_retention: Öffentliche Einsendungen löschen nach (Jahren)
     submission_retention_help: Umfrage-Antworten und Anmeldungen von der öffentlichen Seite. Leer = unbegrenzt.
+    confidential_retention: Vertrauliche Gespräche löschen nach (Monaten)
+    confidential_retention_help: Gezählt ab der letzten Nachricht. Wird auch auf der öffentlichen Seite genannt.
     voting_right: stimmberechtigt
 
 membership:
@@ -386,6 +389,8 @@ membership:
     guest_projects_help: Gäste sehen nur diese Projekte (Forum, Dateien, Termine, Aufgaben) – keine E-Mails, Kontakte oder Mitgliederdaten.
     guest_in: 'Gast in: %projects%'
     former: 'ehemalig seit %date%'
+    confidant: Vertrauensperson
+    confidant_help: Liest und beantwortet die anonymen vertraulichen Nachrichten über die öffentliche Seite. Admins sehen sie nur, wenn sie selbst Vertrauensperson sind.
 
 handover:
     title: Übergabe
@@ -1193,6 +1198,46 @@ forum:
     image_inserted: Bild eingefügt.
     image_invalid: Das Bild konnte nicht hochgeladen werden (PNG, JPEG, GIF oder WebP bis 10 MB).
 
+confidential:
+    filter: Vertrauliche Gespräche filtern
+    open_cases: Offen
+    closed_cases: Erledigt
+    none: Keine offenen vertraulichen Gespräche.
+    none_closed: Keine erledigten Gespräche.
+    choose: Wähle links ein Gespräch aus.
+    intro: Über die öffentliche Seite können Menschen anonym mit euch Kontakt aufnehmen und später mit ihrem Zugangscode eure Antworten lesen. Nur Vertrauenspersonen sehen diese Gespräche, die Inhalte werden verschlüsselt gespeichert.
+    unread: ungelesen
+    case_number: 'Gespräch Nr. %id%'
+    state_open: Offen
+    state_closed: Erledigt
+    encrypted: Verschlüsselt
+    email_yes: Benachrichtigung per E-Mail
+    email_no: Keine E-Mail-Adresse
+    opened_on: 'begonnen am %date%'
+    retention_hint: 'Wird %months% Monat(e) nach der letzten Nachricht automatisch gelöscht.'
+    messages: Nachrichten
+    confidant: Vertrauensperson
+    reporter: Anonym
+    reply: Antwort
+    reply_help: Die Person sieht die Antwort, wenn sie das Gespräch mit ihrem Zugangscode öffnet. Dein Name wird ihr nicht angezeigt.
+    reply_help_email: Die Person bekommt zusätzlich eine E-Mail ohne Inhalt. Ihre Adresse bleibt für euch verborgen. Dein Name wird ihr nicht angezeigt.
+    public_off: Die vertraulichen Nachrichten sind auf der öffentlichen Seite gerade ausgeschaltet – die Person kann Antworten erst lesen, wenn sie wieder eingeschaltet sind.
+    send: Antwort senden
+    close: Als erledigt markieren
+    reopen: Wieder öffnen
+    delete: Gespräch löschen
+    delete_confirm: Gespräch endgültig löschen? Die Person kann es danach auch mit ihrem Zugangscode nicht mehr öffnen.
+    replied: Die Antwort wurde gesendet.
+    reply_invalid: Bitte gib eine Antwort ein (höchstens 20.000 Zeichen).
+    closed: Das Gespräch ist erledigt. Schreibt die Person erneut, wird es wieder geöffnet.
+    reopened: Das Gespräch ist wieder offen.
+    deleted: Das Gespräch wurde gelöscht.
+    email:
+        subject: 'Neue Antwort von %organization%'
+        text: '%organization% hat auf deine vertrauliche Nachricht geantwortet. Öffne das Gespräch mit deinem Zugangscode, um die Antwort zu lesen.'
+        button: Gespräch öffnen
+        hint: Aus Datenschutzgründen steht die Antwort nicht in dieser E-Mail. Deinen Zugangscode kennen wir nicht – wir können ihn auch nicht wiederherstellen.
+
 pwa:
     description: Gemeinsames Postfach, Projekte, Kalender und Kontakte für Stadtelternvertretungen.
     offline_title: Keine Verbindung
@@ -1224,6 +1269,7 @@ notification:
         due: '„%subject%“ steht in den nächsten 24 Stunden an'
         poll: '%actor% bittet um deine Stimme: „%subject%“'
         contact: 'Neue Anfrage über das Kontaktformular: „%subject%“'
+        confidential: 'Neue vertrauliche Nachricht an %subject%'
     email:
         legend: Benachrichtigungen per E-Mail
         instant: Sofort
@@ -1605,6 +1651,42 @@ public:
         sent: Deine Nachricht ist angekommen. Wir melden uns.
         topic: Thema
         institution: Institution
+    confidential:
+        title: Vertraulicher Kontakt
+        nav: Vertraulich
+        intro: 'Hier kannst du %name% anonym etwas mitteilen, das nicht öffentlich werden soll – und später unsere Antwort lesen.'
+        how_title: So funktioniert es
+        how_anonymous: Du musst weder Namen noch E-Mail-Adresse angeben. Wir speichern keine IP-Adresse und keine Uhrzeit, nur das Datum.
+        how_code: Nach dem Absenden bekommst du einen Zugangscode. Nur damit kannst du das Gespräch wieder öffnen, unsere Antworten lesen und weiterschreiben.
+        how_readers: Lesen können das nur unsere Vertrauenspersonen. Die Inhalte werden verschlüsselt gespeichert.
+        how_retention: 'Das Gespräch wird %months% Monat(e) nach der letzten Nachricht automatisch gelöscht.'
+        how_device: Wenn du ganz sichergehen willst, nutze ein privates Gerät und nicht das Netz deiner Schule oder deines Arbeitgebers.
+        new_title: Neue vertrauliche Nachricht
+        subject_help: Ein kurzes Stichwort, z. B. „Vorfall in der Klasse 4b“. Bitte keine Namen, wenn du anonym bleiben willst.
+        email: E-Mail-Adresse für Hinweise (optional)
+        email_help: Wir schicken dir nur einen Hinweis, wenn wir geantwortet haben – ohne Inhalt. Die Adresse wird verschlüsselt gespeichert und niemandem angezeigt, auch nicht den Vertrauenspersonen.
+        submit: Vertraulich senden
+        open_title: Gespräch fortsetzen
+        code: Zugangscode
+        code_help: Der Code, den du nach dem Absenden bekommen hast, z. B. ABCD-EFGH-JKMN-PQRS.
+        open_submit: Gespräch öffnen
+        code_unknown: Zu diesem Zugangscode gibt es kein Gespräch. Vielleicht ein Tippfehler – oder das Gespräch wurde inzwischen gelöscht.
+        sent_title: Deine Nachricht ist angekommen
+        sent_text: Unsere Vertrauenspersonen melden sich hier. Schau in ein paar Tagen wieder vorbei.
+        your_code: Dein Zugangscode
+        code_warning: Schreib dir den Code jetzt auf oder speichere ihn an einem sicheren Ort. Wir kennen ihn nicht und können ihn nicht wiederherstellen – ohne ihn kommst du nicht mehr an das Gespräch.
+        code_next: Mit dem Code öffnest du das Gespräch auf dieser Seite unter „Gespräch fortsetzen“.
+        back: Zurück zum vertraulichen Kontakt
+        opened_on: 'Begonnen am %date%'
+        closed: von uns als erledigt markiert
+        reply_sent: Deine Nachricht wurde gesendet.
+        new_answer: Es gibt eine neue Antwort.
+        messages: Verlauf
+        from_confidant: Vertrauensperson
+        from_you: Du
+        reply: Deine Nachricht
+        reply_submit: Senden
+        case_hint: 'Schließ dieses Fenster, wenn du fertig bist. Das Gespräch wird %months% Monat(e) nach der letzten Nachricht automatisch gelöscht.'
     survey:
         anonymous_hint: Die Umfrage ist anonym.
         named_hint: Bei dieser Umfrage werden Name und E-Mail-Adresse gespeichert.
@@ -1687,6 +1769,8 @@ public:
         events_help: Öffentliche Termine anzeigen und Anmeldungen erlauben.
         subscribe: Verteiler-Abo
         subscribe_help: Externe können sich in öffentlich abonnierbare Verteiler eintragen.
+        confidential: Vertraulicher Kontakt
+        confidential_help: 'Anonyme Nachrichten mit Verlauf, nur für Vertrauenspersonen lesbar (zurzeit %count%). Vertrauenspersonen legst du bei den Mitgliedern fest.'
         privacy: Datenschutzhinweis
         privacy_help: Wird auf der Datenschutzseite angezeigt; Markdown ist möglich. Leer = kurzer Standardtext.
         spam_invisible: Unsichtbarer Spamschutz

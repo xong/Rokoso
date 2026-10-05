@@ -51,6 +51,11 @@ final class MembershipFormType extends AbstractType
                 'required' => false,
                 'help' => 'membership.voting_right_help',
             ])
+            ->add('confidant', CheckboxType::class, [
+                'label' => 'membership.confidant',
+                'required' => false,
+                'help' => 'membership.confidant_help',
+            ])
             ->add('guestProjects', EntityType::class, [
                 'label' => 'membership.guest_projects',
                 'class' => Project::class,

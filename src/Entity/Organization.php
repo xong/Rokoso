@@ -62,6 +62,11 @@ class Organization
     #[Assert\Range(min: 1, max: 30)]
     private ?int $submissionRetentionYears = 2;
 
+    /** Months after the last message after which anonymous confidential conversations are deleted */
+    #[ORM\Column(options: ['default' => 6])]
+    #[Assert\Range(min: 1, max: 60)]
+    private int $confidentialRetentionMonths = 6;
+
     /**
      * Switched-off areas (values of {@see Feature}); stored this way round so new areas start switched on.
      *
@@ -197,6 +202,18 @@ class Organization
         return $this;
     }
 
+    public function getConfidentialRetentionMonths(): int
+    {
+        return $this->confidentialRetentionMonths;
+    }
+
+    public function setConfidentialRetentionMonths(int $months): static
+    {
+        $this->confidentialRetentionMonths = $months;
+
+        return $this;
+    }
+
     /**
      * Members with voting right.
      *
@@ -282,6 +299,11 @@ class Organization
         return null !== $membership && ($membership->isFull() || $membership->grantsGuestAccessTo($project));
     }
 
+    public function isConfidant(User $user): bool
+    {
+        return $this->getMembership($user)?->isConfidant() ?? false;
+    }
+
     public function isAdmin(User $user): bool
     {
         return $this->getMembership($user)?->isAdmin() ?? false;
@@ -298,6 +320,17 @@ class Organization
     public function getAdmins(): array
     {
         return array_values($this->memberships->filter(static fn (Membership $m): bool => $m->isAdmin())
+            ->map(static fn (Membership $m): User => $m->getUser())->toArray());
+    }
+
+    /**
+     * Confidants reading the anonymous confidential contact (active members and administrators only).
+     *
+     * @return list<User>
+     */
+    public function getConfidants(): array
+    {
+        return array_values($this->memberships->filter(static fn (Membership $m): bool => $m->isConfidant() && $m->isFull())
             ->map(static fn (Membership $m): User => $m->getUser())->toArray());
     }
 

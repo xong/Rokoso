@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Calendar\CalendarService;
+use App\Confidential\ConfidentialInbox;
 use App\Entity\CalendarItem;
+use App\Entity\ConfidentialCase;
 use App\Entity\ContactGroup;
 use App\Entity\PublicRequest;
 use App\Entity\PublicSettings;
@@ -13,6 +15,9 @@ use App\Entity\Survey;
 use App\Entity\SurveyResponse;
 use App\Enum\Feature;
 use App\Enum\SurveyQuestionType;
+use App\Form\PublicForm\ConfidentialNewType;
+use App\Form\PublicForm\ConfidentialOpenType;
+use App\Form\PublicForm\ConfidentialReplyType;
 use App\Form\PublicForm\ContactType;
 use App\Form\PublicForm\SignupType;
 use App\Form\PublicForm\SubscribeType;
@@ -35,7 +40,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Public participation pages of an organization (no login): info page, contact form, surveys,
- * event signups and distribution list subscriptions. ?embed=1 hides the page frame for iframes.
+ * event signups, distribution list subscriptions and the anonymous confidential contact. ?embed=1 hides the page frame for iframes.
  */
 #[Route('/p')]
 final class PublicController extends AbstractController
@@ -213,6 +218,75 @@ final class PublicController extends AbstractController
         return $this->render('public/unsubscribe.html.twig', ['settings' => $settings, 'group' => $contactGroup, 'email' => $email]);
     }
 
+    /**
+     * Anonymous confidential contact: start a conversation (shows the access code once) or open one with the code.
+     * The code is never part of an address; all pages are neither cached nor passed on as referrer.
+     */
+    #[Route('/{slug<[a-z0-9-]+>}/confidential', name: 'public_confidential', methods: ['GET', 'POST'])]
+    public function confidential(Request $request, string $slug, ConfidentialInbox $inbox): Response
+    {
+        $settings = $this->load($slug, 'confidential');
+        $form = $this->confidentialNewForm($slug);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid() && $this->passes($settings, $form, $request)) {
+            /** @var array{subject: string, message: string, email: ?string} $data */
+            $data = $form->getData();
+            [, $code] = $inbox->open($settings, $data['subject'], $data['message'], $data['email']);
+
+            return $this->confidentialHeaders($this->render('public/confidential_code.html.twig', ['settings' => $settings, 'code' => $code]));
+        }
+
+        return $this->confidentialHeaders($this->render('public/confidential.html.twig', [
+            'settings' => $settings,
+            'form' => $form,
+            'open_form' => $this->confidentialOpenForm($slug),
+        ], $this->status($form)));
+    }
+
+    #[Route('/{slug<[a-z0-9-]+>}/confidential/open', name: 'public_confidential_open', methods: ['POST'])]
+    public function confidentialOpen(Request $request, string $slug, ConfidentialInbox $inbox): Response
+    {
+        $settings = $this->load($slug, 'confidential');
+        $openForm = $this->confidentialOpenForm($slug);
+        $openForm->handleRequest($request);
+        if ($openForm->isSubmitted() && $openForm->isValid() && $this->passes($settings, $openForm, $request)) {
+            $code = (string) $openForm->get('code')->getData();
+            $case = $inbox->find($settings, $code);
+            if (null !== $case) {
+                return $this->confidentialCase($settings, $case, $code, $inbox);
+            }
+            // the attempt counts towards the limit per hour
+            $this->em->flush();
+            $openForm->get('code')->addError(new FormError($this->translator->trans('public.confidential.code_unknown')));
+        }
+
+        return $this->confidentialHeaders($this->render('public/confidential.html.twig', [
+            'settings' => $settings,
+            'form' => $this->confidentialNewForm($slug),
+            'open_form' => $openForm,
+        ], new Response(null, Response::HTTP_UNPROCESSABLE_ENTITY)));
+    }
+
+    #[Route('/{slug<[a-z0-9-]+>}/confidential/reply', name: 'public_confidential_reply', methods: ['POST'])]
+    public function confidentialReply(Request $request, string $slug, ConfidentialInbox $inbox): Response
+    {
+        $settings = $this->load($slug, 'confidential');
+        $form = $this->createForm(ConfidentialReplyType::class);
+        $form->handleRequest($request);
+        $code = (string) $form->get('code')->getData();
+        $case = $form->isSubmitted() ? $inbox->find($settings, $code) : null;
+        if (null === $case) {
+            throw new NotFoundHttpException();
+        }
+        if ($form->isValid() && $this->passes($settings, $form, $request)) {
+            $inbox->replyFromReporter($case, (string) $form->get('message')->getData());
+
+            return $this->confidentialCase($settings, $case, $code, $inbox, null, true);
+        }
+
+        return $this->confidentialCase($settings, $case, $code, $inbox, $form);
+    }
+
     #[Route('/{slug<[a-z0-9-]+>}/privacy', name: 'public_privacy')]
     public function privacy(string $slug): Response
     {
@@ -259,6 +333,55 @@ final class PublicController extends AbstractController
     private function done(Request $request, PublicSettings $settings, string $text): Response
     {
         return $this->render('public/message.html.twig', ['settings' => $settings, 'title' => 'public.thanks', 'text' => $text, 'embed' => $request->query->getBoolean('embed')]);
+    }
+
+    /**
+     * @return FormInterface<mixed>
+     */
+    private function confidentialNewForm(string $slug): FormInterface
+    {
+        return $this->createForm(ConfidentialNewType::class, null, ['action' => $this->generateUrl('public_confidential', ['slug' => $slug])]);
+    }
+
+    /**
+     * @return FormInterface<mixed>
+     */
+    private function confidentialOpenForm(string $slug): FormInterface
+    {
+        return $this->createForm(ConfidentialOpenType::class, null, ['action' => $this->generateUrl('public_confidential_open', ['slug' => $slug])]);
+    }
+
+    /**
+     * The conversation as the anonymous person sees it, with the form for a further message.
+     *
+     * @param FormInterface<mixed>|null $form
+     */
+    private function confidentialCase(PublicSettings $settings, ConfidentialCase $case, string $code, ConfidentialInbox $inbox, ?FormInterface $form = null, bool $sent = false): Response
+    {
+        $unread = $case->isReporterUnread();
+        $case->markReporterRead();
+        $this->em->flush();
+        $form ??= $this->createForm(ConfidentialReplyType::class, ['code' => $code], ['action' => $this->generateUrl('public_confidential_reply', ['slug' => $settings->getSlug()])]);
+
+        return $this->confidentialHeaders($this->render('public/confidential_case.html.twig', [
+            'settings' => $settings,
+            'case' => $case,
+            'conversation' => $inbox->read($case),
+            'form' => $form,
+            'sent' => $sent,
+            'unread' => $unread,
+        ], $this->status($form)));
+    }
+
+    /** Not cached, not indexed, no referrer to other sites. */
+    private function confidentialHeaders(Response $response): Response
+    {
+        $response->setPrivate();
+        $response->headers->addCacheControlDirective('no-store');
+        $response->headers->set('Referrer-Policy', 'same-origin');
+        $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+
+        return $response;
     }
 
     /**

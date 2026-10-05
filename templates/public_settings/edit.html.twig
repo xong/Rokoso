@@ -32,6 +32,7 @@
                 {{ form_row(form.surveysEnabled) }}
                 {{ form_row(form.eventsEnabled) }}
                 {{ form_row(form.subscribeEnabled) }}
+                {{ form_row(form.confidentialEnabled, {help_translation_parameters: {'%count%': settings.organization.confidants|length}}) }}
             </fieldset>
             <fieldset class="mb-6">
                 <legend class="mb-2 text-base font-semibold">{{ 'public.settings.spam'|trans }}</legend>

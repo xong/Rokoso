@@ -35,11 +35,12 @@
                 {{ form_row(form.quorumPercent) }}
                 {{ form_row(form.invitationDays) }}
             </fieldset>
-            <fieldset class="mb-4 grid gap-x-4 sm:grid-cols-3">
+            <fieldset class="mb-4 grid gap-x-4 sm:grid-cols-2">
                 <legend class="mb-2 text-sm font-semibold">{{ 'organization.retention_legend'|trans }}</legend>
                 {{ form_row(form.trashDays) }}
                 {{ form_row(form.messageRetentionYears) }}
                 {{ form_row(form.submissionRetentionYears) }}
+                {{ form_row(form.confidentialRetentionMonths) }}
             </fieldset>
             {{ form_rest(form) }}
             <div class="flex gap-2">

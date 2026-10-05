@@ -7,12 +7,15 @@
     {% endif %}
 
     <div class="space-y-8">
-        {% if settings.offers('contact') and settings.contactAccount or groups is not empty %}
+        {% if settings.offers('contact') and settings.contactAccount or groups is not empty or settings.offers('confidential') %}
             <section aria-labelledby="actions-heading">
                 <h2 id="actions-heading" class="sr-only">{{ 'public.home.actions'|trans }}</h2>
                 <div class="flex flex-wrap gap-2">
                     {% if settings.offers('contact') and settings.contactAccount %}
                         <a href="{{ path('public_contact', {slug: settings.slug}) }}" class="btn-primary">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.contact.title'|trans }}</a>
+                    {% endif %}
+                    {% if settings.offers('confidential') %}
+                        <a href="{{ path('public_confidential', {slug: settings.slug}) }}" class="btn-secondary">{{ ux_icon('lucide:lock', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.confidential.title'|trans }}</a>
                     {% endif %}
                     {% if groups is not empty %}
                         <a href="{{ path('public_subscribe', {slug: settings.slug}) }}" class="btn-secondary">{{ ux_icon('lucide:bell', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.subscribe.title'|trans }}</a>

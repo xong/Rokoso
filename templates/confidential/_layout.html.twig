@@ -1,0 +1,40 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.confidential'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.confidential'|trans }}{% endblock %}
+{% block back_url %}{{ path('confidential_index', closed ? {closed: 1} : {}) }}{% endblock %}
+
+{% block list %}
+    <nav aria-label="{{ 'confidential.filter'|trans }}" class="flex gap-1 border-b border-slate-200 px-3 py-2 text-sm">
+        {% for value, label in {0: 'confidential.open_cases', 1: 'confidential.closed_cases'} %}
+            {% set active = (value == 1) == closed %}
+            <a href="{{ path('confidential_index', value ? {closed: 1} : {}) }}" {% if active %}aria-current="page"{% endif %}
+               class="rounded-md px-3 py-1.5 {{ active ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">{{ label|trans }}</a>
+        {% endfor %}
+    </nav>
+    {% if items is empty %}
+        {{ ui.empty(closed ? 'confidential.none_closed' : 'confidential.none', 'lucide:lock') }}
+    {% else %}
+        <ul role="list">
+            {% for item in items %}
+                {% set c = item.case %}
+                {% set active = current and current.id == c.id %}
+                <li>
+                    <a href="{{ path('confidential_show', {id: c.id}) }}" {% if active %}aria-current="page"{% endif %}
+                       class="flex items-center gap-3 border-b border-slate-100 px-4 py-3 {{ active ? 'bg-brand-50' : 'hover:bg-slate-50' }}">
+                        {{ ui.tile(c.organization.name, c.organization.logo, c.organization.color) }}
+                        <span class="min-w-0 flex-1">
+                            <span class="flex items-baseline gap-2">
+                                {% if c.staffUnread %}<span class="size-2 shrink-0 self-center rounded-full bg-brand-600" aria-hidden="true"></span><span class="sr-only">{{ 'confidential.unread'|trans }}:</span>{% endif %}
+                                <span class="min-w-0 flex-1 truncate {{ c.staffUnread ? 'font-semibold' : 'font-medium' }} {{ active ? 'text-brand-700' : '' }}">{{ item.subject }}</span>
+                                <time datetime="{{ c.lastActivityOn|date('Y-m-d') }}" class="shrink-0 text-xs text-slate-500">{{ c.lastActivityOn|date('d.m.Y') }}</time>
+                            </span>
+                            <span class="block truncate text-xs text-slate-500">{{ 'confidential.case_number'|trans({'%id%': c.id}) }} · {{ c.organization.name }}</span>
+                        </span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

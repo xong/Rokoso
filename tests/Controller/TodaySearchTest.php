@@ -96,7 +96,7 @@ final class TodaySearchTest extends AppTestCase
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Content-Type', 'application/json');
         $counts = json_decode((string) $this->client->getResponse()->getContent(), true);
-        self::assertSame(['inbox' => 1, 'forum' => 0, 'notifications' => 1], $counts);
+        self::assertSame(['inbox' => 1, 'forum' => 0, 'notifications' => 1, 'confidential' => 0], $counts);
 
         $this->client->request('GET', '/');
         self::assertSelectorExists('[data-live-count="inbox"]:not([hidden])');

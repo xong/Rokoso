@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\ConfidentialCaseRepository;
 use App\Repository\ForumTopicRepository;
 use App\Repository\MessageRepository;
 use App\Repository\NotificationRepository;
@@ -24,11 +25,13 @@ final class CountsController extends AbstractController
         MessageRepository $messages,
         ForumTopicRepository $topics,
         NotificationRepository $notifications,
+        ConfidentialCaseRepository $confidential,
     ): JsonResponse {
         $response = $this->json([
             'inbox' => $messages->countUnreadInbox($user),
             'forum' => $topics->countUnread($user),
             'notifications' => $notifications->countUnread($user),
+            'confidential' => $confidential->countUnread($user),
         ]);
         $response->setPrivate();
         $response->headers->addCacheControlDirective('no-store');

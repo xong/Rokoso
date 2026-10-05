@@ -59,6 +59,10 @@ class PublicSettings
     #[ORM\Column]
     private bool $subscribeEnabled = false;
 
+    /** Anonymous confidential contact with access code, answered by the confidants */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $confidentialEnabled = false;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Length(max: 10000)]
     private ?string $privacyNotice = null;
@@ -104,6 +108,9 @@ class PublicSettings
         if (null !== $this->contactAccount && $this->contactAccount->getOrganization() !== $this->organization) {
             $context->buildViolation('public.account_required')->atPath('contactAccount')->addViolation();
         }
+        if ($this->confidentialEnabled && [] === $this->organization->getConfidants()) {
+            $context->buildViolation('public.confidants_required')->atPath('confidentialEnabled')->addViolation();
+        }
     }
 
     public function getId(): ?int
@@ -119,11 +126,11 @@ class PublicSettings
     /** At least one feature is switched on */
     public function isActive(): bool
     {
-        return $this->infoEnabled || $this->contactEnabled || $this->surveysEnabled || $this->eventsEnabled || $this->subscribeEnabled;
+        return $this->infoEnabled || $this->contactEnabled || $this->surveysEnabled || $this->eventsEnabled || $this->subscribeEnabled || $this->confidentialEnabled;
     }
 
     /**
-     * Whether the public page shows the part (info, contact, surveys, events, subscribe): switched on here and
+     * Whether the public page shows the part (info, contact, surveys, events, subscribe, confidential): switched on here and
      * its area used by the organization – the switches stay stored while an area is off.
      */
     public function offers(string $part): bool
@@ -134,6 +141,7 @@ class PublicSettings
             'surveys' => [$this->surveysEnabled, Feature::Surveys],
             'events' => [$this->eventsEnabled, Feature::Calendar],
             'subscribe' => [$this->subscribeEnabled, Feature::Contacts],
+            'confidential' => [$this->confidentialEnabled, null],
             default => throw new \InvalidArgumentException($part),
         };
 
@@ -254,6 +262,18 @@ class PublicSettings
     public function setSubscribeEnabled(bool $subscribeEnabled): static
     {
         $this->subscribeEnabled = $subscribeEnabled;
+
+        return $this;
+    }
+
+    public function isConfidentialEnabled(): bool
+    {
+        return $this->confidentialEnabled;
+    }
+
+    public function setConfidentialEnabled(bool $confidentialEnabled): static
+    {
+        $this->confidentialEnabled = $confidentialEnabled;
 
         return $this;
     }

@@ -40,6 +40,7 @@ final class PublicSettingsFormType extends AbstractType
             ->add('surveysEnabled', CheckboxType::class, $flag('surveys'))
             ->add('eventsEnabled', CheckboxType::class, $flag('events'))
             ->add('subscribeEnabled', CheckboxType::class, $flag('subscribe'))
+            ->add('confidentialEnabled', CheckboxType::class, $flag('confidential'))
             ->add('privacyNotice', TextareaType::class, ['label' => 'public.settings.privacy', 'help' => 'public.settings.privacy_help', 'required' => false, 'attr' => ['rows' => 5]])
             ->add('spamInvisible', CheckboxType::class, $flag('spam_invisible'))
             ->add('spamMinSeconds', IntegerType::class, ['label' => 'public.settings.spam_min_seconds', 'attr' => ['min' => 0, 'max' => 120]])

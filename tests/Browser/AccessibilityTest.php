@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Browser;
 
+use App\Confidential\ConfidentialInbox;
+use App\Entity\PublicSettings;
+
 /**
  * Automatic accessibility check with axe-core on the main pages (light and dark theme).
  * axe-core (MPL-2.0) is not part of the project: it is downloaded once into var/ and only injected into the
@@ -13,7 +16,7 @@ final class AccessibilityTest extends BrowserTestCase
 {
     private const string AXE_VERSION = '4.11.0';
 
-    private const array PAGES = ['/', '/mail', '/mail/spam', '/mail/new', '/calendar', '/tasks', '/meetings', '/polls', '/forum', '/files', '/contacts', '/projects', '/knowledge', '/notifications', '/profile', '/profile/security', '/profile/changelog', '/organizations', '/search?q=Eltern', '/admin', '/admin/organizations', '/admin/log'];
+    private const array PAGES = ['/', '/mail', '/mail/spam', '/mail/new', '/calendar', '/tasks', '/meetings', '/polls', '/forum', '/files', '/contacts', '/projects', '/knowledge', '/notifications', '/confidential', '/profile', '/profile/security', '/profile/changelog', '/organizations', '/search?q=Eltern', '/admin', '/admin/organizations', '/admin/log'];
 
     public function testMainPagesHaveNoSeriousViolations(): void
     {
@@ -22,7 +25,15 @@ final class AccessibilityTest extends BrowserTestCase
 
         $user = $this->createUser();
         $user->setPlatformAdmin(true);
-        $this->createOrganization($user);
+        $organization = $this->createOrganization($user);
+        $organization->getMembership($user)?->setConfidant(true);
+        $settings = (new PublicSettings($organization))->setSlug(uniqid('a11y-'))->setConfidentialEnabled(true);
+        $this->em()->persist($settings);
+        $this->em()->flush();
+        static::getContainer()->get(ConfidentialInbox::class)->open($settings, 'Vorfall', 'Vertrauliche Nachricht', null);
+
+        $this->client->request('GET', '/p/'.$settings->getSlug().'/confidential');
+        $problems = [...$problems, ...$this->check('/p/…/confidential')];
         $this->login($user);
         foreach (['light', 'dark'] as $theme) {
             foreach (self::PAGES as $path) {

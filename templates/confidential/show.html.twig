@@ -1,0 +1,55 @@
+{% extends 'confidential/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ 'confidential.case_number'|trans({'%id%': case.id}) }} · {{ parent() }}{% endblock %}
+{% block detail_title %}{{ conversation.subject }}{% endblock %}
+
+{% block detail_actions %}
+    {{ ui.post_button(path('confidential_close', {id: case.id}), 'confidential-state', case.closed ? 'confidential.reopen' : 'confidential.close',
+        {class: 'btn-icon', icon: case.closed ? 'lucide:rotate-ccw' : 'lucide:check', icon_only: true}) }}
+    {{ ui.post_button(path('confidential_delete', {id: case.id}), 'confidential-delete', 'confidential.delete',
+        {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'confidential.delete_confirm'}) }}
+{% endblock %}
+
+{% block detail %}
+    <div class="mx-auto max-w-3xl space-y-6 p-4 lg:p-6">
+        <header class="space-y-2">
+            <p class="flex flex-wrap items-center gap-2 text-sm">
+                <span class="badge {{ case.closed ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700' }}">{{ (case.closed ? 'confidential.state_closed' : 'confidential.state_open')|trans }}</span>
+                <span class="badge bg-slate-100 text-slate-700">{{ ux_icon('lucide:lock', {class: 'size-3', 'aria-hidden': 'true'}) }} {{ 'confidential.encrypted'|trans }}</span>
+                <span class="badge bg-slate-100 text-slate-700">{{ (case.hasEmail ? 'confidential.email_yes' : 'confidential.email_no')|trans }}</span>
+            </p>
+            <p class="text-sm text-slate-600">
+                {{ 'confidential.case_number'|trans({'%id%': case.id}) }} · {{ case.organization.name }} · {{ 'confidential.opened_on'|trans({'%date%': case.createdOn|date('d.m.Y')}) }}
+            </p>
+            <p class="text-xs text-slate-500">{{ 'confidential.retention_hint'|trans({'%months%': case.organization.confidentialRetentionMonths}) }}</p>
+        </header>
+
+        <ol role="list" class="space-y-3" aria-label="{{ 'confidential.messages'|trans }}">
+            {% for m in conversation.messages %}
+                <li class="flex {{ m.staff ? 'justify-end' : '' }}">
+                    <article class="max-w-[85%] rounded-lg p-3 shadow-sm ring-1 {{ m.staff ? 'bg-brand-50 ring-brand-100' : 'bg-surface ring-slate-200' }}">
+                        <p class="mb-1 flex flex-wrap items-baseline gap-2 text-xs text-slate-600">
+                            <span class="font-semibold">{{ m.staff ? (m.author ? m.author.name : 'confidential.confidant'|trans) : 'confidential.reporter'|trans }}</span>
+                            <time datetime="{{ m.date|date('Y-m-d') }}">{{ m.date|date('d.m.Y') }}</time>
+                        </p>
+                        <p class="break-words whitespace-pre-line">{{ m.body }}</p>
+                    </article>
+                </li>
+            {% endfor %}
+        </ol>
+
+        <form method="post" action="{{ path('confidential_reply', {id: case.id}) }}" class="card space-y-3 p-4">
+            <input type="hidden" name="_token" value="{{ csrf_token('confidential-reply') }}">
+            <label for="confidential-reply" class="label">{{ 'confidential.reply'|trans }}</label>
+            <textarea id="confidential-reply" name="body" rows="5" required maxlength="20000" class="input resize-y" aria-describedby="confidential-reply-help"></textarea>
+            <p id="confidential-reply-help" class="text-xs text-slate-500">
+                {{ (case.hasEmail ? 'confidential.reply_help_email' : 'confidential.reply_help')|trans }}
+                {% if not public_url %}<span class="text-amber-800">{{ 'confidential.public_off'|trans }}</span>{% endif %}
+            </p>
+            <button type="submit" class="btn-primary">{{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'confidential.send'|trans }}</button>
+        </form>
+    </div>
+{% endblock %}

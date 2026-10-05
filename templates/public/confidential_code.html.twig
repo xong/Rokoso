@@ -1,0 +1,17 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}{{ 'public.confidential.title'|trans }} · {{ parent() }}{% endblock %}
+
+{% block content %}
+    <div class="card mx-auto max-w-lg space-y-4 p-6 text-center">
+        <h1 class="text-xl font-semibold">{{ 'public.confidential.sent_title'|trans }}</h1>
+        <p class="text-slate-700">{{ 'public.confidential.sent_text'|trans }}</p>
+        <div class="rounded-lg bg-slate-50 p-4 ring-1 ring-slate-200">
+            <p id="code-label" class="mb-1 text-sm text-slate-600">{{ 'public.confidential.your_code'|trans }}</p>
+            <p aria-labelledby="code-label" class="font-mono text-2xl font-semibold tracking-wider break-all select-all" data-testid="confidential-code">{{ code }}</p>
+        </div>
+        <p class="rounded-md bg-amber-50 p-3 text-sm text-amber-900" role="note">{{ 'public.confidential.code_warning'|trans }}</p>
+        <p class="text-sm text-slate-600">{{ 'public.confidential.code_next'|trans }}</p>
+        <p><a href="{{ path('public_confidential', {slug: settings.slug}) }}" class="link">{{ 'public.confidential.back'|trans }}</a></p>
+    </div>
+{% endblock %}

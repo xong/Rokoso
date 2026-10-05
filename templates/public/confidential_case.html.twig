@@ -1,0 +1,39 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}{{ 'public.confidential.title'|trans }} · {{ parent() }}{% endblock %}
+
+{% block content %}
+    <h1 class="mb-1 text-2xl font-semibold break-words">{{ conversation.subject }}</h1>
+    <p class="mb-6 text-sm text-slate-600">
+        {{ 'public.confidential.opened_on'|trans({'%date%': case.createdOn|date('d.m.Y')}) }}
+        {% if case.closed %}· {{ 'public.confidential.closed'|trans }}{% endif %}
+    </p>
+
+    {% if sent %}
+        <p class="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800" role="status">{{ 'public.confidential.reply_sent'|trans }}</p>
+    {% elseif unread %}
+        <p class="mb-4 rounded-md bg-brand-50 p-3 text-sm text-brand-800" role="status">{{ 'public.confidential.new_answer'|trans }}</p>
+    {% endif %}
+
+    <ol role="list" class="mb-8 space-y-3" aria-label="{{ 'public.confidential.messages'|trans }}">
+        {% for m in conversation.messages %}
+            <li class="flex {{ m.staff ? '' : 'justify-end' }}">
+                <article class="max-w-[85%] rounded-lg p-3 shadow-sm ring-1 {{ m.staff ? 'bg-surface ring-slate-200' : 'bg-brand-50 ring-brand-100' }}">
+                    <p class="mb-1 flex flex-wrap items-baseline gap-2 text-xs text-slate-600">
+                        <span class="font-semibold">{{ (m.staff ? 'public.confidential.from_confidant' : 'public.confidential.from_you')|trans }}</span>
+                        <time datetime="{{ m.date|date('Y-m-d') }}">{{ m.date|date('d.m.Y') }}</time>
+                    </p>
+                    <p class="break-words whitespace-pre-line">{{ m.body }}</p>
+                </article>
+            </li>
+        {% endfor %}
+    </ol>
+
+    {{ form_start(form, {attr: {class: 'card p-6', 'data-turbo': 'false'}}) }}
+        {{ form_errors(form) }}
+        {{ form_row(form.message) }}
+        {{ form_rest(form) }}
+        <button type="submit" class="btn-primary">{{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.confidential.reply_submit'|trans }}</button>
+    {{ form_end(form) }}
+    <p class="mt-4 text-sm text-slate-600">{{ 'public.confidential.case_hint'|trans({'%months%': settings.organization.confidentialRetentionMonths}) }}</p>
+{% endblock %}

@@ -188,6 +188,7 @@ E-Mails liegen zusätzlich weiterhin auf dem IMAP-Server; Rokoso verändert dort
 - Anhänge liegen außerhalb des Web-Roots und werden nur angemeldeten, berechtigten Mitgliedern ausgeliefert.
 - Jede Person kann im Profil unter **Konto und Daten** ihre Daten als JSON herunterladen (Art. 15/20 DSGVO) und ihr Konto löschen (Art. 17). Beim Löschen werden persönliche Daten entfernt; Beiträge in gemeinsamen Bereichen bleiben unter „Gelöschtes Konto“ erhalten. Wer einziger Admin einer Organisation ist, muss vorher die Rolle übergeben.
 - **Zwei-Faktor-Anmeldung** (TOTP-App, Ersatzcodes) kann jede Person im Profil unter **Sicherheit** einschalten; dort gibt es auch „Überall abmelden“ und das persönliche Sicherheitsprotokoll. Für Admins einer Organisation wird sie dringend empfohlen.
+- **Vertraulicher Kontakt:** Betreff, Nachrichten und die optionale E-Mail-Adresse liegen verschlüsselt in der Datenbank; der Schlüssel hängt an `APP_SECRET`. **`APP_SECRET` nach dem Einrichten nie ändern** – sonst sind alle vertraulichen Gespräche unlesbar (und die Zugangscodes ungültig). Rokoso speichert dafür keine IP-Adressen und keine Uhrzeiten; die **Zugriffsprotokolle des Webservers** enthalten aber IP-Adressen – sie sollten kurz aufbewahrt bzw. gekürzt werden (beim Hoster einstellbar), wenn ihr Anonymität zusagt.
 - Für den Betrieb sind ein Impressum und eine Datenschutzerklärung der betreibenden Stelle nötig (nicht Teil von Rokoso).
 
 ## Fehlersuche

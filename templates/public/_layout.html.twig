@@ -23,6 +23,7 @@
                             {% for item in [
                                 {route: 'public_home', label: 'public.home.title', show: true},
                                 {route: 'public_contact', label: 'public.contact.title', show: settings.offers('contact') and settings.contactAccount},
+                                {route: 'public_confidential', label: 'public.confidential.nav', show: settings.offers('confidential')},
                                 {route: 'public_subscribe', label: 'public.subscribe.title', show: settings.offers('subscribe')},
                             ]|filter(i => i.show) %}
                                 <li><a href="{{ path(item.route, {slug: settings.slug}) }}" {% if route == item.route %}aria-current="page"{% endif %}

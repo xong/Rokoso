@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.11.0 – 2026-10-05
+
+### Neu
+
+- **Vertraulicher Kontakt:** über die öffentliche Seite können Eltern und andere euch anonym etwas mitteilen. Sie bekommen einen Zugangscode, mit dem sie eure Antworten lesen und weiterschreiben – ganz ohne Konto. Lesen und antworten können nur Mitglieder, die in der Mitgliederverwaltung als **Vertrauensperson** markiert sind; die Inhalte werden verschlüsselt gespeichert und nach einer einstellbaren Frist gelöscht. Einschalten unter Verwaltung → Öffentliche Seite.
+
 ## 0.10.0 – 2026-10-05
 
 ### Neu

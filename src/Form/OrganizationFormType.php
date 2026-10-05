@@ -76,6 +76,11 @@ final class OrganizationFormType extends AbstractType
                 'help' => 'organization.submission_retention_help',
                 'required' => false,
                 'attr' => ['min' => 1, 'max' => 30],
+            ])
+            ->add('confidentialRetentionMonths', IntegerType::class, [
+                'label' => 'organization.confidential_retention',
+                'help' => 'organization.confidential_retention_help',
+                'attr' => ['min' => 1, 'max' => 60],
             ]);
     }
 

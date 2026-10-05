@@ -219,6 +219,9 @@
                             {% if membership.votingRight and membership.full %}
                                 <span class="badge bg-emerald-50 text-emerald-700">{{ 'organization.voting_right'|trans }}</span>
                             {% endif %}
+                            {% if membership.confidant and membership.full %}
+                                <span class="badge bg-sky-50 text-sky-800">{{ ux_icon('lucide:lock', {class: 'size-3', 'aria-hidden': 'true'}) }} {{ 'membership.confidant'|trans }}</span>
+                            {% endif %}
                         </div>
                         {% if is_admin %}
                             <a href="{{ path('organization_member_edit', {id: organization.id, membership: membership.id}) }}" class="btn-icon"

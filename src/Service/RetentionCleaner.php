@@ -10,14 +10,15 @@ use App\Entity\Message;
 use App\Entity\Organization;
 use App\Entity\Survey;
 use App\Entity\SurveyResponse;
+use App\Repository\ConfidentialCaseRepository;
 use App\Repository\SecurityEventRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Psr\Clock\ClockInterface;
 
 /**
- * Applies the deletion periods of each organization (trash, old messages, public submissions)
- * and drops security log entries after one year. Called by `app:notify`.
+ * Applies the deletion periods of each organization (trash, old messages, public submissions,
+ * confidential conversations) and drops security log entries after one year. Called by `app:notify`.
  */
 final readonly class RetentionCleaner
 {
@@ -27,18 +28,20 @@ final readonly class RetentionCleaner
         private EntityManagerInterface $em,
         private AttachmentStorage $attachments,
         private SecurityEventRepository $securityEvents,
+        private ConfidentialCaseRepository $confidentialCases,
         private ClockInterface $clock,
     ) {
     }
 
     /**
-     * @return array{messages: int, submissions: int, security: int}
+     * @return array{messages: int, submissions: int, confidential: int, security: int}
      */
     public function clean(): array
     {
         $now = \DateTimeImmutable::createFromInterface($this->clock->now());
         $messages = 0;
         $submissions = 0;
+        $confidential = 0;
         foreach ($this->em->getRepository(Organization::class)->findAll() as $organization) {
             $messages += $this->removeMessages($this->em->createQueryBuilder()->select('m')->from(Message::class, 'm')
                 ->where('m.organization = :org')->andWhere('m.trashedAt < :before OR m.spamAt < :before')
@@ -59,11 +62,13 @@ final readonly class RetentionCleaner
                     ->where('e.createdAt < :before')->andWhere('e.item IN ('.$items->getDQL().')')
                     ->setParameter('before', $before)->setParameter('org', $organization)->getQuery()->execute();
             }
+            $confidential += $this->confidentialCases->deleteInactiveSince($organization, $now->modify(\sprintf('-%d months', $organization->getConfidentialRetentionMonths())));
         }
 
         return [
             'messages' => $messages,
             'submissions' => $submissions,
+            'confidential' => $confidential,
             'security' => $this->securityEvents->deleteOlderThan($now->modify('-1 year')),
         ];
     }

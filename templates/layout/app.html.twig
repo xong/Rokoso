@@ -68,7 +68,8 @@
                     <{{ heading_tag }} id="detail-heading" class="truncate text-base font-semibold">{% block detail_title %}{% endblock %}</{{ heading_tag }}>
                     <div class="ml-auto flex items-center gap-1">{% block detail_actions %}{% endblock %}</div>
                 </header>
-                <div class="min-h-0 flex-1 overflow-y-auto">
+                {# long text without links: keyboard users can scroll after focusing the region #}
+                <div class="min-h-0 flex-1 overflow-y-auto"{% if detail_scroll_focus|default(false) %} tabindex="0"{% endif %}>
                     {% block detail %}{% endblock %}
                 </div>
             </section>

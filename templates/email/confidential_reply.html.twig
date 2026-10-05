@@ -1,0 +1,6 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ 'confidential.email.text'|trans({'%organization%': organization}) }}</p>
+    {{ include('email/_button.html.twig', {url: url, label: 'confidential.email.button'|trans}) }}
+    <p style="font-size:13px;color:#64748b;">{{ 'confidential.email.hint'|trans }}</p>
+{% endblock %}

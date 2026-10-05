@@ -31,6 +31,10 @@ class Membership
     #[ORM\Column(options: ['default' => true])]
     private bool $votingRight = true;
 
+    /** Confidant: reads and answers the anonymous confidential contact of the organization. */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $confidant = false;
+
     /** Function in the organization (chair, treasurer, secretary …). */
     #[ORM\Column(length: 80, nullable: true)]
     #[Assert\Length(max: 80)]
@@ -140,6 +144,19 @@ class Membership
     public function setVotingRight(bool $votingRight): static
     {
         $this->votingRight = $votingRight;
+
+        return $this;
+    }
+
+    /** Only counts together with full access ({@see Organization::getConfidants()}). */
+    public function isConfidant(): bool
+    {
+        return $this->confidant;
+    }
+
+    public function setConfidant(bool $confidant): static
+    {
+        $this->confidant = $confidant;
 
         return $this;
     }

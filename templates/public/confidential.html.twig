@@ -1,0 +1,44 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}{{ 'public.confidential.title'|trans }} · {{ parent() }}{% endblock %}
+
+{% block content %}
+    <h1 class="mb-2 text-2xl font-semibold">{{ 'public.confidential.title'|trans }}</h1>
+    <p class="mb-4 text-slate-600">{{ 'public.confidential.intro'|trans({'%name%': settings.organization.name}) }}</p>
+
+    <section aria-labelledby="how-heading" class="card mb-8 p-5 text-sm">
+        <h2 id="how-heading" class="mb-2 font-semibold">{{ 'public.confidential.how_title'|trans }}</h2>
+        <ul class="list-disc space-y-1 pl-5 text-slate-700">
+            <li>{{ 'public.confidential.how_anonymous'|trans }}</li>
+            <li>{{ 'public.confidential.how_code'|trans }}</li>
+            <li>{{ 'public.confidential.how_readers'|trans }}</li>
+            <li>{{ 'public.confidential.how_retention'|trans({'%months%': settings.organization.confidentialRetentionMonths}) }}</li>
+            <li>{{ 'public.confidential.how_device'|trans }}</li>
+        </ul>
+    </section>
+
+    <div class="grid gap-8">
+        <section aria-labelledby="new-heading">
+            <h2 id="new-heading" class="mb-3 text-lg font-semibold">{{ 'public.confidential.new_title'|trans }}</h2>
+            {{ form_start(form, {attr: {class: 'card p-6', 'data-turbo': 'false'}}) }}
+                {{ form_errors(form) }}
+                {{ form_row(form.subject) }}
+                {{ form_row(form.message) }}
+                {{ form_row(form.email) }}
+                {{ include('public/_consent.html.twig') }}
+                {{ form_rest(form) }}
+                <button type="submit" class="btn-primary">{{ ux_icon('lucide:lock', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.confidential.submit'|trans }}</button>
+            {{ form_end(form) }}
+        </section>
+
+        <section aria-labelledby="open-heading">
+            <h2 id="open-heading" class="mb-3 text-lg font-semibold">{{ 'public.confidential.open_title'|trans }}</h2>
+            {{ form_start(open_form, {attr: {class: 'card p-6', 'data-turbo': 'false'}}) }}
+                {{ form_errors(open_form) }}
+                {{ form_row(open_form.code) }}
+                {{ form_rest(open_form) }}
+                <button type="submit" class="btn-secondary">{{ ux_icon('lucide:key-round', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.confidential.open_submit'|trans }}</button>
+            {{ form_end(open_form) }}
+        </section>
+    </div>
+{% endblock %}

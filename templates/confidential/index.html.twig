@@ -1,0 +1,9 @@
+{% extends 'confidential/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block detail %}
+    {{ ui.empty('confidential.choose', 'lucide:lock') }}
+    <div class="mx-auto max-w-xl px-6 pb-8 text-sm text-slate-600">
+        <p>{{ 'confidential.intro'|trans }}</p>
+    </div>
+{% endblock %}
