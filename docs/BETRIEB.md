@@ -154,6 +154,28 @@ Einstellungen im GitHub-Repository unter *Settings → Environments → staging*
 
 **Zurück auf den vorigen Stand:** per SSH `cd /www/staging.rokoso.de && ln -sfn releases/<älterer Ordner> current.new && mv -Tf current.new current`. Migrationen werden dabei nicht zurückgedreht.
 
+### Deployment von lokal (ohne GitHub Actions)
+
+Läuft GitHub Actions nicht, macht `bin/deploy` dieselben Schritte vom eigenen Rechner aus (unter Windows in der Git Bash). Gebaut wird der eingecheckte Stand (`HEAD`) in einem temporären Ordner; Tailwind- und esbuild-Binary sowie `assets/vendor` werden aus dem Projekt übernommen. Hochgeladen wird per `tar` über SSH (kein rsync nötig, dafür ohne Hardlinks – jeder Stand belegt den vollen Platz, aufgeräumt wird wie im Workflow auf 5 Stände).
+
+Einstellungen in `.env.deploy.local` im Projektordner (nicht eingecheckt):
+
+```
+SSH_TARGET=<ssh-benutzer>@robert-rupf.host-011.gn2.hosting
+SSH_KEY=~/.ssh/deploy_rokoso
+DEPLOY_PATH=/www/staging.rokoso.de
+APP_URL=https://rokoso.robert-rupf.host-011.gn2.hosting
+# DEPLOY_TOKEN=…   (optional; sonst aus shared/.env.local auf dem Server gelesen)
+```
+
+Aufruf:
+
+- `bin/deploy` – `composer check`, Build, Upload, Umschalten, Deploy-Hook (Migrationen), Aufräumen
+- `bin/deploy --skip-check` – ohne `composer check`
+- `bin/deploy --build-only` – nur bauen (zum Ausprobieren, lädt nichts hoch)
+
+Schlägt der Deploy-Hook fehl, zeigt `current` schon auf den neuen Stand; zurück wie oben beschrieben.
+
 Die Zeitzone kommt aus der `php.ini` (siehe oben); die Tests in GitHub Actions laufen deshalb ebenfalls mit `date.timezone=Europe/Berlin`.
 
 Apache braucht die mitgelieferte `public/.htaccess` (Weiterleitung auf `index.php`).
