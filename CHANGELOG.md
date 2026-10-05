@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.12.1 – 2026-10-05
+
+### Verbessert
+
+- **Wiederholung im Abstand:** statt „Intervall“ steht jetzt „Wiederholen alle [2] Wochen“ – die Einheit passt sich an, und das Feld erscheint nur bei wiederholten Terminen. Beim Termin und in Einladungen steht entsprechend z. B. „Alle 2 Wochen am Donnerstag“.
+
 ## 0.12.0 – 2026-10-05
 
 ### Neu

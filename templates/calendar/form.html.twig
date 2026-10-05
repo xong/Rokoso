@@ -23,11 +23,17 @@
     <div class="mx-auto max-w-2xl p-4 lg:p-6">
         {% set recurrence_labels = {} %}
         {% for key in ['weekly', 'monthly', 'monthly_weekday', 'monthly_last'] %}
-            {% set recurrence_labels = recurrence_labels|merge({(key|upper): ('calendar.recurrence.show.' ~ key)|trans}) %}
+            {% set recurrence_labels = recurrence_labels|merge({(key|upper): ('calendar.recurrence.show.' ~ key)|trans({'%count%': 1})}) %}
+        {% endfor %}
+        {# unit after the interval per repetition: [singular, plural] #}
+        {% set recurrence_units = {} %}
+        {% for choice in form.recurrence.vars.choices|filter(c => c.data.unit) %}
+            {% set recurrence_units = recurrence_units|merge({(choice.value): [choice.data.unit|trans({'%count%': 1}), choice.data.unit|trans({'%count%': 2})]}) %}
         {% endfor %}
         {{ form_start(form, {attr: {
             'data-controller': 'recurrence',
             'data-recurrence-labels-value': recurrence_labels|json_encode,
+            'data-recurrence-units-value': recurrence_units|json_encode,
             'data-recurrence-weekdays-value': (0..6)|map(d => ('calendar.weekdays.' ~ d)|trans)|json_encode,
         }}) }}
             {{ form_errors(form) }}
@@ -66,9 +72,21 @@
             <fieldset class="card mb-4 p-4">
                 <legend class="px-1 font-semibold">{{ 'calendar.recurrence.title'|trans }}</legend>
                 <div class="grid gap-x-4 gap-y-3 sm:grid-cols-2">
-                    {{ form_row(form.recurrence, {row_attr: {class: 'mb-0 sm:col-span-2'}, attr: {'data-recurrence-target': 'select'}}) }}
-                    {{ form_row(form.recurrenceInterval, {row_attr: {class: 'mb-0'}}) }}
-                    {{ form_row(form.recurrenceUntil, {row_attr: {class: 'mb-0'}}) }}
+                    {{ form_row(form.recurrence, {row_attr: {class: 'mb-0 sm:col-span-2'}, attr: {'data-recurrence-target': 'select', 'data-action': 'recurrence#update'}}) }}
+                    {# interval and end only when repeating: "Wiederholen alle [2] Wochen" #}
+                    {% set recurrence = form.recurrence.vars.data %}
+                    {% set interval = form.recurrenceInterval %}
+                    <div class="grid gap-x-4 gap-y-3 sm:col-span-2 sm:grid-cols-2" data-recurrence-target="options"{% if not recurrence or not recurrence.unit %} hidden{% endif %}>
+                        <div>
+                            {{ form_label(interval) }}
+                            <div class="flex items-center gap-2">
+                                {{ form_widget(interval, {attr: {class: 'w-20', 'aria-describedby': interval.vars.id ~ '_unit', 'data-recurrence-target': 'interval', 'data-action': 'recurrence#update'}}) }}
+                                <span id="{{ interval.vars.id }}_unit" class="text-sm text-slate-700" data-recurrence-target="unit">{{ recurrence and recurrence.unit ? recurrence.unit|trans({'%count%': interval.vars.value|default(1)}) }}</span>
+                            </div>
+                            {{ form_errors(interval) }}
+                        </div>
+                        {{ form_row(form.recurrenceUntil, {row_attr: {class: 'mb-0'}}) }}
+                    </div>
                 </div>
             </fieldset>
             <div class="grid gap-x-4 sm:grid-cols-2">

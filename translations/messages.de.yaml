@@ -976,7 +976,6 @@ calendar:
     task_done: Erledigte Aufgabe
     task_open: Offene Aufgabe
     recurring: Wiederholt sich
-    every_n: alle %n%
     until: bis
     type:
         label: Art
@@ -992,15 +991,21 @@ calendar:
         monthly_weekday: Monatlich am selben Wochentag (z. B. 2. Donnerstag)
         monthly_last: Monatlich am letzten Wochentag
         yearly: Jährlich
-        interval: Intervall
+        interval: Wiederholen alle
         until: Endet am
+        # %count% = interval
         show:
-            daily: Täglich
-            weekly: 'Wöchentlich am %weekday%'
-            monthly: 'Monatlich am %day%.'
-            monthly_weekday: 'Monatlich am %nth%. %weekday%'
-            monthly_last: 'Monatlich am letzten %weekday%'
-            yearly: Jährlich
+            daily: '{1}Täglich|]1,Inf[Alle %count% Tage'
+            weekly: '{1}Wöchentlich am %weekday%|]1,Inf[Alle %count% Wochen am %weekday%'
+            monthly: '{1}Monatlich am %day%.|]1,Inf[Alle %count% Monate am %day%.'
+            monthly_weekday: '{1}Monatlich am %nth%. %weekday%|]1,Inf[Alle %count% Monate am %nth%. %weekday%'
+            monthly_last: '{1}Monatlich am letzten %weekday%|]1,Inf[Alle %count% Monate am letzten %weekday%'
+            yearly: '{1}Jährlich|]1,Inf[Alle %count% Jahre'
+        unit:
+            daily: '{1}Tag|]1,Inf[Tage'
+            weekly: '{1}Woche|]1,Inf[Wochen'
+            monthly: '{1}Monat|]1,Inf[Monate'
+            yearly: '{1}Jahr|]1,Inf[Jahre'
     weekdays:
         0: Sonntag
         1: Montag

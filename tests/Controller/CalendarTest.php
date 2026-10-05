@@ -154,6 +154,28 @@ final class CalendarTest extends AppTestCase
         self::assertSelectorTextContains('main', 'letzten Woche des Monats');
     }
 
+    public function testIntervalIsNamedWithItsUnit(): void
+    {
+        $crawler = $this->client->request('GET', '/calendar/new');
+        self::assertCount(1, $crawler->filter('[data-recurrence-target="options"][hidden]'));
+
+        $this->client->submitForm('Speichern', [
+            'calendar_item_form[title]' => 'Jour fixe',
+            'calendar_item_form[startsAt]' => '2026-10-08T19:00',
+            'calendar_item_form[recurrence]' => Recurrence::Weekly->value,
+            'calendar_item_form[recurrenceInterval]' => '2',
+        ]);
+        self::assertResponseRedirects();
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('main', 'Alle 2 Wochen am Donnerstag');
+
+        $item = $this->em()->getRepository(CalendarItem::class)->findOneBy(['title' => 'Jour fixe']);
+        self::assertNotNull($item);
+        $crawler = $this->client->request('GET', '/calendar/item/'.$item->getId().'/edit');
+        self::assertCount(0, $crawler->filter('[data-recurrence-target="options"][hidden]'));
+        self::assertSelectorTextSame('[data-recurrence-target="unit"]', 'Wochen');
+    }
+
     public function testTaskCanBeMarkedDone(): void
     {
         $task = (new CalendarItem($this->user))->setTitle('Protokoll schreiben')->setType(CalendarItemType::Task);

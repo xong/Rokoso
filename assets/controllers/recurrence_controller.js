@@ -1,9 +1,12 @@
 import { Controller } from '@hotwired/stimulus';
 
-/* Beschriftet die Wiederholungs-Auswahl passend zum Beginn („Monatlich am 2. Donnerstag“) und blendet „am letzten …“ aus, wenn der Beginn nicht in der letzten Woche des Monats liegt. */
+/*
+ * Beschriftet die Wiederholungs-Auswahl passend zum Beginn („Monatlich am 2. Donnerstag“) und blendet „am letzten …“ aus, wenn der Beginn nicht in der letzten Woche des Monats liegt.
+ * Intervall („Wiederholen alle [2] Wochen“) und Ende erscheinen nur bei einer Wiederholung; die Einheit folgt Auswahl und Zahl.
+ */
 export default class extends Controller {
-    static targets = ['start', 'select'];
-    static values = { labels: Object, weekdays: Array };
+    static targets = ['start', 'select', 'options', 'interval', 'unit'];
+    static values = { labels: Object, weekdays: Array, units: Object };
 
     connect() {
         this.selectTarget.querySelectorAll('option').forEach((option) => { option.dataset.label ??= option.textContent; });
@@ -26,5 +29,13 @@ export default class extends Controller {
                 option.disabled = unavailable;
             }
         });
+
+        const unit = this.unitsValue[this.selectTarget.value];
+        if (this.hasOptionsTarget) {
+            this.optionsTarget.hidden = !unit;
+        }
+        if (unit && this.hasUnitTarget) {
+            this.unitTarget.textContent = Number(this.intervalTarget.value) === 1 ? unit[0] : unit[1];
+        }
     }
 }

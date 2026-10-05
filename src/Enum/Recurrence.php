@@ -23,6 +23,12 @@ enum Recurrence: string
         return 'calendar.recurrence.'.strtolower($this->value);
     }
 
+    /** Unit of the interval ("Wochen"), translated with %count%; null when not repeating */
+    public function unit(): ?string
+    {
+        return self::None === $this ? null : 'calendar.recurrence.unit.'.strtolower($this->freq());
+    }
+
     /** RFC 5545 frequency */
     public function freq(): string
     {

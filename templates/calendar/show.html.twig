@@ -39,7 +39,7 @@
                 {% if item.recurring %}
                     <p class="mt-1 flex items-center gap-1 text-sm text-slate-600">
                         {{ ux_icon('lucide:repeat', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                        {{ recurrence_label(item) }}{% if item.recurrenceInterval > 1 %} ({{ 'calendar.every_n'|trans({'%n%': item.recurrenceInterval}) }}){% endif %}{% if item.recurrenceUntil %}, {{ 'calendar.until'|trans }} {{ item.recurrenceUntil|date('d.m.Y') }}{% endif %}
+                        {{ recurrence_label(item) }}{% if item.recurrenceUntil %}, {{ 'calendar.until'|trans }} {{ item.recurrenceUntil|date('d.m.Y') }}{% endif %}
                     </p>
                 {% endif %}
             </div>

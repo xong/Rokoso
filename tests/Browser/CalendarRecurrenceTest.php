@@ -37,4 +37,31 @@ final class CalendarRecurrenceTest extends BrowserTestCase
         self::assertContains('Monatlich am 5. Donnerstag', $labels);
         self::assertContains('Monatlich am letzten Donnerstag', $labels);
     }
+
+    public function testIntervalAppearsWithItsUnit(): void
+    {
+        $this->login($this->createUser());
+        $this->client->request('GET', '/calendar/new');
+        $this->client->waitFor('#calendar_item_form_recurrence');
+
+        $state = fn (): array => $this->client->executeScript(
+            'return [document.querySelector("[data-recurrence-target=options]").hidden, document.querySelector("[data-recurrence-target=unit]").textContent.trim()];'
+        );
+        self::assertTrue($state()[0]);
+
+        $this->client->executeScript(
+            'const s = document.getElementById("calendar_item_form_recurrence"); s.value = "WEEKLY"; s.dispatchEvent(new Event("change", {bubbles: true}));'
+        );
+        self::assertSame([false, 'Woche'], $state());
+
+        $this->client->executeScript(
+            'const i = document.getElementById("calendar_item_form_recurrenceInterval"); i.value = "3"; i.dispatchEvent(new Event("input", {bubbles: true}));'
+        );
+        self::assertSame([false, 'Wochen'], $state());
+
+        $this->client->executeScript(
+            'const s = document.getElementById("calendar_item_form_recurrence"); s.value = "YEARLY"; s.dispatchEvent(new Event("change", {bubbles: true}));'
+        );
+        self::assertSame([false, 'Jahre'], $state());
+    }
 }
