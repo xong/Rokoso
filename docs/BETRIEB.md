@@ -29,6 +29,8 @@ DATABASE_URL="mysql://rokoso:PASSWORT@127.0.0.1:3306/rokoso?serverVersion=11.8.0
 MAILER_DSN=smtp://benutzer:passwort@smtp.example.org:465
 MAILER_FROM="Rokoso <noreply@example.org>"
 DEFAULT_URI=https://rokoso.example.org
+# Fehlerlog als Datei (Standard: stderr, passend für Docker)
+LOG_PATH="%kernel.logs_dir%/%kernel.environment%.log"
 ```
 
 > **Wichtig:** Aus `APP_SECRET` wird der Schlüssel abgeleitet, mit dem die Passwörter der E-Mail-Konten verschlüsselt sind.
@@ -132,7 +134,7 @@ Für Hosting ohne Docker und ohne passendes PHP auf der Kommandozeile (z. B. Key
 ├── releases/                             (die letzten 5 Stände)
 └── shared/
     ├── .env.local                        (Zugangsdaten, nur hier)
-    ├── var/storage, var/log              (Dateien, Anhänge, Logs)
+    ├── var/storage, var/log              (Dateien, Anhänge, Fehlerlog prod.log über LOG_PATH)
     └── public/uploads                    (Profilbilder, Logos)
 ```
 
