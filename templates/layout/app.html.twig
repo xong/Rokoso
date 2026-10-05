@@ -30,7 +30,7 @@
             {% if show_list %}
             {% set list_panel = panel_width('list') %}
             <section id="list-panel" aria-labelledby="list-heading"
-                     class="relative flex w-full min-w-0 shrink-0 flex-col border-r border-slate-200 bg-surface lg:w-[var(--panel-width,25vw)] lg:min-w-72{{ has_detail ? ' max-lg:hidden' }}"
+                     class="relative flex w-full min-w-0 shrink-0 flex-col border-r border-slate-200 bg-surface lg:w-[var(--panel-width,25vw)] lg:min-w-48{{ has_detail ? ' max-lg:hidden' }}"
                      {% if list_panel.value %}style="--panel-width: {{ list_panel.value }}%"{% endif %}
                      data-controller="panel-resize" data-panel-resize-name-value="list"
                      data-panel-resize-min-value="{{ list_panel.min }}" data-panel-resize-max-value="{{ list_panel.max }}">

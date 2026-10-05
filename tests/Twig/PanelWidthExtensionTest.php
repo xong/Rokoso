@@ -19,7 +19,7 @@ final class PanelWidthExtensionTest extends TestCase
     {
         yield 'no cookie' => [null, null];
         yield 'stored width' => ['33.25', 33.3];
-        yield 'below minimum' => ['5', 20.0];
+        yield 'below minimum' => ['5', 15.0];
         yield 'above maximum' => ['90', 50.0];
         yield 'garbage' => ['30%;color:red', null];
     }
@@ -32,6 +32,6 @@ final class PanelWidthExtensionTest extends TestCase
 
         $panel = (new PanelWidthExtension($stack))->panelWidth('list');
 
-        self::assertSame(['name' => 'list', 'min' => 20, 'max' => 50, 'value' => $expected], $panel);
+        self::assertSame(['name' => 'list', 'min' => 15, 'max' => 50, 'value' => $expected], $panel);
     }
 }

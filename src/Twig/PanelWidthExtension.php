@@ -15,8 +15,8 @@ final class PanelWidthExtension
 {
     /** name => [min %, max %] */
     public const array PANELS = [
-        'list' => [20, 50],
-        'comments' => [20, 60],
+        'list' => [15, 50],
+        'comments' => [12, 60],
     ];
 
     public function __construct(private readonly RequestStack $requestStack)
