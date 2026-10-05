@@ -136,7 +136,7 @@ Für Hosting ohne Docker und ohne passendes PHP auf der Kommandozeile (z. B. Key
     └── public/uploads                    (Profilbilder, Logos)
 ```
 
-Ablauf: Upload per rsync in einen neuen Ordner unter `releases/` (unveränderte Dateien als Hardlink), Verlinken von `shared/`, Umschalten von `current`, dann ruft GitHub den **Deploy-Hook** `POST /_deploy` auf. Er führt mit dem Web-PHP die Migrationen und `cache:warmup` aus. Geschützt ist er durch `DEPLOY_TOKEN` (mind. 32 Zeichen, in `.env.local` und als GitHub-Secret; ohne Token ist er aus). Liefert der Webserver kurz nach dem Umschalten noch den alten Stand aus, antwortet der Hook mit 409 und GitHub versucht es erneut.
+Ablauf: Upload per rsync in einen neuen Ordner unter `releases/` (unveränderte Dateien als Hardlink), Verlinken von `shared/`, Umschalten von `current`, dann ruft GitHub den **Deploy-Hook** `POST /_deploy` auf. Er führt mit dem Web-PHP die Migrationen und `cache:warmup` aus. Geschützt ist er durch `DEPLOY_TOKEN` (mind. 32 Zeichen, in `.env.local` und als GitHub-Secret; ohne Token ist er aus). Der OPcache des Webservers hält `current/public/index.php` sonst dauerhaft auf dem alten Release fest; daher legt der Workflow vorher kurz eine PHP-Datei mit Zufallsnamen an, die `opcache_reset()` aufruft, und löscht sie wieder. Liefert der Webserver trotzdem noch den alten Stand aus, antwortet der Hook mit 409 und GitHub leert den Cache erneut und versucht es noch einmal.
 
 Einstellungen im GitHub-Repository unter *Settings → Environments → staging*:
 

@@ -108,11 +108,21 @@ jobs:
           TOKEN: ${{ secrets.DEPLOY_TOKEN }}
           URL: ${{ vars.APP_URL }}/_deploy
         run: |
-          # 409 = Webserver liefert noch den alten Stand aus (Pfad-Cache), dann erneut versuchen
+          # OPcache des Webservers hält current/public/index.php fest auf dem alten Release:
+          # einmalige Datei mit Zufallsnamen (nicht im Cache) leert ihn, danach wieder löschen
+          reset_opcache() {
+            f="opcache-$(openssl rand -hex 16).php"
+            ssh "$SSH_TARGET" "cd '$DEPLOY_PATH/releases'; for d in */public; do printf '%s' '<?php var_export(function_exists(\"opcache_reset\") && opcache_reset());' > \$d/$f; done"
+            curl -s "${URL%/_deploy}/$f"; echo
+            ssh "$SSH_TARGET" "rm -f '$DEPLOY_PATH'/releases/*/public/$f"
+          }
+          reset_opcache
+          # 409 = Webserver liefert noch den alten Stand aus, dann erneut versuchen
           for i in $(seq 1 30); do
             code=$(curl -s -o hook.txt -w '%{http_code}' -X POST -H "X-Deploy-Token: $TOKEN" --data-urlencode "release=$RELEASE" "$URL" || echo 000)
             cat hook.txt; echo "HTTP $code"
             if [ "$code" = 200 ]; then exit 0; fi
+            if [ "$code" = 409 ]; then reset_opcache; fi
             if [ "$code" != 409 ] && [ "$code" != 000 ] && [ "$code" != 502 ] && [ "$code" != 503 ]; then exit 1; fi
             sleep 10
           done
