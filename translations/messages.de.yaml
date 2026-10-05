@@ -354,6 +354,10 @@ organization:
     pending_invitations: Offene Einladungen
     invitation_expired: abgelaufen
     revoke: Einladung zurückziehen
+    copy_link: Link kopieren
+    invitation_link_copied: Link kopiert
+    invite_unmailed: Die Einladung ist angelegt, aber die E-Mail konnte nicht verschickt werden. Kopiere den Link unter „Offene Einladungen“ und schick ihn der Person selbst.
+    invite_unmailed_account: Die Einladung ist angelegt, aber die E-Mail konnte nicht verschickt werden. Die Person hat schon ein Konto und sieht die Einladung unter ihren Benachrichtigungen; den Link kannst du auch unter „Offene Einladungen“ kopieren.
     invitation_revoked: Einladung zurückgezogen.
     meetings_legend: Sitzungen
     features_legend: Bereiche

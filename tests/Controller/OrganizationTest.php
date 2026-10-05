@@ -10,10 +10,21 @@ use App\Entity\Organization;
 use App\Entity\User;
 use App\Enum\NotificationType;
 use App\Enum\OrganizationRole;
+use App\Notification\NotificationCenter;
+use App\Repository\InvitationRepository;
+use App\Repository\NotificationRepository;
 use App\Repository\UserRepository;
 use App\Service\InvitationManager;
+use App\Service\SystemMailer;
 use App\Tests\AppTestCase;
+use Psr\Log\NullLogger;
+use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mailer\Exception\TransportException;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\RawMessage;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class OrganizationTest extends AppTestCase
 {
@@ -171,5 +182,38 @@ final class OrganizationTest extends AppTestCase
 
         $this->expectException(\LogicException::class);
         static::getContainer()->get(InvitationManager::class)->join($invitation, $other);
+    }
+
+    public function testInvitationSurvivesAFailingMailAndOffersItsLink(): void
+    {
+        $anna = $this->createUser();
+        $owner = $this->login($this->createUser('owner@example.org', 'Owner'));
+        $org = $this->createOrganization($owner);
+
+        $container = static::getContainer();
+        $brokenMailer = new class implements MailerInterface {
+            public function send(RawMessage $message, ?Envelope $envelope = null): void
+            {
+                throw new TransportException('Connection refused');
+            }
+        };
+        $manager = new InvitationManager(
+            $container->get(InvitationRepository::class),
+            $container->get(UserRepository::class),
+            $container->get(NotificationRepository::class),
+            $container->get(NotificationCenter::class),
+            new SystemMailer($brokenMailer, $container->get(TranslatorInterface::class), 'noreply@example.org'),
+            $container->get(UrlGeneratorInterface::class),
+            $this->em(),
+            new NullLogger(),
+        );
+        $result = $manager->invite($org, 'anna@example.org', OrganizationRole::Member, $owner);
+        self::assertFalse($result->mailed);
+        self::assertTrue($result->hasAccount);
+        self::assertNotNull($result->invitation->getId());
+        self::assertCount(1, $this->em()->getRepository(Notification::class)->findBy(['recipient' => $anna->getId()]));
+
+        $this->client->request('GET', '/organizations/'.$org->getId());
+        self::assertSelectorExists(\sprintf('[data-controller="copy"][data-copy-text-value$="/invitation/%s"]', $result->invitation->getToken()));
     }
 }

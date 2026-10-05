@@ -254,11 +254,22 @@
                     <h4 class="mt-4 mb-2 text-sm font-medium text-slate-600">{{ 'organization.pending_invitations'|trans }}</h4>
                     <ul role="list" class="card divide-y divide-slate-100">
                         {% for invitation in invitations %}
-                            <li class="flex items-center gap-3 px-4 py-2">
+                            <li class="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2">
                                 {{ ux_icon('lucide:mail', {class: 'size-4 text-slate-400', 'aria-hidden': 'true'}) }}
                                 <span class="min-w-0 flex-1 truncate">{{ invitation.email }}</span>
                                 <span class="badge bg-slate-100 text-slate-600">{{ invitation.role.label|trans }}</span>
                                 <span class="text-xs text-slate-500">{{ invitation.expired ? 'organization.invitation_expired'|trans : invitation.createdAt|date('d.m.Y') }}</span>
+                                {% if not invitation.expired %}
+                                    {# Link zum Weitergeben, z. B. wenn die E-Mail nicht ankam #}
+                                    <span data-controller="copy" data-copy-text-value="{{ url('invitation_show', {token: invitation.token}) }}" data-copy-done-value="{{ 'organization.invitation_link_copied'|trans }}">
+                                        <button type="button" class="btn-secondary px-2 py-1 text-xs" data-action="copy#copy">
+                                            {{ ux_icon('lucide:link', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                                            <span data-copy-target="label">{{ 'organization.copy_link'|trans }}</span>
+                                            <span class="sr-only">({{ invitation.email }})</span>
+                                        </button>
+                                        <span class="sr-only" role="status" data-copy-target="status"></span>
+                                    </span>
+                                {% endif %}
                                 {{ ui.post_button(path('organization_invitation_revoke', {id: organization.id, invitation: invitation.id}), 'invitation-revoke',
                                     'organization.revoke', {class: 'btn-icon hover:text-red-600', icon: 'lucide:x', icon_only: true}) }}
                             </li>

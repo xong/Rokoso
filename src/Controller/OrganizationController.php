@@ -272,8 +272,12 @@ final class OrganizationController extends AbstractController
             if ($alreadyMember) {
                 $this->addFlash('info', 'organization.already_member');
             } else {
-                $account = $invitations->invite($organization, $email, $data['role'], $user);
-                $this->addFlash('success', null !== $account ? 'organization.invited_account' : 'organization.invited');
+                $result = $invitations->invite($organization, $email, $data['role'], $user);
+                if ($result->mailed) {
+                    $this->addFlash('success', $result->hasAccount ? 'organization.invited_account' : 'organization.invited');
+                } else {
+                    $this->addFlash('error', $result->hasAccount ? 'organization.invite_unmailed_account' : 'organization.invite_unmailed');
+                }
             }
         } else {
             $this->addFlash('error', 'organization.invite_invalid');
