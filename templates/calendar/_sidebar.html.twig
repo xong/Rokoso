@@ -68,13 +68,15 @@
                             <a href="{{ path('calendar_day', {date: ymd}|merge(pf)) }}"
                                {% if is_today %}aria-current="date"{% endif %}
                                aria-label="{{ weekdays_sun[day.date|date('w')] }}, {{ day.date|date('d.m.Y') }}{% if day.count %} – {{ 'calendar.entries'|trans({'%count%': day.count}) }}{% endif %}"
-                               class="flex flex-col items-center gap-0.5 rounded-md pt-0.5 pb-1 tabular-nums hover:bg-slate-100">
-                                {# Zahl im Kreis, Punkte darunter (nicht darüber gelegt, damit sie in schmalen Spalten nichts verdecken) #}
+                               class="relative grid place-items-center rounded-md py-1.5 tabular-nums hover:bg-slate-100">
+                                {# Zahl im Kreis mittig; Punkte absolut im unteren Innenabstand, damit sie weder verschieben noch verdecken #}
                                 <span class="grid aspect-square w-full max-w-7 place-items-center rounded-full
                                              {{ is_today ? 'bg-brand-600 font-semibold text-white' : (is_selected ? 'bg-brand-100 font-semibold text-brand-800' : (day.in_month ? 'text-slate-700' : 'text-slate-500')) }}">{{ day.date|date('j') }}</span>
-                                <span class="flex h-1 max-w-full gap-0.5 overflow-hidden" aria-hidden="true">
-                                    {% for c in day.colors %}<span class="size-1 shrink-0 rounded-full" style="background-color: {{ c }}"></span>{% endfor %}
-                                </span>
+                                {% if day.colors is not empty %}
+                                    <span class="absolute bottom-0.5 flex max-w-full gap-0.5 overflow-hidden" aria-hidden="true">
+                                        {% for c in day.colors %}<span class="size-1 shrink-0 rounded-full" style="background-color: {{ c }}"></span>{% endfor %}
+                                    </span>
+                                {% endif %}
                             </a>
                         </td>
                     {% endfor %}
