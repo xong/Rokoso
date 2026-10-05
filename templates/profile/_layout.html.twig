@@ -23,6 +23,7 @@
             {key: 'calendar', route: 'profile_calendar', icon: 'lucide:calendar-sync', label: 'profile.section_calendar'},
             {key: 'security', route: 'profile_security', icon: 'lucide:shield-check', label: 'profile.section_security'},
             {key: 'account', route: 'profile_account', icon: 'lucide:user-x', label: 'profile.section_account'},
+            {key: 'changelog', route: 'profile_changelog', icon: 'lucide:sparkles', label: 'changelog.title'},
         ] %}
             {% set active = section|default('') == item.key %}
             <li>
@@ -34,6 +35,7 @@
             </li>
         {% endfor %}
     </ul>
+    <p class="px-5 pb-4 text-xs text-slate-500">{{ 'changelog.footer'|trans({'%version%': app_version()}) }}</p>
 {% endblock %}
 
 {% block detail %}

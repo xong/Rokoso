@@ -23,6 +23,7 @@
     {label: 'nav.organizations', icon: 'lucide:building-2', route: 'organization_index'},
     {label: 'nav.notifications', icon: 'lucide:bell', route: 'notification_index', keys: 'g n'},
     {label: 'nav.profile', icon: 'lucide:user', route: 'profile_edit'},
+    {label: 'changelog.title', icon: 'lucide:sparkles', route: 'profile_changelog'},
 ] %}
 {# areas switched off in every organization of the user are left out (shortcuts included) #}
 {% set commands = commands|filter(c => route_available(c.route)) %}

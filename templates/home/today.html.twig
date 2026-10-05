@@ -40,6 +40,20 @@
             </section>
         {% endif %}
 
+        {% if release %}
+            <section aria-labelledby="release-heading" class="card mb-4 p-4">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                    <h2 id="release-heading" class="flex items-center gap-2 font-semibold">
+                        {{ ux_icon('lucide:sparkles', {class: 'size-5 text-brand-700', 'aria-hidden': 'true'}) }}
+                        {{ 'changelog.new_version'|trans({'%version%': release.version}) }}
+                    </h2>
+                    {{ ui.post_button(path('changelog_dismiss'), 'changelog-dismiss', 'changelog.dismiss', {class: 'btn-ghost text-sm'}) }}
+                </div>
+                <div class="markdown mt-2">{{ release.notesFrom(3)|markdown }}</div>
+                <p class="mt-3"><a href="{{ path('profile_changelog') }}" class="text-sm font-medium text-brand-700 hover:underline">{{ 'changelog.all'|trans }}</a></p>
+            </section>
+        {% endif %}
+
         {% if setup %}
             {% set done = setup|filter(s => s.done)|length %}
             <section aria-labelledby="setup-heading" class="card mb-4 p-4">

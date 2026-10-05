@@ -70,6 +70,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     #[ORM\Column(options: ['default' => false])]
     private bool $setupDismissed = false;
 
+    /** Release whose notes the user has read or dismissed (see Changelog). */
+    #[ORM\Column(length: 40, nullable: true)]
+    private ?string $seenVersion = null;
+
     /** TOTP secret (Base32); set = two-factor login active. */
     #[ORM\Column(length: 64, nullable: true)]
     private ?string $totpSecret = null;
@@ -386,6 +390,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     public function setSetupDismissed(bool $setupDismissed): static
     {
         $this->setupDismissed = $setupDismissed;
+
+        return $this;
+    }
+
+    public function getSeenVersion(): ?string
+    {
+        return $this->seenVersion;
+    }
+
+    public function setSeenVersion(?string $seenVersion): static
+    {
+        $this->seenVersion = $seenVersion;
 
         return $this;
     }

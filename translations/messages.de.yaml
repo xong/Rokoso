@@ -1690,6 +1690,17 @@ public:
         deleted: Das Thema wurde gelöscht.
         delete_confirm: Thema löschen?
 
+changelog:
+    title: Neuigkeiten
+    intro: 'Was sich in Rokoso geändert hat. Ihr nutzt Version %version%.'
+    version: 'Version %version%'
+    current: aktuell
+    empty: Noch keine Einträge.
+    footer: 'Rokoso %version%'
+    new_version: 'Neu in Rokoso %version%'
+    dismiss: Gelesen
+    all: Alle Neuigkeiten
+
 today:
     title: Heute
     sync:

@@ -19,6 +19,7 @@ use App\Repository\MeetingRepository;
 use App\Repository\MessageRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\PollRepository;
+use App\Service\Changelog;
 use App\Service\SetupChecklist;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -46,6 +47,7 @@ final class HomeController extends AbstractController
         NotificationRepository $notifications,
         SetupChecklist $setup,
         MailAccountRepository $mailAccounts,
+        Changelog $changelog,
     ): Response {
         $now = new \DateTimeImmutable();
         $events = array_filter(
@@ -72,6 +74,7 @@ final class HomeController extends AbstractController
             'topics' => \array_slice(array_values(array_filter($recentTopics, static fn ($t): bool => \in_array($t->getId(), $unreadTopics, true))), 0, self::LIMIT),
             'mentions' => \array_slice(array_values($mentions), 0, self::LIMIT),
             'setup' => $setup->stepsFor($user),
+            'release' => $changelog->unseenBy($user),
             'sync_problems' => $mailAccounts->findWithSyncProblems($user),
             'now' => $now,
         ]);

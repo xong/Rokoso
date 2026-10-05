@@ -1,0 +1,19 @@
+{% extends 'profile/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'changelog.title'|trans }}{% endblock %}
+
+{% block form %}
+    <p class="mb-6 text-slate-600">{{ 'changelog.intro'|trans({'%version%': app_version()}) }}</p>
+    {% for release in releases %}
+        <section aria-labelledby="release-{{ loop.index }}" class="mb-8">
+            <h3 id="release-{{ loop.index }}" class="flex flex-wrap items-baseline gap-x-2 text-lg font-semibold">
+                {{ 'changelog.version'|trans({'%version%': release.version}) }}
+                {% if release.date %}<time datetime="{{ release.date|date('Y-m-d') }}" class="text-sm font-normal text-slate-500">{{ release.date|date('d.m.Y') }}</time>{% endif %}
+                {% if loop.first %}<span class="rounded-full bg-brand-50 px-2 text-xs font-medium text-brand-700">{{ 'changelog.current'|trans }}</span>{% endif %}
+            </h3>
+            <div class="markdown mt-2">{{ release.notesFrom(4)|markdown }}</div>
+        </section>
+    {% else %}
+        <p class="text-slate-500">{{ 'changelog.empty'|trans }}</p>
+    {% endfor %}
+{% endblock %}
