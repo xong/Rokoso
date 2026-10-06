@@ -44,6 +44,9 @@ final readonly class MessageHtmlRenderer
             $html = str_ireplace('cid:'.$attachment->getContentId(), $dataUri, $html);
         }
 
+        // The body is UTF-8 already; a declared charset (Outlook: windows-1252) would make the HTML parser
+        // of the sanitizer decode it a second time ("Ã¼" instead of "ü").
+        $html = (string) preg_replace('#<meta\b[^>]*charset[^>]*>#i', '', $html);
         $body = $this->sanitizer->sanitize($html);
 
         $dark = match ($theme) {

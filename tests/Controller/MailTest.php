@@ -85,6 +85,19 @@ final class MailTest extends AppTestCase
         self::assertSelectorTextContains('main', 'Viele Grüße');
     }
 
+    public function testHtmlViewIgnoresDeclaredCharset(): void
+    {
+        $message = $this->syncFixture();
+        $message->setBody(null, '<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"></head><body><p>Schöne Grüße</p></body></html>');
+        $this->em()->flush();
+        $this->login($this->user);
+
+        $this->client->request('GET', '/mail/'.$message->getId().'/html');
+        $html = (string) $this->client->getResponse()->getContent();
+        self::assertStringContainsString('Schöne Grüße', $html);
+        self::assertStringNotContainsString('windows-1252', $html);
+    }
+
     public function testTrashAndRestore(): void
     {
         $message = $this->syncFixture();
