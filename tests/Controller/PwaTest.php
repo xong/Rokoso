@@ -16,6 +16,13 @@ final class PwaTest extends AppTestCase
         $manifest = json_decode((string) $this->client->getResponse()->getContent(), true);
         self::assertIsArray($manifest);
         self::assertSame('standalone', $manifest['display']);
+        self::assertIsArray($manifest['icons']);
+        foreach ($manifest['icons'] as $icon) {
+            $path = (string) strtok($icon['src'], '?');
+            // many Apache setups alias /icons/ to their own images, so app icons there are unreachable
+            self::assertStringStartsNotWith('/icons/', $path);
+            self::assertFileExists(\dirname(__DIR__, 2).'/public'.$path);
+        }
 
         $this->client->request('GET', '/sw.js');
         self::assertResponseIsSuccessful();

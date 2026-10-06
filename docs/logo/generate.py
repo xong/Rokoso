@@ -111,10 +111,10 @@ maskable = icon(BOLD, pad=22, radius=0)             # mark inside the 80 % safe 
 small = icon(SMALL, pad=10, radius=26)
 
 write('public/favicon.svg', small)
-write('public/icons/icon.svg', app_icon)
+write('public/app-icons/icon.svg', app_icon)
 write('assets/images/logo-icon.svg', app_icon)
 write('public/favicon.ico', ico([(16, png(small, 16)), (32, png(small, 32)), (48, png(app_icon, 48))]), 'wb')
 for name, svg, size in [('icon-192.png', app_icon, 192), ('icon-512.png', app_icon, 512),
                         ('icon-maskable-512.png', maskable, 512), ('apple-touch-icon.png', full_icon, 180),
                         ('email-logo.png', app_icon, 64)]:
-    write('public/icons/' + name, png(svg, size), 'wb')
+    write('public/app-icons/' + name, png(svg, size), 'wb')

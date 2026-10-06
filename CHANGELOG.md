@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.14.4 – 2026-10-06
+
+### Behoben
+
+- **App installieren:** Rokoso lässt sich wieder als App auf dem Handy installieren (Chrome: „Zum Startbildschirm hinzufügen“ bzw. „App installieren“). Die App-Symbole waren auf dem Server nicht erreichbar; dadurch fehlte auch das Logo in den E-Mails von Rokoso.
+
 ## 0.14.3 – 2026-10-06
 
 ### Behoben

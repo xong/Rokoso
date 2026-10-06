@@ -31,10 +31,10 @@ final class PwaController extends AbstractController
             'background_color' => '#f9f9f9',
             'theme_color' => '#417230',
             'icons' => [
-                ['src' => $files->url('/icons/icon.svg'), 'sizes' => 'any', 'type' => 'image/svg+xml'],
-                ['src' => $files->url('/icons/icon-192.png'), 'sizes' => '192x192', 'type' => 'image/png'],
-                ['src' => $files->url('/icons/icon-512.png'), 'sizes' => '512x512', 'type' => 'image/png'],
-                ['src' => $files->url('/icons/icon-maskable-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+                ['src' => $files->url('/app-icons/icon.svg'), 'sizes' => 'any', 'type' => 'image/svg+xml'],
+                ['src' => $files->url('/app-icons/icon-192.png'), 'sizes' => '192x192', 'type' => 'image/png'],
+                ['src' => $files->url('/app-icons/icon-512.png'), 'sizes' => '512x512', 'type' => 'image/png'],
+                ['src' => $files->url('/app-icons/icon-maskable-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
             ],
             'shortcuts' => [
                 ['name' => $translator->trans('nav.mail_inbox'), 'url' => $this->generateUrl('mail_inbox')],
@@ -66,7 +66,7 @@ final class PwaController extends AbstractController
     public function serviceWorker(Packages $packages, PublicFiles $files): Response
     {
         // new cache name on every JS/CSS/icon change: the browser installs the worker again and drops old files
-        $version = substr(hash('xxh128', $packages->getUrl('build/app.js').$packages->getUrl('styles/app.css').$files->url('/icons/icon-192.png')), 0, 10);
+        $version = substr(hash('xxh128', $packages->getUrl('build/app.js').$packages->getUrl('styles/app.css').$files->url('/app-icons/icon-192.png')), 0, 10);
         $response = $this->render('pwa/sw.js.twig', ['cache_version' => $version]);
         $response->headers->set('Content-Type', 'application/javascript');
         $response->headers->set('Cache-Control', 'no-cache');

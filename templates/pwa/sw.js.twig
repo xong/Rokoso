@@ -8,7 +8,7 @@ const CACHE = 'rokoso-{{ cache_version }}';
 const OFFLINE_URL = '{{ path('pwa_offline') }}';
 
 self.addEventListener('install', (event) => {
-    event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll([OFFLINE_URL, '{{ public_file('/icons/icon-192.png') }}'])));
+    event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll([OFFLINE_URL, '{{ public_file('/app-icons/icon-192.png') }}'])));
     self.skipWaiting();
 });
 
@@ -35,7 +35,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    if (url.pathname.startsWith('/assets/') || url.pathname.startsWith('/icons/')) {
+    if (url.pathname.startsWith('/assets/') || url.pathname.startsWith('/app-icons/')) {
         event.respondWith(
             caches.match(request).then((cached) => cached || fetch(request).then((response) => {
                 if (response.ok) {
@@ -57,8 +57,8 @@ self.addEventListener('push', (event) => {
     }
     event.waitUntil(self.registration.showNotification(data.title || 'Rokoso', {
         body: data.body || '',
-        icon: '{{ public_file('/icons/icon-192.png') }}',
-        badge: '{{ public_file('/icons/icon-192.png') }}',
+        icon: '{{ public_file('/app-icons/icon-192.png') }}',
+        badge: '{{ public_file('/app-icons/icon-192.png') }}',
         tag: data.tag,
         data: { url: data.url || '/' },
     }));
