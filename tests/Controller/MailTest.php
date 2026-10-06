@@ -67,7 +67,11 @@ final class MailTest extends AppTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('#detail-heading', 'Frage zur Schulwegsicherheit');
         self::assertSelectorExists('iframe[sandbox]');
-        self::assertSelectorTextContains('main', 'plan.pdf');
+        // attachments sit in the header, above the content
+        self::assertSelectorTextContains('section[aria-labelledby="attachments-heading"]', 'plan.pdf');
+        self::assertSelectorTextContains('#attachments-heading', '1 Anhang');
+        $page = (string) $this->client->getResponse()->getContent();
+        self::assertLessThan(strpos($page, '<iframe'), strpos($page, 'id="attachments-heading"'));
 
         $this->client->request('GET', '/mail/'.$message->getId().'/html');
         $html = (string) $this->client->getResponse()->getContent();

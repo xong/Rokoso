@@ -119,6 +119,26 @@
                         </dl>
                     </div>
                 </div>
+                {% if message.visibleAttachments is not empty %}
+                    <section aria-labelledby="attachments-heading" class="flex items-start gap-2 text-xs">
+                        <h3 id="attachments-heading" class="sr-only">{{ 'mail.attachments_count'|trans({'%count%': message.visibleAttachments|length}) }}</h3>
+                        {{ ux_icon('lucide:paperclip', {class: 'mt-2.5 size-3.5 shrink-0 text-slate-500', 'aria-hidden': 'true'}) }}
+                        <ul role="list" class="flex min-w-0 flex-wrap gap-1.5">
+                            {% for a in message.visibleAttachments %}
+                                {% set shelved = in_shelf(a) %}
+                                <li class="flex min-w-0 items-center rounded-md ring-1 ring-slate-200">
+                                    <a href="{{ path('mail_attachment', {id: message.id, attachment: a.id}) }}" class="flex min-w-0 items-center gap-1.5 rounded-l-md py-1.5 pl-2 hover:bg-slate-50" data-turbo="false">
+                                        <span class="max-w-48 truncate">{{ a.filename }}</span>
+                                        <span class="shrink-0 text-slate-500">{{ a.size|filesize }}</span>
+                                    </a>
+                                    {{ ui.post_button(path('shelf_toggle_attachment', {id: message.id, attachment: a.id}),
+                                        'shelf', (shelved ? 'shelf.remove_named' : 'shelf.add_named')|trans({'%name%': a.filename}),
+                                        {class: 'btn-icon size-8' ~ (shelved ? ' text-indigo-600' : ''), icon: shelved ? 'lucide:bookmark-check' : 'lucide:bookmark-plus', icon_only: true}) }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
                 <div class="flex flex-wrap items-center gap-2 text-xs">
                     {% if message.mailAccount %}
                         <span class="badge bg-slate-100 text-slate-600"><span class="size-2 rounded-full" style="background-color: {{ message.organization.color }}" aria-hidden="true"></span>{{ message.mailAccount.name }}</span>
@@ -177,27 +197,6 @@
                             </li>
                         {% endfor %}
                     </ol>
-                </section>
-            {% endif %}
-
-            {% if message.visibleAttachments is not empty %}
-                <section aria-labelledby="attachments-heading" class="border-t border-slate-200 p-4">
-                    <h3 id="attachments-heading" class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'mail.attachments'|trans }}</h3>
-                    <ul role="list" class="flex flex-wrap gap-2">
-                        {% for a in message.visibleAttachments %}
-                            {% set shelved = in_shelf(a) %}
-                            <li class="card flex items-center">
-                                <a href="{{ path('mail_attachment', {id: message.id, attachment: a.id}) }}" class="flex items-center gap-2 py-2 pr-1 pl-3 hover:bg-slate-50" data-turbo="false">
-                                    {{ ux_icon('lucide:file', {class: 'size-4 text-slate-500', 'aria-hidden': 'true'}) }}
-                                    <span class="max-w-48 truncate">{{ a.filename }}</span>
-                                    <span class="text-xs text-slate-500">{{ a.size|filesize }}</span>
-                                </a>
-                                {{ ui.post_button(path('shelf_toggle_attachment', {id: message.id, attachment: a.id}),
-                                    'shelf', (shelved ? 'shelf.remove_named' : 'shelf.add_named')|trans({'%name%': a.filename}),
-                                    {class: 'btn-icon size-8' ~ (shelved ? ' text-indigo-600' : ''), icon: shelved ? 'lucide:bookmark-check' : 'lucide:bookmark-plus', icon_only: true}) }}
-                            </li>
-                        {% endfor %}
-                    </ul>
                 </section>
             {% endif %}
 

@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.14.5 – 2026-10-06
+
+### Verbessert
+
+- **Anhänge:** stehen jetzt kompakt im Kopf der E-Mail (unter Absender und Empfängern) statt erst unter dem Text.
+
 ## 0.14.4 – 2026-10-06
 
 ### Behoben
