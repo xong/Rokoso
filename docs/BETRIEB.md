@@ -104,6 +104,8 @@ Läuft ein anderer Reverse-Proxy davor, `SERVER_NAME=:80` setzen und nur Port 80
 
 Ein Dauer-Worker (Messenger) ist **nicht** nötig: Systemmails werden direkt verschickt.
 
+**Cron per URL (ohne passendes PHP auf der Kommandozeile, z. B. KeyHelp bei GN2):** In `shared/.env.local` bzw. `.env.local` ein `CRON_TOKEN` mit mindestens 32 Zeichen setzen (z. B. `openssl rand -hex 24`) und im Hosting-Panel **eine** Aufgabe anlegen, die jede Minute die URL `https://<domain>/_cron/<CRON_TOKEN>` aufruft (KeyHelp: *Geplante Aufgaben* → Typ „URL aufrufen“). Rokoso antwortet sofort mit `202 ok` und führt danach mit dem PHP des Webservers die fälligen Aufgaben aus – in denselben Abständen wie oben (Ausgang jede Minute, Abruf alle 5 Minuten, `app:notify` alle 15 Minuten, Passwort-Links täglich). Die letzten Läufe stehen in `var/cache/prod/cron.json`, das gleichzeitig als Sperre dient (nach einem Deployment laufen alle Aufgaben einmal sofort). Fehler einer Aufgabe landen im Fehlerlog; ein falscher Token ergibt 404. Ohne `CRON_TOKEN` ist der Aufruf abgeschaltet. Den Token wie ein Passwort behandeln – er steht im Zugriffslog des Webservers, erlaubt aber nur, die Aufgaben früher anzustoßen.
+
 **Abruf beim Öffnen:** Zusätzlich ruft Rokoso die Postfächer ab, wenn jemand „Heute“ oder den Posteingang öffnet und der letzte Abruf länger als `MAIL_SYNC_INTERVAL` Minuten (Standard 5, `0` = aus) zurückliegt – nach dem Ausliefern der Seite, also ohne Wartezeit. Der Cronjob bleibt trotzdem empfohlen. Hängt der Abruf eines Kontos länger als eine Stunde oder ist er fehlgeschlagen, sehen die Admins der Organisation einen Hinweis auf „Heute“ und in der Organisation.
 
 `app:notify` setzt auch die **Löschfristen** um (einstellbar je Organisation unter „Organisation bearbeiten“):
