@@ -8,6 +8,8 @@ use ZBateson\MailMimeParser\Header\AddressHeader;
 use ZBateson\MailMimeParser\Header\DateHeader;
 use ZBateson\MailMimeParser\IMessage;
 use ZBateson\MailMimeParser\MailMimeParser;
+use ZBateson\MailMimeParser\Message\IMessagePart;
+use ZBateson\MailMimeParser\Message\IMimePart;
 
 /**
  * Turns a raw RFC 822 message into a ParsedMessage (zbateson/mail-mime-parser).
@@ -57,11 +59,32 @@ final class MessageParser
             cc: $this->addresses($message, 'cc'),
             subject: trim((string) $message->getHeaderValue('subject', '')),
             date: $date ?? new \DateTimeImmutable(),
-            text: $message->getTextContent(),
-            html: $message->getHtmlContent(),
+            text: $this->body($message->getTextPart()),
+            html: $this->body($message->getHtmlPart()),
             attachments: $attachments,
             spamFlagged: $this->spamFlagged($message),
         );
+    }
+
+    /**
+     * Body of a text part as UTF-8. Many mailers and web forms send UTF-8 without declaring a charset
+     * (or claim US-ASCII); the RFC default ISO-8859-1 would turn "ü" into "Ã¼". Such parts are read as
+     * UTF-8 when they are valid UTF-8, which real Latin-1 text with umlauts practically never is.
+     */
+    private function body(?IMessagePart $part): ?string
+    {
+        if (null === $part) {
+            return null;
+        }
+        $charset = $part instanceof IMimePart ? strtolower((string) $part->getHeaderParameter('content-type', 'charset', '')) : '';
+        if (\in_array($charset, ['', 'us-ascii', 'ascii', 'binary'], true)) {
+            $raw = $part->getBinaryContentStream()?->getContents();
+            if (null !== $raw && mb_check_encoding($raw, 'UTF-8')) {
+                return $raw;
+            }
+        }
+
+        return $part->getContent();
     }
 
     /**

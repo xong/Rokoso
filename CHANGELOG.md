@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.14.2 – 2026-10-06
+
+### Behoben
+
+- **Umlaute in E-Mails:** E-Mails, deren Absender den Zeichensatz nicht angibt, zeigten Umlaute als „Ã¼“ o. Ä. Solche Nachrichten werden beim Abruf jetzt richtig gelesen.
+
 ## 0.14.1 – 2026-10-06
 
 ### Verbessert

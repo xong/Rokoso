@@ -27,4 +27,18 @@ final class MessageParserTest extends TestCase
         self::assertSame('application/pdf', $parsed->attachments[0]['mimeType']);
         self::assertStringStartsWith('%PDF', $parsed->attachments[0]['content']);
     }
+
+    public function testBodiesWithoutCharsetAreReadAsUtf8WhenValid(): void
+    {
+        $parser = new MessageParser();
+        $mail = static fn (string $contentType, string $body): string => "From: a@example.org\r\nSubject: Test\r\nMIME-Version: 1.0\r\n"
+            ."Content-Type: {$contentType}\r\nContent-Transfer-Encoding: 8bit\r\n\r\n{$body}\r\n";
+
+        self::assertSame('Schöne Grüße', trim((string) $parser->parse($mail('text/plain', 'Schöne Grüße'))->text));
+        self::assertSame('<p>Schöne Grüße</p>', trim((string) $parser->parse($mail('text/html', '<p>Schöne Grüße</p>'))->html));
+        self::assertSame('Schöne Grüße', trim((string) $parser->parse($mail('text/plain; charset=us-ascii', 'Schöne Grüße'))->text));
+        // real Latin-1 without a charset keeps the RFC default
+        self::assertSame('Schöne Grüße', trim((string) $parser->parse($mail('text/plain', (string) mb_convert_encoding('Schöne Grüße', 'ISO-8859-1', 'UTF-8')))->text));
+        self::assertSame('Grüße „Test“', trim((string) $parser->parse($mail('text/plain; charset=windows-1252', (string) mb_convert_encoding('Grüße „Test“', 'Windows-1252', 'UTF-8')))->text));
+    }
 }
