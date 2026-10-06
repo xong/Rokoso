@@ -27,6 +27,7 @@ final readonly class MailSyncCommand
     {
         $list = null === $account ? $this->accounts->findBy(['enabled' => true]) : array_filter([$this->accounts->find($account)]);
 
+        $failed = false;
         foreach ($list as $mailAccount) {
             if (!$mailAccount->getOrganization()->hasFeature(Feature::Mail)) {
                 continue;
@@ -37,9 +38,11 @@ final readonly class MailSyncCommand
                 $io->writeln(\sprintf('%s: %d neue E-Mail(s)', $mailAccount->getEmailAddress(), $count));
             } else {
                 $io->warning(\sprintf('%s: %s', $mailAccount->getEmailAddress(), $error));
+                $failed = true;
             }
         }
 
-        return 0;
+        // non-zero, so cron by URL reports it (CronRunner)
+        return $failed ? 1 : 0;
     }
 }

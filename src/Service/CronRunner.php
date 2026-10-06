@@ -10,16 +10,14 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Scheduled tasks for hosting whose cron cannot run a suitable PHP (see docs/BETRIEB.md): a cron job calls
- * /_cron/<CRON_TOKEN> every minute and the due commands run with the web PHP after the response was sent.
+ * /_cron/<CRON_TOKEN> every minute and the due commands run with the web PHP.
  * The last runs are kept in a file that is also the lock, so overlapping calls never run a task twice.
  */
-final class CronRunner
+final readonly class CronRunner
 {
     /** command => interval in minutes (same as the cron lines in docs/BETRIEB.md) */
     public const array TASKS = [
@@ -32,44 +30,25 @@ final class CronRunner
     /** A call a few seconds early (cron jitter) still counts. */
     private const int TOLERANCE = 30;
 
-    private bool $requested = false;
-
     public function __construct(
-        private readonly KernelInterface $kernel,
-        private readonly ClockInterface $clock,
-        private readonly LoggerInterface $logger,
+        private KernelInterface $kernel,
+        private ClockInterface $clock,
+        private LoggerInterface $logger,
         #[Autowire('%kernel.cache_dir%/cron.json')]
-        private readonly string $stateFile,
+        private string $stateFile,
     ) {
     }
 
     /**
-     * Runs the due tasks once the current response has been sent.
-     */
-    public function request(): void
-    {
-        $this->requested = true;
-    }
-
-    #[AsEventListener(KernelEvents::TERMINATE)]
-    public function onTerminate(): void
-    {
-        if ($this->requested) {
-            $this->requested = false;
-            $this->run();
-        }
-    }
-
-    /**
-     * @return list<string> the commands that ran
+     * Runs the due tasks.
+     *
+     * @return array<string, string> failed command => its output; empty when everything went fine
      */
     public function run(): array
     {
         $handle = fopen($this->stateFile, 'c+');
         if (false === $handle) {
-            $this->logger->error('Cron state file {file} cannot be opened', ['file' => $this->stateFile]);
-
-            return [];
+            return ['cron' => 'Cannot open '.$this->stateFile];
         }
         try {
             if (!flock($handle, \LOCK_EX | \LOCK_NB)) {
@@ -95,9 +74,7 @@ final class CronRunner
             fwrite($handle, (string) json_encode($state));
             fflush($handle);
 
-            $this->runCommands($due);
-
-            return $due;
+            return $this->runCommands($due);
         } finally {
             fclose($handle);
         }
@@ -105,8 +82,10 @@ final class CronRunner
 
     /**
      * @param list<string> $commands
+     *
+     * @return array<string, string>
      */
-    private function runCommands(array $commands): void
+    private function runCommands(array $commands): array
     {
         ignore_user_abort(true);
         if (\function_exists('set_time_limit')) {
@@ -115,13 +94,17 @@ final class CronRunner
 
         $application = new Application($this->kernel);
         $application->setAutoExit(false);
+        $failed = [];
         foreach ($commands as $command) {
             $input = new ArrayInput(['command' => $command, '--no-interaction' => true]);
             $input->setInteractive(false);
             $output = new BufferedOutput();
             if (0 !== $application->run($input, $output)) {
-                $this->logger->error('Scheduled task {command} failed: {output}', ['command' => $command, 'output' => $output->fetch()]);
+                $failed[$command] = trim($output->fetch());
+                $this->logger->error('Scheduled task {command} failed: {output}', ['command' => $command, 'output' => $failed[$command]]);
             }
         }
+
+        return $failed;
     }
 }

@@ -36,11 +36,32 @@ final class CronTest extends AppTestCase
         $reader->add((string) file_get_contents(__DIR__.'/../fixtures/simple.eml'));
 
         $this->client->request('GET', '/_cron/test-cron-token-0123456789abcdefgh');
-        self::assertResponseStatusCodeSame(202);
-        // the mail sync ran after the response
+        // silent on success, so the cron daemon sends no mail
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame('', (string) $this->client->getResponse()->getContent());
         self::assertNotNull($this->em()->getRepository(Message::class)->findOneBy(['messageIdHeader' => 'abc123@example.org']));
 
         // right afterwards nothing is due any more
         self::assertSame([], self::getContainer()->get(CronRunner::class)->run());
+    }
+
+    public function testFailedTaskIsReported(): void
+    {
+        $user = $this->createUser();
+        $this->createMailAccount($this->createOrganization($user))->setImapHost('fail.example.org');
+        $this->em()->flush();
+
+        // phpunit.dist.xml silences console output (SHELL_VERBOSITY=-1); the web server does not
+        $_SERVER['SHELL_VERBOSITY'] = $_ENV['SHELL_VERBOSITY'] = 0;
+        try {
+            $this->client->request('GET', '/_cron/test-cron-token-0123456789abcdefgh');
+        } finally {
+            $_SERVER['SHELL_VERBOSITY'] = $_ENV['SHELL_VERBOSITY'] = -1;
+        }
+        self::assertResponseStatusCodeSame(500);
+        $report = (string) $this->client->getResponse()->getContent();
+        self::assertStringContainsString('> app:mail:sync', $report);
+        self::assertStringContainsString('connection refused', $report);
+        self::assertStringNotContainsString('app:mail:outbox', $report);
     }
 }

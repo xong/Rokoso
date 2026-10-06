@@ -28,6 +28,7 @@ final class FakeMailboxReader implements MailboxReader
 
     public function fetchNew(MailAccount $account, int $limit = 200): FetchResult
     {
+        $this->test($account);
         $last = $account->getUidValidity() === $this->uidValidity ? ($account->getLastUid() ?? 0) : 0;
         $new = array_filter($this->messages, static fn (int $uid): bool => $uid > $last, \ARRAY_FILTER_USE_KEY);
         ksort($new);
