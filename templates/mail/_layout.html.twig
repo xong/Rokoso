@@ -88,6 +88,7 @@
                 <button type="submit" name="action" value="not_spam" class="btn-icon size-8" title="{{ 'mail.spam.not_spam'|trans }}" aria-label="{{ 'mail.spam.not_spam'|trans }}">{{ ux_icon('lucide:shield-check', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
             {% elseif folder != 'trash' %}
                 <button type="submit" name="action" value="done" class="btn-icon size-8" title="{{ 'mail.done'|trans }}" aria-label="{{ 'mail.done'|trans }}">{{ ux_icon('lucide:check', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
+                <button type="submit" name="action" value="done_all" class="btn-icon size-8" title="{{ 'mail.done_all'|trans }}" aria-label="{{ 'mail.done_all'|trans }}">{{ ux_icon('lucide:check-check', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
             {% endif %}
             <button type="submit" name="action" value="read" class="btn-icon size-8" title="{{ 'mail.mark_read'|trans }}" aria-label="{{ 'mail.mark_read'|trans }}">{{ ux_icon('lucide:mail-open', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
             <button type="submit" name="action" value="unread" class="btn-icon size-8" title="{{ 'mail.mark_unread'|trans }}" aria-label="{{ 'mail.mark_unread'|trans }}">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }}</button>
@@ -121,7 +122,7 @@
                         {{ ('mail.group.' ~ group)|trans }}
                     </li>
                 {% endif %}
-                <li>{{ include('mail/_item.html.twig', {m: m, unread: read_ids[m.id] is not defined, active: message is defined and message.id == m.id}) }}</li>
+                <li>{{ include('mail/_item.html.twig', {m: m, unread: read_ids[m.id] is not defined, state: user_states[m.id] ?? null, active: message is defined and message.id == m.id}) }}</li>
             {% endfor %}
         </ul>
         {% if has_more or filter.page > 1 %}

@@ -75,6 +75,7 @@ final class MailController extends AbstractController
 
         return $this->render('mail/show.html.twig', $this->listContext($request, $folder, $user) + [
             'message' => $message,
+            'state' => $this->messages->userState($user, $message),
             'show_html' => $showHtml,
             'has_external_images' => $message->hasHtml() && $renderer->hasExternalImages($message),
             'load_images' => $request->query->getBoolean('images'),
@@ -305,6 +306,7 @@ final class MailController extends AbstractController
             'messages' => $messages,
             'has_more' => $hasMore,
             'read_ids' => $this->messages->readIds($user, $messages),
+            'user_states' => $this->messages->userStates($user, $messages),
             'accounts' => $this->accounts->findForUser($user),
             'projects' => $this->projects->findVisibleFor($user),
         ];

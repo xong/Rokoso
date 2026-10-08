@@ -6,6 +6,7 @@ namespace App\Mail;
 
 use App\Entity\BlockedSender;
 use App\Entity\Message;
+use App\Entity\MessageUserState;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Enum\MessageEventType;
@@ -16,15 +17,17 @@ use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Status changes on one or several messages (single toolbar actions, bulk actions, undo).
- * Every change is written to the message history.
+ * Shared changes are written to the message history; "Erledigt" (done for me) and Wiedervorlage are personal
+ * (MessageUserState, Entscheidung 84) and stay out of it.
  */
 final readonly class MessageActions
 {
-    public const array ACTIONS = ['done', 'reopen', 'trash', 'restore', 'read', 'unread', 'assign_me', 'unassign_me', 'project', 'snooze', 'unsnooze', 'spam', 'not_spam', 'block'];
+    public const array ACTIONS = ['done', 'done_all', 'reopen', 'trash', 'restore', 'read', 'unread', 'assign_me', 'unassign_me', 'project', 'snooze', 'unsnooze', 'spam', 'not_spam', 'block'];
 
     /** Action that reverts another one (for the undo toast). */
     public const array INVERSE = [
         'done' => 'reopen',
+        'done_all' => 'reopen',
         'reopen' => 'done',
         'trash' => 'restore',
         'restore' => 'trash',
@@ -77,7 +80,7 @@ final readonly class MessageActions
         if ('block' === $action) {
             return $this->block($messages, $user);
         }
-        if ('done' !== $action) {
+        if ('done' !== $action && 'done_all' !== $action) {
             return $messages;
         }
         $all = [];
@@ -144,6 +147,13 @@ final readonly class MessageActions
 
                 return true;
             case 'done':
+                if ($message->isDone() || true === $this->state($message, $user, false)?->isDone()) {
+                    return false;
+                }
+                $this->state($message, $user)->setDone(true);
+
+                return true;
+            case 'done_all':
                 if ($message->isDone()) {
                     return false;
                 }
@@ -151,12 +161,17 @@ final readonly class MessageActions
 
                 return true;
             case 'reopen':
-                if (!$message->isDone()) {
-                    return false;
+                // back into my inbox: lifts my own "done" and, if set, the one for everyone
+                $state = $this->state($message, $user, false);
+                $changed = null !== $state && $state->isDone();
+                $state?->setDone(false);
+                $this->cleanUp($state);
+                if ($message->isDone()) {
+                    $message->reopen()->log(MessageEventType::Reopened, $user);
+                    $changed = true;
                 }
-                $message->reopen()->log(MessageEventType::Reopened, $user);
 
-                return true;
+                return $changed;
             case 'trash':
                 if ($message->isTrashed()) {
                     return false;
@@ -205,19 +220,48 @@ final readonly class MessageActions
                 if (null === $until || $until <= new \DateTimeImmutable()) {
                     return false;
                 }
-                $message->snooze($until)->log(MessageEventType::Snoozed, $user, $until->format('d.m.Y H:i'));
+                $this->state($message, $user)->setDone(false)->snooze($until);
+                // it has to come back into the inbox then
+                if ($message->isDone()) {
+                    $message->reopen()->log(MessageEventType::Reopened, $user);
+                }
 
                 return true;
             case 'unsnooze':
-                if (null === $message->getSnoozedUntil()) {
+                $state = $this->state($message, $user, false);
+                if (null === $state?->getSnoozedUntil()) {
                     return false;
                 }
-                $message->snooze(null)->log(MessageEventType::Snoozed, $user);
+                $state->snooze(null);
+                $this->cleanUp($state);
 
                 return true;
         }
 
         return false;
+    }
+
+    /**
+     * @return ($create is true ? MessageUserState : ?MessageUserState)
+     */
+    private function state(Message $message, User $user, bool $create = true): ?MessageUserState
+    {
+        $state = $this->messages->userState($user, $message);
+        if (null === $state && $create) {
+            $state = new MessageUserState($message, $user);
+            $this->em->persist($state);
+            $this->em->flush();
+        }
+
+        return $state;
+    }
+
+    private function cleanUp(?MessageUserState $state): void
+    {
+        if (null !== $state && $state->isEmpty()) {
+            $this->em->remove($state);
+            $this->em->flush();
+        }
     }
 
     /**

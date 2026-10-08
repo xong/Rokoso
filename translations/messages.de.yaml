@@ -585,12 +585,14 @@ mail_rule:
 
 mail:
     choose: Wähle eine Nachricht aus der Liste.
-    intro: Hier kommen die E-Mails an die gemeinsamen Konten eurer Organisation und eure Direktnachrichten an. Alle Mitglieder sehen denselben Eingang – ordnet Verantwortliche zu, besprecht euch in Kommentaren und markiert Erledigtes, dann bleibt nichts liegen.
+    intro: Hier kommen die E-Mails an die gemeinsamen Konten eurer Organisation und eure Direktnachrichten an. Alle Mitglieder sehen dieselben Nachrichten – ordnet Verantwortliche zu und besprecht euch in Kommentaren. „Erledigt“ räumt eine Nachricht aus deinem Eingang, „Für alle erledigt“ aus dem Eingang aller.
     empty: Keine Nachrichten.
     inbox_zero: Alles erledigt – der Eingang ist leer.
     open: Offen
-    done: Erledigt
+    done: Für mich erledigt
+    done_all: Für alle erledigt
     reopen: Wieder öffnen
+    done_for_me: 'Für dich erledigt am %date%'
     done_by: 'Erledigt von %name% am %date%'
     rule_or_system: Regel/System
     snoozed_until: Wiedervorlage
@@ -609,7 +611,8 @@ mail:
         custom: Eigener Zeitpunkt
         cancel: Wiedervorlage aufheben
     action_done:
-        done: '{1}Als erledigt markiert.|]1,Inf[%count% Nachrichten als erledigt markiert.'
+        done: '{1}Für dich erledigt.|]1,Inf[%count% Nachrichten für dich erledigt.'
+        done_all: '{1}Für alle als erledigt markiert.|]1,Inf[%count% Nachrichten für alle als erledigt markiert.'
         reopen: '{1}Wieder geöffnet.|]1,Inf[%count% Nachrichten wieder geöffnet.'
         trash: '{1}In den Papierkorb verschoben.|]1,Inf[%count% Nachrichten in den Papierkorb verschoben.'
         restore: '{1}Wiederhergestellt.|]1,Inf[%count% Nachrichten wiederhergestellt.'

@@ -94,17 +94,13 @@ class Message
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $spamAt = null;
 
-    /** Status model: open (null) or done since … (Entscheidung 39). */
+    /** Status model: open (null) or done for everyone since … (Entscheidung 39); done for me see MessageUserState (#84). */
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $doneAt = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?User $doneBy = null;
-
-    /** Hidden from the inbox until this time ("Wiedervorlage"). */
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $snoozedUntil = null;
 
     /** Conversation: Message-ID of the first message of the thread. */
     #[ORM\Column(length: 255, nullable: true)]
@@ -444,7 +440,6 @@ class Message
     {
         $this->doneAt = new \DateTimeImmutable();
         $this->doneBy = $user;
-        $this->snoozedUntil = null;
 
         return $this;
     }
@@ -453,26 +448,6 @@ class Message
     {
         $this->doneAt = null;
         $this->doneBy = null;
-
-        return $this;
-    }
-
-    public function getSnoozedUntil(): ?\DateTimeImmutable
-    {
-        return $this->snoozedUntil;
-    }
-
-    public function isSnoozed(): bool
-    {
-        return null !== $this->snoozedUntil && $this->snoozedUntil > new \DateTimeImmutable();
-    }
-
-    public function snooze(?\DateTimeImmutable $until): static
-    {
-        $this->snoozedUntil = $until;
-        if (null !== $until) {
-            $this->reopen();
-        }
 
         return $this;
     }

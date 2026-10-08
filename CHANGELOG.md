@@ -4,6 +4,14 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.15.0 – 2026-10-08
+
+### Neu
+
+- **Erledigt für dich:** „Erledigt“ räumt eine E-Mail jetzt nur aus deinem eigenen Eingang – die anderen sehen sie weiterhin. So kann jede und jeder den eigenen Eingang leer bekommen. Erledigte E-Mails bleiben unter „Erledigt“ und „Alle E-Mails“ erreichbar.
+- **Für alle erledigt:** Der doppelte Haken markiert eine E-Mail wie bisher für alle als erledigt, etwa wenn du sie beantwortet hast. Regeln tun das weiterhin automatisch.
+- **Wiedervorlage:** gilt jetzt nur für dich.
+
 ## 0.14.5 – 2026-10-06
 
 ### Verbessert

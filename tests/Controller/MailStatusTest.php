@@ -7,18 +7,20 @@ namespace App\Tests\Controller;
 use App\Entity\MailAccount;
 use App\Entity\MailRule;
 use App\Entity\Message;
+use App\Entity\MessageUserState;
 use App\Entity\Organization;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Enum\MailRuleField;
 use App\Enum\MessageEventType;
+use App\Enum\OrganizationRole;
 use App\Mail\MailboxReader;
 use App\Mail\MailSynchronizer;
 use App\Tests\AppTestCase;
 use App\Tests\Fake\FakeMailboxReader;
 
 /**
- * Status model (open/done), snooze, bulk actions, undo, threads and inbox rules.
+ * Status model (done for me / for everyone), personal snooze, bulk actions, undo, threads and inbox rules.
  */
 final class MailStatusTest extends AppTestCase
 {
@@ -76,51 +78,108 @@ final class MailStatusTest extends AppTestCase
         return $headers."Content-Type: text/plain; charset=utf-8\r\n\r\nText\r\n";
     }
 
-    public function testDoneLeavesInboxAndCanBeUndone(): void
+    private function state(Message $message, User $user): ?MessageUserState
+    {
+        $this->em()->clear();
+
+        return $this->em()->getRepository(MessageUserState::class)->findOneBy(['message' => $message->getId(), 'user' => $user->getId()]);
+    }
+
+    private function colleague(): User
+    {
+        $colleague = $this->createUser('max@example.org', 'Max');
+        $org = $this->em()->find(Organization::class, $this->org->getId());
+        self::assertNotNull($org);
+        $org->addMember($colleague, OrganizationRole::Member);
+        $this->em()->flush();
+
+        return $colleague;
+    }
+
+    public function testDoneIsPersonalAndCanBeUndone(): void
     {
         $message = $this->message('Elternabend');
         $second = $this->message('Kassenbericht');
+        $colleague = $this->colleague();
         $this->login($this->user);
 
         $this->action('done', [$message->getId()]);
         self::assertResponseRedirects('/mail');
-        self::assertTrue($this->reload($message)->isDone());
+        self::assertFalse($this->reload($message)->isDone());
+        self::assertTrue($this->state($message, $this->user)?->isDone());
+        // personal: not in the shared history
+        self::assertCount(0, $this->reload($message)->getEvents());
 
         $this->client->followRedirect();
         self::assertSelectorTextNotContains('main', 'Elternabend');
         $this->client->request('GET', '/mail/done');
         self::assertSelectorTextContains('main', 'Elternabend');
 
+        // still open for the others
+        $this->login($colleague);
+        $this->client->request('GET', '/mail');
+        self::assertSelectorTextContains('main', 'Elternabend');
+        $this->client->request('GET', '/mail/done');
+        self::assertSelectorTextNotContains('main', 'Elternabend');
+
         // Undo toast posts the inverse action
-        $message = $second;
-        $this->action('done', [$message->getId()]);
+        $this->login($this->user);
+        $this->action('done', [$second->getId()]);
         $crawler = $this->client->followRedirect();
         $undo = $crawler->filter('input[name="undo"]')->closest('form');
         self::assertNotNull($undo);
         self::assertSame('reopen', $undo->filter('input[name="action"]')->attr('value'));
         $this->client->submit($undo->form());
-        self::assertFalse($this->reload($message)->isDone());
+        self::assertNull($this->state($second, $this->user));
+    }
 
+    public function testDoneForEveryoneLeavesAllInboxes(): void
+    {
+        $message = $this->message('Elternabend');
+        $colleague = $this->colleague();
+        $this->login($this->user);
+
+        $this->action('done_all', [$message->getId()]);
+        self::assertTrue($this->reload($message)->isDone());
+
+        $this->login($colleague);
+        $this->client->request('GET', '/mail');
+        self::assertSelectorTextNotContains('main', 'Elternabend');
+        $this->client->request('GET', '/mail/done');
+        self::assertSelectorTextContains('main', 'Elternabend');
+
+        // reopening brings it back for everyone
+        $this->action('reopen', [$message->getId()]);
+        self::assertFalse($this->reload($message)->isDone());
         $types = array_map(static fn ($e) => $e->getType(), $this->reload($message)->getEvents()->toArray());
         self::assertContains(MessageEventType::Done, $types);
         self::assertContains(MessageEventType::Reopened, $types);
     }
 
-    public function testSnoozeHidesUntilDue(): void
+    public function testSnoozeIsPersonalAndHidesUntilDue(): void
     {
         $message = $this->message('Haushalt');
+        $colleague = $this->colleague();
         $this->login($this->user);
 
         $this->action('snooze', [$message->getId()], ['until' => 'tomorrow']);
-        self::assertTrue($this->reload($message)->isSnoozed());
+        self::assertTrue($this->state($message, $this->user)?->isSnoozed());
         $this->client->request('GET', '/mail');
         self::assertSelectorTextNotContains('main', 'Haushalt');
         $this->client->request('GET', '/mail/snoozed');
         self::assertSelectorTextContains('main', 'Haushalt');
 
+        $this->login($colleague);
+        $this->client->request('GET', '/mail');
+        self::assertSelectorTextContains('main', 'Haushalt');
+        $this->client->request('GET', '/mail/snoozed');
+        self::assertSelectorTextNotContains('main', 'Haushalt');
+
         // Due again → back in the inbox
-        $fresh = $this->reload($message);
-        $fresh->snooze(new \DateTimeImmutable('-1 minute'));
+        $this->login($this->user);
+        $state = $this->state($message, $this->user);
+        self::assertNotNull($state);
+        $state->snooze(new \DateTimeImmutable('-1 minute'));
         $this->em()->flush();
         $this->client->request('GET', '/mail');
         self::assertSelectorTextContains('main', 'Haushalt');
@@ -155,6 +214,8 @@ final class MailStatusTest extends AppTestCase
         $this->login($this->user);
 
         $this->action('done', [$foreign->getId()]);
+        self::assertNull($this->state($foreign, $this->user));
+        $this->action('done_all', [$foreign->getId()]);
         self::assertFalse($this->reload($foreign)->isDone());
     }
 
@@ -178,6 +239,8 @@ final class MailStatusTest extends AppTestCase
         self::assertSelectorTextContains('#thread-heading', '2');
 
         $this->action('done', [$second->getId()]);
+        self::assertTrue($this->state($first, $this->user)?->isDone());
+        $this->action('done_all', [$second->getId()]);
         self::assertTrue($this->reload($first)->isDone());
     }
 

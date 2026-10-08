@@ -3,18 +3,22 @@ routes: [mail_, snippet_, blocked_sender_]
 ---
 # E-Mails und Direktnachrichten
 
-Unter **E-Mails** landet alles, was an das gemeinsame E-Mail-Konto eurer Organisation geht, dazu die Direktnachrichten innerhalb von Rokoso. Alle Mitglieder sehen denselben Eingang. So bleibt keine Anfrage in einem privaten Postfach liegen.
+Unter **E-Mails** landet alles, was an das gemeinsame E-Mail-Konto eurer Organisation geht, dazu die Direktnachrichten innerhalb von Rokoso. Alle Mitglieder sehen dieselben Nachrichten. So bleibt keine Anfrage in einem privaten Postfach liegen.
 
 ## Offen und erledigt
 
-Der **Eingang** enthält alle offenen Nachrichten. Ist etwas beantwortet oder erledigt, markierst du es als **Erledigt**. Dann verschwindet es für alle aus dem Eingang und bleibt unter **Erledigt** und **Alle E-Mails** auffindbar. Ein leerer Eingang heißt: Alles ist bearbeitet.
+Der **Eingang** enthält alle Nachrichten, die für dich noch offen sind. Ziel ist ein leerer Eingang: Hast du eine Nachricht gelesen oder bearbeitet, markierst du sie als **Erledigt** (Haken, in der Liste auch per Wischen nach rechts). Das gilt nur für dich – die anderen sehen die Nachricht weiterhin.
+
+Ist eine Anfrage für alle abgeschlossen, etwa weil du sie beantwortet hast, nimm **Für alle erledigt** (doppelter Haken). Dann verschwindet sie aus jedem Eingang, und im Verlauf steht, wer sie erledigt hat.
+
+Erledigte Nachrichten findest du unter **Erledigt** und **Alle E-Mails**. **Wieder öffnen** holt eine Nachricht zurück in den Eingang.
 
 ## Wer kümmert sich?
 
 - **Verantwortliche** – mit „Mir zuordnen“ übernimmst du eine Nachricht. Wer zugeordnet wird, bekommt eine Benachrichtigung. Der Filter „Ohne Verantwortliche“ zeigt, was noch niemand übernommen hat.
 - **Kommentare** – interne Notizen fürs Team neben der Nachricht. Wer die E-Mail geschickt hat, sieht sie nicht. Mit @Name erwähnst du jemanden.
 - **Projekt** – ordnet die Nachricht einem Thema zu.
-- **Wiedervorlage** – blendet eine Nachricht bis zu einem Zeitpunkt aus. Danach steht sie wieder im Eingang.
+- **Wiedervorlage** – blendet eine Nachricht für dich bis zu einem Zeitpunkt aus. Danach steht sie wieder in deinem Eingang.
 
 Schreibt gerade jemand anderes eine Antwort auf dieselbe Nachricht, siehst du einen Hinweis.
 

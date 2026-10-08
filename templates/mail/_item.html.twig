@@ -1,5 +1,6 @@
-{# Eintrag der Nachrichtenliste. Variablen: m, unread, active, folder, filter #}
+{# Eintrag der Nachrichtenliste. Variablen: m, unread, state (persönlicher Status oder null), active, folder, filter #}
 {% import '_partials/ui.html.twig' as ui %}
+{% set done = m.done or (state and state.done) %}
 {% set sender = m.internal and m.author ? m.author.name : m.fromLabel %}
 {% set org_color = m.organization ? m.organization.color : '#94a3b8' %}
 <div data-controller="swipe" data-action="touchstart->swipe#start:passive touchmove->swipe#move:passive touchend->swipe#end touchcancel->swipe#cancel"
@@ -37,9 +38,9 @@
                 {% elseif m.isAssignedTo(app.user) %}
                     <span title="{{ 'mail.icon.mine'|trans }}">{{ ux_icon('lucide:user-check', {class: 'size-3.5 text-emerald-600', 'aria-label': 'mail.icon.mine'|trans, role: 'img'}) }}</span>
                 {% endif %}
-                {% if m.snoozed %}
-                    <span class="badge bg-amber-50 text-amber-700" title="{{ 'mail.snoozed_until'|trans }}">{{ ux_icon('lucide:alarm-clock', {class: 'size-3', 'aria-hidden': 'true'}) }}<span class="sr-only">{{ 'mail.snoozed_until'|trans }}</span> {{ m.snoozedUntil|date('d.m. H:i') }}</span>
-                {% elseif m.done and folder != 'done' %}
+                {% if state and state.snoozed %}
+                    <span class="badge bg-amber-50 text-amber-700" title="{{ 'mail.snoozed_until'|trans }}">{{ ux_icon('lucide:alarm-clock', {class: 'size-3', 'aria-hidden': 'true'}) }}<span class="sr-only">{{ 'mail.snoozed_until'|trans }}</span> {{ state.snoozedUntil|date('d.m. H:i') }}</span>
+                {% elseif done and folder != 'done' %}
                     <span title="{{ 'mail.icon.done'|trans }}">{{ ux_icon('lucide:circle-check', {class: 'size-3.5 text-emerald-600', 'aria-label': 'mail.icon.done'|trans, role: 'img'}) }}</span>
                 {% endif %}
                 {% if m.project %}
@@ -59,8 +60,8 @@
                 {class: 'btn-icon size-7 hover:text-emerald-600', icon: 'lucide:shield-check', icon_only: true, fields: id_fields|merge({action: 'not_spam'}),
                 form_attr: {'data-swipe-target': 'right'}}) }}
         {% elseif not m.trashed %}
-            {{ ui.post_button(path('mail_action'), 'mail-action', m.done ? 'mail.reopen' : 'mail.done',
-                {class: 'btn-icon size-7 hover:text-emerald-600', icon: m.done ? 'lucide:rotate-ccw' : 'lucide:check', icon_only: true, fields: id_fields|merge({action: m.done ? 'reopen' : 'done'}),
+            {{ ui.post_button(path('mail_action'), 'mail-action', done ? 'mail.reopen' : 'mail.done',
+                {class: 'btn-icon size-7 hover:text-emerald-600', icon: done ? 'lucide:rotate-ccw' : 'lucide:check', icon_only: true, fields: id_fields|merge({action: done ? 'reopen' : 'done'}),
                 form_attr: {'data-swipe-target': 'right'}}) }}
         {% endif %}
         <a href="{{ path('mail_show', {folder: folder, id: m.id, open: 'project'}|merge(filter.params)) }}" class="btn-icon size-7" aria-label="{{ 'mail.toolbar.project'|trans }}" title="{{ 'mail.toolbar.project'|trans }}">{{ ux_icon('lucide:folder-kanban', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>

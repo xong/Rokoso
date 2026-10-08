@@ -17,9 +17,15 @@
             {% endif %}
         {% endif %}
         {% if not message.trashed and not message.spam %}
-            {{ ui.post_button(path('mail_action'), 'mail-action', message.done ? 'mail.reopen' : 'mail.done',
-                {class: 'btn-icon hover:text-emerald-600', icon: message.done ? 'lucide:rotate-ccw' : 'lucide:check', icon_only: true,
-                 fields: action_fields|merge({action: message.done ? 'reopen' : 'done', 'ids[]': message.id, return: message.done ? 'message' : 'list'})}) }}
+            {% set done_for_me = message.done or (state and state.done) %}
+            {{ ui.post_button(path('mail_action'), 'mail-action', done_for_me ? 'mail.reopen' : 'mail.done',
+                {class: 'btn-icon hover:text-emerald-600', icon: done_for_me ? 'lucide:rotate-ccw' : 'lucide:check', icon_only: true,
+                 fields: action_fields|merge({action: done_for_me ? 'reopen' : 'done', 'ids[]': message.id, return: done_for_me ? 'message' : 'list'})}) }}
+            {% if not message.done %}
+                {{ ui.post_button(path('mail_action'), 'mail-action', 'mail.done_all',
+                    {class: 'btn-icon hover:text-emerald-600', icon: 'lucide:check-check', icon_only: true,
+                     fields: action_fields|merge({action: 'done_all', 'ids[]': message.id, return: 'list'})}) }}
+            {% endif %}
             {% if has_feature('tasks') %}
                 <a href="{{ path('calendar_item_new', {message: message.id}) }}" class="btn-icon" aria-label="{{ 'task.create_from'|trans }}" title="{{ 'task.create_from'|trans }}">{{ ux_icon('lucide:list-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}</a>
             {% endif %}
@@ -43,7 +49,7 @@
                         </label>
                         <button type="submit" class="btn-secondary py-1">{{ 'action.ok'|trans }}</button>
                     </div>
-                    {% if message.snoozedUntil %}
+                    {% if state and state.snoozedUntil %}
                         <button type="submit" name="action" value="unsnooze" class="block w-full rounded px-2 py-1.5 text-left text-red-700 hover:bg-red-50">{{ 'mail.snooze.cancel'|trans }}</button>
                     {% endif %}
                 </form>
@@ -147,8 +153,10 @@
                     {% endif %}
                     {% if message.done %}
                         <span class="badge bg-emerald-50 text-emerald-700">{{ ux_icon('lucide:circle-check', {class: 'size-3', 'aria-hidden': 'true'}) }}{{ 'mail.done_by'|trans({'%name%': message.doneBy ? message.doneBy.name : 'mail.rule_or_system'|trans, '%date%': message.doneAt|date('d.m.Y H:i')}) }}</span>
-                    {% elseif message.snoozed %}
-                        <span class="badge bg-amber-50 text-amber-700">{{ ux_icon('lucide:alarm-clock', {class: 'size-3', 'aria-hidden': 'true'}) }}{{ 'mail.snoozed_until_date'|trans({'%date%': message.snoozedUntil|date('d.m.Y H:i')}) }}</span>
+                    {% elseif state and state.done %}
+                        <span class="badge bg-emerald-50 text-emerald-700">{{ ux_icon('lucide:circle-check', {class: 'size-3', 'aria-hidden': 'true'}) }}{{ 'mail.done_for_me'|trans({'%date%': state.doneAt|date('d.m.Y H:i')}) }}</span>
+                    {% elseif state and state.snoozed %}
+                        <span class="badge bg-amber-50 text-amber-700">{{ ux_icon('lucide:alarm-clock', {class: 'size-3', 'aria-hidden': 'true'}) }}{{ 'mail.snoozed_until_date'|trans({'%date%': state.snoozedUntil|date('d.m.Y H:i')}) }}</span>
                     {% else %}
                         <span class="badge bg-sky-50 text-sky-700">{{ ux_icon('lucide:circle-dot', {class: 'size-3', 'aria-hidden': 'true'}) }}{{ 'mail.open'|trans }}</span>
                     {% endif %}

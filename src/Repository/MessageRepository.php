@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Membership;
 use App\Entity\Message;
 use App\Entity\MessageRead;
+use App\Entity\MessageUserState;
 use App\Entity\Organization;
 use App\Entity\User;
 use App\Enum\Feature;
@@ -109,17 +110,23 @@ class MessageRepository extends ServiceEntityRepository
                 ->andWhere('m.folder = :sent OR (m.type = :internal AND m.author = :viewer)')
                 ->setParameter('sent', MessageFolder::Sent->value)
                 ->setParameter('internal', MessageType::Internal->value),
-            'done' => $qb->andWhere('m.trashedAt IS NULL')->andWhere('m.doneAt IS NOT NULL'),
-            'snoozed' => $qb->andWhere('m.trashedAt IS NULL')
+            // done for everyone or for me (Entscheidung 84)
+            'done' => $qb->leftJoin(MessageUserState::class, 'us', 'ON', 'us.message = m AND us.user = :viewer')
+                ->andWhere('m.trashedAt IS NULL')
+                ->andWhere('m.doneAt IS NOT NULL OR us.doneAt IS NOT NULL')
+                ->addSelect('COALESCE(us.doneAt, m.doneAt) AS HIDDEN doneSort'),
+            // Wiedervorlage is personal
+            'snoozed' => $qb->innerJoin(MessageUserState::class, 'us', 'ON', 'us.message = m AND us.user = :viewer')
+                ->andWhere('m.trashedAt IS NULL')
                 ->andWhere('m.doneAt IS NULL')
-                ->andWhere('m.snoozedUntil > :now')
+                ->andWhere('us.snoozedUntil > :now')
                 ->setParameter('now', new \DateTimeImmutable()),
             default => $this->applyInbox($qb),
         };
         if ('snoozed' === $filter->folder) {
-            $qb->orderBy('m.snoozedUntil', \SortDirection::Ascending);
+            $qb->orderBy('us.snoozedUntil', \SortDirection::Ascending);
         } elseif ('done' === $filter->folder) {
-            $qb->orderBy('m.doneAt', \SortDirection::Descending);
+            $qb->orderBy('doneSort', \SortDirection::Descending);
         }
 
         match ($filter->show) {
@@ -171,6 +178,33 @@ class MessageRepository extends ServiceEntityRepository
         return array_fill_keys(array_map(static fn (array $r): int => (int) $r['id'], $rows), true);
     }
 
+    /**
+     * Personal status (done for me, Wiedervorlage) of the given messages, by message ID.
+     *
+     * @param list<Message> $messages
+     *
+     * @return array<int, MessageUserState>
+     */
+    public function userStates(User $user, array $messages): array
+    {
+        if ([] === $messages) {
+            return [];
+        }
+        /** @var list<MessageUserState> $states */
+        $states = $this->getEntityManager()->getRepository(MessageUserState::class)->findBy(['user' => $user, 'message' => $messages]);
+        $byId = [];
+        foreach ($states as $state) {
+            $byId[(int) $state->getMessage()->getId()] = $state;
+        }
+
+        return $byId;
+    }
+
+    public function userState(User $user, Message $message): ?MessageUserState
+    {
+        return $this->userStates($user, [$message])[(int) $message->getId()] ?? null;
+    }
+
     public function countUnreadInbox(User $user): int
     {
         $qb = $this->visibleQuery($user)
@@ -216,8 +250,8 @@ class MessageRepository extends ServiceEntityRepository
     }
 
     /**
-     * Inbox = everything open: not trashed, not spam, not done, not snoozed, not written by the viewer.
-     * The project does not matter (Entscheidung 39).
+     * Inbox = everything open: not trashed, not spam, not done (for everyone or for the viewer), not snoozed by the viewer,
+     * not written by the viewer. The project does not matter (Entscheidung 39, 84).
      */
     private function applyInbox(QueryBuilder $qb): QueryBuilder
     {
@@ -225,7 +259,7 @@ class MessageRepository extends ServiceEntityRepository
             ->andWhere('m.spamAt IS NULL')
             ->andWhere('m.folder = :inbox')
             ->andWhere('m.doneAt IS NULL')
-            ->andWhere('m.snoozedUntil IS NULL OR m.snoozedUntil <= :now')
+            ->andWhere('NOT EXISTS (SELECT 1 FROM '.MessageUserState::class.' us0 WHERE us0.message = m AND us0.user = :viewer AND (us0.doneAt IS NOT NULL OR us0.snoozedUntil > :now))')
             ->andWhere('m.type = :email OR m.author IS NULL OR m.author != :viewer')
             ->setParameter('inbox', MessageFolder::Inbox->value)
             ->setParameter('email', MessageType::Email->value)
