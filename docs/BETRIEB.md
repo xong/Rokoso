@@ -27,7 +27,7 @@ APP_ENV=prod
 APP_SECRET=<64 zufällige Hex-Zeichen, z. B. php -r "echo bin2hex(random_bytes(32));">
 DATABASE_URL="mysql://rokoso:PASSWORT@127.0.0.1:3306/rokoso?serverVersion=11.8.0-MariaDB&charset=utf8mb4"
 MAILER_DSN=smtp://benutzer:passwort@smtp.example.org:465
-MAILER_FROM="Rokoso <noreply@example.org>"
+MAILER_FROM="Rokoso <system@example.org>"
 DEFAULT_URI=https://rokoso.example.org
 # Fehlerlog als Datei (Standard: stderr, passend für Docker)
 LOG_PATH="%kernel.logs_dir%/%kernel.environment%.log"
@@ -74,7 +74,7 @@ APP_SECRET=<64 zufällige Hex-Zeichen>
 DB_PASSWORD=<zufällig>
 DB_ROOT_PASSWORD=<zufällig>
 MAILER_DSN=smtp://benutzer:passwort@smtp.example.org:465
-MAILER_FROM="Rokoso <noreply@example.org>"
+MAILER_FROM="Rokoso <system@example.org>"
 VAPID_PUBLIC_KEY=...
 VAPID_PRIVATE_KEY=...
 ```
@@ -128,10 +128,24 @@ Ein Dauer-Worker (Messenger) ist **nicht** nötig: Systemmails werden direkt ver
 
 ## Deployment mit GitHub Actions (Shared Hosting)
 
-Für Hosting ohne Docker und ohne passendes PHP auf der Kommandozeile (z. B. KeyHelp bei GN2: Web-PHP 8.5, per SSH nur 8.2) liegt `.github/workflows/deploy.yml` bei. Bei jedem Push auf `main` laufen zuerst `composer check` (mit MariaDB-Dienst), dann der Build auf GitHub (Composer ohne Dev-Pakete, Tailwind, JavaScript, Assets). Auf dem Server wird nur hochgeladen und umgeschaltet:
+Für Hosting ohne Docker und ohne passendes PHP auf der Kommandozeile (z. B. KeyHelp bei GN2: Web-PHP 8.5, per SSH nur 8.2) liegt `.github/workflows/deploy.yml` bei. Bei jedem Push auf `main` laufen zuerst `composer check` (mit MariaDB-Dienst), dann der Build auf GitHub (Composer ohne Dev-Pakete, Tailwind, JavaScript, Assets). Auf dem Server wird nur hochgeladen und umgeschaltet.
+
+**Instanzen:** Jede Domain ist eine eigene Instanz mit eigenem Ordner, eigener Datenbank und eigener `shared/.env.local` (eigene `APP_SECRET`, `DEFAULT_URI`, `DEPLOY_TOKEN`, `CRON_TOKEN`, eigene KeyHelp-Aufgabe für den Cron). Der Code ist überall derselbe.
+
+| Ziel (GitHub-Environment, `bin/deploy`) | Domain | Art | Wann |
+|---|---|---|---|
+| `stage` | stage.rokoso.de | Staging, passwortgeschützt | automatisch bei jedem Push auf `main` |
+| `rokoso` | rokoso.de | live | von Hand |
+| `stev-halle` | rokoso.stev-halle.de | live | von Hand |
+
+Live-Instanzen werden unter *Actions → Test & Deploy → Run workflow* mit dem passenden Ziel ausgeliefert (`live` = beide gleichzeitig), sobald der Stand auf Staging geprüft ist. Lokal entsprechend `bin/deploy rokoso stev-halle` (siehe unten).
+
+**Passwortschutz (Staging):** In der `shared/.env.local` der Instanz `BASIC_AUTH="benutzer:passwort"` setzen. Rokoso fragt dann vor jeder Seite per Browser-Dialog nach Benutzer und Passwort (HTTP Basic Auth, nur über HTTPS sinnvoll). Der Schutz steckt in der App statt im Webserver, damit er Deployments übersteht; Deploy-Hook (`/_deploy`) und Cron-URL (`/_cron/…`) bleiben erreichbar, weil sie eigene Tokens haben. Leer = aus.
+
+Aufbau auf dem Server (je Instanz):
 
 ```
-/www/staging.rokoso.de/
+/www/stage.rokoso.de/
 ├── current -> releases/<zeit>-<commit>   (Document Root: current/public)
 ├── releases/                             (die letzten 5 Stände)
 └── shared/
@@ -142,7 +156,7 @@ Für Hosting ohne Docker und ohne passendes PHP auf der Kommandozeile (z. B. Key
 
 Ablauf: Upload per rsync in einen neuen Ordner unter `releases/` (unveränderte Dateien als Hardlink), Verlinken von `shared/`, Umschalten von `current`, dann ruft GitHub den **Deploy-Hook** `POST /_deploy` auf. Er führt mit dem Web-PHP die Migrationen und `cache:warmup` aus. Geschützt ist er durch `DEPLOY_TOKEN` (mind. 32 Zeichen, in `.env.local` und als GitHub-Secret; ohne Token ist er aus). Der OPcache des Webservers hält `current/public/index.php` sonst dauerhaft auf dem alten Release fest; daher legt der Workflow vorher kurz eine PHP-Datei mit Zufallsnamen an, die `opcache_reset()` aufruft, und löscht sie wieder. Liefert der Webserver trotzdem noch den alten Stand aus, antwortet der Hook mit 409 und GitHub leert den Cache erneut und versucht es noch einmal.
 
-Einstellungen im GitHub-Repository unter *Settings → Environments → staging*:
+Einstellungen im GitHub-Repository unter *Settings → Environments*, je ein Environment `stage`, `rokoso` und `stev-halle` (für die Live-Instanzen am besten mit *Deployment branches* = `main`):
 
 | Art | Name | Inhalt |
 |---|---|---|
@@ -151,29 +165,30 @@ Einstellungen im GitHub-Repository unter *Settings → Environments → staging*
 | Variable | `SSH_HOST` | z. B. `robert-rupf.host-011.gn2.hosting` |
 | Variable | `SSH_USER` | SSH-Benutzer |
 | Variable | `SSH_KNOWN_HOSTS` | Ausgabe von `ssh-keyscan <host>` |
-| Variable | `DEPLOY_PATH` | z. B. `/www/staging.rokoso.de` |
-| Variable | `APP_URL` | z. B. `https://rokoso.robert-rupf.host-011.gn2.hosting` (Staging) |
+| Variable | `DEPLOY_PATH` | z. B. `/www/stage.rokoso.de` |
+| Variable | `APP_URL` | z. B. `https://stage.rokoso.de` |
 
-**Zurück auf den vorigen Stand:** per SSH `cd /www/staging.rokoso.de && ln -sfn releases/<älterer Ordner> current.new && mv -Tf current.new current`. Migrationen werden dabei nicht zurückgedreht.
+**Zurück auf den vorigen Stand:** per SSH `cd /www/<instanz> && ln -sfn releases/<älterer Ordner> current.new && mv -Tf current.new current`. Migrationen werden dabei nicht zurückgedreht.
 
 ### Deployment von lokal (ohne GitHub Actions)
 
-Läuft GitHub Actions nicht, macht `bin/deploy` dieselben Schritte vom eigenen Rechner aus (unter Windows in der Git Bash). Gebaut wird der eingecheckte Stand (`HEAD`) in einem temporären Ordner; Tailwind- und esbuild-Binary sowie `assets/vendor` werden aus dem Projekt übernommen. Hochgeladen wird per `tar` über SSH (kein rsync nötig, dafür ohne Hardlinks – jeder Stand belegt den vollen Platz, aufgeräumt wird wie im Workflow auf 5 Stände).
+Läuft GitHub Actions nicht, macht `bin/deploy` dieselben Schritte vom eigenen Rechner aus (unter Windows in der Git Bash). Gebaut wird der eingecheckte Stand (`HEAD`) einmal in einem temporären Ordner; Tailwind- und esbuild-Binary sowie `assets/vendor` werden aus dem Projekt übernommen. Hochgeladen wird für jedes Ziel per `tar` über SSH (kein rsync nötig, dafür ohne Hardlinks – jeder Stand belegt den vollen Platz, aufgeräumt wird wie im Workflow auf 5 Stände).
 
-Einstellungen in `.env.deploy.local` im Projektordner (nicht eingecheckt):
+Einstellungen je Ziel in `.env.deploy.<ziel>.local` im Projektordner (nicht eingecheckt), z. B. `.env.deploy.stage.local`:
 
 ```
 SSH_TARGET=<ssh-benutzer>@robert-rupf.host-011.gn2.hosting
 SSH_KEY=~/.ssh/deploy_rokoso
-DEPLOY_PATH=/www/staging.rokoso.de
-APP_URL=https://rokoso.robert-rupf.host-011.gn2.hosting
+DEPLOY_PATH=/www/stage.rokoso.de
+APP_URL=https://stage.rokoso.de
 # DEPLOY_TOKEN=…   (optional; sonst aus shared/.env.local auf dem Server gelesen)
 ```
 
 Aufruf:
 
-- `bin/deploy` – `composer check`, Build, Upload, Umschalten, Deploy-Hook (Migrationen), Aufräumen
-- `bin/deploy --skip-check` – ohne `composer check`
+- `bin/deploy stage` – `composer check`, Build, Upload, Umschalten, Deploy-Hook (Migrationen), Aufräumen
+- `bin/deploy rokoso stev-halle` – einmal bauen, nacheinander auf beide Live-Instanzen (bricht beim ersten Fehler ab)
+- `bin/deploy --skip-check <ziel …>` – ohne `composer check`
 - `bin/deploy --build-only` – nur bauen (zum Ausprobieren, lädt nichts hoch)
 
 Schlägt der Deploy-Hook fehl, zeigt `current` schon auf den neuen Stand; zurück wie oben beschrieben.

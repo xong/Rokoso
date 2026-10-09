@@ -1,6 +1,7 @@
 app:
     name: Rokoso
     short_name: Ko
+    basic_auth: Diese Instanz ist passwortgeschützt.
 
 nav:
     label: Hauptnavigation

@@ -1,37 +1,40 @@
 #!/usr/bin/env bash
 # Deployment von lokal – dieselben Schritte wie .github/workflows/deploy.yml, falls GitHub Actions nicht läuft.
-# Baut den eingecheckten Stand (HEAD) in einem temporären Ordner, lädt ihn per tar über SSH hoch,
+# Baut den eingecheckten Stand (HEAD) einmal in einem temporären Ordner, lädt ihn für jedes Ziel per tar über SSH hoch,
 # verlinkt shared/, schaltet current um und ruft den Deploy-Hook (Migrationen, Cache) auf.
 #
-# Einstellungen in .env.deploy.local (nicht eingecheckt):
+# Einstellungen je Ziel in .env.deploy.<ziel>.local (nicht eingecheckt):
 #   SSH_TARGET=benutzer@host        SSH_KEY=~/.ssh/deploy_rokoso (optional)
-#   DEPLOY_PATH=/www/staging.rokoso.de
+#   DEPLOY_PATH=/www/stage.rokoso.de
 #   APP_URL=https://…               DEPLOY_TOKEN=… (optional, sonst aus shared/.env.local auf dem Server)
 #
-# Aufruf (Git Bash): bin/deploy [--skip-check] [--build-only]
+# Aufruf (Git Bash): bin/deploy [--skip-check] [--build-only] [ziel …]
+#   z. B. bin/deploy stage   ·   bin/deploy rokoso stev-halle
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-CHECK=1 UPLOAD=1
+CHECK=1 UPLOAD=1 TARGETS=()
 for arg in "$@"; do
     case "$arg" in
         --skip-check) CHECK=0 ;;
         --build-only) CHECK=0 UPLOAD=0 ;;
-        *) echo "Unbekannte Option: $arg"; exit 1 ;;
+        -*) echo "Unbekannte Option: $arg"; exit 1 ;;
+        *) TARGETS+=("$arg") ;;
     esac
 done
-
-SSH_OPTS=()
-if [ "$UPLOAD" = 1 ]; then
-    [ -f .env.deploy.local ] || { echo ".env.deploy.local fehlt (siehe Kopf von bin/deploy bzw. docs/BETRIEB.md)"; exit 1; }
-    set -a; . ./.env.deploy.local; set +a
-    : "${SSH_TARGET:?SSH_TARGET fehlt}" "${DEPLOY_PATH:?DEPLOY_PATH fehlt}" "${APP_URL:?APP_URL fehlt}"
-    if [ -n "${SSH_KEY:-}" ]; then
-        SSH_OPTS=(-i "${SSH_KEY/#\~/$HOME}")
-    fi
+if [ "$UPLOAD" = 1 ] && [ "${#TARGETS[@]}" = 0 ]; then
+    echo "Ziel fehlt: bin/deploy [--skip-check] <ziel …>, vorhanden: $(ls .env.deploy.*.local 2>/dev/null | sed -E 's/^\.env\.deploy\.(.*)\.local$/\1/' | tr '\n' ' ')"
+    exit 1
 fi
-remote() { ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "$@"; }
+
+config_file() { echo ".env.deploy.$1.local"; }
+
+if [ "$UPLOAD" = 1 ]; then
+    for target in "${TARGETS[@]}"; do
+        [ -f "$(config_file "$target")" ] || { echo "$(config_file "$target") fehlt (siehe Kopf von bin/deploy bzw. docs/BETRIEB.md)"; exit 1; }
+    done
+fi
 
 if [ -n "$(git status --porcelain)" ]; then
     echo "Hinweis: nicht eingecheckte Änderungen werden nicht deployt (gebaut wird HEAD)."
@@ -45,15 +48,18 @@ BUILD=$(mktemp -d)
 trap 'rm -rf "$BUILD"' EXIT
 echo "== Build $RELEASE in $BUILD"
 
-git -c core.autocrlf=false archive HEAD | tar -x -C "$BUILD"
+# Stand in $BUILD/app, damit hook.txt in $BUILD nicht beim nächsten Ziel mit hochgeladen wird
+APP="$BUILD/app"
+mkdir -p "$APP"
+git -c core.autocrlf=false archive HEAD | tar -x -C "$APP"
 # bereits geladene Binaries und Fremdpakete übernehmen (spart Downloads)
-mkdir -p "$BUILD/var" "$BUILD/assets"
+mkdir -p "$APP/var" "$APP/assets"
 for d in var/tailwind var/esbuild assets/vendor; do
-    [ -d "$d" ] && cp -r "$d" "$BUILD/$(dirname "$d")/"
+    [ -d "$d" ] && cp -r "$d" "$APP/$(dirname "$d")/"
 done
 
 (
-    cd "$BUILD"
+    cd "$APP"
     export APP_ENV=prod APP_DEBUG=0 APP_SECRET=build-only
     composer install --no-dev --no-scripts --prefer-dist --no-progress --quiet
     composer dump-autoload --no-dev --classmap-authoritative --quiet
@@ -64,48 +70,63 @@ done
     rm -rf var tests docker drivers .github
 )
 if [ "$UPLOAD" = 0 ]; then
-    echo "== Gebaut: $(du -sh "$BUILD" | cut -f1), $(find "$BUILD" -type f | wc -l) Dateien (nicht hochgeladen)"
+    echo "== Gebaut: $(du -sh "$APP" | cut -f1), $(find "$APP" -type f | wc -l) Dateien (nicht hochgeladen)"
     exit 0
 fi
 
-echo "== Upload"
-remote "set -e; cd '$DEPLOY_PATH'; mkdir -p releases shared/var/storage shared/var/log shared/public/uploads
-    test -f shared/.env.local || { echo 'shared/.env.local fehlt (siehe docs/BETRIEB.md)'; exit 1; }
-    mkdir releases/$RELEASE"
-tar -C "$BUILD" -czf - . | remote "tar -xzf - -C '$DEPLOY_PATH/releases/$RELEASE'"
+# Ein Ziel: Einstellungen laden, hochladen, umschalten, Deploy-Hook, aufräumen (läuft in einer Subshell je Ziel)
+deploy() {
+    unset SSH_TARGET SSH_KEY DEPLOY_PATH APP_URL DEPLOY_TOKEN
+    set -a; . "./$(config_file "$1")"; set +a
+    : "${SSH_TARGET:?SSH_TARGET fehlt}" "${DEPLOY_PATH:?DEPLOY_PATH fehlt}" "${APP_URL:?APP_URL fehlt}"
+    SSH_OPTS=()
+    if [ -n "${SSH_KEY:-}" ]; then
+        SSH_OPTS=(-i "${SSH_KEY/#\~/$HOME}")
+    fi
+    remote() { ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "$@"; }
 
-echo "== Switch"
-remote "set -e; cd '$DEPLOY_PATH'; R=releases/$RELEASE
-    ln -s ../../shared/.env.local \$R/.env.local
-    mkdir -p \$R/var && ln -s ../../../shared/var/storage \$R/var/storage && ln -s ../../../shared/var/log \$R/var/log
-    rm -rf \$R/public/uploads && ln -s ../../../shared/public/uploads \$R/public/uploads
-    ln -sfn \$R current.new && mv -Tf current.new current"
+    echo "== Upload nach $APP_URL"
+    remote "set -e; cd '$DEPLOY_PATH'; mkdir -p releases shared/var/storage shared/var/log shared/public/uploads
+        test -f shared/.env.local || { echo 'shared/.env.local fehlt (siehe docs/BETRIEB.md)'; exit 1; }
+        mkdir releases/$RELEASE"
+    tar -C "$APP" -czf - . | remote "tar -xzf - -C '$DEPLOY_PATH/releases/$RELEASE'"
 
-echo "== Migrate (deploy hook)"
-if [ -z "${DEPLOY_TOKEN:-}" ]; then
-    DEPLOY_TOKEN=$(remote "grep -E '^DEPLOY_TOKEN=' '$DEPLOY_PATH/shared/.env.local' | tail -1" | cut -d= -f2- | tr -d "\"'\r")
-fi
-URL="$APP_URL/_deploy"
-# OPcache des Webservers hält current/public/index.php auf dem alten Release fest (siehe Workflow)
-reset_opcache() {
-    local f
-    f="opcache-$(openssl rand -hex 16).php"
-    remote "cd '$DEPLOY_PATH/releases'; for d in */public; do printf '%s' '<?php var_export(function_exists(\"opcache_reset\") && opcache_reset());' > \$d/$f; done"
-    curl -s "$APP_URL/$f"; echo
-    remote "rm -f '$DEPLOY_PATH'/releases/*/public/$f"
+    echo "== Switch"
+    remote "set -e; cd '$DEPLOY_PATH'; R=releases/$RELEASE
+        ln -s ../../shared/.env.local \$R/.env.local
+        mkdir -p \$R/var && ln -s ../../../shared/var/storage \$R/var/storage && ln -s ../../../shared/var/log \$R/var/log
+        rm -rf \$R/public/uploads && ln -s ../../../shared/public/uploads \$R/public/uploads
+        ln -sfn \$R current.new && mv -Tf current.new current"
+
+    echo "== Migrate (deploy hook)"
+    if [ -z "${DEPLOY_TOKEN:-}" ]; then
+        DEPLOY_TOKEN=$(remote "grep -E '^DEPLOY_TOKEN=' '$DEPLOY_PATH/shared/.env.local' | tail -1" | cut -d= -f2- | tr -d "\"'\r")
+    fi
+    local url="$APP_URL/_deploy" code ok=0
+    # OPcache des Webservers hält current/public/index.php auf dem alten Release fest (siehe Workflow)
+    reset_opcache() {
+        local f
+        f="opcache-$(openssl rand -hex 16).php"
+        remote "cd '$DEPLOY_PATH/releases'; for d in */public; do printf '%s' '<?php var_export(function_exists(\"opcache_reset\") && opcache_reset());' > \$d/$f; done"
+        curl -s "$APP_URL/$f"; echo
+        remote "rm -f '$DEPLOY_PATH'/releases/*/public/$f"
+    }
+    reset_opcache
+    for _ in $(seq 1 30); do
+        code=$(curl -s -o "$BUILD/hook.txt" -w '%{http_code}' -X POST -H "X-Deploy-Token: $DEPLOY_TOKEN" --data-urlencode "release=$RELEASE" "$url" || echo 000)
+        cat "$BUILD/hook.txt"; echo "HTTP $code"
+        if [ "$code" = 200 ]; then ok=1; break; fi
+        if [ "$code" = 409 ]; then reset_opcache; fi
+        if [ "$code" != 409 ] && [ "$code" != 000 ] && [ "$code" != 502 ] && [ "$code" != 503 ]; then break; fi
+        sleep 10
+    done
+    [ "$ok" = 1 ] || { echo "Deploy-Hook fehlgeschlagen – current zeigt schon auf $RELEASE (zurück: siehe docs/BETRIEB.md)"; exit 1; }
+
+    echo "== Clean up old releases"
+    remote "cd '$DEPLOY_PATH'; rels=(\$(ls -1dt releases/*)); for d in \"\${rels[@]:5}\"; do rm -rf \"\$d\"; done; ls releases"
 }
-reset_opcache
-ok=0
-for _ in $(seq 1 30); do
-    code=$(curl -s -o "$BUILD/hook.txt" -w '%{http_code}' -X POST -H "X-Deploy-Token: $DEPLOY_TOKEN" --data-urlencode "release=$RELEASE" "$URL" || echo 000)
-    cat "$BUILD/hook.txt"; echo "HTTP $code"
-    if [ "$code" = 200 ]; then ok=1; break; fi
-    if [ "$code" = 409 ]; then reset_opcache; fi
-    if [ "$code" != 409 ] && [ "$code" != 000 ] && [ "$code" != 502 ] && [ "$code" != 503 ]; then break; fi
-    sleep 10
-done
-[ "$ok" = 1 ] || { echo "Deploy-Hook fehlgeschlagen – current zeigt schon auf $RELEASE (zurück: siehe docs/BETRIEB.md)"; exit 1; }
 
-echo "== Clean up old releases"
-remote "cd '$DEPLOY_PATH'; rels=(\$(ls -1dt releases/*)); for d in \"\${rels[@]:5}\"; do rm -rf \"\$d\"; done; ls releases"
-echo "== Fertig: $RELEASE"
+for target in "${TARGETS[@]}"; do
+    ( deploy "$target" )
+    echo "== Fertig: $RELEASE${target:+ auf $target}"
+done

@@ -1,4 +1,5 @@
-# Prüfen und auf den Staging-Server deployen (Shared Hosting, siehe docs/BETRIEB.md „Deployment mit GitHub Actions“).
+# Prüfen und deployen (Shared Hosting, siehe docs/BETRIEB.md „Deployment mit GitHub Actions“).
+# Push auf main → Staging (Environment „stage“); Live-Instanzen von Hand über „Run workflow“ mit Ziel.
 # Gebaut wird hier (Composer, Tailwind, JS, Assets); auf dem Server wird nur hochgeladen, verlinkt und der Deploy-Hook aufgerufen.
 name: Test & Deploy
 
@@ -7,6 +8,12 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      target:
+        description: Ziel (live = rokoso und stev-halle)
+        type: choice
+        options: [stage, live, rokoso, stev-halle]
+        default: stage
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -51,7 +58,12 @@ jobs:
     needs: test
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: staging
+    # je Ziel ein GitHub-Environment mit eigenen Variablen und Secrets
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(github.event_name != 'workflow_dispatch' && '["stage"]' || inputs.target == 'live' && '["rokoso","stev-halle"]' || format('["{0}"]', inputs.target)) }}
+    environment: ${{ matrix.target }}
     env:
       APP_ENV: prod
       APP_DEBUG: '0'
