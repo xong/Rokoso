@@ -4,6 +4,13 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.15.1 – 2026-10-10
+
+### Verbessert
+
+- **Benachrichtigungen abbestellen:** Benachrichtigungsmails lassen sich jetzt mit einem Klick abbestellen, viele E-Mail-Programme zeigen dafür „Abbestellen“ neben dem Absender. Die Benachrichtigungen erscheinen danach weiter in Rokoso. Im Profil kannst du die E-Mails jederzeit wieder einschalten.
+- **E-Mail-Versand prüfen:** Wer die Installation betreut, kann unter „Plattform → E-Mail-Versand“ eine Testmail schicken und sieht sofort, ob der Mailserver sie annimmt.
+
 ## 0.15.0 – 2026-10-08
 
 ### Neu

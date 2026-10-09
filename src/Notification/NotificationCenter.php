@@ -130,7 +130,7 @@ final class NotificationCenter
                     $notification->markEmailed();
                 }
             } catch (\Throwable $e) {
-                $this->logger->warning('Notification mail failed: {message}', ['message' => $e->getMessage()]);
+                $this->logger->error('Notification mail failed: {message}', ['message' => $e->getMessage()]);
             }
         }
         $this->push->send($pending);

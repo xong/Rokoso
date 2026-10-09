@@ -1,0 +1,11 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'notification.unsubscribe.title'|trans }}{% endblock %}
+
+{% block content %}
+    <p class="mb-4 text-slate-700">{{ 'notification.unsubscribe.question'|trans({'%email%': email}) }}</p>
+    {# Turbo erwartet nach POST eine Weiterleitung; die Bestätigung wird direkt gerendert #}
+    <form method="post" data-turbo="false">
+        <button type="submit" class="btn-primary w-full">{{ 'notification.unsubscribe.submit'|trans }}</button>
+    </form>
+{% endblock %}

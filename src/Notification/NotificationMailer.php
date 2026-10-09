@@ -7,6 +7,7 @@ namespace App\Notification;
 use App\Entity\Notification;
 use App\Entity\User;
 use App\Service\SystemMailer;
+use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -18,6 +19,7 @@ final readonly class NotificationMailer
         private SystemMailer $mailer,
         private NotificationText $text,
         private UrlGeneratorInterface $urls,
+        private UriSigner $signer,
     ) {
     }
 
@@ -30,7 +32,7 @@ final readonly class NotificationMailer
             'text' => $text,
             'url' => $this->text->link($notification),
             'settings_url' => $this->settingsUrl(),
-        ], $recipient->getName());
+        ], $recipient->getName(), unsubscribeUrl: $this->unsubscribeUrl($recipient));
     }
 
     /**
@@ -48,7 +50,18 @@ final readonly class NotificationMailer
             'items' => $items,
             'url' => $this->urls->generate('notification_index', [], UrlGeneratorInterface::ABSOLUTE_URL),
             'settings_url' => $this->settingsUrl(),
-        ], $recipient->getName());
+        ], $recipient->getName(), unsubscribeUrl: $this->unsubscribeUrl($recipient));
+    }
+
+    /**
+     * Signed link that turns notification emails off without logging in (List-Unsubscribe header).
+     * Bound to the current address, so it stops working after an email change.
+     */
+    public function unsubscribeUrl(User $user): string
+    {
+        return $this->signer->sign($this->urls->generate('notification_unsubscribe', [
+            'id' => $user->getId(), 'email' => mb_strtolower($user->getEmail()),
+        ], UrlGeneratorInterface::ABSOLUTE_URL));
     }
 
     private function settingsUrl(): string

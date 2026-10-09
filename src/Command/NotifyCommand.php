@@ -19,6 +19,7 @@ use App\Service\FileStorage;
 use App\Service\RetentionCleaner;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -43,6 +44,7 @@ final readonly class NotifyCommand
         private PublicSubmissionHandler $public,
         private FileStorage $files,
         private RetentionCleaner $retention,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -133,7 +135,9 @@ final readonly class NotifyCommand
                 case NotificationEmail::Off:
                     return 0;
             }
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            $this->logger->error('Notification mail to user {id} failed: {message}', ['id' => $user->getId(), 'message' => $e->getMessage()]);
+
             return 0;
         }
     }

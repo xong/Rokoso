@@ -43,7 +43,7 @@ security:
         - { path: ^/logout, roles: PUBLIC_ACCESS }
         - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
         - { path: ^/admin, roles: ROLE_PLATFORM_ADMIN }
-        - { path: ^/(login|register|verify|reset-password|invitation|manifest|sw\.js|offline|p/|ical/|s/|_deploy$|_cron/), roles: PUBLIC_ACCESS }
+        - { path: ^/(login|register|verify|reset-password|invitation|manifest|sw\.js|offline|p/|ical/|s/|unsubscribe/|_deploy$|_cron/), roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
 
 when@test:

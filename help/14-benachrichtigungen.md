@@ -13,6 +13,8 @@ Unter **Mein Profil → Benachrichtigungen** wählst du für E-Mails:
 - **Täglich** – morgens eine Zusammenfassung mit allem, was du noch nicht gelesen hast.
 - **Nie** – Benachrichtigungen erscheinen nur in Rokoso.
 
+Jede Benachrichtigungsmail lässt sich auch direkt abbestellen: über den Link „Abbestellen“, den viele E-Mail-Programme neben dem Absender anzeigen. Danach bekommst du keine E-Mails mehr, in Rokoso erscheinen die Benachrichtigungen weiterhin.
+
 Zusätzlich kannst du **Push-Benachrichtigungen** einschalten, für jedes Gerät und jeden Browser einzeln. Sie erscheinen auch, wenn Rokoso nicht geöffnet ist.
 
 ## Beobachten und erwähnen

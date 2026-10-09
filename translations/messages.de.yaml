@@ -146,6 +146,18 @@ platform:
     delete_blocked: 'Das Konto ist einziger Admin in: %organizations%. Dort muss zuerst jemand anderes Admin werden.'
     deleted: Das Konto wurde gelöscht.
     log_intro: Anmeldungen, Rollenänderungen und Löschungen aller Konten. Einträge werden nach einem Jahr gelöscht, IP-Adressen sind gekürzt.
+    mail:
+        title: E-Mail-Versand
+        intro: Systemmails (Bestätigung, Passwort, Einladungen, Benachrichtigungen) gehen über diesen Absender und Server. Eine Testmail zeigt, ob der Server sie annimmt.
+        from: Absender
+        server: Server
+        to: Empfänger
+        send: Testmail senden
+        test_subject: Rokoso – Testmail
+        ok: Der Server hat die Mail angenommen.
+        sent: 'An %to%, Kennung beim Server: %id%'
+        ok_hint: Kommt sie trotzdem nicht an, liegt es am Empfänger (Spam-Ordner, Quarantäne) oder an der Zustellung des Servers – die Kennung hilft beim Nachfragen.
+        failed: Der Versand ist fehlgeschlagen.
 
 account:
     export_title: Meine Daten herunterladen
@@ -283,6 +295,8 @@ profile:
 
 email:
     footer: Diese E-Mail wurde automatisch von Rokoso verschickt.
+    test_mail:
+        text: 'Diese Testmail kam über %server% bei dir an. Der Versand von Rokoso funktioniert.'
     notification:
         subject: '%text%'
         button: Ansehen
@@ -1295,6 +1309,12 @@ upload:
     remove: Entfernen
 notification:
     title: Benachrichtigungen
+    unsubscribe:
+        title: Benachrichtigungen abbestellen
+        question: 'Sollen an %email% keine Benachrichtigungen per E-Mail mehr geschickt werden? In Rokoso siehst du sie weiterhin.'
+        submit: Keine E-Mails mehr
+        done: Du bekommst keine Benachrichtigungen mehr per E-Mail. In deinem Profil kannst du das jederzeit wieder einschalten.
+        settings: Zu den Einstellungen
     settings: Einstellungen für Benachrichtigungen
     filter: Benachrichtigungen filtern
     all: Alle

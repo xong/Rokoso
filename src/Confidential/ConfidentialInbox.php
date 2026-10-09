@@ -98,7 +98,7 @@ final readonly class ConfidentialInbox
                 'subject_params' => ['%organization%' => $organization],
             ]);
         } catch (\Throwable $e) {
-            $this->logger->warning('Confidential reply notice failed: {message}', ['message' => $e->getMessage()]);
+            $this->logger->error('Confidential reply notice failed: {message}', ['message' => $e->getMessage()]);
         }
     }
 

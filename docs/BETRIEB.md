@@ -220,6 +220,37 @@ Zu sichern sind:
 
 E-Mails liegen zusätzlich weiterhin auf dem IMAP-Server; Rokoso verändert dort nichts.
 
+## Systemmails zuverlässig zustellen
+
+Rokoso verschickt Bestätigungen, Passwort-Links, Einladungen und Benachrichtigungen über `MAILER_DSN` mit dem Absender `MAILER_FROM`.
+Über den SMTP-Server eines Webhosters klappt das technisch, aber dessen IP teilen sich viele Kunden. Vor allem **Microsoft 365** nimmt solche Mails oft an und legt sie dann **ohne Rückläufer in die Quarantäne**.
+Für Systemmails daher einen Dienst für Transaktionsmails nutzen. Wegen der personenbezogenen Daten einen EU-Anbieter mit Auftragsverarbeitungsvertrag (AVV) wählen, z. B. Mailjet, Brevo oder Scaleway.
+Die Postfächer (z. B. `system@…` für Antworten und Rückläufer) bleiben beim Webhoster.
+
+**Prüfen:** Unter **Plattform → E-Mail-Versand** (`/admin/mail`, nur Plattform-Admins) stehen Absender und Server. Dort lässt sich eine Testmail schicken.
+Rokoso zeigt dann die Fehlermeldung des Servers oder die Kennung, unter der er die Mail angenommen hat. Mit der Kennung kann man beim Anbieter nachfragen.
+Ob Absender, SPF, DKIM und DMARC stimmen, zeigt eine Testmail an die Adresse von https://www.mail-tester.com.
+Fehlgeschlagene Einladungen, Benachrichtigungen und Rundschreiben stehen als Fehler im Log.
+
+**Beispiel Mailjet:**
+
+1. Konto anlegen und unter „Absender & Domains“ die Domain hinzufügen (z. B. `rokoso.de`). Die Domain bestätigen, entweder mit einer Datei bzw. einem TXT-Eintrag oder mit einer Mail an die Absenderadresse.
+2. **DKIM:** den angezeigten TXT-Eintrag `mailjet._domainkey` im DNS anlegen.
+3. **SPF:** den vorhandenen Eintrag ergänzen, nicht ersetzen, z. B. `v=spf1 a mx include:spf.mailjet.com -all`. Auch das Webmail beim Hoster soll weiter senden dürfen.
+4. In Mailjet unter „SMTP-Einstellungen“ API-Schlüssel und Secret Key ablesen und in `shared/.env.local` jeder Instanz eintragen:
+
+   ```dotenv
+   MAILER_DSN="smtp://API-SCHLUESSEL:SECRET-KEY@in-v3.mailjet.com:587"
+   MAILER_FROM="Rokoso <system@rokoso.de>"
+   ```
+
+   Sonderzeichen in Benutzername und Passwort URL-kodieren: `@` → `%40`, `&` → `%26`, `#` → `%23`, `/` → `%2F`, `:` → `%3A`. Ein Neustart ist nicht nötig.
+5. Testmail unter `/admin/mail` schicken, auch an eine Microsoft-365-Adresse. Im Mailjet-Dashboard steht danach für jede Mail, ob sie zugestellt, abgelehnt oder als Spam markiert wurde.
+
+**DMARC-Berichte:** Den TXT-Eintrag `_dmarc.<domain>` auf `v=DMARC1; p=none; rua=mailto:dmarc@<domain>` setzen. Die großen Anbieter schicken dann täglich Berichte, wer im Namen der Domain sendet und ob es durchkommt. Wenn alles passt, auf `p=quarantine` verschärfen.
+
+Benachrichtigungsmails haben die Header `List-Unsubscribe` und `List-Unsubscribe-Post` (Abbestellen mit einem Klick, RFC 8058). Darauf achten Gmail und Yahoo. Der signierte Link `/unsubscribe/<id>` schaltet nur die E-Mails ab und gilt nur für die aktuelle Adresse des Kontos.
+
 ## Datenschutz-Hinweise
 
 - Rokoso liest Postfächer nur (IMAP read-only); „Papierkorb“ wirkt nur in Rokoso.
@@ -235,6 +266,7 @@ E-Mails liegen zusätzlich weiterhin auf dem IMAP-Server; Rokoso verändert dort
 - Logs: `var/log/prod.log`, E-Mail-Abruf: `var/log/mail-sync.log`
 - Abruf eines einzelnen Kontos testen: `php bin/console app:mail:sync <Konto-ID>`
 - Der letzte Abruffehler eines Kontos steht auch in der Oberfläche beim E-Mail-Konto und auf „Heute“ (nur Admins).
+- Systemmails kommen nicht an: Testmail unter `/admin/mail` (siehe „Systemmails zuverlässig zustellen“); nimmt der Server sie an, liegt es an der Zustellung (Spam-Ordner, Quarantäne bei Microsoft 365, Rückläufer im Absender-Postfach).
 - Docker: `docker compose -f compose.prod.yaml logs -f app cron`
 
 ## Für Entwickler: Browser- und Barrierefreiheitstests

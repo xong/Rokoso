@@ -1,0 +1,4 @@
+{% extends 'email/_layout.html.twig' %}
+{% block content %}
+    <p>{{ 'email.test_mail.text'|trans({'%server%': server}) }}</p>
+{% endblock %}

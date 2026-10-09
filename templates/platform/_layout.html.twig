@@ -12,6 +12,7 @@
         {% for item in [
             {key: 'users', route: 'platform_users', icon: 'lucide:users', label: 'platform.users'},
             {key: 'organizations', route: 'platform_organizations', icon: 'lucide:building-2', label: 'platform.organizations'},
+            {key: 'mail', route: 'platform_mail', icon: 'lucide:mail', label: 'platform.mail.title'},
             {key: 'log', route: 'platform_log', icon: 'lucide:scroll-text', label: 'security_log.title'},
         ] %}
             {% set active = section == item.key %}

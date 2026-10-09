@@ -152,7 +152,7 @@ final readonly class MailSender
                 }
                 $error ??= $e;
                 $failed[] = $recipients[0]->getAddress();
-                $this->logger->warning('Circular to {address} failed: {error}', ['address' => $recipients[0]->getAddress(), 'error' => $e->getMessage()]);
+                $this->logger->error('Circular to {address} failed: {error}', ['address' => $recipients[0]->getAddress(), 'error' => $e->getMessage()]);
             }
         }
         if (null !== $error && \count($failed) === \count($to)) {

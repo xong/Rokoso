@@ -1,0 +1,37 @@
+{% extends 'platform/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'platform.mail.title'|trans }}{% endblock %}
+
+{% block content %}
+    <p class="mb-4 max-w-prose text-sm text-slate-600">{{ 'platform.mail.intro'|trans }}</p>
+    <dl class="mb-6 grid max-w-xl grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dt class="text-slate-500">{{ 'platform.mail.from'|trans }}</dt>
+        <dd class="break-all">{{ from }}</dd>
+        <dt class="text-slate-500">{{ 'platform.mail.server'|trans }}</dt>
+        <dd class="break-all">{{ server }}</dd>
+    </dl>
+
+    {% if result %}
+        <div id="platform-mail-result" role="{{ result.ok ? 'status' : 'alert' }}"
+             class="mb-4 max-w-xl rounded-md p-3 text-sm {{ result.ok ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800' }}">
+            <p class="flex items-center gap-2 font-medium">
+                {{ ux_icon(result.ok ? 'lucide:circle-check' : 'lucide:circle-alert', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ (result.ok ? 'platform.mail.ok' : 'platform.mail.failed')|trans }}
+            </p>
+            <p class="mt-1 break-words">{{ result.message }}</p>
+            {% if result.ok %}<p class="mt-1">{{ 'platform.mail.ok_hint'|trans }}</p>{% endif %}
+        </div>
+    {% endif %}
+
+    <form method="post" class="flex max-w-xl flex-wrap items-end gap-2" data-turbo="false">
+        <input type="hidden" name="_token" value="{{ csrf_token('platform-mail') }}">
+        <div class="min-w-0 flex-1">
+            <label for="platform-mail-to" class="label">{{ 'platform.mail.to'|trans }}</label>
+            <input id="platform-mail-to" type="email" name="to" value="{{ to }}" required autocomplete="email" class="input">
+        </div>
+        <button type="submit" class="btn-primary">
+            {{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }}
+            {{ 'platform.mail.send'|trans }}
+        </button>
+    </form>
+{% endblock %}

@@ -186,6 +186,18 @@ final class SecurityTest extends AppTestCase
         self::assertResponseIsSuccessful();
         $this->client->request('GET', '/admin/log');
         self::assertSelectorTextContains('table', 'Konto gesperrt');
+
+        $this->client->request('GET', '/admin/mail');
+        self::assertResponseIsSuccessful();
+        $this->client->submitForm('Testmail senden', ['to' => 'test@example.org']);
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('#platform-mail-result', 'angenommen');
+        self::assertEmailCount(1);
+        self::assertEmailAddressContains(self::getMailerMessage() ?? throw new \LogicException(), 'To', 'test@example.org');
+
+        $this->client->submitForm('Testmail senden', ['to' => 'keine-adresse']);
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('#platform-mail-result', 'fehlgeschlagen');
     }
 
     public function testRetentionCleanerRemovesTrashAndOldEntries(): void

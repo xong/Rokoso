@@ -22,6 +22,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
@@ -101,6 +102,27 @@ final class NotificationController extends AbstractController
         $back = $request->getPayload()->getString('redirect');
 
         return $this->redirect(str_starts_with($back, '/') && !str_starts_with($back, '//') ? $back : $this->generateUrl('notification_index'));
+    }
+
+    /**
+     * Turns notification emails off from a signed mail link, without logging in.
+     * Mail programs send the one-click POST (RFC 8058) directly, hence no CSRF token; the signature protects it.
+     */
+    #[Route('/unsubscribe/{id<\d+>}', name: 'notification_unsubscribe', methods: ['GET', 'POST'])]
+    public function unsubscribe(Request $request, User $account, UriSigner $signer): Response
+    {
+        if (!$signer->checkRequest($request) || null !== $account->getDeletedAt()
+            || $request->query->getString('email') !== mb_strtolower($account->getEmail())) {
+            throw $this->createNotFoundException();
+        }
+        if ($request->isMethod('POST')) {
+            $account->setNotificationEmail(NotificationEmail::Off);
+            $this->em->flush();
+
+            return $this->render('notification/unsubscribed.html.twig');
+        }
+
+        return $this->render('notification/unsubscribe.html.twig', ['email' => $account->getEmail()]);
     }
 
     #[Route('/profile/notifications', name: 'profile_notifications')]

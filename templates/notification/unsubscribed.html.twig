@@ -1,0 +1,8 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'notification.unsubscribe.title'|trans }}{% endblock %}
+
+{% block content %}
+    <p class="mb-4 text-slate-700">{{ 'notification.unsubscribe.done'|trans }}</p>
+    <a href="{{ path('profile_notifications') }}" class="btn-secondary w-full">{{ 'notification.unsubscribe.settings'|trans }}</a>
+{% endblock %}

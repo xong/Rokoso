@@ -20,6 +20,7 @@ use App\Notification\NotificationCenter;
 use App\Tests\AppTestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Mime\Message;
 
 /**
  * Notifications: mentions, comments, watching, opening, settings and reminders.
@@ -151,6 +152,38 @@ final class NotificationTest extends AppTestCase
         $this->client->submitForm('Kommentieren', ['body' => 'Hallo @anna schulz']);
         self::assertEmailCount(0);
         self::assertCount(1, $this->notificationsOf($this->member));
+    }
+
+    public function testOneClickUnsubscribeFromMail(): void
+    {
+        $project = (new Project($this->admin))->setName('Fest')->setOrganization($this->org);
+        $this->em()->persist($project);
+        $this->em()->flush();
+
+        $this->login($this->admin);
+        $this->client->request('GET', '/projects/'.$project->getId());
+        $this->client->submitForm('Kommentieren', ['body' => 'Hallo @anna schulz']);
+        self::assertEmailCount(1);
+        $email = self::getMailerMessage();
+        self::assertInstanceOf(Message::class, $email);
+        self::assertSame('List-Unsubscribe=One-Click', $email->getHeaders()->getHeaderBody('List-Unsubscribe-Post'));
+        $header = $email->getHeaders()->getHeaderBody('List-Unsubscribe');
+        self::assertIsString($header);
+        self::assertStringStartsWith('<', $header);
+        $url = trim($header, '<>');
+
+        $this->client->request('GET', '/logout');
+        $this->client->request('GET', $url.'x');
+        self::assertResponseStatusCodeSame(404);
+        $this->client->request('GET', $url);
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('main', 'anna@example.org');
+
+        // what mail programs send for one-click unsubscribe
+        $this->client->request('POST', $url, ['List-Unsubscribe' => 'One-Click']);
+        self::assertResponseIsSuccessful();
+        $this->em()->clear();
+        self::assertSame(NotificationEmail::Off, $this->em()->find(User::class, $this->member->getId())?->getNotificationEmail());
     }
 
     public function testCalendarAssignmentAndDueReminder(): void

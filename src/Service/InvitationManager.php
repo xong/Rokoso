@@ -74,7 +74,7 @@ final readonly class InvitationManager
             ]);
             $mailed = true;
         } catch (TransportExceptionInterface $e) {
-            $this->logger->warning('Invitation mail failed: {message}', ['message' => $e->getMessage()]);
+            $this->logger->error('Invitation mail failed: {message}', ['message' => $e->getMessage()]);
             $mailed = false;
         }
 
