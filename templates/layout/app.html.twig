@@ -22,8 +22,9 @@
     {{ include('_partials/flashes.html.twig') }}
     <a href="#main" class="sr-only z-50 rounded-md bg-surface px-4 py-2 shadow focus:not-sr-only focus:fixed focus:top-2 focus:left-2">{{ 'nav.skip_to_content'|trans }}</a>
 
-    {# relative: absolutely positioned elements deep in the lists (sr-only …) are clipped here instead of lengthening the page #}
-    <div class="relative flex h-dvh overflow-hidden max-lg:pb-[calc(3.5rem+env(safe-area-inset-bottom))]"
+    {# relative: absolutely positioned elements deep in the lists (sr-only …) are clipped here instead of lengthening the page.
+       overflow-clip, not -hidden: a hidden box still scrolls via scrollIntoView (anchor links) and cuts off the top #}
+    <div class="relative flex h-dvh overflow-clip max-lg:pb-[calc(3.5rem+env(safe-area-inset-bottom))]"
          data-controller="shell palette live-counts"
          data-live-counts-url-value="{{ path('counts') }}"
          data-shell-collapsed-value="{{ nav_collapsed ? 'true' : 'false' }}"

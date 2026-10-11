@@ -28,8 +28,8 @@ final class MailTest extends BrowserTestCase
         $this->client->clickLink($subject);
         $this->client->waitForElementToContain('#detail-heading', $subject);
 
-        $this->client->getCrawler()->filter('section[aria-labelledby=detail-heading] button[aria-label="Erledigt"]')->first()->click();
-        $this->client->waitForElementToContain('body', 'Als erledigt markiert');
+        $this->client->getCrawler()->filter('section[aria-labelledby=detail-heading] button[aria-label="Für mich erledigt"]')->first()->click();
+        $this->client->waitForElementToContain('body', 'Für dich erledigt.');
         self::assertSelectorTextNotContains('section[aria-labelledby=list-heading]', $subject);
 
         $this->client->getCrawler()->selectButton('Rückgängig')->click();

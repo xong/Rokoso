@@ -11,6 +11,10 @@ Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nut
 - **Benachrichtigungen abbestellen:** Benachrichtigungsmails lassen sich jetzt mit einem Klick abbestellen, viele E-Mail-Programme zeigen dafür „Abbestellen“ neben dem Absender. Die Benachrichtigungen erscheinen danach weiter in Rokoso. Im Profil kannst du die E-Mails jederzeit wieder einschalten.
 - **E-Mail-Versand prüfen:** Wer die Installation betreut, kann unter „Plattform → E-Mail-Versand“ eine Testmail schicken und sieht sofort, ob der Mailserver sie annimmt.
 
+### Behoben
+
+- **Sprung zu einem Abschnitt:** Links wie „Verwaltung → Mitglieder“ verschoben die ganze Ansicht nach oben, sodass der Kopf abgeschnitten war und unten eine leere Fläche blieb. Jetzt scrollt nur die Spalte.
+
 ## 0.15.0 – 2026-10-08
 
 ### Neu
