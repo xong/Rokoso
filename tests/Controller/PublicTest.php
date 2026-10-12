@@ -130,7 +130,8 @@ final class PublicTest extends AppTestCase
         self::assertResponseStatusCodeSame(404);
         $this->client->request('GET', '/p/sev-test');
         self::assertResponseIsSuccessful();
-        self::assertSelectorNotExists('header a[href$="/contact"]');
+        self::assertSelectorNotExists('header a[href$="#contact"]');
+        self::assertSelectorNotExists('#contact');
 
         $settings = $this->em()->find(PublicSettings::class, $this->settings->getId());
         self::assertNotNull($settings);
@@ -267,7 +268,8 @@ final class PublicTest extends AppTestCase
         $this->em()->persist((new ContactGroup($this->org))->setName('Rundbrief'));
         $this->em()->flush();
         $this->client->request('GET', '/p/sev-test');
-        self::assertSelectorNotExists('a[href="/p/sev-test/subscribe"]');
+        self::assertSelectorNotExists('a[href="/p/sev-test#subscribe"]');
+        self::assertSelectorNotExists('#subscribe');
         $this->client->request('GET', '/p/sev-test/subscribe');
         self::assertResponseStatusCodeSame(404);
 
@@ -282,6 +284,83 @@ final class PublicTest extends AppTestCase
         $this->client->submit($crawler->selectButton('Speichern')->form());
         self::assertResponseRedirects();
         $this->client->request('GET', '/p/sev-test');
-        self::assertSelectorCount(2, 'a[href="/p/sev-test/subscribe"]');
+        self::assertSelectorExists('header nav a[href="/p/sev-test#subscribe"]');
+        self::assertSelectorExists('#subscribe form[name="subscribe"]');
+    }
+
+    public function testFormsOnTheStartPage(): void
+    {
+        $group = (new ContactGroup($this->org))->setName('Rundbrief')->setPublicSubscribe(true);
+        $this->em()->persist($group);
+        $this->em()->flush();
+
+        $crawler = $this->client->request('GET', '/p/sev-test');
+        self::assertResponseIsSuccessful();
+        foreach (['contact', 'subscribe'] as $anchor) {
+            self::assertSelectorExists(\sprintf('header nav a[href="/p/sev-test#%s"]', $anchor));
+            self::assertSelectorExists(\sprintf('section#%s form[action="/p/sev-test#%1$s"]', $anchor));
+        }
+
+        // errors are shown in place, the other form stays untouched
+        $values = $this->contactValues();
+        unset($values['contact']['consent']);
+        $crawler = $this->submit($crawler, 'Nachricht senden', $values);
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorExists('#contact [role="alert"]');
+        self::assertSelectorNotExists('#subscribe [role="alert"]');
+        self::assertSame(0, $this->inboxCount());
+
+        $this->submit($crawler, 'Nachricht senden', $this->contactValues());
+        self::assertSelectorTextContains('main', 'Deine Nachricht ist angekommen');
+        self::assertSame(1, $this->inboxCount());
+
+        $crawler = $this->client->request('GET', '/p/sev-test?embed=1');
+        self::assertSelectorNotExists('header');
+        self::assertSelectorExists('section#subscribe form[action="/p/sev-test?embed=1#subscribe"]');
+        $this->submit($crawler, 'Eintragen', ['subscribe' => [
+            'name' => 'Bert Beispiel', 'email' => 'bert@example.org', 'groups' => [(string) $group->getId()], 'consent' => '1',
+        ]]);
+        self::assertSelectorTextContains('main', 'Wir haben dir eine E-Mail geschickt');
+        self::assertSelectorNotExists('header');
+    }
+
+    public function testDesignAndColorScheme(): void
+    {
+        $this->settings->setSubscribeEnabled(false);
+        $this->em()->flush();
+        $this->client->request('GET', '/p/sev-test');
+        self::assertSelectorExists('html[data-theme="light"]', 'light by default, whatever the visitor\'s device prefers');
+        self::assertSelectorExists('[data-design="classic"]');
+        self::assertSelectorExists('main h1');
+
+        $this->login($this->admin);
+        $crawler = $this->client->request('GET', '/organizations/'.$this->org->getId().'/public');
+        $this->client->submit($crawler->selectButton('Speichern')->form([
+            'public_settings_form[design]' => 'banner',
+            'public_settings_form[scheme]' => 'dark',
+            'public_settings_form[accentColor]' => PublicSettings::ACCENTS['blue'],
+        ]));
+        self::assertResponseRedirects();
+
+        $this->client->request('GET', '/p/sev-test');
+        self::assertSelectorExists('html[data-theme="dark"]', 'the page decides, not the profile of the visitor');
+        self::assertSelectorExists(\sprintf('[data-design="banner"].org-theme[style="--org-color: %s"]', PublicSettings::ACCENTS['blue']));
+        self::assertSelectorTextContains('header h1', 'SEV Musterstadt');
+        self::assertSelectorNotExists('main h1');
+
+        $this->client->request('GET', '/p/sev-test/privacy');
+        self::assertSelectorNotExists('header h1');
+        self::assertSelectorExists('main h1');
+
+        $crawler = $this->client->request('GET', '/organizations/'.$this->org->getId().'/public');
+        $this->client->submit($crawler->selectButton('Speichern')->form([
+            'public_settings_form[design]' => 'plain',
+            'public_settings_form[scheme]' => 'system',
+            'public_settings_form[accentColor]' => '',
+        ]));
+        $this->client->request('GET', '/p/sev-test');
+        self::assertSelectorExists('html[data-theme="system"]');
+        self::assertSelectorExists(\sprintf('[data-design="plain"][style="--org-color: %s"]', $this->org->getColor()));
+        self::assertSelectorTextContains('header h1', 'SEV Musterstadt');
     }
 }

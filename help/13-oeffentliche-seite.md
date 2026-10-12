@@ -15,7 +15,17 @@ feature: public_page
 - **Verteiler-Abo** – Eintragen in öffentlich abonnierbare Verteiler.
 - **Vertraulicher Kontakt** – siehe unten.
 
-Der **unsichtbare Spamschutz** arbeitet mit einem versteckten Feld, einer Mindestzeit zum Ausfüllen und einer Begrenzung pro Stunde. Zusätzlich könnt ihr eine **Bestätigung per E-Mail** verlangen: Kontaktanfragen und Anmeldungen gelten dann erst nach Klick auf einen Link. Mit `?embed=1` an der Adresse lässt sich die Seite in eure Website einbinden.
+Alle Bausteine stehen untereinander auf der Startseite der öffentlichen Seite – auch das Kontaktformular und die Anmeldung zum Verteiler. Die Navigation oben springt zum jeweiligen Abschnitt.
+
+Der **unsichtbare Spamschutz** arbeitet mit einem versteckten Feld, einer Mindestzeit zum Ausfüllen und einer Begrenzung pro Stunde. Zusätzlich könnt ihr eine **Bestätigung per E-Mail** verlangen: Kontaktanfragen und Anmeldungen gelten dann erst nach Klick auf einen Link. Mit `?embed=1` an der Adresse lässt sich die Seite in eure Website einbinden. Kontaktformular und Verteiler-Anmeldung gibt es dafür auch einzeln (Adresse mit `/contact` bzw. `/subscribe`).
+
+## Aussehen
+
+Unter **Aussehen** legt ihr fest, wie die Seite wirkt:
+
+- **Design** – *Klassisch* (schmale Kopfzeile, Inhalte in Karten), *Banner* (großer farbiger Kopf mit eurem Namen) oder *Schlicht* (zentrierter Kopf, Überschriften mit Serifen, ohne Kästen).
+- **Farbschema** – *Hell*, *Dunkel* oder *Automatisch* (folgt der Einstellung im Gerät der Besucher). Neu eingerichtete Seiten sind hell.
+- **Akzentfarbe** – für Knöpfe, Links und den Banner. Ohne Auswahl gilt die Farbe eurer Organisation.
 
 ## Vertraulicher Kontakt
 

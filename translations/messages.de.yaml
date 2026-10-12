@@ -1715,10 +1715,10 @@ public:
         consent: 'Ich habe den <a href="%url%" class="link" target="_blank">Datenschutzhinweis</a> gelesen und bin mit der Verarbeitung meiner Angaben einverstanden.'
     home:
         title: Start
-        actions: Mitmachen
         events: Termine
         surveys: Umfragen
         resolutions: Beschlüsse
+        confidential_start: Vertraulich schreiben
     contact:
         title: Kontakt
         intro: 'Schreib %name% eine Nachricht. Wir melden uns per E-Mail.'
@@ -1782,6 +1782,7 @@ public:
         full: Leider sind nicht mehr genug Plätze frei.
     subscribe:
         title: Verteiler abonnieren
+        nav: Verteiler
         intro: Trag dich in unsere Verteiler ein, um Informationen per E-Mail zu erhalten. Du bekommst zuerst eine Bestätigungs-E-Mail.
         submit: Eintragen
         contact_note: Über die öffentliche Seite eingetragen.
@@ -1804,6 +1805,26 @@ public:
     privacy:
         title: Datenschutz
         default: '%name% verarbeitet deine Angaben nur, um dein Anliegen zu bearbeiten. Bestätigungsanfragen werden nach sieben Tagen gelöscht.'
+    design:
+        classic: Klassisch
+        classic_help: Kopfzeile mit Farbstreifen, Inhalte in Karten.
+        banner: Banner
+        banner_help: Großer farbiger Kopfbereich mit dem Namen.
+        plain: Schlicht
+        plain_help: Zentriert und ohne Rahmen, Überschriften mit Serifen.
+    scheme:
+        light: Hell
+        dark: Dunkel
+        system: Automatisch – hell oder dunkel wie das Gerät der Besucher:innen
+    accent:
+        organization: Farbe der Organisation
+        moss: Moosgrün
+        blue: Blau
+        teal: Petrol
+        violet: Violett
+        berry: Beere
+        orange: Orange
+        slate: Schiefergrau
     email:
         confirm_subject: 'Bitte bestätigen – %organization%'
         confirm_text_contact: 'Du hast %organization% über das Kontaktformular eine Nachricht geschrieben. Bitte bestätige, dass sie von dir stammt.'
@@ -1819,6 +1840,11 @@ public:
         unsubscribe: austragen
     settings:
         title: Öffentliche Seite
+        appearance: Aussehen
+        design: Design
+        scheme: Farbschema
+        accent: Akzentfarbe
+        accent_help: Für Knöpfe, Links und Markierungen. Die Helligkeit wird angepasst, damit Texte gut lesbar bleiben.
         teaser: Infoseite, Kontaktformular, Umfragen, Veranstaltungsanmeldungen und Verteiler-Abos für Externe.
         configure: Einrichten
         intro_text: Hier legst du fest, was Externe ohne Anmeldung sehen und tun können.

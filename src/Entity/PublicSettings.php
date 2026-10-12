@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\Feature;
+use App\Enum\PublicDesign;
+use App\Enum\Theme;
 use App\Repository\PublicSettingsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -21,6 +23,17 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[UniqueEntity('slug', message: 'public.slug_taken')]
 class PublicSettings
 {
+    /** Accent colors to choose from (translation public.accent.<name>) */
+    public const array ACCENTS = [
+        'moss' => '#417230',
+        'blue' => '#1d4ed8',
+        'teal' => '#0f766e',
+        'violet' => '#6d28d9',
+        'berry' => '#be123c',
+        'orange' => '#c2410c',
+        'slate' => '#475569',
+    ];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -66,6 +79,18 @@ class PublicSettings
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Length(max: 10000)]
     private ?string $privacyNotice = null;
+
+    /** Light, dark or following the visitor's device – independent of the visitor's own profile */
+    #[ORM\Column(length: 10, enumType: Theme::class, options: ['default' => 'light'])]
+    private Theme $scheme = Theme::Light;
+
+    #[ORM\Column(length: 10, enumType: PublicDesign::class, options: ['default' => 'classic'])]
+    private PublicDesign $design = PublicDesign::Classic;
+
+    /** One of ACCENTS; null = color of the organization */
+    #[ORM\Column(length: 7, nullable: true)]
+    #[Assert\Choice(choices: self::ACCENTS)]
+    private ?string $accentColor = null;
 
     /** Invisible protection: honeypot, minimum time and throttling */
     #[ORM\Column]
@@ -288,6 +313,48 @@ class PublicSettings
         $this->privacyNotice = $privacyNotice;
 
         return $this;
+    }
+
+    public function getScheme(): Theme
+    {
+        return $this->scheme;
+    }
+
+    public function setScheme(Theme $scheme): static
+    {
+        $this->scheme = $scheme;
+
+        return $this;
+    }
+
+    public function getDesign(): PublicDesign
+    {
+        return $this->design;
+    }
+
+    public function setDesign(PublicDesign $design): static
+    {
+        $this->design = $design;
+
+        return $this;
+    }
+
+    public function getAccentColor(): ?string
+    {
+        return $this->accentColor;
+    }
+
+    public function setAccentColor(?string $accentColor): static
+    {
+        $this->accentColor = '' === $accentColor ? null : $accentColor;
+
+        return $this;
+    }
+
+    /** Color the public page is tinted with */
+    public function getColor(): string
+    {
+        return $this->accentColor ?? $this->organization->getColor();
     }
 
     public function isSpamInvisible(): bool

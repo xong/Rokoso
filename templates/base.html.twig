@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-{# Farbschema aus dem Profil; "system" folgt prefers-color-scheme (siehe app.css) #}
-{% set theme = app.user.theme.value ?? 'system' %}
+{# Farbschema aus dem Profil; "system" folgt prefers-color-scheme (siehe app.css). Öffentliche Seiten setzen page_theme aus ihren Einstellungen #}
+{% set theme = page_theme|default(app.user.theme.value ?? 'system') %}
 <html lang="{{ app.request.locale }}" class="h-full" data-theme="{{ theme }}">
     <head>
         <meta charset="UTF-8">

@@ -1,44 +1,87 @@
 {% extends 'base.html.twig' %}
 
-{# Öffentliche Seiten einer Organisation (ohne Anmeldung). ?embed=1 blendet Kopf und Fuß für iframes aus. #}
+{# Öffentliche Seiten einer Organisation (ohne Anmeldung). Design, Farbschema und Akzentfarbe aus PublicSettings
+   (data-design steuert die Feinheiten in app.css); ?embed=1 blendet Kopf und Fuß für iframes aus. #}
 {% set embed = app.request.query.getBoolean('embed') %}
 {% set org = settings ? settings.organization : null %}
+{% set design = settings ? settings.design.value : 'classic' %}
+{% set page_theme = settings ? settings.scheme.value : 'light' %}
+{% set width = design == 'plain' ? 'max-w-2xl' : 'max-w-3xl' %}
+{# Banner und Schlicht: auf der Startseite ist der Name im Kopf die Hauptüberschrift #}
+{% set title_in_header = org and not embed and design != 'classic' and app.request.attributes.get('_route') == 'public_home' %}
 
 {% block title %}{{ org ? org.name : '' }}{% endblock %}
 
 {% block body %}
-    {# Organisationsfarbe färbt die Markentöne (Buttons, Links, Markierungen), siehe .org-theme in app.css #}
-    <div class="{{ org ? 'org-theme' : '' }} min-h-full" {% if org %}style="--org-color: {{ org.color }}"{% endif %}>
+    {# Organisations- bzw. Akzentfarbe färbt die Markentöne (Buttons, Links, Markierungen), siehe .org-theme in app.css #}
+    <div class="{{ org ? 'org-theme' : '' }} min-h-full {{ design == 'plain' ? 'bg-surface' }}" data-design="{{ design }}" {% if org %}style="--org-color: {{ settings.color }}"{% endif %}>
         {% if not embed and org %}
             <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">{{ 'nav.skip_to_content'|trans }}</a>
-            <header class="border-t-4 border-b border-t-brand-600 border-b-slate-200 bg-surface">
-                <div class="mx-auto flex max-w-3xl flex-wrap items-center gap-3 px-4 py-3">
-                    <a href="{{ path('public_home', {slug: settings.slug}) }}" class="flex items-center gap-2 font-semibold">
-                        {% if org.logo %}<img src="{{ asset(org.logo) }}" alt="" class="size-8 rounded-lg object-cover">{% endif %}
-                        {{ org.name }}
-                    </a>
-                    <nav aria-label="{{ 'public.nav'|trans }}" class="ml-auto">
-                        <ul role="list" class="flex flex-wrap gap-1 text-sm">
-                            {% set route = app.request.attributes.get('_route') %}
-                            {% for item in [
-                                {route: 'public_home', label: 'public.home.title', show: true},
-                                {route: 'public_contact', label: 'public.contact.title', show: settings.offers('contact') and settings.contactAccount},
-                                {route: 'public_confidential', label: 'public.confidential.nav', show: settings.offers('confidential')},
-                                {route: 'public_subscribe', label: 'public.subscribe.title', show: public_subscribable(settings)},
-                            ]|filter(i => i.show) %}
-                                <li><a href="{{ path(item.route, {slug: settings.slug}) }}" {% if route == item.route %}aria-current="page"{% endif %}
-                                       class="rounded-md px-3 py-1.5 {{ route == item.route ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">{{ item.label|trans }}</a></li>
+            {% set home_url = path('public_home', {slug: settings.slug}) %}
+            {% set sections = public_sections(settings) %}
+            {% set nav %}
+                {% if sections is not empty %}
+                    <nav aria-label="{{ 'public.nav'|trans }}">
+                        <ul role="list" class="flex flex-wrap gap-1 text-sm {{ design == 'plain' ? 'justify-center' }}">
+                            {% for anchor, label in sections %}
+                                <li><a href="{{ home_url }}#{{ anchor }}" class="block rounded-md px-3 py-1.5 {{ design == 'banner' ? 'text-white hover:bg-white/15' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">{{ label|trans }}</a></li>
                             {% endfor %}
                         </ul>
                     </nav>
-                </div>
-            </header>
+                {% endif %}
+            {% endset %}
+
+            {% if design == 'banner' %}
+                <header class="bg-brand-600 text-white">
+                    <div class="mx-auto {{ width }} px-4 {{ title_in_header ? 'pt-4 pb-12' : 'py-4' }}">
+                        <div class="flex flex-wrap items-center gap-3">
+                            {% if not title_in_header %}
+                                <a href="{{ home_url }}" class="flex items-center gap-2 font-semibold">
+                                    {% if org.logo %}<img src="{{ asset(org.logo) }}" alt="" class="size-8 rounded-lg bg-white object-cover">{% endif %}
+                                    {{ org.name }}
+                                </a>
+                            {% endif %}
+                            <div class="ml-auto">{{ nav }}</div>
+                        </div>
+                        {% if title_in_header %}
+                            <div class="mt-8 flex items-center gap-4">
+                                {% if org.logo %}<img src="{{ asset(org.logo) }}" alt="" class="size-16 shrink-0 rounded-xl bg-white object-cover ring-2 ring-white/40">{% endif %}
+                                <h1 class="text-3xl font-bold text-balance sm:text-4xl">{{ org.name }}</h1>
+                            </div>
+                        {% endif %}
+                    </div>
+                </header>
+            {% elseif design == 'plain' %}
+                <header class="border-b border-slate-200">
+                    <div class="mx-auto {{ width }} px-4 pt-10 pb-6 text-center">
+                        {% set brand %}
+                            <a href="{{ home_url }}" class="inline-flex flex-col items-center gap-3">
+                                {% if org.logo %}<img src="{{ asset(org.logo) }}" alt="" class="size-16 rounded-xl object-cover">{% endif %}
+                                <span class="font-serif text-2xl font-semibold text-balance">{{ org.name }}</span>
+                            </a>
+                        {% endset %}
+                        {% if title_in_header %}<h1>{{ brand }}</h1>{% else %}{{ brand }}{% endif %}
+                        <span class="mx-auto mt-3 block h-1 w-12 rounded-full bg-brand-600" aria-hidden="true"></span>
+                        <div class="mt-5">{{ nav }}</div>
+                    </div>
+                </header>
+            {% else %}
+                <header class="border-t-4 border-b border-t-brand-600 border-b-slate-200 bg-surface">
+                    <div class="mx-auto flex {{ width }} flex-wrap items-center gap-3 px-4 py-3">
+                        <a href="{{ home_url }}" class="flex items-center gap-2 font-semibold">
+                            {% if org.logo %}<img src="{{ asset(org.logo) }}" alt="" class="size-8 rounded-lg object-cover">{% endif %}
+                            {{ org.name }}
+                        </a>
+                        <div class="ml-auto">{{ nav }}</div>
+                    </div>
+                </header>
+            {% endif %}
         {% endif %}
-        <main id="main" tabindex="-1" class="mx-auto max-w-3xl px-4 {{ embed ? 'py-4' : 'py-8' }}">
+        <main id="main" tabindex="-1" class="mx-auto {{ width }} px-4 {{ embed ? 'py-4' : 'py-8' }}">
             {% block content %}{% endblock %}
         </main>
         {% if not embed and org %}
-            <footer class="mx-auto max-w-3xl border-t border-slate-200 px-4 py-6 text-xs text-slate-500">
+            <footer class="mx-auto {{ width }} border-t border-slate-200 px-4 py-6 text-xs text-slate-500 {{ design == 'plain' ? 'text-center' }}">
                 <a href="{{ path('public_privacy', {slug: settings.slug}) }}" class="link">{{ 'public.privacy.title'|trans }}</a>
             </footer>
         {% endif %}

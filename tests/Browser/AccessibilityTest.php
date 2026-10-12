@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\Browser;
 
 use App\Confidential\ConfidentialInbox;
+use App\Entity\ContactGroup;
+use App\Entity\MailAccount;
 use App\Entity\PublicSettings;
+use App\Enum\PublicDesign;
+use App\Enum\Theme;
 
 /**
  * Automatic accessibility check with axe-core on the main pages (light and dark theme).
@@ -27,13 +31,28 @@ final class AccessibilityTest extends BrowserTestCase
         $user->setPlatformAdmin(true);
         $organization = $this->createOrganization($user);
         $organization->getMembership($user)?->setConfidant(true);
-        $settings = (new PublicSettings($organization))->setSlug(uniqid('a11y-'))->setConfidentialEnabled(true);
+        $account = (new MailAccount($organization))->setName('Postfach')->setEmailAddress(uniqid('a11y-').'@example.org')->setSenderName('SEV')
+            ->setImapHost('imap.example.org')->setImapUsername('sev')->setSmtpHost('smtp.example.org');
+        $settings = (new PublicSettings($organization))->setSlug(uniqid('a11y-'))->setConfidentialEnabled(true)
+            ->setInfoEnabled(true)->setIntro('Willkommen bei der **Stadtelternvertretung**.')->setContactEnabled(true)->setContactAccount($account)->setSubscribeEnabled(true);
+        $this->em()->persist($account);
+        $this->em()->persist((new ContactGroup($organization))->setName('Rundbrief')->setPublicSubscribe(true));
         $this->em()->persist($settings);
         $this->em()->flush();
         static::getContainer()->get(ConfidentialInbox::class)->open($settings, 'Vorfall', 'Vertrauliche Nachricht', null);
 
         $this->client->request('GET', '/p/'.$settings->getSlug().'/confidential');
         $problems = [...$problems, ...$this->check('/p/…/confidential')];
+        // public start page in every design and color scheme (with the contact and subscription forms)
+        foreach (PublicDesign::cases() as $design) {
+            foreach ([Theme::Light, Theme::Dark] as $scheme) {
+                $settings->setDesign($design)->setScheme($scheme);
+                $this->em()->flush();
+                $this->client->request('GET', '/p/'.$settings->getSlug());
+                $this->client->waitFor('main');
+                $problems = [...$problems, ...$this->check(\sprintf('/p/… (%s, %s)', $design->value, $scheme->value))];
+            }
+        }
         $this->login($user);
         foreach (['light', 'dark'] as $theme) {
             foreach (self::PAGES as $path) {

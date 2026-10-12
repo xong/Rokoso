@@ -129,6 +129,21 @@
     }
 }
 
+/*
+ * Designs der öffentlichen Seite (data-design am Wrapper, siehe public/_layout.html.twig).
+ * In @layer utilities, damit die Regeln die Abstände der Karten (p-6, px-4) übersteuern.
+ */
+@layer utilities {
+    /* Banner: Fokusring im farbigen Kopf weiß, Abschnittsüberschriften mit Farbbalken */
+    [data-design="banner"] header :focus-visible { outline-color: #fff; }
+    [data-design="banner"] main section > h2 { border-left: 4px solid var(--color-brand-600); padding-left: 0.625rem; }
+    /* Schlicht: Karten ohne Rahmen und Fläche, Abschnitte durch Linien getrennt, Überschriften mit Serifen */
+    [data-design="plain"] .card { border-radius: 0; background: transparent; box-shadow: none; padding-inline: 0; }
+    [data-design="plain"] .card > li { padding-inline: 0; }
+    [data-design="plain"] main section + section { border-top: 1px solid var(--color-slate-200); padding-top: 2rem; }
+    [data-design="plain"] :is(h1, h2) { font-family: var(--font-serif); }
+}
+
 /* Wiederkehrende Bausteine – Formulare, Buttons, Karten */
 @layer components {
     .btn-primary { @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 bg-brand-600 text-white hover:bg-brand-700 dark:hover:bg-brand-500; }

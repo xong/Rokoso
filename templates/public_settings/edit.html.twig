@@ -35,6 +35,37 @@
                 {{ form_row(form.confidentialEnabled, {help_translation_parameters: {'%count%': settings.organization.confidants|length}}) }}
             </fieldset>
             <fieldset class="mb-6">
+                <legend class="mb-2 text-base font-semibold">{{ 'public.settings.appearance'|trans }}</legend>
+                <fieldset class="mb-4">
+                    <legend class="label">{{ form.design.vars.label|trans }}</legend>
+                    <div class="grid gap-3 sm:grid-cols-3">
+                        {% for child in form.design %}
+                            <label class="card flex cursor-pointer flex-col gap-2 p-3 has-checked:ring-2 has-checked:ring-brand-600">
+                                {{ include('public_settings/_design_preview.html.twig', {design: child.vars.value, color: settings.color}) }}
+                                <span class="flex items-center gap-2 font-medium">{{ form_widget(child) }} {{ child.vars.label|trans }}</span>
+                                <span class="text-xs text-slate-500">{{ ('public.design.' ~ child.vars.value ~ '_help')|trans }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {{ form_errors(form.design) }}
+                </fieldset>
+                {{ form_row(form.scheme) }}
+                <fieldset class="mb-4" aria-describedby="accent-help">
+                    <legend class="label">{{ form.accentColor.vars.label|trans }}</legend>
+                    <div class="flex flex-wrap gap-2">
+                        {% for child in form.accentColor %}
+                            <label class="flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 ring-1 ring-slate-200 has-checked:ring-2 has-checked:ring-brand-600">
+                                {{ form_widget(child) }}
+                                <span class="size-4 rounded-full ring-1 ring-black/10" style="background: {{ child.vars.value ?: organization.color }}" aria-hidden="true"></span>
+                                {{ child.vars.label|trans }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                    <p id="accent-help" class="help">{{ 'public.settings.accent_help'|trans }}</p>
+                    {{ form_errors(form.accentColor) }}
+                </fieldset>
+            </fieldset>
+            <fieldset class="mb-6">
                 <legend class="mb-2 text-base font-semibold">{{ 'public.settings.spam'|trans }}</legend>
                 {{ form_row(form.spamInvisible) }}
                 <div class="grid gap-x-4 sm:grid-cols-2">

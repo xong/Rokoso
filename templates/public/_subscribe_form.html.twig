@@ -1,0 +1,12 @@
+{# Verteiler-Abo; action (optional) = Ziel, auf der Startseite mit Sprung zurück zum Abschnitt #}
+{{ form_start(form, action is defined ? {action: action, attr: {class: 'card p-6'}} : {attr: {class: 'card p-6'}}) }}
+    {{ form_errors(form) }}
+    <div class="grid gap-x-4 sm:grid-cols-2">
+        {{ form_row(form.name) }}
+        {{ form_row(form.email) }}
+    </div>
+    {{ form_row(form.groups) }}
+    {{ include('public/_consent.html.twig') }}
+    {{ form_rest(form) }}
+    <button type="submit" class="btn-primary">{{ 'public.subscribe.submit'|trans }}</button>
+{{ form_end(form) }}

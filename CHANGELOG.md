@@ -4,6 +4,13 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.16.0 – 2026-10-12
+
+### Neu
+
+- **Aussehen der öffentlichen Seite:** Unter „Öffentliche Seite → Aussehen“ wählt ihr ein Design (Klassisch, Banner oder Schlicht), ein Farbschema (Hell, Dunkel oder Automatisch) und eine Akzentfarbe. Die Seite ist jetzt standardmäßig hell – bisher hing das Farbschema am Gerät der Besucher.
+- **Formulare direkt auf der Startseite:** Kontaktformular und Verteiler-Anmeldung stehen direkt auf der öffentlichen Seite. Die Navigation springt zu den Abschnitten (Termine, Umfragen, Beschlüsse, Kontakt, Verteiler, Vertraulich).
+
 ## 0.15.1 – 2026-10-10
 
 ### Verbessert

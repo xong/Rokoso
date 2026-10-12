@@ -1,31 +1,19 @@
 {% extends 'public/_layout.html.twig' %}
 
+{# Startseite mit allen Abschnitten; die Navigation springt per Anker dorthin (Reihenfolge in PublicPage::sections()) #}
 {% block content %}
-    <h1 class="mb-4 text-2xl font-semibold">{{ settings.organization.name }}</h1>
+    {% set sections = public_sections(settings) %}
+    {% set home_url = path('public_home', {slug: settings.slug, embed: embed ? 1 : null}) %}
+    {% if not title_in_header %}
+        <h1 class="mb-4 text-2xl font-semibold">{{ settings.organization.name }}</h1>
+    {% endif %}
     {% if settings.offers('info') and settings.intro %}
         <div class="markdown mb-8">{{ settings.intro|markdown }}</div>
     {% endif %}
 
-    <div class="space-y-8">
-        {% if settings.offers('contact') and settings.contactAccount or groups is not empty or settings.offers('confidential') %}
-            <section aria-labelledby="actions-heading">
-                <h2 id="actions-heading" class="sr-only">{{ 'public.home.actions'|trans }}</h2>
-                <div class="flex flex-wrap gap-2">
-                    {% if settings.offers('contact') and settings.contactAccount %}
-                        <a href="{{ path('public_contact', {slug: settings.slug}) }}" class="btn-primary">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.contact.title'|trans }}</a>
-                    {% endif %}
-                    {% if settings.offers('confidential') %}
-                        <a href="{{ path('public_confidential', {slug: settings.slug}) }}" class="btn-secondary">{{ ux_icon('lucide:lock', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.confidential.title'|trans }}</a>
-                    {% endif %}
-                    {% if groups is not empty %}
-                        <a href="{{ path('public_subscribe', {slug: settings.slug}) }}" class="btn-secondary">{{ ux_icon('lucide:bell', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.subscribe.title'|trans }}</a>
-                    {% endif %}
-                </div>
-            </section>
-        {% endif %}
-
-        {% if events is not empty %}
-            <section aria-labelledby="events-heading">
+    <div class="space-y-10">
+        {% if sections.events is defined %}
+            <section id="events" aria-labelledby="events-heading" class="scroll-mt-6">
                 <h2 id="events-heading" class="mb-3 text-lg font-semibold">{{ 'public.home.events'|trans }}</h2>
                 <ul role="list" class="card divide-y divide-slate-100">
                     {% for o in events %}
@@ -39,8 +27,8 @@
             </section>
         {% endif %}
 
-        {% if surveys is not empty %}
-            <section aria-labelledby="surveys-heading">
+        {% if sections.surveys is defined %}
+            <section id="surveys" aria-labelledby="surveys-heading" class="scroll-mt-6">
                 <h2 id="surveys-heading" class="mb-3 text-lg font-semibold">{{ 'public.home.surveys'|trans }}</h2>
                 <ul role="list" class="card divide-y divide-slate-100">
                     {% for s in surveys %}
@@ -50,8 +38,8 @@
             </section>
         {% endif %}
 
-        {% if resolutions is not empty %}
-            <section aria-labelledby="resolutions-heading">
+        {% if sections.resolutions is defined %}
+            <section id="resolutions" aria-labelledby="resolutions-heading" class="scroll-mt-6">
                 <h2 id="resolutions-heading" class="mb-3 text-lg font-semibold">{{ 'public.home.resolutions'|trans }}</h2>
                 <ul role="list" class="space-y-3">
                     {% for r in resolutions %}
@@ -63,6 +51,30 @@
                         </li>
                     {% endfor %}
                 </ul>
+            </section>
+        {% endif %}
+
+        {% if contact_form %}
+            <section id="contact" aria-labelledby="contact-heading" class="scroll-mt-6">
+                <h2 id="contact-heading" class="mb-1 text-lg font-semibold">{{ 'public.contact.title'|trans }}</h2>
+                <p class="mb-4 text-slate-600">{{ 'public.contact.intro'|trans({'%name%': settings.organization.name}) }}</p>
+                {{ include('public/_contact_form.html.twig', {form: contact_form, action: home_url ~ '#contact'}) }}
+            </section>
+        {% endif %}
+
+        {% if subscribe_form %}
+            <section id="subscribe" aria-labelledby="subscribe-heading" class="scroll-mt-6">
+                <h2 id="subscribe-heading" class="mb-1 text-lg font-semibold">{{ 'public.subscribe.title'|trans }}</h2>
+                <p class="mb-4 text-slate-600">{{ 'public.subscribe.intro'|trans }}</p>
+                {{ include('public/_subscribe_form.html.twig', {form: subscribe_form, action: home_url ~ '#subscribe'}) }}
+            </section>
+        {% endif %}
+
+        {% if sections.confidential is defined %}
+            <section id="confidential" aria-labelledby="confidential-heading" class="scroll-mt-6">
+                <h2 id="confidential-heading" class="mb-1 text-lg font-semibold">{{ 'public.confidential.title'|trans }}</h2>
+                <p class="mb-4 text-slate-600">{{ 'public.confidential.intro'|trans({'%name%': settings.organization.name}) }}</p>
+                <a href="{{ path('public_confidential', {slug: settings.slug}) }}" class="btn-secondary">{{ ux_icon('lucide:lock', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'public.home.confidential_start'|trans }}</a>
             </section>
         {% endif %}
     </div>

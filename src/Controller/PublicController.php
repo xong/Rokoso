@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Calendar\CalendarService;
 use App\Confidential\ConfidentialInbox;
 use App\Entity\CalendarItem;
 use App\Entity\ConfidentialCase;
@@ -23,10 +22,9 @@ use App\Form\PublicForm\SignupType;
 use App\Form\PublicForm\SubscribeType;
 use App\Form\PublicForm\SurveyAnswerType;
 use App\Participation\PublicGuard;
+use App\Participation\PublicPage;
 use App\Participation\PublicSubmissionHandler;
 use App\Repository\PublicSettingsRepository;
-use App\Repository\ResolutionRepository;
-use App\Repository\SurveyRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -76,22 +74,32 @@ final class PublicController extends AbstractController
         return $this->render('public/confirm.html.twig', ['settings' => $settings, 'public_request' => $publicRequest]);
     }
 
-    #[Route('/{slug<[a-z0-9-]+>}', name: 'public_home')]
-    public function home(Request $request, string $slug, ResolutionRepository $resolutions, CalendarService $calendar, SurveyRepository $surveys): Response
+    /**
+     * Start page with all sections; the contact and subscription forms are part of it and are sent here.
+     */
+    #[Route('/{slug<[a-z0-9-]+>}', name: 'public_home', methods: ['GET', 'POST'])]
+    public function home(Request $request, string $slug, PublicPage $page): Response
     {
         $settings = $this->load($slug);
-        $organization = $settings->getOrganization();
-        $today = new \DateTimeImmutable('today');
+        $contents = $page->contents($settings);
+        $sections = $page->sections($settings);
+        $contact = isset($sections['contact']) ? $this->createForm(ContactType::class, null, ['topics' => $settings->getActiveTopics()]) : null;
+        $subscribe = isset($sections['subscribe']) ? $this->createForm(SubscribeType::class, null, ['groups' => $contents['groups']]) : null;
+        $response = (null !== $contact ? $this->submitContact($request, $settings, $contact) : null)
+            ?? (null !== $subscribe ? $this->submitSubscribe($request, $settings, $subscribe) : null);
+        if (null !== $response) {
+            return $response;
+        }
 
         return $this->render('public/home.html.twig', [
             'settings' => $settings,
-            'resolutions' => $settings->offers('info') && $organization->hasFeature(Feature::Resolutions) ? $resolutions->findPublic($organization) : [],
-            'events' => $settings->offers('events') ? \array_slice($calendar->publicOccurrences($organization, $today, $today->modify('+6 months')), 0, 20) : [],
-            'surveys' => $settings->offers('surveys') ? $surveys->findListed($organization) : [],
-            'groups' => $settings->offers('subscribe') ? $this->subscribableGroups($settings) : [],
-        ]);
+            ...$contents,
+            'contact_form' => $contact,
+            'subscribe_form' => $subscribe,
+        ], $this->status(...array_filter([$contact, $subscribe])));
     }
 
+    /** Contact form on its own page – for embedding (?embed=1) and older links */
     #[Route('/{slug<[a-z0-9-]+>}/contact', name: 'public_contact', methods: ['GET', 'POST'])]
     public function contact(Request $request, string $slug): Response
     {
@@ -100,17 +108,9 @@ final class PublicController extends AbstractController
             throw new NotFoundHttpException();
         }
         $form = $this->createForm(ContactType::class, null, ['topics' => $settings->getActiveTopics()]);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid() && $this->passes($settings, $form, $request)) {
-            /** @var array{name: string, email: string, institution?: ?string, topic?: ?\App\Entity\PublicTopic, subject: string, message: string, attachments?: list<\Symfony\Component\HttpFoundation\File\UploadedFile>, copy?: bool} $data */
-            $data = $form->getData();
-            $confirm = $this->handler->contact($settings, $data);
-            $this->em->flush();
 
-            return $this->done($request, $settings, $confirm ? 'public.sent_confirm' : 'public.contact.sent');
-        }
-
-        return $this->render('public/contact.html.twig', ['settings' => $settings, 'form' => $form], $this->status($form));
+        return $this->submitContact($request, $settings, $form)
+            ?? $this->render('public/contact.html.twig', ['settings' => $settings, 'form' => $form], $this->status($form));
     }
 
     #[Route('/{slug<[a-z0-9-]+>}/survey/{token<[a-f0-9]{32}>}', name: 'public_survey', methods: ['GET', 'POST'])]
@@ -178,6 +178,7 @@ final class PublicController extends AbstractController
         return $this->render('public/event.html.twig', ['settings' => $settings, 'item' => $item, 'form' => $form], null !== $form ? $this->status($form) : null);
     }
 
+    /** Subscription on its own page – for embedding (?embed=1) and older links */
     #[Route('/{slug<[a-z0-9-]+>}/subscribe', name: 'public_subscribe', methods: ['GET', 'POST'])]
     public function subscribe(Request $request, string $slug): Response
     {
@@ -187,17 +188,9 @@ final class PublicController extends AbstractController
             throw new NotFoundHttpException();
         }
         $form = $this->createForm(SubscribeType::class, null, ['groups' => $groups]);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid() && $this->passes($settings, $form, $request)) {
-            /** @var array{name: string, email: string, groups: iterable<ContactGroup>} $data */
-            $data = $form->getData();
-            $this->handler->subscribe($settings, $data);
-            $this->em->flush();
 
-            return $this->done($request, $settings, 'public.sent_confirm');
-        }
-
-        return $this->render('public/subscribe.html.twig', ['settings' => $settings, 'form' => $form], $this->status($form));
+        return $this->submitSubscribe($request, $settings, $form)
+            ?? $this->render('public/subscribe.html.twig', ['settings' => $settings, 'form' => $form], $this->status($form));
     }
 
     #[Route('/{slug<[a-z0-9-]+>}/unsubscribe/{group<\d+>}', name: 'public_unsubscribe', methods: ['GET', 'POST'])]
@@ -384,10 +377,56 @@ final class PublicController extends AbstractController
     }
 
     /**
+     * 422 when one of the forms was sent with errors (Turbo then shows the page with the errors).
+     *
+     * @param FormInterface<mixed> ...$forms
+     */
+    private function status(FormInterface ...$forms): ?Response
+    {
+        foreach ($forms as $form) {
+            if ($form->isSubmitted() && !$form->isValid()) {
+                return new Response(null, Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Handles a sent contact form; the confirmation page on success, null otherwise.
+     *
      * @param FormInterface<mixed> $form
      */
-    private function status(FormInterface $form): ?Response
+    private function submitContact(Request $request, PublicSettings $settings, FormInterface $form): ?Response
     {
-        return $form->isSubmitted() && !$form->isValid() ? new Response(null, Response::HTTP_UNPROCESSABLE_ENTITY) : null;
+        $form->handleRequest($request);
+        if (!$form->isSubmitted() || !$form->isValid() || !$this->passes($settings, $form, $request)) {
+            return null;
+        }
+        /** @var array{name: string, email: string, institution?: ?string, topic?: ?\App\Entity\PublicTopic, subject: string, message: string, attachments?: list<\Symfony\Component\HttpFoundation\File\UploadedFile>, copy?: bool} $data */
+        $data = $form->getData();
+        $confirm = $this->handler->contact($settings, $data);
+        $this->em->flush();
+
+        return $this->done($request, $settings, $confirm ? 'public.sent_confirm' : 'public.contact.sent');
+    }
+
+    /**
+     * Handles a sent subscription form; the confirmation page on success, null otherwise.
+     *
+     * @param FormInterface<mixed> $form
+     */
+    private function submitSubscribe(Request $request, PublicSettings $settings, FormInterface $form): ?Response
+    {
+        $form->handleRequest($request);
+        if (!$form->isSubmitted() || !$form->isValid() || !$this->passes($settings, $form, $request)) {
+            return null;
+        }
+        /** @var array{name: string, email: string, groups: iterable<ContactGroup>} $data */
+        $data = $form->getData();
+        $this->handler->subscribe($settings, $data);
+        $this->em->flush();
+
+        return $this->done($request, $settings, 'public.sent_confirm');
     }
 }
