@@ -5,10 +5,11 @@ import { Controller } from '@hotwired/stimulus';
  * der Service Worker (sw.js) zeigt die Benachrichtigungen an.
  */
 export default class extends Controller {
-    static targets = ['enable', 'disable', 'status'];
+    static targets = ['enable', 'disable', 'status', 'test'];
     static values = {
         key: String, url: String, token: String,
         enabled: String, disabled: String, denied: String, unsupported: String, error: String,
+        devices: Boolean,
     };
 
     async connect() {
@@ -75,6 +76,10 @@ export default class extends Controller {
     toggle(subscribed) {
         this.enableTarget.hidden = subscribed;
         this.disableTarget.hidden = !subscribed;
+        if (this.hasTestTarget) {
+            // other devices of the person can be tested from here as well
+            this.testTarget.hidden = !subscribed && !this.devicesValue;
+        }
     }
 
     say(text) {

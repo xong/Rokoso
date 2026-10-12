@@ -1337,6 +1337,8 @@ notification:
         contact: 'Neue Anfrage über das Kontaktformular: „%subject%“'
         confidential: 'Neue vertrauliche Nachricht an %subject%'
         invitation: '%actor% lädt dich in „%subject%“ ein'
+        message: '%actor% hat dir eine Nachricht geschickt: „%subject%“'
+        meeting: '%actor% lädt zur Sitzung „%subject%“ ein'
     email:
         legend: Benachrichtigungen per E-Mail
         instant: Sofort
@@ -1356,6 +1358,39 @@ notification:
         unsupported: Dieser Browser unterstützt keine Push-Benachrichtigungen.
         error: Das hat nicht geklappt. Bitte versuche es später noch einmal.
         not_configured: Push-Benachrichtigungen sind auf diesem Server nicht eingerichtet.
+        test: Testnachricht senden
+        test_title: Push-Benachrichtigungen funktionieren
+        test_body: So sehen Benachrichtigungen von Rokoso auf diesem Gerät aus.
+        test_sent: Die Testnachricht ist unterwegs.
+        test_none: Kein Gerät hat die Testnachricht angenommen. Schalte Push-Benachrichtigungen auf diesem Gerät bitte noch einmal ein.
+        categories: Push-Benachrichtigungen bekommen für
+        categories_help: Gilt für alle deine Geräte. Unabhängig davon siehst du alles weiterhin unter Benachrichtigungen.
+        mail_title: '{1}Neue E-Mail in %account%|]1,Inf[%count% neue E-Mails in %account%'
+        category:
+            mentioned: Erwähnungen
+            mentioned_help: Jemand erwähnt dich mit @ in einem Kommentar oder Forenbeitrag.
+            message: Direktnachrichten
+            message_help: Jemand schickt dir eine interne Nachricht.
+            assigned: Zuweisungen
+            assigned_help: Dir wird eine E-Mail, Aufgabe oder ein Termin zugewiesen – auch Anfragen zu deinen Themen auf der öffentlichen Seite.
+            due: Erinnerungen
+            due_help: Erinnerungen an Aufgaben und Termine, bei denen du beteiligt bist.
+            comment: Kommentare
+            comment_help: Neue Kommentare bei Dingen, an denen du beteiligt bist oder die du beobachtest.
+            forum: Forum
+            forum_help: Neue Themen und Antworten in beobachteten Foren und Themen.
+            poll: Abstimmungen
+            poll_help: Du wirst um deine Stimme gebeten.
+            meeting: Sitzungen
+            meeting_help: Einladung zu einer Sitzung deiner Organisation.
+            contact: Kontaktformular
+            contact_help: Neue Anfrage über die öffentliche Seite.
+            confidential: Vertraulicher Kontakt
+            confidential_help: Neue vertrauliche Nachricht (nur für Vertrauenspersonen).
+            invitation: Einladungen
+            invitation_help: Du wirst in eine weitere Organisation eingeladen.
+            mail: Neue E-Mails
+            mail_help: Neue E-Mails in gemeinsamen Postfächern – eine Zusammenfassung je Abruf. Kann viel sein, daher zunächst aus.
     mention:
         list: Personen erwähnen
         help: Mit @ und dem Namen erwähnst du jemanden; die Person wird benachrichtigt.

@@ -19,10 +19,29 @@ enum NotificationType: string
     case Contact = 'contact';
     case Confidential = 'confidential';
     case Invitation = 'invitation';
+    case Message = 'message';
+    case Meeting = 'meeting';
 
     public function label(): string
     {
         return 'notification.type.'.$this->value;
+    }
+
+    public function pushCategory(): PushCategory
+    {
+        return match ($this) {
+            self::Assigned => PushCategory::Assigned,
+            self::Mentioned => PushCategory::Mentioned,
+            self::Comment => PushCategory::Comment,
+            self::Topic, self::Post => PushCategory::Forum,
+            self::Due => PushCategory::Due,
+            self::Poll => PushCategory::Poll,
+            self::Contact => PushCategory::Contact,
+            self::Confidential => PushCategory::Confidential,
+            self::Invitation => PushCategory::Invitation,
+            self::Message => PushCategory::Message,
+            self::Meeting => PushCategory::Meeting,
+        };
     }
 
     public function icon(): string
@@ -37,6 +56,8 @@ enum NotificationType: string
             self::Contact => 'lucide:inbox',
             self::Confidential => 'lucide:lock',
             self::Invitation => 'lucide:user-plus',
+            self::Message => 'lucide:mail',
+            self::Meeting => 'lucide:calendar-check',
         };
     }
 }

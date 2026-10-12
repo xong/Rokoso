@@ -11,6 +11,7 @@ use App\Enum\MessageType;
 use App\Form\InternalMessageFormType;
 use App\Mail\InternalMessageData;
 use App\Mail\ReadTracker;
+use App\Notification\ActivityNotifier;
 use App\Repository\MembershipRepository;
 use App\Repository\MessageRepository;
 use App\Security\Voter\MessageVoter;
@@ -38,6 +39,7 @@ final class InternalMessageController extends AbstractController
         AttachmentStorage $storage,
         ReadTracker $readTracker,
         EntityManagerInterface $em,
+        ActivityNotifier $notifier,
     ): Response {
         $users = array_values(array_filter($memberships->colleaguesOf($user), static fn (User $u): bool => $u !== $user));
         $data = new InternalMessageData();
@@ -83,6 +85,8 @@ final class InternalMessageController extends AbstractController
                 }
             }
             $em->persist($message);
+            $em->flush();
+            $notifier->directMessage($message, $user);
             $em->flush();
             $readTracker->markRead($message, $user);
             $this->addFlash('success', 'internal.sent');

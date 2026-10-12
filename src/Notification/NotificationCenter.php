@@ -8,6 +8,7 @@ use App\Entity\Notification;
 use App\Entity\User;
 use App\Enum\NotificationEmail;
 use App\Enum\NotificationType;
+use App\Enum\PushCategory;
 use App\Repository\NotificationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -23,6 +24,9 @@ final class NotificationCenter
 {
     /** @var list<Notification> */
     private array $pending = [];
+
+    /** @var list<array{0: User, 1: PushCategory, 2: PushMessage}> push messages without a notification */
+    private array $pushes = [];
 
     /** @var array<string, true> recipient|url pairs already notified in this request */
     private array $notified = [];
@@ -78,6 +82,15 @@ final class NotificationCenter
     }
 
     /**
+     * Push message only (no entry behind the bell, no email), for frequent events such as new mail.
+     * Sent together with the notifications once the request or command has finished.
+     */
+    public function push(User $recipient, PushCategory $category, PushMessage $message): void
+    {
+        $this->pushes[] = [$recipient, $category, $message];
+    }
+
+    /**
      * People mentioned as "@Name" in the text, among the candidates (longest names first,
      * so "@Kim Kollegin" wins over a person called "Kim").
      *
@@ -118,8 +131,10 @@ final class NotificationCenter
     public function deliverPending(): void
     {
         $pending = array_values(array_filter($this->pending, static fn (Notification $n): bool => null !== $n->getId()));
+        $pushes = $this->pushes;
         $this->pending = [];
-        if ([] === $pending) {
+        $this->pushes = [];
+        if ([] === $pending && [] === $pushes) {
             return;
         }
 
@@ -133,7 +148,12 @@ final class NotificationCenter
                 $this->logger->error('Notification mail failed: {message}', ['message' => $e->getMessage()]);
             }
         }
-        $this->push->send($pending);
+        try {
+            $this->push->send($pending);
+            $this->push->deliver($pushes);
+        } catch (\Throwable $e) {
+            $this->logger->error('Web push failed: {message}', ['message' => $e->getMessage()]);
+        }
         $this->em->flush();
     }
 

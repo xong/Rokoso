@@ -51,12 +51,19 @@ final readonly class MailSynchronizer
         }
 
         $imported = 0;
+        $fresh = [];
+        // the first fetch of an account brings old mail, which is no news
+        $initial = null === $account->getLastUid();
         $lastUid = $account->getUidValidity() === $result->uidValidity ? $account->getLastUid() : null;
         foreach ($result->messages as $uid => $raw) {
             $lastUid = max($lastUid ?? 0, $uid);
             try {
-                if ($this->import($account, $uid, $raw)) {
+                $message = $this->import($account, $uid, $raw);
+                if (null !== $message) {
                     ++$imported;
+                    if (!$message->isSpam() && !$message->isDone() && MessageFolder::Inbox === $message->getFolder()) {
+                        $fresh[] = $message;
+                    }
                 }
             } catch (\Throwable $e) {
                 $this->logger->error('Could not import message {uid} of account {id}: {error}', ['uid' => $uid, 'id' => $account->getId(), 'error' => $e->getMessage()]);
@@ -66,15 +73,21 @@ final readonly class MailSynchronizer
         $account->setSyncPosition($result->uidValidity, $lastUid);
         $account->markSynced();
         $this->em->flush();
+        if (!$initial) {
+            $this->notifier->newMail($account, $fresh);
+        }
 
         return $imported;
     }
 
-    private function import(MailAccount $account, int $uid, string $raw): bool
+    /**
+     * @return Message|null the stored message, null if it was already there
+     */
+    private function import(MailAccount $account, int $uid, string $raw): ?Message
     {
         $parsed = $this->parser->parse($raw);
         if ($this->messages->existsForAccount((int) $account->getId(), $parsed->messageId, $uid)) {
-            return false;
+            return null;
         }
 
         $message = (new Message())
@@ -123,7 +136,7 @@ final readonly class MailSynchronizer
             $this->em->flush();
         }
 
-        return true;
+        return $message;
     }
 
     /**

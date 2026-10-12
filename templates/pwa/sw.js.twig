@@ -2,7 +2,7 @@
  * Rokoso Service Worker
  * - Seiten: immer aus dem Netz (keine personenbezogenen Inhalte im Cache), ohne Netz die Offline-Seite
  * - Statische Dateien (/assets, /icons): Cache, dann Netz
- * - Web-Push: zeigt Benachrichtigungen an, Klick öffnet bzw. fokussiert die Seite
+ * - Web-Push: zeigt Benachrichtigungen an (Zahl der ungelesenen als App-Badge), Klick öffnet bzw. fokussiert die Seite
  */
 const CACHE = 'rokoso-{{ cache_version }}';
 const OFFLINE_URL = '{{ path('pwa_offline') }}';
@@ -55,13 +55,20 @@ self.addEventListener('push', (event) => {
     } catch (e) {
         data = { title: event.data ? event.data.text() : '' };
     }
-    event.waitUntil(self.registration.showNotification(data.title || 'Rokoso', {
+    const shown = self.registration.showNotification(data.title || 'Rokoso', {
         body: data.body || '',
         icon: '{{ public_file('/app-icons/icon-192.png') }}',
         badge: '{{ public_file('/app-icons/icon-192.png') }}',
         tag: data.tag,
+        // a replaced notification (same tag, e.g. new mail) alerts again
+        renotify: Boolean(data.tag),
         data: { url: data.url || '/' },
-    }));
+    });
+    // number of unread notifications on the app icon of the installed app
+    const count = Number(data.badge);
+    const badge = !('setAppBadge' in self.navigator) || Number.isNaN(count) ? Promise.resolve()
+        : (count > 0 ? self.navigator.setAppBadge(count) : self.navigator.clearAppBadge()).catch(() => {});
+    event.waitUntil(Promise.all([shown, badge]));
 });
 
 self.addEventListener('notificationclick', (event) => {

@@ -32,7 +32,8 @@
                  data-push-disabled-value="{{ 'notification.push.disabled'|trans }}"
                  data-push-denied-value="{{ 'notification.push.denied'|trans }}"
                  data-push-unsupported-value="{{ 'notification.push.unsupported'|trans }}"
-                 data-push-error-value="{{ 'notification.push.error'|trans }}">
+                 data-push-error-value="{{ 'notification.push.error'|trans }}"
+                 data-push-devices-value="{{ push_devices ? 'true' : 'false' }}">
                 <p class="mb-3 text-sm text-slate-600">{{ 'notification.push.help'|trans }}</p>
                 <div class="flex flex-wrap gap-2">
                     <button type="button" class="btn-secondary" data-push-target="enable" data-action="push#enable">
@@ -41,9 +42,35 @@
                     <button type="button" class="btn-secondary" data-push-target="disable" data-action="push#disable" hidden>
                         {{ ux_icon('lucide:bell-off', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'notification.push.disable'|trans }}
                     </button>
+                    <form method="post" action="{{ path('profile_push_test') }}" data-push-target="test" {{ push_devices ? '' : 'hidden' }}>
+                        <input type="hidden" name="_token" value="{{ csrf_token('notification-settings') }}">
+                        <button type="submit" class="btn-secondary">
+                            {{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'notification.push.test'|trans }}
+                        </button>
+                    </form>
                 </div>
                 <p class="mt-2 text-sm text-slate-600" role="status" data-push-target="status"></p>
             </div>
+
+            <form method="post" class="mt-6 space-y-4">
+                <input type="hidden" name="_token" value="{{ csrf_token('notification-settings') }}">
+                <input type="hidden" name="section" value="push">
+                <fieldset class="space-y-2">
+                    <legend class="mb-1 font-medium">{{ 'notification.push.categories'|trans }}</legend>
+                    <p class="mb-2 text-sm text-slate-600">{{ 'notification.push.categories_help'|trans }}</p>
+                    {% for category in push_categories %}
+                        <label class="flex items-start gap-2">
+                            <input type="checkbox" name="push[]" value="{{ category.value }}" class="mt-1" {{ app.user.wantsPush(category) ? 'checked' }}
+                                   aria-describedby="push-{{ category.value }}-help">
+                            <span>
+                                <span class="block">{{ category.label|trans }}</span>
+                                <span id="push-{{ category.value }}-help" class="block text-xs text-slate-500">{{ category.help|trans }}</span>
+                            </span>
+                        </label>
+                    {% endfor %}
+                </fieldset>
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+            </form>
         {% else %}
             <p class="text-sm text-slate-600">{{ 'notification.push.not_configured'|trans }}</p>
         {% endif %}

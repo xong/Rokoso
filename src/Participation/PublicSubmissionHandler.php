@@ -243,10 +243,8 @@ final readonly class PublicSubmissionHandler
 
         $this->em->persist($message);
         $this->em->flush();
-        if (!$message->getAssignees()->isEmpty()) {
-            $this->notifier->messageAssigned($message, $message->getAssignees(), null);
-            $this->em->flush();
-        }
+        $this->notifier->contactRequest($message);
+        $this->em->flush();
 
         if (true === ($payload['copy'] ?? false)) {
             $this->mailer->send($email, 'public.email.copy_subject', 'public_copy', [

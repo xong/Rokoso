@@ -3,7 +3,8 @@ import * as Turbo from '@hotwired/turbo';
 
 /*
  * Fragt die Ungelesen-Zähler regelmäßig ab (nur bei sichtbarem Tab), aktualisiert die
- * Badges [data-live-count] und den Seitentitel und zeigt bei neuen Nachrichten einen Hinweis.
+ * Badges [data-live-count], den Seitentitel und die Zahl am App-Symbol (installierte PWA)
+ * und zeigt bei neuen Nachrichten einen Hinweis.
  */
 export default class extends Controller {
     static targets = ['notice'];
@@ -13,6 +14,7 @@ export default class extends Controller {
         this.inbox = this.read('inbox');
         this.baseTitle = document.title.replace(/^\(\d+\+?\) /, '');
         this.updateTitle(this.inbox);
+        this.updateAppBadge(this.read('notifications'));
         this.timer = setInterval(() => this.poll(), this.intervalValue);
         this.onVisible = () => document.visibilityState === 'visible' && this.poll();
         document.addEventListener('visibilitychange', this.onVisible);
@@ -43,6 +45,7 @@ export default class extends Controller {
         }
         this.inbox = counts.inbox;
         this.updateTitle(counts.inbox);
+        this.updateAppBadge(counts.notifications);
     }
 
     reload() {
@@ -70,6 +73,13 @@ export default class extends Controller {
                 number.textContent = value > 99 ? '99+' : String(value);
             }
         });
+    }
+
+    updateAppBadge(count) {
+        if (!('setAppBadge' in navigator) || typeof count !== 'number') {
+            return;
+        }
+        (count > 0 ? navigator.setAppBadge(count) : navigator.clearAppBadge()).catch(() => {});
     }
 
     updateTitle(count) {

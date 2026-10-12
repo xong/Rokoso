@@ -10,6 +10,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Delivers notifications after the response has been sent (or the command has finished).
+ * Runs after the other terminate listeners, so mail fetched on open is included.
  */
 final readonly class NotificationDeliverySubscriber
 {
@@ -17,8 +18,8 @@ final readonly class NotificationDeliverySubscriber
     {
     }
 
-    #[AsEventListener(KernelEvents::TERMINATE)]
-    #[AsEventListener(ConsoleEvents::TERMINATE)]
+    #[AsEventListener(KernelEvents::TERMINATE, priority: -100)]
+    #[AsEventListener(ConsoleEvents::TERMINATE, priority: -100)]
     public function deliver(): void
     {
         $this->center->deliverPending();

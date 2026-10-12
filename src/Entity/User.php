@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\NotificationEmail;
+use App\Enum\PushCategory;
 use App\Enum\Theme;
 use App\Repository\UserRepository;
 use App\Util\Initials;
@@ -54,6 +55,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastDigestAt = null;
+
+    /**
+     * Push choices per category; missing categories use their default.
+     *
+     * @var array<string, bool>|null
+     */
+    #[ORM\Column(nullable: true)]
+    private ?array $pushCategories = null;
 
     /** Secret for the personal iCal subscription link; null = no subscription */
     #[ORM\Column(length: 64, unique: true, nullable: true)]
@@ -341,6 +350,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     public function setNotificationEmail(NotificationEmail $notificationEmail): static
     {
         $this->notificationEmail = $notificationEmail;
+
+        return $this;
+    }
+
+    public function wantsPush(PushCategory $category): bool
+    {
+        return $this->pushCategories[$category->value] ?? $category->isDefault();
+    }
+
+    /**
+     * @param list<PushCategory> $enabled all other categories are switched off
+     */
+    public function setPushCategories(array $enabled): static
+    {
+        $this->pushCategories = [];
+        foreach (PushCategory::cases() as $category) {
+            $this->pushCategories[$category->value] = \in_array($category, $enabled, true);
+        }
 
         return $this;
     }

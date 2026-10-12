@@ -9,6 +9,7 @@ use App\Entity\CalendarItem;
 use App\Entity\Meeting;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
+use App\Notification\ActivityNotifier;
 use App\Repository\CalendarItemRepository;
 use App\Service\SystemMailer;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,6 +25,7 @@ final readonly class MeetingService
         private CalendarItemRepository $calendarItems,
         private SystemMailer $mailer,
         private UrlGeneratorInterface $urls,
+        private ActivityNotifier $notifier,
     ) {
     }
 
@@ -47,7 +49,7 @@ final readonly class MeetingService
     }
 
     /**
-     * Sends the invitation to all members and guests and marks the meeting as invited (not flushed).
+     * Sends the invitation to all members and guests, notifies the members and marks the meeting as invited (not flushed).
      *
      * @return int number of recipients
      */
@@ -76,6 +78,7 @@ final readonly class MeetingService
             ++$count;
         }
         $meeting->markInvited();
+        $this->notifier->meetingInvited($meeting, $sender);
 
         return $count;
     }

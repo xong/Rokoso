@@ -5,40 +5,40 @@ declare(strict_types=1);
 namespace App\Notification;
 
 use App\Entity\Notification;
+use App\Entity\User;
+use App\Enum\PushCategory;
+use App\Repository\NotificationRepository;
 use App\Repository\PushSubscriptionRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Minishlink\WebPush\Subscription;
-use Minishlink\WebPush\WebPush;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * Web push to the recipients' devices (PWA). Inactive without VAPID keys (see `app:vapid-keys`).
+ * Web push to the recipients' devices (PWA), only for the categories they chose in their profile.
+ * The payload carries the number of unread notifications for the badge on the app icon.
  */
 final readonly class PushSender
 {
     public function __construct(
+        private PushGateway $gateway,
         private PushSubscriptionRepository $subscriptions,
+        private NotificationRepository $notifications,
         private EntityManagerInterface $em,
         private NotificationText $text,
-        private LoggerInterface $logger,
-        #[Autowire(env: 'VAPID_PUBLIC_KEY')]
-        private string $publicKey,
-        #[Autowire(env: 'VAPID_PRIVATE_KEY')]
-        private string $privateKey,
-        #[Autowire(env: 'MAILER_FROM')]
-        private string $contact,
     ) {
     }
 
     public function isEnabled(): bool
     {
-        return '' !== $this->publicKey && '' !== $this->privateKey;
+        return $this->gateway->isEnabled();
     }
 
     public function getPublicKey(): string
     {
-        return $this->publicKey;
+        return $this->gateway->getPublicKey();
+    }
+
+    public function hasSubscription(User $user): bool
+    {
+        return null !== $this->subscriptions->findOneBy(['user' => $user]);
     }
 
     /**
@@ -46,44 +46,58 @@ final readonly class PushSender
      */
     public function send(array $notifications): void
     {
-        if (!$this->isEnabled() || [] === $notifications) {
-            return;
+        $messages = [];
+        foreach ($notifications as $notification) {
+            if (!$notification->isRead()) {
+                $messages[] = [$notification->getRecipient(), $notification->getType()->pushCategory(), $this->message($notification)];
+            }
+        }
+        $this->deliver($messages);
+    }
+
+    /**
+     * @param list<array{0: User, 1: PushCategory|null, 2: PushMessage}> $messages recipient, category (null = always) and content
+     *
+     * @return int delivered messages
+     */
+    public function deliver(array $messages): int
+    {
+        if (!$this->isEnabled()) {
+            return 0;
+        }
+        $queue = [];
+        $badges = [];
+        foreach ($messages as [$user, $category, $message]) {
+            if (null !== $category && !$user->wantsPush($category)) {
+                continue;
+            }
+            $subscriptions = $this->subscriptions->findBy(['user' => $user]);
+            if ([] === $subscriptions) {
+                continue;
+            }
+            $badge = $badges[(int) $user->getId()] ??= $this->notifications->countUnread($user);
+            $payload = json_encode($message->toArray() + ['badge' => $badge], \JSON_THROW_ON_ERROR);
+            foreach ($subscriptions as $subscription) {
+                $queue[] = [$subscription, $payload];
+            }
+        }
+        if ([] === $queue) {
+            return 0;
         }
 
-        try {
-            $subject = preg_match('/<([^>]+)>/', $this->contact, $m) ? 'mailto:'.$m[1] : 'mailto:'.$this->contact;
-            $webPush = new WebPush(['VAPID' => ['subject' => $subject, 'publicKey' => $this->publicKey, 'privateKey' => $this->privateKey]], ['TTL' => 86400]);
-            $queued = 0;
-            foreach ($notifications as $notification) {
-                $payload = json_encode([
-                    'title' => $this->text->text($notification),
-                    'url' => $this->text->link($notification),
-                    'tag' => 'rokoso-'.$notification->getId(),
-                ], \JSON_THROW_ON_ERROR);
-                foreach ($this->subscriptions->findBy(['user' => $notification->getRecipient()]) as $subscription) {
-                    $webPush->queueNotification(Subscription::create([
-                        'endpoint' => $subscription->getEndpoint(),
-                        'publicKey' => $subscription->getPublicKey(),
-                        'authToken' => $subscription->getAuthToken(),
-                    ]), $payload);
-                    ++$queued;
-                }
+        $result = $this->gateway->send($queue);
+        foreach ($result['expired'] as $endpoint) {
+            $expired = $this->subscriptions->findByEndpoint($endpoint);
+            if (null !== $expired) {
+                $this->em->remove($expired);
             }
-            if (0 === $queued) {
-                return;
-            }
-            foreach ($webPush->flush() as $report) {
-                if ($report->isSubscriptionExpired()) {
-                    $expired = $this->subscriptions->findByEndpoint($report->getEndpoint());
-                    if (null !== $expired) {
-                        $this->em->remove($expired);
-                    }
-                } elseif (!$report->isSuccess()) {
-                    $this->logger->info('Web push failed: {reason}', ['reason' => $report->getReason()]);
-                }
-            }
-        } catch (\Throwable $e) {
-            $this->logger->warning('Web push failed: {message}', ['message' => $e->getMessage()]);
         }
+
+        return $result['sent'];
+    }
+
+    private function message(Notification $notification): PushMessage
+    {
+        return new PushMessage($this->text->text($notification), $this->text->link($notification), 'rokoso-'.$notification->getId());
     }
 }

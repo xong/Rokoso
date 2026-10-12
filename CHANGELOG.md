@@ -4,6 +4,18 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.17.0 – 2026-10-12
+
+### Neu
+
+- **Push-Benachrichtigungen nach Wahl:** Im Profil unter „Benachrichtigungen“ legst du fest, wofür sich dein Smartphone oder Browser meldet – etwa nur für Erwähnungen, Direktnachrichten und Zuweisungen. Mit „Testnachricht senden“ prüfst du, ob es klappt.
+- **Neue E-Mails als Push:** Auf Wunsch meldet sich dein Gerät, wenn in einem gemeinsamen Postfach neue E-Mails eintreffen – eine Zusammenfassung je Abruf. Standardmäßig aus.
+- **Zahl am App-Symbol:** Die installierte App zeigt die Zahl deiner ungelesenen Benachrichtigungen am Symbol (je nach Gerät).
+
+### Verbessert
+
+- **Mehr Benachrichtigungen:** Direktnachrichten, Einladungen zu Sitzungen und Anfragen über das Kontaktformular (ohne zuständige Person beim Thema an alle, die das Postfach sehen) erscheinen jetzt auch unter Benachrichtigungen und als Push.
+
 ## 0.16.0 – 2026-10-12
 
 ### Neu

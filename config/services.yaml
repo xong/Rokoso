@@ -30,6 +30,9 @@ when@test:
         App\Tests\Fake\FakeSentFolderWriter:
             public: true
         App\Mail\SentFolderWriter: '@App\Tests\Fake\FakeSentFolderWriter'
+        App\Tests\Fake\FakePushGateway:
+            public: true
+        App\Notification\PushGateway: '@App\Tests\Fake\FakePushGateway'
         App\Service\FileStorage:
             arguments:
                 $baseDir: '%kernel.project_dir%/var/storage/test/files'

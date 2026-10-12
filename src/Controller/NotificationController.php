@@ -11,6 +11,8 @@ use App\Entity\Project;
 use App\Entity\PushSubscription;
 use App\Entity\User;
 use App\Enum\NotificationEmail;
+use App\Enum\PushCategory;
+use App\Notification\PushMessage;
 use App\Notification\PushSender;
 use App\Repository\NotificationRepository;
 use App\Repository\PushSubscriptionRepository;
@@ -26,6 +28,7 @@ use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Bell (notification list), watching, notification settings and push subscriptions.
@@ -132,8 +135,14 @@ final class NotificationController extends AbstractController
             if (!$this->isCsrfTokenValid('notification-settings', $request->getPayload()->getString('_token'))) {
                 throw $this->createAccessDeniedException();
             }
-            $mode = NotificationEmail::tryFrom($request->getPayload()->getString('email'));
-            if (null !== $mode) {
+            if ('push' === $request->getPayload()->getString('section')) {
+                $user->setPushCategories(array_values(array_filter(array_map(
+                    static fn (mixed $value): ?PushCategory => \is_string($value) ? PushCategory::tryFrom($value) : null,
+                    $request->getPayload()->all('push'),
+                ))));
+                $this->em->flush();
+                $this->addFlash('success', 'flash.saved');
+            } elseif (null !== $mode = NotificationEmail::tryFrom($request->getPayload()->getString('email'))) {
                 $user->setNotificationEmail($mode);
                 $this->em->flush();
                 $this->addFlash('success', 'flash.saved');
@@ -146,7 +155,26 @@ final class NotificationController extends AbstractController
             'section' => 'notifications',
             'modes' => NotificationEmail::cases(),
             'push_key' => $push->isEnabled() ? $push->getPublicKey() : null,
+            'push_categories' => PushCategory::cases(),
+            'push_devices' => $push->hasSubscription($user),
         ]);
+    }
+
+    /** Sends a test push to all devices of the current person. */
+    #[Route('/profile/push/test', name: 'profile_push_test', methods: ['POST'])]
+    #[IsCsrfTokenValid('notification-settings')]
+    public function pushTest(PushSender $push, TranslatorInterface $translator, #[CurrentUser] User $user): Response
+    {
+        $sent = $push->isEnabled() ? $push->deliver([[$user, null, new PushMessage(
+            $translator->trans('notification.push.test_title'),
+            $this->generateUrl('profile_notifications'),
+            'rokoso-test',
+            $translator->trans('notification.push.test_body'),
+        )]]) : 0;
+        $this->em->flush();
+        $this->addFlash($sent > 0 ? 'success' : 'error', $sent > 0 ? 'notification.push.test_sent' : 'notification.push.test_none');
+
+        return $this->redirectToRoute('profile_notifications');
     }
 
     /**
