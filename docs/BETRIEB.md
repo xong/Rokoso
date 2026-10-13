@@ -130,7 +130,7 @@ Ein Dauer-Worker (Messenger) ist **nicht** nötig: Systemmails werden direkt ver
 
 Für Hosting ohne Docker und ohne passendes PHP auf der Kommandozeile (z. B. KeyHelp bei GN2: Web-PHP 8.5, per SSH nur 8.2) liegt `.github/workflows/deploy.yml` bei. Bei jedem Push auf `main` laufen zuerst `composer check` (mit MariaDB-Dienst), dann der Build auf GitHub (Composer ohne Dev-Pakete, Tailwind, JavaScript, Assets). Auf dem Server wird nur hochgeladen und umgeschaltet.
 
-**Instanzen:** Jede Domain ist eine eigene Instanz mit eigenem Ordner, eigener Datenbank und eigener `shared/.env.local` (eigene `APP_SECRET`, `DEFAULT_URI`, `DEPLOY_TOKEN`, `CRON_TOKEN`, eigene KeyHelp-Aufgabe für den Cron). Der Code ist überall derselbe.
+**Instanzen:** Jede Domain ist eine eigene Instanz mit eigenem Ordner, eigener Datenbank und eigener `shared/.env.local` (eigene `APP_SECRET`, `DEFAULT_URI`, `DEPLOY_TOKEN`, `CRON_TOKEN`, VAPID-Schlüssel, eigene KeyHelp-Aufgabe für den Cron). Der Code ist überall derselbe.
 
 | Ziel (GitHub-Environment, `bin/deploy`) | Domain | Art | Wann |
 |---|---|---|---|
@@ -141,6 +141,8 @@ Für Hosting ohne Docker und ohne passendes PHP auf der Kommandozeile (z. B. Key
 Live-Instanzen werden unter *Actions → Test & Deploy → Run workflow* mit dem passenden Ziel ausgeliefert (`live` = beide gleichzeitig), sobald der Stand auf Staging geprüft ist. Lokal entsprechend `bin/deploy rokoso stev-halle` (siehe unten).
 
 **Passwortschutz (Staging):** In der `shared/.env.local` der Instanz `BASIC_AUTH="benutzer:passwort"` setzen. Rokoso fragt dann vor jeder Seite per Browser-Dialog nach Benutzer und Passwort (HTTP Basic Auth, nur über HTTPS sinnvoll). Der Schutz steckt in der App statt im Webserver, damit er Deployments übersteht; Deploy-Hook (`/_deploy`) und Cron-URL (`/_cron/…`) bleiben erreichbar, weil sie eigene Tokens haben. Leer = aus.
+
+**Push-Benachrichtigungen (VAPID):** Das Schlüsselpaar lokal erzeugen – es ist an keinen Server gebunden, auf dem Server ist also kein PHP auf der Kommandozeile nötig: `php bin/console app:vapid-keys` (unter Windows/XAMPP vorher in PowerShell `$env:OPENSSL_CONF = 'C:\xampp\php\extras\ssl\openssl.cnf'` bzw. in Git Bash `OPENSSL_CONF='C:\xampp\php\extras\ssl\openssl.cnf'` vor den Befehl setzen, sonst „Unable to create the key“). Die beiden ausgegebenen Zeilen `VAPID_PUBLIC_KEY=…` und `VAPID_PRIVATE_KEY=…` in die `shared/.env.local` der Instanz eintragen (z. B. mit dem Datei-Editor von KeyHelp); sie wirken ohne neues Deployment. Je Instanz ein eigenes Paar, den privaten Schlüssel wie ein Passwort behandeln (nicht committen). **Später nicht mehr wechseln:** Die Push-Abos der Geräte hängen am öffentlichen Schlüssel – nach einem Wechsel kommt nichts mehr an, bis alle Push auf ihren Geräten aus- und wieder einschalten. Ohne Schlüssel zeigt das Profil „nicht eingerichtet“.
 
 Aufbau auf dem Server (je Instanz):
 

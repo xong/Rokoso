@@ -19,8 +19,10 @@ final readonly class VapidKeysCommand
         try {
             $keys = VAPID::createVapidKeys();
         } catch (\Throwable $e) {
-            // Typical on Windows: OpenSSL cannot find its configuration file
-            $io->error($e->getMessage().' – unter Windows ggf. OPENSSL_CONF auf die openssl.cnf der PHP-Installation setzen.');
+            // Typical on Windows: OpenSSL cannot find its configuration file; XAMPP ships one next to php.exe
+            $conf = \dirname(\PHP_BINARY).\DIRECTORY_SEPARATOR.'extras'.\DIRECTORY_SEPARATOR.'ssl'.\DIRECTORY_SEPARATOR.'openssl.cnf';
+            $io->error($e->getMessage().' – unter Windows ggf. OPENSSL_CONF auf die openssl.cnf der PHP-Installation setzen'
+                .(is_file($conf) ? ', z. B. PowerShell: $env:OPENSSL_CONF = \''.$conf.'\'' : '').'.');
 
             return 1;
         }
