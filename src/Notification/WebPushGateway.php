@@ -8,6 +8,9 @@ use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\WebPush;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpClient\HttplugClient;
+use Symfony\Component\HttpClient\Psr18Client;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Web push with VAPID (minishlink/web-push). Inactive without keys (see `app:vapid-keys`).
@@ -16,6 +19,7 @@ final readonly class WebPushGateway implements PushGateway
 {
     public function __construct(
         private LoggerInterface $logger,
+        private HttpClientInterface $httpClient,
         #[Autowire(env: 'VAPID_PUBLIC_KEY')]
         private string $publicKey,
         #[Autowire(env: 'VAPID_PRIVATE_KEY')]
@@ -50,7 +54,9 @@ final readonly class WebPushGateway implements PushGateway
 
         try {
             $subject = preg_match('/<([^>]+)>/', $this->contact, $m) ? 'mailto:'.$m[1] : 'mailto:'.$this->contact;
-            $webPush = new WebPush(['VAPID' => ['subject' => $subject, 'publicKey' => $this->publicKey, 'privateKey' => $this->privateKey]], ['TTL' => 86400]);
+            // the app's client instead of discovery: that one also works where hostings disable curl_multi_exec (see HttpClientFactory)
+            $webPush = new WebPush(['VAPID' => ['subject' => $subject, 'publicKey' => $this->publicKey, 'privateKey' => $this->privateKey]], ['TTL' => 86400],
+                new Psr18Client($this->httpClient), asyncClient: new HttplugClient($this->httpClient));
             foreach ($messages as [$subscription, $payload]) {
                 $webPush->queueNotification(Subscription::create([
                     'endpoint' => $subscription->getEndpoint(),
