@@ -20,10 +20,40 @@ export default class extends Controller {
         }
         try {
             const registration = await navigator.serviceWorker.ready;
-            this.toggle(null !== await registration.pushManager.getSubscription());
+            const subscription = await registration.pushManager.getSubscription();
+            this.toggle(null !== subscription);
+            if (subscription && 'granted' === Notification.permission) {
+                await this.refresh(registration, subscription);
+            }
         } catch (e) {
             this.toggle(false);
         }
+    }
+
+    /*
+     * Gleicht das Abo dieses Browsers mit dem Server ab: Gehört es zu einem anderen Schlüssel (neue Schlüssel,
+     * andere Instanz), wird es erneuert; außerdem kennt der Server es danach sicher (z. B. nach Ablauf gelöscht).
+     */
+    async refresh(registration, subscription) {
+        const key = this.decode(this.keyValue);
+        const current = subscription.options?.applicationServerKey;
+        if (current && !this.same(new Uint8Array(current), key)) {
+            await this.drop(subscription);
+            subscription =await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+        }
+        await this.send('POST', subscription);
+        this.devicesValue = true;
+        this.toggle(true);
+    }
+
+    // Altes Abo beim Server und im Browser entfernen; scheitert der Server, stört das nicht weiter.
+    async drop(subscription) {
+        await this.send('DELETE', subscription).catch(() => {});
+        await subscription.unsubscribe();
+    }
+
+    same(a, b) {
+        return a.length === b.length && a.every((value, i) => value === b[i]);
     }
 
     async enable() {
@@ -33,6 +63,11 @@ export default class extends Controller {
                 return;
             }
             const registration = await navigator.serviceWorker.ready;
+            // a leftover subscription with another key would make subscribe() fail
+            const old = await registration.pushManager.getSubscription();
+            if (old) {
+                await this.drop(old);
+            }
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: this.decode(this.keyValue),

@@ -14,6 +14,7 @@ Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nut
 
 ### Verbessert
 
+- **Push zuverlässiger:** Gehört das Push-Abo eines Geräts nicht mehr zum Server, erneuert Rokoso es beim Öffnen der Benachrichtigungs-Einstellungen selbst. Lehnt der Push-Dienst die Testnachricht ab, steht der Grund in der Meldung.
 - **Mehr Benachrichtigungen:** Direktnachrichten, Einladungen zu Sitzungen und Anfragen über das Kontaktformular (ohne zuständige Person beim Thema an alle, die das Postfach sehen) erscheinen jetzt auch unter Benachrichtigungen und als Push.
 
 ## 0.16.0 – 2026-10-12

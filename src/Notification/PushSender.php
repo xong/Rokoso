@@ -58,12 +58,12 @@ final readonly class PushSender
     /**
      * @param list<array{0: User, 1: PushCategory|null, 2: PushMessage}> $messages recipient, category (null = always) and content
      *
-     * @return int delivered messages
+     * @return array{sent: int, errors: list<string>} delivered messages and reasons for failures
      */
-    public function deliver(array $messages): int
+    public function deliver(array $messages): array
     {
         if (!$this->isEnabled()) {
-            return 0;
+            return ['sent' => 0, 'errors' => []];
         }
         $queue = [];
         $badges = [];
@@ -82,7 +82,7 @@ final readonly class PushSender
             }
         }
         if ([] === $queue) {
-            return 0;
+            return ['sent' => 0, 'errors' => []];
         }
 
         $result = $this->gateway->send($queue);
@@ -93,7 +93,7 @@ final readonly class PushSender
             }
         }
 
-        return $result['sent'];
+        return ['sent' => $result['sent'], 'errors' => $result['errors']];
     }
 
     private function message(Notification $notification): PushMessage

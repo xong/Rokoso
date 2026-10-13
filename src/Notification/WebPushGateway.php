@@ -37,10 +37,16 @@ final readonly class WebPushGateway implements PushGateway
 
     public function send(array $messages): array
     {
-        $result = ['sent' => 0, 'expired' => []];
+        $result = ['sent' => 0, 'expired' => [], 'errors' => []];
         if (!$this->isEnabled() || [] === $messages) {
             return $result;
         }
+
+        // logged as error: prod's fingers_crossed handler drops anything below
+        $fail = function (string $reason) use (&$result): void {
+            $result['errors'][] = $reason;
+            $this->logger->error('Web push failed: {reason}', ['reason' => $reason]);
+        };
 
         try {
             $subject = preg_match('/<([^>]+)>/', $this->contact, $m) ? 'mailto:'.$m[1] : 'mailto:'.$this->contact;
@@ -58,11 +64,15 @@ final readonly class WebPushGateway implements PushGateway
                 } elseif ($report->isSubscriptionExpired()) {
                     $result['expired'][] = $report->getEndpoint();
                 } else {
-                    $this->logger->info('Web push failed: {reason}', ['reason' => $report->getReason()]);
+                    // the push service explains itself in the body (e.g. VAPID key not matching the subscription)
+                    $response = $report->getResponse();
+                    $fail(null !== $response
+                        ? trim(\sprintf('HTTP %d %s', $response->getStatusCode(), mb_substr(trim((string) $response->getBody()), 0, 200)))
+                        : mb_substr($report->getReason(), 0, 300));
                 }
             }
         } catch (\Throwable $e) {
-            $this->logger->warning('Web push failed: {message}', ['message' => $e->getMessage()]);
+            $fail($e->getMessage());
         }
 
         return $result;

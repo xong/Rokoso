@@ -18,7 +18,7 @@ interface PushGateway
     /**
      * @param list<array{0: PushSubscription, 1: string}> $messages subscription and JSON payload
      *
-     * @return array{sent: int, expired: list<string>} delivered messages and endpoints that no longer exist
+     * @return array{sent: int, expired: list<string>, errors: list<string>} delivered messages, endpoints that no longer exist and reasons for other failures
      */
     public function send(array $messages): array;
 }

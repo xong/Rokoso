@@ -165,14 +165,21 @@ final class NotificationController extends AbstractController
     #[IsCsrfTokenValid('notification-settings')]
     public function pushTest(PushSender $push, TranslatorInterface $translator, #[CurrentUser] User $user): Response
     {
-        $sent = $push->isEnabled() ? $push->deliver([[$user, null, new PushMessage(
+        $result = $push->deliver([[$user, null, new PushMessage(
             $translator->trans('notification.push.test_title'),
             $this->generateUrl('profile_notifications'),
             'rokoso-test',
             $translator->trans('notification.push.test_body'),
-        )]]) : 0;
+        )]]);
         $this->em->flush();
-        $this->addFlash($sent > 0 ? 'success' : 'error', $sent > 0 ? 'notification.push.test_sent' : 'notification.push.test_none');
+        if ($result['sent'] > 0) {
+            $this->addFlash('success', 'notification.push.test_sent');
+        } elseif ([] !== $result['errors']) {
+            // the push service's answer helps to find the cause (wrong keys, blocked connection, …)
+            $this->addFlash('error', $translator->trans('notification.push.test_failed', ['%reason%' => $result['errors'][0]]));
+        } else {
+            $this->addFlash('error', 'notification.push.test_none');
+        }
 
         return $this->redirectToRoute('profile_notifications');
     }

@@ -1363,6 +1363,7 @@ notification:
         test_body: So sehen Benachrichtigungen von Rokoso auf diesem Gerät aus.
         test_sent: Die Testnachricht ist unterwegs.
         test_none: Kein Gerät hat die Testnachricht angenommen. Schalte Push-Benachrichtigungen auf diesem Gerät bitte noch einmal ein.
+        test_failed: 'Der Push-Dienst hat die Testnachricht abgelehnt (%reason%). Schalte Push-Benachrichtigungen auf diesem Gerät bitte aus und wieder ein; hilft das nicht, gib die Meldung an die Administration weiter.'
         categories: Push-Benachrichtigungen bekommen für
         categories_help: Gilt für alle deine Geräte. Unabhängig davon siehst du alles weiterhin unter Benachrichtigungen.
         mail_title: '{1}Neue E-Mail in %account%|]1,Inf[%count% neue E-Mails in %account%'

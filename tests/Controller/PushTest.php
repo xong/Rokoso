@@ -212,6 +212,14 @@ final class PushTest extends AppTestCase
         $this->client->followRedirect();
         self::assertSelectorTextContains('[role="status"]', 'Die Testnachricht ist unterwegs.');
 
+        // A refusal of the push service is shown with its reason (same container for the next requests)
+        $this->client->disableReboot();
+        $this->gateway()->failure = 'HTTP 403 key mismatch';
+        $crawler = $this->client->request('GET', '/profile/notifications');
+        $this->client->submit($crawler->selectButton('Testnachricht senden')->form());
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('[role="status"]', 'abgelehnt (HTTP 403 key mismatch)');
+
         // Without a device there is nothing to test
         $this->login($this->admin);
         $crawler = $this->client->request('GET', '/profile/notifications');
