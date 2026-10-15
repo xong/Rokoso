@@ -6,7 +6,6 @@ namespace App\Controller;
 
 use App\Entity\Draft;
 use App\Entity\MailAccount;
-use App\Entity\Message;
 use App\Entity\ShelfItem;
 use App\Entity\StoredFile;
 use App\Entity\User;
@@ -119,7 +118,7 @@ final class ComposeController extends AbstractController
                     throw $this->createNotFoundException();
                 }
                 $this->denyAccessUnlessGranted(MessageVoter::VIEW, $original);
-                $this->prefill($data, $original, $request->query->has('forward'), $request->query->getBoolean('all'), $available, $translator);
+                $assistant->prefill($data, $original, $request->query->has('forward'), $request->query->getBoolean('all'), $available);
             }
             $data->body = ComposeAssistant::withSignature($data->body, $signatures[$data->account?->getId() ?? 0] ?? '');
         }
@@ -264,51 +263,5 @@ final class ComposeController extends AbstractController
     private function uploadedFiles(mixed $files): array
     {
         return array_values(array_filter(\is_array($files) ? $files : [], static fn ($f): bool => $f instanceof UploadedFile));
-    }
-
-    /**
-     * @param list<MailAccount> $available
-     */
-    private function prefill(ComposeData $data, Message $original, bool $forward, bool $all, array $available, TranslatorInterface $translator): void
-    {
-        $data->original = $original;
-        $data->forward = $forward;
-        $data->project = $original->getFirstProject();
-        foreach ($available as $account) {
-            if ($account === $original->getMailAccount()) {
-                $data->account = $account;
-            }
-        }
-
-        $subject = $original->getSubject();
-        $date = $original->getDate()->setTimezone(new \DateTimeZone('Europe/Berlin'))->format('d.m.Y H:i');
-        $sender = '' !== $original->getFromName() ? \sprintf('%s <%s>', $original->getFromName(), $original->getFromAddress()) : $original->getFromAddress();
-        $text = (string) ($original->getTextBody() ?? $original->getSnippet());
-
-        if ($forward) {
-            $data->subject = preg_match('/^(fwd?|wg):/i', $subject) ? $subject : 'Fwd: '.$subject;
-            $data->body = "\n\n".$translator->trans('compose.forward_header', ['%from%' => $sender, '%date%' => $date, '%subject%' => $subject])."\n\n".$text;
-
-            return;
-        }
-
-        $data->subject = preg_match('/^(re|aw):/i', $subject) ? $subject : 'Re: '.$subject;
-        $quoted = implode("\n", array_map(static fn (string $line): string => '> '.$line, explode("\n", str_replace("\r\n", "\n", $text))));
-        $data->body = "\n\n".$translator->trans('compose.reply_header', ['%from%' => $sender, '%date%' => $date])."\n".$quoted;
-
-        if (MessageFolder::Sent === $original->getFolder()) {
-            // Antwort auf eigene Mail: an die ursprünglichen Empfänger
-            $data->to = implode(', ', array_map(static fn (array $r): string => $r['address'], $original->getToRecipients()));
-        } else {
-            $data->to = $original->getReplyToAddress() ?? $original->getFromAddress();
-        }
-        if ($all) {
-            $own = array_map(static fn ($a): string => $a->getEmailAddress(), $available);
-            $others = array_filter(
-                array_map(static fn (array $r): string => $r['address'], [...$original->getToRecipients(), ...$original->getCcRecipients()]),
-                static fn (string $address): bool => !\in_array($address, $own, true) && $address !== $data->to,
-            );
-            $data->cc = implode(', ', array_unique($others));
-        }
     }
 }

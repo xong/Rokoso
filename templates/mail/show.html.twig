@@ -215,7 +215,7 @@
                         {% for e in message.events|reverse %}
                             <li class="flex gap-2 text-slate-600">
                                 <time datetime="{{ e.createdAt|date('c') }}" class="w-28 shrink-0 text-xs text-slate-500">{{ e.createdAt|date('d.m.Y H:i') }}</time>
-                                <span>{{ e.type.label|trans({'%user%': e.user ? e.user.name : 'mail.rule_or_system'|trans, '%detail%': e.detail ?? '–'}) }}</span>
+                                <span>{{ e.type.label|trans({'%user%': e.user ? e.user.name : 'mail.rule_or_system'|trans, '%detail%': e.detail ?? '–'}) }} {{ include('_partials/agent_badge.html.twig', {subject: e}) }}</span>
                             </li>
                         {% endfor %}
                     </ol>

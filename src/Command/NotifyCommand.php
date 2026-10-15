@@ -72,7 +72,7 @@ final readonly class NotifyCommand
         $cleaned = $this->retention->clean();
 
         $io->writeln(\sprintf('%d Erinnerung(en), %d E-Mail(s), %d abgelaufene Anfrage(n), %d geteilte Datei(en) entfernt', $reminders, $mails, $purged, $incoming));
-        $io->writeln(\sprintf('Löschfristen: %d Nachricht(en), %d Einsendung(en), %d vertrauliche(s) Gespräch(e), %d Protokolleinträge', $cleaned['messages'], $cleaned['submissions'], $cleaned['confidential'], $cleaned['security']));
+        $io->writeln(\sprintf('Löschfristen: %d Nachricht(en), %d Einsendung(en), %d vertrauliche(s) Gespräch(e), %d Protokolleinträge, %d Agenten-Zugänge', $cleaned['messages'], $cleaned['submissions'], $cleaned['confidential'], $cleaned['security'], $cleaned['agents']));
 
         return 0;
     }

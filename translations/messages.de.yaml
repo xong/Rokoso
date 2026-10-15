@@ -97,7 +97,7 @@ security_log:
     by: 'durch %name%'
     account: Konto
     sessions: Angemeldete Geräte
-    sessions_intro: Wenn du ein Gerät verloren hast oder dich an einem fremden Rechner nicht abgemeldet hast, meldest du hier alle Geräte auf einmal ab – auch „Angemeldet bleiben“ verfällt.
+    sessions_intro: Wenn du ein Gerät verloren hast oder dich an einem fremden Rechner nicht abgemeldet hast, meldest du hier alle Geräte auf einmal ab – auch „Angemeldet bleiben“ verfällt. Zugänge für KI-Agenten enden ebenfalls.
     logout_everywhere: Überall abmelden
     logout_everywhere_confirm: Alle Geräte einschließlich dieses werden abgemeldet. Fortfahren?
     type:
@@ -119,6 +119,70 @@ security_log:
         member_removed: Aus Organisation entfernt
         organization_deleted: Organisation gelöscht
         platform_admin: Plattform-Admin ernannt
+        agent_token_created: Token für KI-Agenten erstellt
+        agent_token_revoked: Zugang für KI-Agenten widerrufen
+        agent_connected: KI-App verbunden
+
+agent:
+    title: KI-Agenten
+    intro: KI-Assistenten wie Claude können über die MCP-Schnittstelle mit deinen Rechten in Rokoso arbeiten – z. B. E-Mails sortieren und Antwortentwürfe schreiben, Kontakte anlegen, Aufgaben eintragen oder im Handbuch nachschlagen. Was ein Agent anlegt oder kommentiert, ist mit „über KI-Agent“ gekennzeichnet.
+    warning: Ein Agent sieht alles, was du in den freigegebenen Bereichen siehst. Inhalte von außen (z. B. E-Mails) können versuchen, den Agenten zu etwas zu überreden – prüfe seine Entwürfe und Änderungen, bevor du dich darauf verlässt.
+    no_organization: Keine deiner Organisationen erlaubt bisher KI-Agenten. Admins schalten das in den Einstellungen der Organisation unter „Bereiche“ ein; bis dahin sieht ein Agent nur deine persönlichen Inhalte.
+    scopes: Was darf der Agent?
+    scopes_required: Bitte mindestens einen Bereich auswählen.
+    drafts_only: E-Mails verschickt ein Agent nie selbst – er legt nur Entwürfe an, die du prüfst und absendest.
+    copy: Kopieren
+    copied: Kopiert
+    via_name: 'über KI-Agent (%name%)'
+    scope:
+        mail_read: E-Mails lesen
+        mail_write: E-Mails bearbeiten (Status, Zuweisung, Kommentare, Entwürfe)
+        contacts_read: Kontakte und Einrichtungen lesen
+        contacts_write: Kontakte und Einrichtungen anlegen und ändern
+        calendar_read: Kalender und Aufgaben lesen
+        calendar_write: Termine und Aufgaben anlegen und ändern
+        knowledge_read: Forum, Handbuch und Dateien lesen
+        knowledge_write: Im Forum schreiben und das Handbuch bearbeiten
+    connect:
+        title: Verbinden
+        url: Adresse der Schnittstelle (MCP-Server)
+        claude_ai: claude.ai und Claude Desktop
+        claude_ai_steps: Unter „Einstellungen → Konnektoren → Eigenen Konnektor hinzufügen“ diese Adresse eintragen. Beim Verbinden meldest du dich in Rokoso an und wählst aus, was Claude darf – ein Token brauchst du dafür nicht.
+        claude_code: Claude Code und eigene Skripte
+        claude_code_steps: Unten ein persönliches Token erstellen und als Bearer-Token mitschicken, für Claude Code zum Beispiel so (Token statt „rks_…“ einsetzen)
+        help: Ausführliche Anleitung
+    authorize:
+        title: KI-App verbinden
+        intro: '„%client%“ möchte mit den Rechten von %name% auf Rokoso zugreifen.'
+        redirect: 'Nach der Freigabe geht es zurück zu %host%.'
+        organizations: 'Sichtbar sind deine persönlichen Inhalte und die Organisationen, die KI-Agenten erlauben:'
+        allow: Erlauben
+        deny: Ablehnen
+        invalid: Diese Verbindungsanfrage ist ungültig oder abgelaufen. Starte die Verbindung in der KI-App bitte neu.
+        home: Zur Startseite
+    token:
+        new: Persönliches Token
+        name: Bezeichnung
+        name_placeholder: z. B. Claude Code am Laptop
+        name_required: Bitte eine Bezeichnung angeben.
+        validity: Gültig für
+        days: '{1} 1 Tag|]1,Inf[ %count% Tage'
+        unlimited: unbegrenzt
+        create: Token erstellen
+        created: Token erstellt
+        once: Kopiere das Token jetzt – es wird nur dieses eine Mal angezeigt. Behandle es wie ein Passwort.
+        secret: Neues Token
+        list: Aktive Zugänge
+        none: Noch keine Zugänge.
+        personal: Persönliches Token
+        connection: Verbundene App
+        created_at: 'erstellt %date%'
+        last_used: 'zuletzt genutzt %date%'
+        never_used: noch nicht genutzt
+        valid_until: 'gültig bis %date%'
+        revoke: Widerrufen
+        revoke_confirm: Der Agent verliert sofort den Zugriff. Fortfahren?
+        revoked: Zugang widerrufen.
 
 platform:
     title: Plattform
@@ -1216,6 +1280,8 @@ feature:
     facilities_help: Einrichtungen mit Vertretung und Stellvertretung, für Einladungen und Rundschreiben (braucht Kontakte).
     public_page: Öffentliche Seite
     public_page_help: Infoseite, Kontaktformular, Umfragen und Verteiler-Anmeldung für Außenstehende.
+    agents: KI-Agenten
+    agents_help: Mitglieder dürfen KI-Assistenten (z. B. Claude) über die Schnittstelle auf die Inhalte dieser Organisation zugreifen lassen – mit ihren eigenen Rechten. Standardmäßig aus.
 file:
     upload: Dateien hochladen
     upload_submit: Hochladen

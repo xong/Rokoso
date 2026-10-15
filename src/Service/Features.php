@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Agent\AgentContext;
 use App\Entity\Membership;
 use App\Entity\Organization;
 use App\Entity\User;
@@ -26,7 +27,7 @@ final class Features implements ResetInterface
     /** @var array<int, list<Organization>> user id => organizations */
     private array $organizations = [];
 
-    public function __construct(private readonly EntityManagerInterface $em)
+    public function __construct(private readonly EntityManagerInterface $em, private readonly AgentContext $agent)
     {
     }
 
@@ -41,12 +42,21 @@ final class Features implements ResetInterface
             return true;
         }
         foreach ($organizations as $organization) {
-            if ($organization->hasFeature($feature)) {
+            if ($organization->hasFeature($feature) && $this->agent->allows($organization)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * DQL condition for content that is not tied to an area (e.g. internal messages): while an AI agent works,
+     * organizations that do not allow agents are left out.
+     */
+    public function agentDql(string $organizationId): string
+    {
+        return $this->agent->isActive() ? $this->dql($organizationId, Feature::Agents) : '1 = 1';
     }
 
     /**
@@ -80,7 +90,12 @@ final class Features implements ResetInterface
             }
         }
 
-        return $this->disabled[$feature->value] ?? [];
+        $ids = $this->disabled[$feature->value] ?? [];
+        if (Feature::Agents !== $feature && $this->agent->isActive()) {
+            $ids = array_values(array_unique([...$ids, ...($this->disabled[Feature::Agents->value] ?? [])]));
+        }
+
+        return $ids;
     }
 
     public function reset(): void

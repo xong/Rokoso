@@ -25,6 +25,8 @@ enum Feature: string
     /** Facilities with their representatives (contacts), e.g. Kitas of a city parents' council */
     case Facilities = 'facilities';
     case PublicPage = 'public_page';
+    /** Access for AI agents (MCP interface) with the rights of the person; starts switched off */
+    case Agents = 'agents';
 
     public function label(): string
     {
@@ -60,6 +62,7 @@ enum Feature: string
             self::Contacts => ['contact_'],
             self::Facilities => ['facility_'],
             self::PublicPage => ['public_settings', 'public_topic_'],
+            self::Agents => ['agent_'],
         };
     }
 

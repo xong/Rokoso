@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Agent\AgentAware;
+use App\Agent\AgentAwareTrait;
 use App\Repository\CommentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,8 +16,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Exactly one target relation is set.
  */
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
-class Comment
+class Comment implements AgentAware
 {
+    use AgentAwareTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

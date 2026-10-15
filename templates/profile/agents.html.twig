@@ -1,0 +1,118 @@
+{% extends 'profile/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block detail_title %}{{ 'agent.title'|trans }}{% endblock %}
+
+{% block form %}
+    <div class="space-y-8">
+        <section aria-labelledby="agent-intro-heading" class="space-y-3">
+            <h2 id="agent-intro-heading" class="sr-only">{{ 'agent.title'|trans }}</h2>
+            <p class="text-slate-600">{{ 'agent.intro'|trans }}</p>
+            {% if organizations is empty %}
+                <div role="status" class="rounded-md bg-amber-50 p-3 text-sm text-amber-800">{{ 'agent.no_organization'|trans }}</div>
+            {% else %}
+                <p class="text-sm text-slate-600">{{ 'agent.authorize.organizations'|trans }} {{ organizations|map(o => o.name)|join(', ') }}</p>
+            {% endif %}
+            <div class="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">{{ 'agent.warning'|trans }}</div>
+        </section>
+
+        <section aria-labelledby="agent-url-heading" class="space-y-3">
+            <h2 id="agent-url-heading" class="text-base font-semibold">{{ 'agent.connect.title'|trans }}</h2>
+            <div>
+                <label for="agent-mcp-url" class="label">{{ 'agent.connect.url'|trans }}</label>
+                <div class="flex gap-2" data-controller="copy" data-copy-text-value="{{ mcp_url }}" data-copy-done-value="{{ 'agent.copied'|trans }}">
+                    <input id="agent-mcp-url" type="text" class="input font-mono text-xs" value="{{ mcp_url }}" readonly>
+                    <button type="button" class="btn-secondary shrink-0" data-action="copy#copy">
+                        {{ ux_icon('lucide:copy', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                        <span data-copy-target="label">{{ 'agent.copy'|trans }}</span>
+                    </button>
+                    <span class="sr-only" role="status" data-copy-target="status"></span>
+                </div>
+            </div>
+            <h3 class="font-medium">{{ 'agent.connect.claude_ai'|trans }}</h3>
+            <p class="text-sm text-slate-600">{{ 'agent.connect.claude_ai_steps'|trans }}</p>
+            <h3 class="font-medium">{{ 'agent.connect.claude_code'|trans }}</h3>
+            <p class="text-sm text-slate-600">{{ 'agent.connect.claude_code_steps'|trans }}</p>
+            <pre tabindex="0" class="overflow-x-auto rounded-md bg-slate-100 p-3 text-xs"><code>claude mcp add --transport http rokoso {{ mcp_url }} --header "Authorization: Bearer rks_…"</code></pre>
+            <p class="text-sm"><a class="link" href="{{ path('help_show', {slug: 'ki-agenten'}) }}">{{ 'agent.connect.help'|trans }}</a></p>
+        </section>
+
+        <section aria-labelledby="agent-new-heading" class="space-y-3">
+            <h2 id="agent-new-heading" class="text-base font-semibold">{{ 'agent.token.new'|trans }}</h2>
+            {% if new_secret %}
+                <div class="space-y-2 rounded-md border border-amber-300 bg-amber-50 p-4 text-amber-950" role="status">
+                    <h3 class="font-semibold">{{ 'agent.token.created'|trans }}</h3>
+                    <p class="text-sm">{{ 'agent.token.once'|trans }}</p>
+                    <div class="flex gap-2" data-controller="copy" data-copy-text-value="{{ new_secret }}" data-copy-done-value="{{ 'agent.copied'|trans }}">
+                        <label for="agent-new-secret" class="sr-only">{{ 'agent.token.secret'|trans }}</label>
+                        <input id="agent-new-secret" type="text" class="input font-mono text-xs" value="{{ new_secret }}" readonly>
+                        <button type="button" class="btn-secondary shrink-0" data-action="copy#copy">
+                            {{ ux_icon('lucide:copy', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            <span data-copy-target="label">{{ 'agent.copy'|trans }}</span>
+                        </button>
+                        <span class="sr-only" role="status" data-copy-target="status"></span>
+                    </div>
+                </div>
+            {% endif %}
+            <form method="post" action="{{ path('agent_token_new') }}" class="space-y-4" data-backup="off">
+                <input type="hidden" name="_token" value="{{ csrf_token('agent-token-new') }}">
+                <div>
+                    <label for="agent-token-name" class="label">{{ 'agent.token.name'|trans }}</label>
+                    <input id="agent-token-name" type="text" name="name" class="input" maxlength="80" required placeholder="{{ 'agent.token.name_placeholder'|trans }}">
+                </div>
+                <fieldset>
+                    <legend class="label mb-2">{{ 'agent.scopes'|trans }}</legend>
+                    {% for scope in scopes %}
+                        <div class="mb-1.5 flex items-start gap-2">
+                            <input type="checkbox" name="scopes[]" value="{{ scope.value }}" id="agent-scope-{{ loop.index }}" class="mt-0.5 size-4 accent-brand-600" {{ not scope.write ? 'checked' }}>
+                            <label for="agent-scope-{{ loop.index }}" class="text-sm text-slate-700">{{ scope.label|trans }}</label>
+                        </div>
+                    {% endfor %}
+                    <p class="mt-2 text-xs text-slate-500">{{ 'agent.drafts_only'|trans }}</p>
+                </fieldset>
+                <div>
+                    <label for="agent-token-days" class="label">{{ 'agent.token.validity'|trans }}</label>
+                    <select id="agent-token-days" name="days" class="input">
+                        {% for days in day_choices %}
+                            <option value="{{ days }}" {{ days == 90 ? 'selected' }}>{{ days > 0 ? 'agent.token.days'|trans({'%count%': days}) : 'agent.token.unlimited'|trans }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">
+                    {{ ux_icon('lucide:key-round', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    {{ 'agent.token.create'|trans }}
+                </button>
+            </form>
+        </section>
+
+        <section aria-labelledby="agent-list-heading" class="space-y-3">
+            <h2 id="agent-list-heading" class="text-base font-semibold">{{ 'agent.token.list'|trans }}</h2>
+            {% if tokens is empty %}
+                <p class="text-sm text-slate-500">{{ 'agent.token.none'|trans }}</p>
+            {% else %}
+                <ul role="list" class="card divide-y divide-slate-100">
+                    {% for token in tokens %}
+                        <li class="flex items-start gap-3 px-4 py-3">
+                            {{ ux_icon(token.personal ? 'lucide:key-round' : 'lucide:plug-zap', {class: 'mt-0.5 size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                            <div class="min-w-0 flex-1 text-sm">
+                                <p class="font-medium">
+                                    {{ token.name }}
+                                    {% if token.personal %}<span class="font-mono text-xs text-slate-500">…{{ token.hint }}</span>{% endif %}
+                                </p>
+                                <p class="text-xs text-slate-500">
+                                    {{ (token.personal ? 'agent.token.personal' : 'agent.token.connection')|trans }} ·
+                                    {{ 'agent.token.created_at'|trans({'%date%': token.createdAt|date('d.m.Y')}) }} ·
+                                    {{ token.lastUsedAt ? 'agent.token.last_used'|trans({'%date%': token.lastUsedAt|date('d.m.Y H:i')}) : 'agent.token.never_used'|trans }} ·
+                                    {{ token.validUntil ? 'agent.token.valid_until'|trans({'%date%': token.validUntil|date('d.m.Y')}) : 'agent.token.unlimited'|trans }}
+                                </p>
+                                <p class="mt-1 text-xs text-slate-600">{{ token.scopes|map(s => s.label|trans)|join(', ') }}</p>
+                            </div>
+                            {{ ui.post_button(path('agent_token_revoke', {id: token.id}), 'agent-token-revoke', 'agent.token.revoke',
+                                {class: 'btn-secondary px-2 py-1 text-xs', icon: 'lucide:x', confirm: 'agent.token.revoke_confirm'}) }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

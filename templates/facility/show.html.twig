@@ -27,6 +27,7 @@
     <div class="max-w-2xl space-y-6 p-4 lg:p-6">
         <div>
             <p class="text-xs text-slate-500">{{ facility.organization.name }}{% if facility.number %} · {{ 'facility.number'|trans }} {{ facility.number }}{% endif %}</p>
+            {{ include('_partials/agent_badge.html.twig', {subject: facility, class: 'mt-1'}) }}
             {% if facility.reportedOn %}
                 <p class="mt-1 text-sm {{ facility.needsReview ? 'text-amber-800' : 'text-slate-600' }}">
                     {{ 'facility.reported_on_value'|trans({'%date%': facility.reportedOn|date('d.m.Y')}) }}{% if facility.needsReview %} – {{ 'facility.review_hint'|trans }}{% endif %}

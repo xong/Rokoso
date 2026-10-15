@@ -40,6 +40,7 @@
                 <twig:Avatar name="{{ contact.displayName }}" image="{{ contact.photo }}" size="size-20 text-2xl" />
                 <div class="min-w-0">
                     <p class="text-xl font-semibold">{{ contact.salutation }} {{ contact.displayName }}</p>
+                    {{ include('_partials/agent_badge.html.twig', {subject: contact}) }}
                     {% if contact.position or (contact.company and (contact.firstName or contact.lastName)) %}
                         <p class="text-slate-600">{{ [contact.position, contact.firstName or contact.lastName ? contact.company : null]|filter(v => v)|join(', ') }}</p>
                     {% endif %}

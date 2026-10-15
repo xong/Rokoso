@@ -18,7 +18,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 final readonly class BasicAuthListener
 {
-    private const array OPEN_PREFIXES = ['/_deploy', '/_cron/'];
+    /** machine endpoints with their own authentication (AI agents send a bearer token) */
+    private const array OPEN_PREFIXES = ['/_deploy', '/_cron/', '/mcp', '/oauth/token', '/oauth/register', '/.well-known/'];
 
     public function __construct(
         private TranslatorInterface $translator,

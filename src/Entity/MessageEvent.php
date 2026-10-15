@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Agent\AgentAware;
+use App\Agent\AgentAwareTrait;
 use App\Enum\MessageEventType;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -11,8 +13,10 @@ use Doctrine\ORM\Mapping as ORM;
  * One entry of a message's history: who did what when (Verlauf).
  */
 #[ORM\Entity]
-class MessageEvent
+class MessageEvent implements AgentAware
 {
+    use AgentAwareTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

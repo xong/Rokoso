@@ -15,16 +15,18 @@
         </div>
     </div>
     <ul role="list" class="p-2">
-        {% for item in [
+        {% set items = [
             {key: 'profile', route: 'profile_edit', icon: 'lucide:user-round', label: 'profile.section_profile'},
             {key: 'password', route: 'profile_password', icon: 'lucide:key-round', label: 'profile.section_password'},
             {key: 'email', route: 'profile_email', icon: 'lucide:at-sign', label: 'profile.section_email'},
             {key: 'notifications', route: 'profile_notifications', icon: 'lucide:bell', label: 'profile.section_notifications'},
             {key: 'calendar', route: 'profile_calendar', icon: 'lucide:calendar-sync', label: 'profile.section_calendar'},
             {key: 'security', route: 'profile_security', icon: 'lucide:shield-check', label: 'profile.section_security'},
+        ]|merge(route_available('agent_tokens') ? [{key: 'agents', route: 'agent_tokens', icon: 'lucide:bot', label: 'agent.title'}] : [])|merge([
             {key: 'account', route: 'profile_account', icon: 'lucide:user-x', label: 'profile.section_account'},
             {key: 'changelog', route: 'profile_changelog', icon: 'lucide:sparkles', label: 'changelog.title'},
-        ] %}
+        ]) %}
+        {% for item in items %}
             {% set active = section|default('') == item.key %}
             <li>
                 <a href="{{ path(item.route) }}" {% if active %}aria-current="page"{% endif %}

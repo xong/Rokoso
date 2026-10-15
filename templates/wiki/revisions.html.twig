@@ -21,6 +21,7 @@
                            class="block px-3 py-2 {{ active ? 'bg-brand-50 text-brand-700' : 'hover:bg-slate-50' }}">
                             <span class="block font-medium">{{ r.createdAt|date('d.m.Y H:i') }}{% if loop.first %} · {{ 'wiki.current'|trans }}{% endif %}</span>
                             <span class="block truncate text-xs text-slate-500">{{ r.author ? r.author.name : '–' }}</span>
+                            {{ include('_partials/agent_badge.html.twig', {subject: r, class: 'mt-1'}) }}
                         </a>
                     </li>
                 {% endfor %}

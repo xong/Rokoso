@@ -1,0 +1,8 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ 'agent.authorize.title'|trans }}{% endblock %}
+
+{% block content %}
+    <p role="alert" class="text-sm text-slate-700">{{ 'agent.authorize.invalid'|trans }}</p>
+    <p class="mt-4"><a class="link text-sm" href="{{ path('home') }}">{{ 'agent.authorize.home'|trans }}</a></p>
+{% endblock %}

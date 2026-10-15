@@ -19,6 +19,7 @@
             · {{ draft.account.name }}
             {% if draft.original %}· {{ (draft.forward ? 'compose.title_forward' : 'compose.title_reply')|trans }}{% endif %}
         </p>
+        {{ include('_partials/agent_badge.html.twig', {subject: draft, class: 'mt-1'}) }}
         {% if draft.sendError %}
             <p class="mt-1 flex items-center gap-1 text-xs text-red-700">
                 {{ ux_icon('lucide:circle-alert', {class: 'size-3.5', 'aria-hidden': 'true'}) }}

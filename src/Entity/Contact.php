@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Agent\AgentAware;
+use App\Agent\AgentAwareTrait;
 use App\Repository\ContactRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -18,8 +20,10 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Entity(repositoryClass: ContactRepository::class)]
 #[ORM\Index(columns: ['email'])]
 #[Assert\Expression('this.getFirstName() or this.getLastName() or this.getCompany()', message: 'contact.name_required')]
-class Contact
+class Contact implements AgentAware
 {
+    use AgentAwareTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

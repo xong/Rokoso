@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Agent\AgentContext;
 use App\Entity\ForumBoard;
 use App\Entity\Membership;
 use App\Entity\User;
@@ -16,7 +17,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ForumBoardRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly AgentContext $agent)
     {
         parent::__construct($registry, ForumBoard::class);
     }
@@ -38,7 +39,8 @@ class ForumBoardRepository extends ServiceEntityRepository
             ->addOrderBy('b.name')
             ->getQuery()->getResult();
 
-        return array_values(array_filter($all, static fn (ForumBoard $x): bool => $x->getOrganization()->hasFeature(Feature::Forum) && $x->isVisibleTo($user)));
+        return array_values(array_filter($all, fn (ForumBoard $x): bool => $x->getOrganization()->hasFeature(Feature::Forum) && $x->isVisibleTo($user)
+            && $this->agent->allows($x->getOrganization())));
     }
 
     /**

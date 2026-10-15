@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Mail;
 
 use App\Entity\MailAccount;
+use App\Entity\Message;
 use App\Entity\Signature;
 use App\Entity\TextSnippet;
 use App\Entity\User;
+use App\Enum\MessageFolder;
 use App\Repository\ContactGroupRepository;
 use App\Repository\ContactRepository;
 use App\Repository\OrganizationRepository;
@@ -91,6 +93,54 @@ final readonly class ComposeAssistant
     public function signature(User $user, MailAccount $account): ?Signature
     {
         return $this->em->getRepository(Signature::class)->findOneBy(['user' => $user, 'account' => $account]);
+    }
+
+    /**
+     * Reply (to the sender, or everyone) or forward: recipients, subject and the quoted original.
+     *
+     * @param list<MailAccount> $available accounts the user may send from
+     */
+    public function prefill(ComposeData $data, Message $original, bool $forward, bool $all, array $available): void
+    {
+        $data->original = $original;
+        $data->forward = $forward;
+        $data->project = $original->getFirstProject();
+        foreach ($available as $account) {
+            if ($account === $original->getMailAccount()) {
+                $data->account = $account;
+            }
+        }
+
+        $subject = $original->getSubject();
+        $date = $original->getDate()->setTimezone(new \DateTimeZone('Europe/Berlin'))->format('d.m.Y H:i');
+        $sender = '' !== $original->getFromName() ? \sprintf('%s <%s>', $original->getFromName(), $original->getFromAddress()) : $original->getFromAddress();
+        $text = (string) ($original->getTextBody() ?? $original->getSnippet());
+
+        if ($forward) {
+            $data->subject = preg_match('/^(fwd?|wg):/i', $subject) ? $subject : 'Fwd: '.$subject;
+            $data->body = "\n\n".$this->translator->trans('compose.forward_header', ['%from%' => $sender, '%date%' => $date, '%subject%' => $subject])."\n\n".$text;
+
+            return;
+        }
+
+        $data->subject = preg_match('/^(re|aw):/i', $subject) ? $subject : 'Re: '.$subject;
+        $quoted = implode("\n", array_map(static fn (string $line): string => '> '.$line, explode("\n", str_replace("\r\n", "\n", $text))));
+        $data->body = "\n\n".$this->translator->trans('compose.reply_header', ['%from%' => $sender, '%date%' => $date])."\n".$quoted;
+
+        if (MessageFolder::Sent === $original->getFolder()) {
+            // Antwort auf eigene Mail: an die ursprünglichen Empfänger
+            $data->to = implode(', ', array_map(static fn (array $r): string => $r['address'], $original->getToRecipients()));
+        } else {
+            $data->to = $original->getReplyToAddress() ?? $original->getFromAddress();
+        }
+        if ($all) {
+            $own = array_map(static fn ($a): string => $a->getEmailAddress(), $available);
+            $others = array_filter(
+                array_map(static fn (array $r): string => $r['address'], [...$original->getToRecipients(), ...$original->getCcRecipients()]),
+                static fn (string $address): bool => !\in_array($address, $own, true) && $address !== $data->to,
+            );
+            $data->cc = implode(', ', array_unique($others));
+        }
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Agent\AgentContext;
 use App\Entity\Folder;
 use App\Entity\Membership;
 use App\Entity\User;
@@ -16,7 +17,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class FolderRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly AgentContext $agent)
     {
         parent::__construct($registry, Folder::class);
     }
@@ -38,7 +39,8 @@ class FolderRepository extends ServiceEntityRepository
             ->addOrderBy('f.name')
             ->getQuery()->getResult();
 
-        return array_values(array_filter($all, static fn (Folder $x): bool => $x->getOrganization()->hasFeature(Feature::Files) && $x->isVisibleTo($user)));
+        return array_values(array_filter($all, fn (Folder $x): bool => $x->getOrganization()->hasFeature(Feature::Files) && $x->isVisibleTo($user)
+            && $this->agent->allows($x->getOrganization())));
     }
 
     /**

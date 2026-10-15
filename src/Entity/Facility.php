@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Agent\AgentAware;
+use App\Agent\AgentAwareTrait;
 use App\Enum\FacilityRole;
 use App\Repository\FacilityRepository;
 use Doctrine\DBAL\Types\Types;
@@ -16,8 +18,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ORM\Entity(repositoryClass: FacilityRepository::class)]
 #[ORM\Index(name: 'facility_name_idx', columns: ['organization_id', 'name'])]
-class Facility
+class Facility implements AgentAware
 {
+    use AgentAwareTrait;
+
     /** A report older than this is shown as "to be checked" (boards elect yearly, but not on one date). */
     public const string REVIEW_AFTER = '-1 year';
 

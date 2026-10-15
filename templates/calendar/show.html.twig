@@ -18,6 +18,7 @@
             <span class="mt-1.5 size-3 shrink-0 rounded-full" style="background-color: {{ item.color }}" aria-hidden="true"></span>
             <div class="min-w-0 flex-1">
                 <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">{{ item.type.label|trans }}</p>
+                {{ include('_partials/agent_badge.html.twig', {subject: item, class: 'mt-1'}) }}
                 <p class="text-xl font-semibold {{ item.done ? 'line-through text-slate-500' : '' }}">{{ occurrence ? occurrence.title : item.title }}</p>
                 <p class="mt-1 text-slate-700">
                     {% set start = occurrence ? occurrence.start : item.startsAt %}

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Agent\AgentAware;
+use App\Agent\AgentAwareTrait;
 use App\Mail\ComposeData;
 use App\Repository\DraftRepository;
 use Doctrine\DBAL\Types\Types;
@@ -15,8 +17,10 @@ use Doctrine\ORM\Mapping as ORM;
  */
 #[ORM\Entity(repositoryClass: DraftRepository::class)]
 #[ORM\Index(columns: ['send_at'])]
-class Draft
+class Draft implements AgentAware
 {
+    use AgentAwareTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

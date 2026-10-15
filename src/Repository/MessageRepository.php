@@ -48,6 +48,7 @@ class MessageRepository extends ServiceEntityRepository
                 .' OR :viewer MEMBER OF m.recipientUsers'
                 .' OR (m.organization IS NULL AND EXISTS (SELECT 1 FROM '.Project::class.' vp WHERE vp MEMBER OF m.projects AND vp.createdBy = :viewer))')
             ->andWhere(\sprintf("m.type <> '%s' OR %s", MessageType::Email->value, $this->features->dql('IDENTITY(m.organization)', Feature::Mail)))
+            ->andWhere($this->features->agentDql('IDENTITY(m.organization)'))
             ->setParameter('viewer', $user);
     }
 

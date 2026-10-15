@@ -9,6 +9,7 @@ use App\Entity\ContactGroup;
 use App\Entity\Facility;
 use App\Entity\MailAccount;
 use App\Entity\PublicSettings;
+use App\Enum\Feature;
 use App\Enum\PublicDesign;
 use App\Enum\Theme;
 
@@ -21,7 +22,7 @@ final class AccessibilityTest extends BrowserTestCase
 {
     private const string AXE_VERSION = '4.11.0';
 
-    private const array PAGES = ['/', '/mail', '/mail/spam', '/mail/new', '/calendar', '/tasks', '/meetings', '/polls', '/forum', '/files', '/contacts', '/contacts/facilities', '/projects', '/knowledge', '/notifications', '/confidential', '/profile', '/profile/security', '/profile/notifications', '/profile/changelog', '/organizations', '/search?q=Eltern', '/admin', '/admin/organizations', '/admin/log', '/help', '/help/rundschreiben'];
+    private const array PAGES = ['/', '/mail', '/mail/spam', '/mail/new', '/calendar', '/tasks', '/meetings', '/polls', '/forum', '/files', '/contacts', '/contacts/facilities', '/projects', '/knowledge', '/notifications', '/confidential', '/profile', '/profile/security', '/profile/notifications', '/profile/changelog', '/profile/agents', '/organizations', '/search?q=Eltern', '/admin', '/admin/organizations', '/admin/log', '/help', '/help/rundschreiben', '/help/ki-agenten'];
 
     public function testMainPagesHaveNoSeriousViolations(): void
     {
@@ -32,6 +33,7 @@ final class AccessibilityTest extends BrowserTestCase
         $user->setPlatformAdmin(true);
         $organization = $this->createOrganization($user);
         $organization->getMembership($user)?->setConfidant(true);
+        $organization->enableFeature(Feature::Agents);
         $account = (new MailAccount($organization))->setName('Postfach')->setEmailAddress(uniqid('a11y-').'@example.org')->setSenderName('SEV')
             ->setImapHost('imap.example.org')->setImapUsername('sev')->setSmtpHost('smtp.example.org');
         $settings = (new PublicSettings($organization))->setSlug(uniqid('a11y-'))->setConfidentialEnabled(true)

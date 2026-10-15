@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.20.0 – 2026-10-16
+
+### Neu
+
+- **KI-Agenten:** KI-Assistenten wie Claude können mit Rokoso arbeiten – E-Mails sichten und Antwortentwürfe vorbereiten, Kontakte und Einrichtungen pflegen, Aufgaben und Termine eintragen, im Forum, Handbuch und in den Dateien nachschlagen. Ein Agent handelt mit deinen Rechten und nur in den Bereichen, die du freigibst. E-Mails verschickt er nie, er legt nur Entwürfe an. Alles, was ein Agent anlegt, ist mit „über KI-Agent“ gekennzeichnet. Admins schalten den Bereich unter „Organisation bearbeiten“ ein, danach verbindest du Claude im Profil unter „KI-Agenten“.
+
 ## 0.19.1 – 2026-10-16
 
 ### Verbessert

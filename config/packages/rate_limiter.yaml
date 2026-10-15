@@ -1,0 +1,12 @@
+framework:
+    rate_limiter:
+        # requests of one AI agent token to /mcp
+        agent_api:
+            policy: sliding_window
+            limit: 120
+            interval: '1 minute'
+        # OAuth client registrations per IP address
+        oauth_register:
+            policy: fixed_window
+            limit: 20
+            interval: '1 hour'

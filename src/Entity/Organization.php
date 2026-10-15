@@ -68,12 +68,13 @@ class Organization
     private int $confidentialRetentionMonths = 6;
 
     /**
-     * Switched-off areas (values of {@see Feature}); stored this way round so new areas start switched on.
+     * Switched-off areas (values of {@see Feature}); stored this way round so new areas start switched on
+     * (except the access for AI agents, which an organization has to allow explicitly).
      *
      * @var list<string>
      */
     #[ORM\Column(type: Types::JSON, options: ['default' => '[]'])]
-    private array $disabledFeatures = [];
+    private array $disabledFeatures = ['agents'];
 
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
@@ -248,6 +249,13 @@ class Organization
             $enabled[] = $feature->value;
         }
         $this->disabledFeatures = array_values(array_diff(array_map(static fn (Feature $f): string => $f->value, Feature::cases()), $enabled));
+
+        return $this;
+    }
+
+    public function enableFeature(Feature $feature): static
+    {
+        $this->disabledFeatures = array_values(array_diff($this->disabledFeatures, [$feature->value]));
 
         return $this;
     }

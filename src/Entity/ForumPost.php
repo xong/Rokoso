@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Agent\AgentAware;
+use App\Agent\AgentAwareTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -13,8 +15,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Forum post in Markdown; attachments are uploads linked to the post.
  */
 #[ORM\Entity]
-class ForumPost
+class ForumPost implements AgentAware
 {
+    use AgentAwareTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

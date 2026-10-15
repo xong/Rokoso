@@ -10,6 +10,7 @@ use App\Entity\Message;
 use App\Entity\Organization;
 use App\Entity\Survey;
 use App\Entity\SurveyResponse;
+use App\Repository\AgentTokenRepository;
 use App\Repository\ConfidentialCaseRepository;
 use App\Repository\SecurityEventRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,7 +19,8 @@ use Psr\Clock\ClockInterface;
 
 /**
  * Applies the deletion periods of each organization (trash, old messages, public submissions,
- * confidential conversations) and drops security log entries after one year. Called by `app:notify`.
+ * confidential conversations), drops security log entries after one year and unusable AI agent access.
+ * Called by `app:notify`.
  */
 final readonly class RetentionCleaner
 {
@@ -29,12 +31,13 @@ final readonly class RetentionCleaner
         private AttachmentStorage $attachments,
         private SecurityEventRepository $securityEvents,
         private ConfidentialCaseRepository $confidentialCases,
+        private AgentTokenRepository $agentTokens,
         private ClockInterface $clock,
     ) {
     }
 
     /**
-     * @return array{messages: int, submissions: int, confidential: int, security: int}
+     * @return array{messages: int, submissions: int, confidential: int, security: int, agents: int}
      */
     public function clean(): array
     {
@@ -70,6 +73,7 @@ final readonly class RetentionCleaner
             'submissions' => $submissions,
             'confidential' => $confidential,
             'security' => $this->securityEvents->deleteOlderThan($now->modify('-1 year')),
+            'agents' => $this->agentTokens->deleteUnusable($now),
         ];
     }
 

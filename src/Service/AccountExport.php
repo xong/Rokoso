@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Agent\AgentScope;
+use App\Entity\AgentToken;
 use App\Entity\CalendarItem;
 use App\Entity\Comment;
 use App\Entity\Draft;
@@ -85,6 +87,13 @@ final readonly class AccountExport
                 'detail' => $e->getDetail(),
                 'ip' => $e->getIp(),
             ], $this->find(SecurityEvent::class, 'user', $user)),
+            'agent_tokens' => array_map(static fn (AgentToken $t): array => [
+                'name' => $t->getName(),
+                'type' => $t->isPersonal() ? 'personal' : 'oauth',
+                'scopes' => AgentScope::join($t->getScopes()),
+                'created_at' => self::date($t->getCreatedAt()),
+                'last_used_at' => null === $t->getLastUsedAt() ? null : self::date($t->getLastUsedAt()),
+            ], $this->find(AgentToken::class, 'user', $user)),
         ];
     }
 

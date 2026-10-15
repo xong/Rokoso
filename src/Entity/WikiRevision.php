@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Agent\AgentAware;
+use App\Agent\AgentAwareTrait;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -11,8 +13,10 @@ use Doctrine\ORM\Mapping as ORM;
  * Saved state of a knowledge base page (title and text at the time of saving).
  */
 #[ORM\Entity]
-class WikiRevision
+class WikiRevision implements AgentAware
 {
+    use AgentAwareTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

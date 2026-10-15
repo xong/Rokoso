@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Security;
 
+use App\Entity\AgentToken;
 use App\Entity\Draft;
 use App\Entity\ForumTopicRead;
 use App\Entity\Membership;
 use App\Entity\MessageRead;
 use App\Entity\MessageUserState;
 use App\Entity\Notification;
+use App\Entity\OAuthCode;
 use App\Entity\Organization;
 use App\Entity\PushSubscription;
 use App\Entity\ResetPasswordRequest;
@@ -53,7 +55,8 @@ final readonly class AccountDeleter
     {
         foreach ([Membership::class => 'user', Draft::class => 'owner', ShelfItem::class => 'owner', Notification::class => 'recipient',
             PushSubscription::class => 'user', Signature::class => 'user', ResetPasswordRequest::class => 'user', Watch::class => 'user',
-            ForumTopicRead::class => 'user', MessageRead::class => 'user', MessageUserState::class => 'user'] as $class => $field) {
+            ForumTopicRead::class => 'user', MessageRead::class => 'user', MessageUserState::class => 'user',
+            AgentToken::class => 'user', OAuthCode::class => 'user'] as $class => $field) {
             $this->em->createQueryBuilder()->delete($class, 'x')->where('x.'.$field.' = :user')->setParameter('user', $user)->getQuery()->execute();
         }
         $this->images->remove($user->getAvatar());

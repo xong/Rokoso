@@ -1,0 +1,7 @@
+{# Kennzeichen „über KI-Agent“ für Einträge, die ein Agent angelegt hat (subject: AgentAware) #}
+{% if subject.agentName is defined and subject.agentName %}
+    <span class="badge bg-violet-50 text-violet-700 {{ class|default('') }}">
+        {{ ux_icon('lucide:bot', {class: 'size-3', 'aria-hidden': 'true'}) }}
+        {{ 'agent.via_name'|trans({'%name%': subject.agentName}) }}
+    </span>
+{% endif %}

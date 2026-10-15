@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Agent\AgentAware;
+use App\Agent\AgentAwareTrait;
 use App\Enum\CalendarItemType;
 use App\Enum\Recurrence;
 use App\Enum\TaskStatus;
@@ -23,8 +25,10 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 #[ORM\Entity(repositoryClass: CalendarItemRepository::class)]
 #[ORM\Index(columns: ['starts_at'])]
-class CalendarItem
+class CalendarItem implements AgentAware
 {
+    use AgentAwareTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
