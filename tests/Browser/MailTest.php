@@ -61,4 +61,34 @@ final class MailTest extends BrowserTestCase
         self::assertSelectorTextContains('section[aria-labelledby=list-heading]', $found);
         self::assertStringContainsString('q=', (string) $this->client->getCurrentURL());
     }
+
+    public function testSearchStartsWhileTypingWithoutEnter(): void
+    {
+        $user = $this->createUser();
+        $organization = $this->createOrganization($user);
+        $account = (new MailAccount($organization))->setName('Postfach')->setEmailAddress(uniqid('live-').'@example.org')
+            ->setImapHost('imap.example.org')->setImapUsername('sev')->setSmtpHost('smtp.example.org');
+        $word = 'Laternenumzug'.random_int(1000, 9999);
+        $this->em()->persist($account);
+        foreach (['Treffen' => 'Wir planen den '.$word.'.', 'Elternabend' => 'Hallo'] as $subject => $body) {
+            $message = (new Message())->setMailAccount($account)->setFrom('eva@example.org', 'Eva')->setSubject($subject)->setBody($body);
+            $message->setThreadKey($message->deriveThreadKey());
+            $this->em()->persist($message);
+        }
+        $this->em()->flush();
+
+        $this->login($user);
+        $this->client->request('GET', '/mail');
+        $this->client->waitForElementToContain('main', 'Elternabend');
+        // a word from the body, no Enter
+        $this->client->getCrawler()->filter('#mail-q')->sendKeys($word);
+        $this->client->waitForElementToNotContain('section[aria-labelledby=list-heading]', 'Elternabend');
+        self::assertSelectorTextContains('section[aria-labelledby=list-heading]', 'Treffen');
+        self::assertStringContainsString('q='.$word, (string) $this->client->getCurrentURL());
+        // the field keeps text and focus, so typing can go on
+        self::assertSame([$word, true], $this->client->executeScript("const q = document.getElementById('mail-q'); return [q.value, document.activeElement === q];"));
+
+        $this->client->executeScript("const q = document.getElementById('mail-q'); q.value = ''; q.dispatchEvent(new Event('search'));");
+        $this->client->waitForElementToContain('section[aria-labelledby=list-heading]', 'Elternabend');
+    }
 }

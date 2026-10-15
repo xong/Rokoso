@@ -15,7 +15,7 @@ Erledigte Nachrichten findest du unter **Erledigt** und **Alle E-Mails**. **Wied
 
 ## Suchen
 
-Das Suchfeld über der Liste durchsucht Betreff, Absender, Empfänger, den ganzen Text und die Namen der Anhänge. Mehrere Wörter müssen alle vorkommen, egal in welcher Reihenfolge; eine Wortgruppe setzt du in Anführungszeichen, z. B. `"Elternabend Grundschule"`. Im Eingang findet die Suche auch erledigte Nachrichten und solche auf Wiedervorlage – nur Papierkorb und Spam bleiben außen vor.
+Das Suchfeld über der Liste sucht schon beim Tippen und durchsucht Betreff, Absender, Empfänger, den ganzen Text und die Namen der Anhänge. Mehrere Wörter müssen alle vorkommen, egal in welcher Reihenfolge; eine Wortgruppe setzt du in Anführungszeichen, z. B. `"Elternabend Grundschule"`. Im Eingang findet die Suche auch erledigte Nachrichten und solche auf Wiedervorlage – nur Papierkorb und Spam bleiben außen vor.
 
 ## Wer kümmert sich?
 

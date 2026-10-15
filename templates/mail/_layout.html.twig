@@ -19,13 +19,14 @@
 {% endblock %}
 
 {% block list %}
-    {# Filter über der Liste (GET, sendet bei Änderung automatisch ab) #}
+    {# Filter über der Liste (GET, sendet bei Änderung und beim Tippen automatisch ab) #}
     <form method="get" action="{{ path(list_route) }}" role="search" aria-label="{{ 'mail.filter.label'|trans }}"
-          class="sticky top-0 z-10 space-y-2 border-b border-slate-200 bg-surface/95 p-2 backdrop-blur" data-controller="autosubmit">
+          class="sticky top-0 z-10 space-y-2 border-b border-slate-200 bg-surface/95 p-2 backdrop-blur" data-controller="autosubmit live-search" data-turbo-action="replace" data-action="submit->live-search#remember">
         <div class="relative">
             {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-2.5 left-2.5 size-4 text-slate-400', 'aria-hidden': 'true'}) }}
             <label for="mail-q" class="sr-only">{{ 'action.search'|trans }}</label>
-            <input type="search" id="mail-q" name="q" value="{{ filter.query }}" placeholder="{{ 'mail.filter.search'|trans }}" class="input pl-8">
+            <input type="search" id="mail-q" name="q" value="{{ filter.query }}" placeholder="{{ 'mail.filter.search'|trans }}" class="input pl-8"
+                   autocomplete="off" data-live-search-target="input" data-action="input->live-search#type search->live-search#cleared">
         </div>
         <div class="flex gap-2">
             <label for="mail-show" class="sr-only">{{ 'mail.filter.show'|trans }}</label>

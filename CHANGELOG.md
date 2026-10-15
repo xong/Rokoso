@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.20.1 – 2026-10-16
+
+### Verbessert
+
+- **Suche in den E-Mails startet beim Tippen:** Bisher suchte das Feld über der Mailliste erst nach der Eingabetaste – ohne sie blieb die Liste unverändert. Jetzt filtert die Liste kurz nach dem Tippen, und du kannst gleich weiterschreiben. Leeren des Felds zeigt wieder alle Nachrichten.
+
 ## 0.20.0 – 2026-10-16
 
 ### Neu
