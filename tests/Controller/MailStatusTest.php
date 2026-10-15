@@ -194,9 +194,15 @@ final class MailStatusTest extends AppTestCase
         $this->em()->flush();
         $this->login($this->user);
 
-        $this->action('project', [$a->getId(), $b->getId()], ['project' => $project->getId()]);
-        self::assertSame('Schulwege', $this->reload($a)->getProject()?->getName());
-        self::assertSame('Schulwege', $this->reload($b)->getProject()?->getName());
+        $this->action('project_add', [$a->getId(), $b->getId()], ['project' => $project->getId()]);
+        self::assertSame('Schulwege', $this->reload($a)->getFirstProject()?->getName());
+        self::assertSame('Schulwege', $this->reload($b)->getFirstProject()?->getName());
+        // undo posts the inverse with the same project
+        $this->client->followRedirect();
+        self::assertSelectorExists('form[action="/mail/action"] input[name="action"][value="project_remove"] ~ input[name="project"][value="'.$project->getId().'"]');
+        $this->action('project_remove', [$a->getId()], ['project' => $project->getId()]);
+        self::assertCount(0, $this->reload($a)->getProjects());
+        self::assertCount(1, $this->reload($b)->getProjects());
 
         $this->action('trash', [$a->getId(), $b->getId()]);
         self::assertTrue($this->reload($a)->isTrashed());
@@ -264,10 +270,10 @@ final class MailStatusTest extends AppTestCase
         $other = $repo->findOneBy(['messageIdHeader' => 'n2@example.org']);
         self::assertNotNull($matched);
         self::assertNotNull($other);
-        self::assertSame('Newsletter', $matched->getProject()?->getName());
+        self::assertSame('Newsletter', $matched->getFirstProject()?->getName());
         self::assertTrue($matched->isDone());
         self::assertCount(1, $matched->getAssignees());
-        self::assertNull($other->getProject());
+        self::assertCount(0, $other->getProjects());
         self::assertFalse($other->isDone());
     }
 

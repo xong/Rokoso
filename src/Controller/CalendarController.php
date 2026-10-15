@@ -98,7 +98,7 @@ final class CalendarController extends AbstractController
             $source = $message->getSubject();
             $item->setType(CalendarItemType::Task)->setStartsAt($date?->setTime(9, 0))->setTitle(mb_substr($message->getSubject(), 0, 200))
                 ->setSourceMessage($message)->setOrganization($message->getOrganization() ?? $item->getOrganization());
-            $project ??= $message->getProject();
+            $project ??= $message->getFirstProject();
         }
         $topic = $topics->find($request->query->getInt('topic'));
         if (null !== $topic && $this->isGranted(ForumVoter::VIEW, $topic)) {

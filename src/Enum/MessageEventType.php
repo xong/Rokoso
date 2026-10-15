@@ -11,7 +11,10 @@ enum MessageEventType: string
 {
     case Assigned = 'assigned';
     case Unassigned = 'unassigned';
+    /** Before several projects per message: project replaced (history only). */
     case Project = 'project';
+    case ProjectAdded = 'project_added';
+    case ProjectRemoved = 'project_removed';
     case Done = 'done';
     case Reopened = 'reopened';
     case Snoozed = 'snoozed';

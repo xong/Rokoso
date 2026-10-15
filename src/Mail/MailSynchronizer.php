@@ -148,8 +148,8 @@ final readonly class MailSynchronizer
             if (!$rule->matches($message)) {
                 continue;
             }
-            if (null !== $rule->getProject() && null === $message->getProject()) {
-                $message->setProject($rule->getProject());
+            if (null !== $rule->getProject()) {
+                $message->addProject($rule->getProject());
             }
             foreach ($rule->getAssignees() as $assignee) {
                 $message->addAssignee($assignee);

@@ -99,9 +99,11 @@ final readonly class MailSender
             ->setCcRecipients(self::recipients($cc))
             ->setSubject($data->subject)
             ->setBody($data->body, $html)
-            ->setProject($data->project)
             ->setCircular($data->circular)
             ->setInReplyTo($isReply ? $original->getMessageIdHeader() : null);
+        if (null !== $data->project) {
+            $message->addProject($data->project);
+        }
         if ($isReply) {
             $message->setReferencesHeader(trim(($original->getReferencesHeader() ?? '').' <'.$original->getMessageIdHeader().'>'));
         }

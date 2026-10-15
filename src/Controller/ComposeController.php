@@ -244,7 +244,7 @@ final class ComposeController extends AbstractController
     {
         $data->original = $original;
         $data->forward = $forward;
-        $data->project = $original->getProject();
+        $data->project = $original->getFirstProject();
         foreach ($available as $account) {
             if ($account === $original->getMailAccount()) {
                 $data->account = $account;

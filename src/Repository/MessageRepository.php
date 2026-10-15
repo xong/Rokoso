@@ -9,6 +9,7 @@ use App\Entity\Message;
 use App\Entity\MessageRead;
 use App\Entity\MessageUserState;
 use App\Entity\Organization;
+use App\Entity\Project;
 use App\Entity\User;
 use App\Enum\Feature;
 use App\Enum\MessageFolder;
@@ -41,11 +42,10 @@ class MessageRepository extends ServiceEntityRepository
     public function visibleQuery(User $user): QueryBuilder
     {
         return $this->createQueryBuilder('m')
-            ->leftJoin('m.project', 'p')
             ->andWhere('(m.organization IS NOT NULL AND EXISTS (SELECT 1 FROM '.Membership::class.' vm WHERE vm.organization = m.organization AND vm.user = :viewer AND '.Membership::fullDql('vm').'))'
                 .' OR m.author = :viewer'
                 .' OR :viewer MEMBER OF m.recipientUsers'
-                .' OR (m.organization IS NULL AND p.createdBy = :viewer)')
+                .' OR (m.organization IS NULL AND EXISTS (SELECT 1 FROM '.Project::class.' vp WHERE vp MEMBER OF m.projects AND vp.createdBy = :viewer))')
             ->andWhere(\sprintf("m.type <> '%s' OR %s", MessageType::Email->value, $this->features->dql('IDENTITY(m.organization)', Feature::Mail)))
             ->setParameter('viewer', $user);
     }
@@ -93,7 +93,7 @@ class MessageRepository extends ServiceEntityRepository
     public function findForList(User $user, MessageFilter $filter): array
     {
         $qb = $this->visibleQuery($user)
-            ->addSelect('a', 'p')
+            ->addSelect('a')
             ->leftJoin('m.mailAccount', 'a')
             ->orderBy('m.date', \SortDirection::Descending)
             ->setFirstResult(($filter->page - 1) * self::PAGE_SIZE)
@@ -138,7 +138,7 @@ class MessageRepository extends ServiceEntityRepository
         };
 
         if (null !== $filter->project) {
-            $qb->andWhere('m.project = :project')->setParameter('project', $filter->project);
+            $qb->andWhere(':project MEMBER OF m.projects')->setParameter('project', $filter->project);
         }
         if (null !== $filter->account) {
             $qb->andWhere('m.mailAccount = :account')->setParameter('account', $filter->account);
@@ -148,8 +148,29 @@ class MessageRepository extends ServiceEntityRepository
                 ->setParameter('q', '%'.addcslashes($filter->query, '%_\\').'%');
         }
 
-        /* @var list<Message> */
-        return $qb->getQuery()->getResult();
+        /** @var list<Message> $messages */
+        $messages = $qb->getQuery()->getResult();
+        $this->loadProjects($messages);
+
+        return $messages;
+    }
+
+    /**
+     * Loads the projects of all messages in one query (badges in lists; a fetch join would break the paging).
+     *
+     * @param list<Message> $messages
+     */
+    private function loadProjects(array $messages): void
+    {
+        if ([] !== $messages) {
+            $this->createQueryBuilder('m')
+                ->select('m', 'p')
+                ->leftJoin('m.projects', 'p')
+                ->andWhere('m IN (:messages)')
+                ->setParameter('messages', $messages)
+                ->getQuery()
+                ->getResult();
+        }
     }
 
     /**

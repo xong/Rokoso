@@ -17,7 +17,7 @@ Erledigte Nachrichten findest du unter **Erledigt** und **Alle E-Mails**. **Wied
 
 - **Verantwortliche** – mit „Mir zuordnen“ übernimmst du eine Nachricht. Wer zugeordnet wird, bekommt eine Benachrichtigung. Der Filter „Ohne Verantwortliche“ zeigt, was noch niemand übernommen hat.
 - **Kommentare** – interne Notizen fürs Team neben der Nachricht. Wer die E-Mail geschickt hat, sieht sie nicht. Mit @Name erwähnst du jemanden.
-- **Projekt** – ordnet die Nachricht einem Thema zu.
+- **Projekte** – ordnen die Nachricht einem oder mehreren Themen zu. Sie erscheint dann bei jedem dieser Projekte; der Filter „Projekt“ in der Liste findet sie über jedes davon. In der Sammelaktion ordnest du mehreren Nachrichten auf einmal ein Projekt zu oder entfernst es wieder.
 - **Wiedervorlage** – blendet eine Nachricht für dich bis zu einem Zeitpunkt aus. Danach steht sie wieder in deinem Eingang.
 
 Schreibt gerade jemand anderes eine Antwort auf dieselbe Nachricht, siehst du einen Hinweis.

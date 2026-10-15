@@ -60,7 +60,7 @@ final readonly class GroupMessageConverter
                 $board = $boards[spl_object_id($organization)] ??= $this->board($organization, $message->getAuthor());
                 $topic = (new ForumTopic($board, $message->getAuthor()))
                     ->setTitle($message->getSubject() ?: $this->translator->trans('mail.no_subject'))
-                    ->setProject($message->getProject())
+                    ->setProject($message->getFirstProject())
                     ->backdate($message->getDate());
                 $this->em->persist($topic);
             }

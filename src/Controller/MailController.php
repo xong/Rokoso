@@ -160,16 +160,12 @@ final class MailController extends AbstractController
         }
 
         $projectId = $payload->getInt('project') ?: null;
-        $previousProject = $selected[0]->getProject()?->getId();
-        $samePrevious = [] === array_filter($selected, static fn (Message $m): bool => $m->getProject()?->getId() !== $previousProject);
         $changed = $this->actions->apply($action, $selected, $user, $projectId, $this->snoozeUntil($payload->getString('until') ?: $payload->getString('until_custom')));
 
         if ($payload->getBoolean('undo')) {
             $this->addFlash('success', 'mail.undone');
-        } elseif ('project' === $action) {
-            $this->undoFlash(null === $projectId ? 'mail.project.removed' : 'mail.project.set', 'project', $samePrevious ? $changed : [], $previousProject);
         } else {
-            $this->undoFlash('mail.action_done.'.$action, $action, $changed);
+            $this->undoFlash('mail.action_done.'.$action, $action, $changed, $projectId);
         }
 
         return $this->redirectAfterAction($request, 1 === \count($selected) ? $selected[0] : null);
@@ -256,16 +252,25 @@ final class MailController extends AbstractController
         return $this->redirectBack($request, $message);
     }
 
-    #[Route('/{id<\d+>}/project', name: 'mail_project', methods: ['POST'])]
+    /**
+     * Replace the projects (searchable multiselect). They do not move the message out of the inbox (Entscheidung 39).
+     */
+    #[Route('/{id<\d+>}/projects', name: 'mail_projects', methods: ['POST'])]
     #[IsGranted(MessageVoter::VIEW, 'message')]
     #[IsCsrfTokenValid('mail-action')]
-    public function project(Request $request, Message $message, #[CurrentUser] User $user): Response
+    public function projects(Request $request, Message $message, ParticipantResolver $participants, #[CurrentUser] User $user): Response
     {
-        // The project no longer moves the message out of the inbox (Entscheidung 39).
-        $previous = $message->getProject()?->getId();
-        $projectId = $request->getPayload()->getInt('project') ?: null;
-        $changed = $this->actions->apply('project', [$message], $user, $projectId);
-        $this->undoFlash(null === $message->getProject() ? 'mail.project.removed' : 'mail.project.set', 'project', $changed, $previous);
+        $ids = array_map(intval(...), $request->getPayload()->all('projects'));
+        // only the offered projects change; others (not shown in the picker) stay
+        foreach ($participants->projects($message) as $candidate) {
+            $wanted = \in_array($candidate->getId(), $ids, true);
+            if ($wanted && !$message->hasProject($candidate)) {
+                $message->addProject($candidate)->log(MessageEventType::ProjectAdded, $user, $candidate->getName());
+            } elseif (!$wanted && $message->hasProject($candidate)) {
+                $message->removeProject($candidate)->log(MessageEventType::ProjectRemoved, $user, $candidate->getName());
+            }
+        }
+        $this->em->flush();
 
         return $this->redirectBack($request, $message);
     }
@@ -338,9 +343,9 @@ final class MailController extends AbstractController
      *
      * @param list<Message> $changed
      */
-    private function undoFlash(string $text, string $action, array $changed, ?int $previousProject = null): void
+    private function undoFlash(string $text, string $action, array $changed, ?int $project = null): void
     {
-        $inverse = 'project' === $action ? 'project' : (MessageActions::INVERSE[$action] ?? null);
+        $inverse = MessageActions::INVERSE[$action] ?? null;
         if ([] === $changed) {
             $this->addFlash('info', 'mail.nothing_changed');
 
@@ -356,7 +361,7 @@ final class MailController extends AbstractController
             'count' => \count($changed),
             'action' => $inverse,
             'ids' => array_map(static fn (Message $m): ?int => $m->getId(), $changed),
-            'project' => $previousProject,
+            'project' => $project,
         ]);
     }
 

@@ -116,7 +116,7 @@
                                     {% set targets = [] %}
                                     {% for u in message.recipientUsers %}{% set targets = targets|merge([u.name]) %}{% endfor %}
                                     {% if message.organization %}{% set targets = targets|merge([message.organization.name]) %}{% endif %}
-                                    {% if message.project %}{% set targets = targets|merge([message.project.name]) %}{% endif %}
+                                    {% set targets = targets|merge(message.projects|map(p => p.name)) %}
                                     {{ targets|join(', ') }}
                                 </dd>
                             {% endif %}

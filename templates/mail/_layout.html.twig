@@ -7,6 +7,7 @@
 {% block title %}{{ folder_title|trans }}{% endblock %}
 {% block list_title %}{{ folder_title|trans }}{% endblock %}
 {% block back_url %}{{ path(list_route, filter.params) }}{% endblock %}
+{% block list_key %}{{ path(list_route, filter.params) }}{% endblock %}
 
 {% block list_actions %}
     {% if folder == 'inbox' and accounts is not empty %}
@@ -105,10 +106,11 @@
                 <span class="flex w-full items-center gap-1">
                     <label for="bulk-project" class="sr-only">{{ 'mail.project.label'|trans }}</label>
                     <select id="bulk-project" name="project" class="input min-w-0 flex-1 py-1">
-                        <option value="">{{ 'mail.project.none'|trans }}</option>
+                        <option value="">{{ 'mail.project.choose'|trans }}</option>
                         {% for p in projects %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
                     </select>
-                    <button type="submit" name="action" value="project" class="btn-secondary py-1">{{ 'mail.bulk.set_project'|trans }}</button>
+                    <button type="submit" name="action" value="project_add" class="btn-secondary py-1">{{ 'mail.bulk.add_project'|trans }}</button>
+                    <button type="submit" name="action" value="project_remove" class="btn-ghost py-1">{{ 'mail.bulk.remove_project'|trans }}</button>
                 </span>
             {% endif %}
         </form>

@@ -232,7 +232,9 @@ final readonly class PublicSubmissionHandler
             ->setBody($body);
         $message->setThreadKey($message->deriveThreadKey());
         if (null !== $topic) {
-            $message->setProject($topic->getProject());
+            if (null !== $topic->getProject()) {
+                $message->addProject($topic->getProject());
+            }
             if (null !== $topic->getAssignee()) {
                 $message->addAssignee($topic->getAssignee());
             }

@@ -43,8 +43,13 @@
                 {% elseif done and folder != 'done' %}
                     <span title="{{ 'mail.icon.done'|trans }}">{{ ux_icon('lucide:circle-check', {class: 'size-3.5 text-emerald-600', 'aria-label': 'mail.icon.done'|trans, role: 'img'}) }}</span>
                 {% endif %}
-                {% if m.project %}
-                    <span class="badge max-w-24 truncate bg-slate-100 text-slate-600"><span class="size-2 shrink-0 rounded-full" style="background-color: {{ m.project.color }}" aria-hidden="true"></span>{{ m.project.name }}</span>
+                {% set first_project = m.projects|first %}
+                {% if first_project %}
+                    <span class="badge max-w-24 truncate bg-slate-100 text-slate-600"><span class="size-2 shrink-0 rounded-full" style="background-color: {{ first_project.color }}" aria-hidden="true"></span>{{ first_project.name }}</span>
+                    {% if m.projects|length > 1 %}
+                        {% set more_projects = m.projects|slice(1)|map(p => p.name)|join(', ') %}
+                        <span class="badge bg-slate-100 text-slate-600" title="{{ more_projects }}"><span aria-hidden="true">+{{ m.projects|length - 1 }}</span><span class="sr-only">{{ more_projects }}</span></span>
+                    {% endif %}
                 {% endif %}
             </span>
         </span>

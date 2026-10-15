@@ -69,7 +69,7 @@ final class MembershipTest extends AppTestCase
         $topic->addPost((new ForumPost($topic, $this->admin))->setBody('Kreuzung Nord'));
         $hidden = (new ForumBoard($this->org, $this->admin))->setName('Vorstand');
         $note = (new Message(MessageType::Internal))->setAuthor($this->admin)->setFrom('owner@example.org', 'Eva')
-            ->setOrganization($this->org)->setProject($this->released)->setSubject('Interne Notiz')->setBody('nur Mitglieder');
+            ->setOrganization($this->org)->addProject($this->released)->setSubject('Interne Notiz')->setBody('nur Mitglieder');
         $task = (new CalendarItem($this->admin))->setTitle('Begehung planen')->setType(CalendarItemType::Task)
             ->setOrganization($this->org)->setProject($this->released)->setStartsAt(null);
         foreach ([$board, $topic, $hidden, $note, $task] as $entity) {

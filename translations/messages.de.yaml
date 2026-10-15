@@ -637,7 +637,8 @@ mail:
         unassign_me: Zuordnung entfernt.
         snooze: 'Auf Wiedervorlage gelegt.'
         unsnooze: Wiedervorlage aufgehoben.
-        project: Projekt geändert.
+        project_add: '{1}Projekt zugeordnet.|]1,Inf[Projekt %count% Nachrichten zugeordnet.'
+        project_remove: '{1}Projektzuordnung entfernt.|]1,Inf[Projektzuordnung bei %count% Nachrichten entfernt.'
         spam: '{1}In den Spam-Ordner verschoben.|]1,Inf[%count% Nachrichten in den Spam-Ordner verschoben.'
         not_spam: '{1}Kein Spam – zurück im Eingang.|]1,Inf[%count% Nachrichten zurück im Eingang.'
         block: '{1}Absender gesperrt, die Nachricht liegt im Spam-Ordner.|]1,Inf[Absender gesperrt, %count% Nachrichten liegen im Spam-Ordner.'
@@ -646,12 +647,15 @@ mail:
         select: 'Auswählen: %subject%'
         select_all: Alle auswählen
         selected: ausgewählt
-        set_project: Projekt setzen
+        add_project: Zuordnen
+        remove_project: Entfernen
         none: Keine Nachricht ausgewählt.
     event:
         assigned: '%user% hat %detail% als verantwortlich eingetragen'
         unassigned: '%user% hat %detail% als verantwortlich entfernt'
         project: '%user% hat das Projekt auf „%detail%“ gesetzt'
+        project_added: '%user% hat das Projekt „%detail%“ zugeordnet'
+        project_removed: '%user% hat das Projekt „%detail%“ entfernt'
         done: '%user% hat die Nachricht erledigt'
         reopened: '%user% hat die Nachricht wieder geöffnet'
         snoozed: '%user% hat die Wiedervorlage auf %detail% gesetzt'
@@ -703,10 +707,9 @@ mail:
         no_match: Keine Treffer
     project:
         none: Kein Projekt
-        change: Projekt ändern
+        change: Projekte ändern
         label: Projekt
-        set: Projekt zugeordnet. Die Nachricht bleibt offen im Eingang, bis sie erledigt ist.
-        removed: Projektzuordnung entfernt.
+        choose: Projekt wählen …
         search: Projekt suchen …
     assignees:
         label: Verantwortliche

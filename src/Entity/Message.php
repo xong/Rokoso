@@ -111,9 +111,10 @@ class Message
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?User $author = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(onDelete: 'SET NULL')]
-    private ?Project $project = null;
+    /** @var Collection<int, Project> */
+    #[ORM\ManyToMany(targetEntity: Project::class)]
+    #[ORM\JoinTable(name: 'message_project')]
+    private Collection $projects;
 
     /** Circular letter: sent as a separate email to each "to" recipient. */
     #[ORM\Column]
@@ -150,6 +151,7 @@ class Message
         $this->date = new \DateTimeImmutable();
         $this->createdAt = new \DateTimeImmutable();
         $this->assignees = new ArrayCollection();
+        $this->projects = new ArrayCollection();
         $this->recipientUsers = new ArrayCollection();
         $this->attachments = new ArrayCollection();
         $this->comments = new ArrayCollection();
@@ -488,9 +490,37 @@ class Message
         return $this;
     }
 
-    public function getProject(): ?Project
+    /** @return Collection<int, Project> */
+    public function getProjects(): Collection
     {
-        return $this->project;
+        return $this->projects;
+    }
+
+    /** First assigned project, for places that take a single one (appointment, forum topic). */
+    public function getFirstProject(): ?Project
+    {
+        return $this->projects->first() ?: null;
+    }
+
+    public function hasProject(Project $project): bool
+    {
+        return $this->projects->contains($project);
+    }
+
+    public function addProject(Project $project): static
+    {
+        if (!$this->projects->contains($project)) {
+            $this->projects->add($project);
+        }
+
+        return $this;
+    }
+
+    public function removeProject(Project $project): static
+    {
+        $this->projects->removeElement($project);
+
+        return $this;
     }
 
     public function isCircular(): bool
@@ -501,13 +531,6 @@ class Message
     public function setCircular(bool $circular): static
     {
         $this->circular = $circular;
-
-        return $this;
-    }
-
-    public function setProject(?Project $project): static
-    {
-        $this->project = $project;
 
         return $this;
     }

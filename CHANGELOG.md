@@ -8,12 +8,14 @@ Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nut
 
 ### Neu
 
+- **Mehrere Projekte pro E-Mail:** Eine Nachricht lässt sich jetzt mehreren Projekten zuordnen – in der Nachricht per Häkchen, für mehrere Nachrichten über die Sammelaktion („Zuordnen“ bzw. „Entfernen“). Die Liste zeigt das erste Projekt und die Zahl der weiteren.
 - **Push-Benachrichtigungen nach Wahl:** Im Profil unter „Benachrichtigungen“ legst du fest, wofür sich dein Smartphone oder Browser meldet – etwa nur für Erwähnungen, Direktnachrichten und Zuweisungen. Mit „Testnachricht senden“ prüfst du, ob es klappt.
 - **Neue E-Mails als Push:** Auf Wunsch meldet sich dein Gerät, wenn in einem gemeinsamen Postfach neue E-Mails eintreffen – eine Zusammenfassung je Abruf. Standardmäßig aus.
 - **Zahl am App-Symbol:** Die installierte App zeigt die Zahl deiner ungelesenen Benachrichtigungen am Symbol (je nach Gerät).
 
 ### Verbessert
 
+- **Liste springt nicht mehr:** Beim Anklicken einer E-Mail bleibt die Liste an ihrer Stelle, statt wieder nach oben zu springen – auch in den anderen Bereichen mit Liste.
 - **Push zuverlässiger:** Gehört das Push-Abo eines Geräts nicht mehr zum Server, erneuert Rokoso es beim Öffnen der Benachrichtigungs-Einstellungen selbst. Lehnt der Push-Dienst die Testnachricht ab, steht der Grund in der Meldung.
 - **Mehr Benachrichtigungen:** Direktnachrichten, Einladungen zu Sitzungen und Anfragen über das Kontaktformular (ohne zuständige Person beim Thema an alle, die das Postfach sehen) erscheinen jetzt auch unter Benachrichtigungen und als Push.
 

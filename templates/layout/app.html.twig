@@ -54,7 +54,7 @@
                     <h1 id="list-heading" class="truncate text-base font-semibold">{% block list_title %}{% endblock %}</h1>
                     <div class="ml-auto flex items-center gap-1">{% block list_actions %}{% endblock %}{{ help_link }}</div>
                 </header>
-                <div class="min-h-0 flex-1 overflow-y-auto">
+                <div class="min-h-0 flex-1 overflow-y-auto" data-controller="keep-scroll" data-keep-scroll-key-value="{% block list_key %}{{ app.request.pathInfo|split('/')|slice(0, 2)|join('/') }}{% endblock %}">
                     {% block list %}{% endblock %}
                 </div>
             </section>

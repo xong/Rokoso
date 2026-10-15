@@ -92,23 +92,40 @@ final class MailCollaborationTest extends AppTestCase
 
     public function testProjectAssignmentAndFilter(): void
     {
-        $crawler = $this->client->request('GET', $this->showUrl());
-        $form = $crawler->filter('form[action$="/project"]')->form();
-        $values = $form->getPhpValues();
-        $values['project'] = (string) $this->project->getId();
-        $this->client->request('POST', $form->getUri(), $values);
-        self::assertSame('Schulwege', $this->reload()->getProject()?->getName());
-        self::assertResponseRedirects($this->showUrl());
+        $second = (new Project($this->user))->setName('Schulfest')->setOrganization($this->project->getOrganization());
+        $this->em()->persist($second);
+        $this->em()->flush();
+        $names = fn (): array => array_map(static fn (Project $p): string => (string) $p->getName(), $this->reload()->getProjects()->toArray());
+        $save = function (Project ...$projects): void {
+            $crawler = $this->client->request('GET', $this->showUrl());
+            $form = $crawler->filter('form[action$="/projects"]')->form();
+            $values = $form->getPhpValues();
+            $values['projects'] = array_map(static fn (Project $p): string => (string) $p->getId(), $projects);
+            $this->client->request('POST', $form->getUri(), $values);
+            self::assertResponseRedirects($this->showUrl());
+        };
 
-        // Status model: stays open in the inbox until done, also reachable on the project page
+        $save($this->project, $second);
+        self::assertEqualsCanonicalizing(['Schulwege', 'Schulfest'], $names());
+
+        // Both in the list badge and in the history; status model: stays open in the inbox, reachable via each project
         $this->client->followRedirect();
-        self::assertSelectorExists('form[action="/mail/action"] input[name="undo"]');
+        self::assertSelectorTextContains('#list-panel', '+1');
+        self::assertSelectorTextContains('main', 'hat das Projekt „Schulfest“ zugeordnet');
         $this->client->request('GET', '/mail');
         self::assertSelectorTextContains('main', 'Zebrastreifen');
+        foreach ([$this->project, $second] as $project) {
+            $this->client->request('GET', '/mail/all?project='.$project->getId());
+            self::assertSelectorTextContains('main', 'Zebrastreifen');
+            $this->client->request('GET', '/projects/'.$project->getId());
+            self::assertSelectorTextContains('#project-messages-heading + ul', 'Zebrastreifen');
+        }
+
+        // Unchecking removes only that project
+        $save($second);
+        self::assertSame(['Schulfest'], $names());
         $this->client->request('GET', '/mail/all?project='.$this->project->getId());
-        self::assertSelectorTextContains('main', 'Zebrastreifen');
-        $this->client->request('GET', '/projects/'.$this->project->getId());
-        self::assertSelectorTextContains('#project-messages-heading + ul', 'Zebrastreifen');
+        self::assertSelectorTextNotContains('main', 'Zebrastreifen');
     }
 
     public function testToolbarTrashReturnsToFilteredList(): void

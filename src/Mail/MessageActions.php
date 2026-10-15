@@ -22,7 +22,7 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 final readonly class MessageActions
 {
-    public const array ACTIONS = ['done', 'done_all', 'reopen', 'trash', 'restore', 'read', 'unread', 'assign_me', 'unassign_me', 'project', 'snooze', 'unsnooze', 'spam', 'not_spam', 'block'];
+    public const array ACTIONS = ['done', 'done_all', 'reopen', 'trash', 'restore', 'read', 'unread', 'assign_me', 'unassign_me', 'project_add', 'project_remove', 'snooze', 'unsnooze', 'spam', 'not_spam', 'block'];
 
     /** Action that reverts another one (for the undo toast). */
     public const array INVERSE = [
@@ -35,6 +35,8 @@ final readonly class MessageActions
         'unread' => 'read',
         'assign_me' => 'unassign_me',
         'unassign_me' => 'assign_me',
+        'project_add' => 'project_remove',
+        'project_remove' => 'project_add',
         'snooze' => 'unsnooze',
         'spam' => 'not_spam',
         'not_spam' => 'spam',
@@ -208,14 +210,24 @@ final readonly class MessageActions
                 $message->removeAssignee($user)->log(MessageEventType::Unassigned, $user, $user->getName());
 
                 return true;
-            case 'project':
+            case 'project_add':
                 $project = $this->project($message, $projectId);
-                if ($project === $message->getProject()) {
+                if (null === $project || $message->hasProject($project)) {
                     return false;
                 }
-                $message->setProject($project)->log(MessageEventType::Project, $user, $project?->getName());
+                $message->addProject($project)->log(MessageEventType::ProjectAdded, $user, $project->getName());
 
                 return true;
+            case 'project_remove':
+                foreach ($message->getProjects() as $project) {
+                    if ($project->getId() === $projectId) {
+                        $message->removeProject($project)->log(MessageEventType::ProjectRemoved, $user, $project->getName());
+
+                        return true;
+                    }
+                }
+
+                return false;
             case 'snooze':
                 if (null === $until || $until <= new \DateTimeImmutable()) {
                     return false;
