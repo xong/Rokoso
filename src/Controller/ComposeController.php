@@ -10,6 +10,7 @@ use App\Entity\Message;
 use App\Entity\ShelfItem;
 use App\Entity\StoredFile;
 use App\Entity\User;
+use App\Enum\Feature;
 use App\Enum\MessageFolder;
 use App\Form\ComposeFormType;
 use App\Mail\ComposeAssistant;
@@ -18,9 +19,11 @@ use App\Mail\MailSender;
 use App\Mail\Outbox;
 use App\Repository\ContactGroupRepository;
 use App\Repository\DraftRepository;
+use App\Repository\FacilityRepository;
 use App\Repository\FolderRepository;
 use App\Repository\MailAccountRepository;
 use App\Repository\MessageRepository;
+use App\Repository\OrganizationRepository;
 use App\Repository\ProjectRepository;
 use App\Repository\StoredFileRepository;
 use App\Security\Voter\MessageVoter;
@@ -54,6 +57,8 @@ final class ComposeController extends AbstractController
         ProjectRepository $projects,
         DraftRepository $drafts,
         ContactGroupRepository $groups,
+        OrganizationRepository $organizations,
+        FacilityRepository $facilities,
         MailSender $sender,
         Outbox $outbox,
         ComposeAssistant $assistant,
@@ -101,6 +106,10 @@ final class ComposeController extends AbstractController
                 }
                 $this->denyAccessUnlessGranted(OrganizationVoter::VIEW, $group->getOrganization());
                 $data->to = implode(', ', $group->getAddresses());
+                $data->circular = true;
+            }
+            if ($request->query->getInt('facilities') > 0) {
+                $data->to = implode(', ', $this->facilityAddresses($request, $organizations, $facilities));
                 $data->circular = true;
             }
             $originalId = $request->query->getInt('reply') ?: $request->query->getInt('forward');
@@ -191,6 +200,26 @@ final class ComposeController extends AbstractController
             'signatures' => $signatures,
             'snippets' => $assistant->snippets($user),
         ]);
+    }
+
+    /**
+     * Circular to the facilities of an organization: ?facilities=<organization>&recipients=…&district=….
+     *
+     * @return list<string>
+     */
+    private function facilityAddresses(Request $request, OrganizationRepository $organizations, FacilityRepository $facilities): array
+    {
+        $organization = $organizations->find($request->query->getInt('facilities'));
+        if (null === $organization || !$organization->hasFeature(Feature::Facilities) || !$organization->hasFeature(Feature::Contacts)) {
+            throw $this->createNotFoundException();
+        }
+        $this->denyAccessUnlessGranted(OrganizationVoter::VIEW, $organization);
+        $recipients = $request->query->getString('recipients');
+        if (!\in_array($recipients, [FacilityRepository::TO_ALL, FacilityRepository::TO_MISSING], true)) {
+            $recipients = FacilityRepository::TO_REPRESENTATIVES;
+        }
+
+        return $facilities->addresses($organization, $recipients, $request->query->getString('district'));
     }
 
     /**

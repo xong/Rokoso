@@ -1,0 +1,49 @@
+{% extends 'facility/_layout.html.twig' %}
+
+{% set has_detail = true %}
+{% set role_label = role.label|trans %}
+
+{% block title %}{{ role_label }} · {{ facility.name }}{% endblock %}
+{% block detail_title %}{{ role_label }} · {{ facility.name }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl space-y-6 p-4 lg:p-6">
+        {% if previous %}
+            <p class="text-sm text-slate-600">{{ 'facility.replace_intro'|trans({'%name%': previous.displayName, '%role%': role_label}) }}</p>
+        {% else %}
+            <p class="text-sm text-slate-600">{{ 'facility.assign_intro'|trans({'%role%': role_label}) }}</p>
+        {% endif %}
+
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.firstName) }}
+                {{ form_row(form.lastName) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.phone) }}
+            </div>
+            {{ form_row(form.reportedOn) }}
+            {{ form_rest(form) }}
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ path('facility_show', {id: facility.id}) }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+
+        {% if previous %}
+            <form method="post" action="{{ path('facility_release', {id: facility.id, role: role.value}) }}" class="card space-y-3 p-4" data-backup="off"
+                  data-turbo-confirm="{{ 'facility.release_confirm'|trans({'%name%': previous.displayName}) }}">
+                <h3 class="font-semibold">{{ 'facility.release'|trans }}</h3>
+                <p class="text-sm text-slate-600">{{ 'facility.release_help'|trans({'%name%': previous.displayName}) }}</p>
+                <input type="hidden" name="_token" value="{{ csrf_token('release-facility-' ~ facility.id) }}">
+                {% if previous_deletable %}
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="release-delete" name="delete_contact" value="1">
+                        <label for="release-delete" class="text-sm">{{ 'facility.remove_previous'|trans({'%name%': previous.displayName}) }}</label>
+                    </div>
+                {% endif %}
+                <button type="submit" class="btn-secondary">{{ ux_icon('lucide:user-minus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'facility.release'|trans }}</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

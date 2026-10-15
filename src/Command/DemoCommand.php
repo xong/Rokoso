@@ -12,6 +12,7 @@ use App\Entity\Contact;
 use App\Entity\ContactGroup;
 use App\Entity\Draft;
 use App\Entity\EventSignup;
+use App\Entity\Facility;
 use App\Entity\FileShare;
 use App\Entity\Folder;
 use App\Entity\ForumBoard;
@@ -43,6 +44,7 @@ use App\Entity\Watch;
 use App\Entity\WikiPage;
 use App\Enum\AttendanceStatus;
 use App\Enum\CalendarItemType;
+use App\Enum\FacilityRole;
 use App\Enum\MailEncryption;
 use App\Enum\MailRuleField;
 use App\Enum\MessageType;
@@ -145,6 +147,7 @@ final readonly class DemoCommand
                 $this->em->persist($contact);
             }
             $this->em->persist(Comment::onContact($contacts[2], $colleague)->setBody('Bevorzugt Anrufe vormittags, E-Mails beantwortet sie meist erst am Wochenende.'));
+            $this->createFacilities($org, $user);
 
             $monday = new \DateTimeImmutable('monday this week');
             $board = (new CalendarItem($user))->setTitle('Vorstandstreffen')->setOrganization($org)->setLocation('Rathaus, Raum 2')
@@ -337,6 +340,30 @@ final readonly class DemoCommand
     /**
      * Knowledge base: a few nested pages, one of them edited twice.
      */
+    /** Kitas with their representatives: one up to date, one to check, one without deputy, one without anyone. */
+    private function createFacilities(Organization $org, User $user): void
+    {
+        $person = fn (string $first, string $last, string $email, string $company, string $position): Contact => (new Contact($user))
+            ->setFirstName($first)->setLastName($last)->setEmail($email)->setCompany($company)->setPosition($position)->setOrganization($org);
+        foreach ([
+            ['Kita Sonnenschein', 'Kita-001', 'Stadt Musterstadt', 'Nord', 'Lindenweg 4', 'sonnenschein@kita.example.org', [['Miriam', 'Koch', 'm.koch@example.org'], ['Tobias', 'Wolf', 't.wolf@example.org']], '-2 months'],
+            ['Kita Regenbogen', 'Kita-002', 'Elternverein Regenbogen e. V.', 'Nord', 'Am Anger 12', 'info@regenbogen.example.org', [['Sandra', 'Neumann', 'sandra.neumann@example.org'], ['Ali', 'Yilmaz', 'ali.yilmaz@example.org']], '-14 months'],
+            ['Hort am Park', 'Hort-007', 'Stadt Musterstadt', 'Süd', 'Parkstraße 1', 'hort-park@example.org', [['Lena', 'Hoffmann', 'lena.hoffmann@example.org']], '-5 months'],
+            ['Kita Pusteblume', 'Kita-014', 'Diakonie Musterstadt', 'Süd', 'Blumenstraße 9', 'pusteblume@diakonie.example.org', [], null],
+        ] as [$name, $number, $carrier, $district, $street, $email, $people, $reported]) {
+            $facility = (new Facility($org))->setName($name)->setNumber($number)->setCarrier($carrier)->setDistrict($district)
+                ->setStreet($street)->setPostalCode('12345')->setCity('Musterstadt')->setEmail($email);
+            foreach ($people as $i => [$first, $last, $address]) {
+                $role = 0 === $i ? FacilityRole::Representative : FacilityRole::Deputy;
+                $contact = $person($first, $last, $address, $name, 0 === $i ? 'Vertretung' : 'Stellvertretung');
+                $this->em->persist($contact);
+                $facility->setPerson($role, $contact);
+            }
+            $facility->setReportedOn(null === $reported ? null : new \DateTimeImmutable($reported));
+            $this->em->persist($facility);
+        }
+    }
+
     private function createWiki(Organization $org, User $user, User $colleague): void
     {
         $page = function (string $title, string $body, User $author, ?WikiPage $parent = null) use ($org): WikiPage {

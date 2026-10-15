@@ -9,6 +9,8 @@ internal:
     no_recipient: Bitte wähle mindestens eine Person.
 contact:
     name_required: Bitte gib einen Namen oder eine Institution an.
+facility:
+    person_name_required: Bitte gib einen Namen an.
 contact_group:
     wrong_organization: Kontakt und Verteiler müssen zur selben Organisation gehören.
 calendar:

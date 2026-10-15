@@ -42,6 +42,7 @@ nav:
     contacts: Kontakte
     contacts_all: Alle Kontakte
     contact_groups: Verteiler
+    facilities: Einrichtungen
     projects: Projekte
     organizations: Organisationen
     admin: Verwaltung
@@ -926,6 +927,75 @@ contact_group:
     public_subscribe: Öffentlich abonnierbar
     public_subscribe_help: Externe können sich über die öffentliche Seite selbst eintragen (mit Bestätigung per E-Mail).
 
+facility:
+    new: Neue Einrichtung
+    edit: Einrichtung bearbeiten
+    created: Einrichtung angelegt.
+    delete: Einrichtung löschen
+    delete_confirm: Einrichtung wirklich löschen? Vertretung und Stellvertretung bleiben als Kontakte erhalten.
+    overview: Übersicht
+    intro: 'Für jede Einrichtung eine Vertretung und eine Stellvertretung. Die Personen werden Kontakte der Organisation – ohne Zugang zu Rokoso. Meldungen, die älter als ein Jahr sind, werden zum Prüfen markiert.'
+    search: Einrichtung, Person, Stadtteil …
+    none: Noch keine Einrichtungen.
+    no_match: Keine Einrichtung gefunden.
+    nobody: Niemand gemeldet
+    vacant: Nicht besetzt
+    badge_missing: Ohne Vertretung
+    badge_review: Prüfen
+    filter_status: Status
+    filter_all: Alle Einrichtungen
+    filter_missing: Ohne Vertretung
+    filter_no_deputy: Ohne Stellvertretung
+    filter_review: Zu prüfen
+    all_districts: Alle Stadtteile
+    stat_represented: Mit Vertretung
+    stat_missing: Ohne Vertretung
+    stat_no_deputy: Ohne Stellvertretung
+    stat_review: Zu prüfen
+    circular: Rundschreiben
+    circular_help: Öffnet eine neue E-Mail mit den Adressen; jede Person bekommt eine eigene E-Mail.
+    circular_district: 'Nur Einrichtungen im Stadtteil %district% – jede Person bekommt eine eigene E-Mail.'
+    circular_representatives: '{0}An die Vertretungen (keine Adresse)|{1}An die Vertretung (1)|]1,Inf[An die Vertretungen (%count%)'
+    circular_all: '{0}An Vertretungen und Stellvertretungen (keine Adresse)|]0,Inf[An Vertretungen und Stellvertretungen (%count%)'
+    circular_missing: '{0}An Einrichtungen ohne Vertretung (keine Adresse)|]0,Inf[An Einrichtungen ohne Vertretung (%count%)'
+    name: Name
+    number: Kennnummer
+    number_help: Nummer der Einrichtung in der Liste der Stadt, falls vorhanden.
+    carrier: Träger
+    district: Stadtteil
+    street: Straße
+    postal_code: PLZ
+    city: Ort
+    address: Anschrift
+    email: E-Mail der Einrichtung
+    email_help: Für Rundschreiben an Einrichtungen, die noch niemanden gemeldet haben.
+    phone: Telefon
+    notes: Notizen
+    people: Vertretung
+    section_facility: Einrichtung
+    no_details: Keine weiteren Angaben.
+    role:
+        representative: Vertretung
+        deputy: Stellvertretung
+    assign: Eintragen
+    replace: Wechseln
+    assign_intro: 'Wer wurde als %role% gemeldet? Gibt es die E-Mail-Adresse schon in den Kontakten, wird dieser Kontakt verwendet.'
+    replace_intro: 'Neue Person als %role% eintragen – sie ersetzt %name%. Gibt es die E-Mail-Adresse schon in den Kontakten, wird dieser Kontakt verwendet.'
+    person_email_help: Ohne E-Mail-Adresse kommt die Person nicht in Rundschreiben.
+    reported_on: Gemeldet am
+    reported_on_help: Zum Beispiel das Datum der E-Mail oder der Wahl. Nach einem Jahr wird die Einrichtung zum Prüfen markiert.
+    reported_on_value: 'Gemeldet am %date%'
+    reported_short: 'seit %date%'
+    review_hint: bitte prüfen, ob neu gewählt wurde
+    remove_previous: '%name% aus den Kontakten löschen'
+    remove_previous_help: Sonst bleibt der Kontakt erhalten, zum Beispiel für den Verlauf.
+    person_saved: Gespeichert.
+    person_released: Ausgetragen.
+    release: Austragen
+    release_help: '%name% hat das Amt abgegeben und es gibt noch keine Nachfolge? Dann bleibt der Platz leer.'
+    release_confirm: '%name% wirklich austragen?'
+    seats: Vertritt
+
 calendar:
     new_intro: Termine einer Organisation sehen alle ihre Mitglieder im Kalender, persönliche Termine nur du. Du kannst eine Wiederholung, Teilnehmende und eine Erinnerung festlegen und Gäste ohne Konto per E-Mail mit Kalenderdatei einladen.
     timeline_region: Tagesablauf (scrollbar)
@@ -1141,6 +1211,8 @@ feature:
     wiki_help: Gemeinsame Wissensseiten – Abläufe, Ansprechpartner, Vorlagen.
     contacts: Kontakte
     contacts_help: Adressbuch und Verteiler.
+    facilities: Einrichtungen
+    facilities_help: Einrichtungen mit Vertretung und Stellvertretung, für Einladungen und Rundschreiben (braucht Kontakte).
     public_page: Öffentliche Seite
     public_page_help: Infoseite, Kontaktformular, Umfragen und Verteiler-Anmeldung für Außenstehende.
 file:
@@ -2017,6 +2089,7 @@ search:
         files: Dateien
         topics: Forum
         contacts: Kontakte
+        facilities: Einrichtungen
         events: Termine und Aufgaben
         resolutions: Beschlüsse
         wiki: Handbuch

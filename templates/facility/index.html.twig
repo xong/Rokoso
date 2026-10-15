@@ -1,0 +1,52 @@
+{% extends 'facility/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'facility.overview'|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl space-y-6 p-4 lg:p-6">
+        <p class="text-sm text-slate-600">{{ 'facility.intro'|trans }}</p>
+        {% for entry in overview %}
+            {% set org = entry.organization %}
+            <section aria-labelledby="overview-{{ org.id }}" class="space-y-3">
+                <h2 id="overview-{{ org.id }}" class="text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ org.name }}</h2>
+                <dl class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {% for key, filter in {represented: null, missing: 'missing', no_deputy: 'no_deputy', review: 'review'} %}
+                        <div class="card px-3 py-2">
+                            <dt class="text-xs text-slate-500">{{ ('facility.stat_' ~ key)|trans }}</dt>
+                            <dd class="text-lg font-semibold">
+                                {% if filter and entry[key] > 0 %}
+                                    <a class="link" href="{{ path('facility_index', {status: filter}) }}">{{ entry[key] }}</a>
+                                {% else %}
+                                    {{ entry[key] }}{% if key == 'represented' %}<span class="text-sm font-normal text-slate-500"> / {{ entry.total }}</span>{% endif %}
+                                {% endif %}
+                            </dd>
+                        </div>
+                    {% endfor %}
+                </dl>
+                {% if route_available('mail_compose') %}
+                    <div class="card space-y-2 p-4">
+                        <h3 class="font-semibold">{{ 'facility.circular'|trans }}</h3>
+                        <p class="text-sm text-slate-600">{{ (district ? 'facility.circular_district' : 'facility.circular_help')|trans({'%district%': district}) }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            {% for recipients in ['representatives', 'all', 'missing'] %}
+                                {% set count = entry.recipients[recipients] %}
+                                {% set label = ('facility.circular_' ~ recipients)|trans({'%count%': count}) %}
+                                {% if count > 0 %}
+                                    <a href="{{ path('mail_compose', {facilities: org.id, recipients: recipients, district: district}|filter(v => v)) }}" class="{{ loop.first ? 'btn-primary' : 'btn-secondary' }}">
+                                        {{ ux_icon('lucide:mails', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ label }}
+                                    </a>
+                                {% else %}
+                                    <span class="btn-secondary opacity-60" aria-disabled="true">{{ label }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </section>
+        {% else %}
+            {% if can_create %}
+                <a href="{{ path('facility_new') }}" class="btn-primary">{{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'facility.new'|trans }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}

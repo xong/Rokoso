@@ -83,6 +83,23 @@
                 </section>
             {% endif %}
 
+            {% if seats is not empty %}
+                <section aria-labelledby="seats-heading">
+                    <h3 id="seats-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'facility.seats'|trans }}</h3>
+                    <ul role="list" class="card divide-y divide-slate-100">
+                        {% for f in seats %}
+                            <li>
+                                <a href="{{ path('facility_show', {id: f.id}) }}" class="flex items-center gap-3 px-4 py-2 hover:bg-slate-50">
+                                    {{ ux_icon('lucide:school', {class: 'size-4 shrink-0 text-slate-400', 'aria-hidden': 'true'}) }}
+                                    <span class="min-w-0 flex-1 truncate">{{ f.name }} <span class="text-sm text-slate-500">· {{ (f.representative == contact ? 'facility.role.representative' : 'facility.role.deputy')|trans }}</span></span>
+                                    {% if f.reportedOn %}<span class="shrink-0 text-xs text-slate-500">{{ 'facility.reported_short'|trans({'%date%': f.reportedOn|date('d.m.Y')}) }}</span>{% endif %}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
+
             {% if colleagues is not empty %}
                 <section aria-labelledby="colleagues-heading">
                     <h3 id="colleagues-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'contact.colleagues'|trans({'%institution%': contact.company}) }}</h3>

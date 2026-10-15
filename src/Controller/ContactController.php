@@ -16,6 +16,7 @@ use App\Notification\ActivityNotifier;
 use App\Repository\CommentRepository;
 use App\Repository\ContactGroupRepository;
 use App\Repository\ContactRepository;
+use App\Repository\FacilityRepository;
 use App\Repository\MeetingRepository;
 use App\Repository\MessageRepository;
 use App\Repository\OrganizationRepository;
@@ -76,7 +77,7 @@ final class ContactController extends AbstractController
 
     #[Route('/{id<\d+>}', name: 'contact_show')]
     #[IsGranted(ContactVoter::EDIT, 'contact')]
-    public function show(Request $request, Contact $contact, #[CurrentUser] User $user, CommentRepository $comments, MessageRepository $messages, MeetingRepository $meetings): Response
+    public function show(Request $request, Contact $contact, #[CurrentUser] User $user, CommentRepository $comments, MessageRepository $messages, MeetingRepository $meetings, FacilityRepository $facilities): Response
     {
         // history: mails from/to the contact and meetings as guest, newest first
         $history = [];
@@ -91,6 +92,7 @@ final class ContactController extends AbstractController
         return $this->render('contact/show.html.twig', $this->listContext($request, $user) + [
             'contact' => $contact,
             'colleagues' => $this->contacts->findColleagues($contact, $user),
+            'seats' => $contact->getOrganization()?->hasFeature(Feature::Facilities) ? $facilities->findForContact($contact) : [],
             'history' => $history,
             'comments' => $comments->forTarget($contact),
         ]);

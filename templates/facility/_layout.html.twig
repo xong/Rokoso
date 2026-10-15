@@ -1,0 +1,75 @@
+{% extends 'layout/app.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.facilities'|trans }}{% endblock %}
+{% block list_title %}{{ 'nav.facilities'|trans }}{% endblock %}
+{% block list_key %}/contacts/facilities{% endblock %}
+{# Suche und Filter bleiben beim Blättern erhalten #}
+{% set list_params = {q: query ?: null, status: status, district: district}|filter(v => v) %}
+{% block back_url %}{{ path('facility_index', list_params) }}{% endblock %}
+
+{% block list_actions %}
+    {% if can_create %}
+        <a href="{{ path('facility_new') }}" class="btn-icon" aria-label="{{ 'facility.new'|trans }}" title="{{ 'facility.new'|trans }}">
+            {{ ux_icon('lucide:plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block list %}
+    <form method="get" action="{{ path('facility_index') }}" role="search" data-controller="autosubmit" class="sticky top-0 z-10 border-b border-slate-200 bg-surface p-2">
+        <div class="relative">
+            {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-2.5 left-2.5 size-4 text-slate-400', 'aria-hidden': 'true'}) }}
+            <label for="facility-q" class="sr-only">{{ 'action.search'|trans }}</label>
+            <input type="search" id="facility-q" name="q" value="{{ query }}" placeholder="{{ 'facility.search'|trans }}" class="input pl-8">
+        </div>
+        <div class="mt-2 flex items-center gap-2">
+            <label for="facility-status" class="sr-only">{{ 'facility.filter_status'|trans }}</label>
+            <select id="facility-status" name="status" class="input py-1 text-sm" data-action="autosubmit#submit">
+                <option value="">{{ 'facility.filter_all'|trans }}</option>
+                {% for s in ['missing', 'no_deputy', 'review'] %}
+                    <option value="{{ s }}" {{ status == s ? 'selected' }}>{{ ('facility.filter_' ~ s)|trans }}</option>
+                {% endfor %}
+            </select>
+            {% if districts is not empty %}
+                <label for="facility-district" class="sr-only">{{ 'facility.district'|trans }}</label>
+                <select id="facility-district" name="district" class="input py-1 text-sm" data-action="autosubmit#submit">
+                    <option value="">{{ 'facility.all_districts'|trans }}</option>
+                    {% for d in districts %}
+                        <option value="{{ d }}" {{ district == d ? 'selected' }}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+            <noscript><button type="submit" class="btn-secondary py-1">{{ 'action.show'|trans }}</button></noscript>
+        </div>
+    </form>
+    {% if facilities is empty %}
+        {% set filtered = query or status or district %}
+        {{ ui.empty(filtered ? 'facility.no_match' : 'facility.none', 'lucide:school', filtered or not can_create ? null : path('facility_new'), 'facility.new') }}
+    {% else %}
+        {# Punkt in Organisationsfarbe nur, wenn die Liste mehrere Organisationen mischt #}
+        {% set first_org = (facilities|first).organization %}
+        {% set several = facilities|reduce((carry, f) => carry or f.organization != first_org, false) %}
+        <ul role="list">
+            {% for f in facilities %}
+                {% set active = facility is defined and facility and facility.id == f.id %}
+                {% set people = [f.representative, f.deputy]|filter(p => p)|map(p => p.displayName) %}
+                <li>
+                    <a href="{{ path('facility_show', {id: f.id}|merge(list_params)) }}" {% if active %}aria-current="page"{% endif %}
+                       class="flex items-center gap-3 border-b border-slate-100 px-4 py-2.5 {{ active ? 'bg-brand-50' : 'hover:bg-slate-50' }}">
+                        <span class="min-w-0 flex-1">
+                            <span class="block truncate font-medium {{ active ? 'text-brand-700' : '' }}">{{ f.name }}</span>
+                            <span class="block truncate text-xs text-slate-500">{{ people is empty ? 'facility.nobody'|trans : people|join(' · ') }}</span>
+                        </span>
+                        {% if not f.representative %}
+                            <span class="badge shrink-0 bg-amber-50 text-amber-800">{{ 'facility.badge_missing'|trans }}</span>
+                        {% elseif f.needsReview %}
+                            <span class="badge shrink-0 bg-slate-100 text-slate-600">{{ 'facility.badge_review'|trans }}</span>
+                        {% endif %}
+                        {% if several %}<span class="size-2 shrink-0 rounded-full" style="background-color: {{ f.organization.color }}" title="{{ f.organization.name }}"></span>{% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

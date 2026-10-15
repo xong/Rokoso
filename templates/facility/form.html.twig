@@ -1,0 +1,53 @@
+{% extends 'facility/_layout.html.twig' %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ edited ? edited.name : 'facility.new'|trans }}{% endblock %}
+{% block detail_title %}{{ (edited ? 'facility.edit' : 'facility.new')|trans }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl p-4 lg:p-6">
+        {% if organizations|length > 1 %}
+            <form method="get" action="{{ path('facility_new') }}" class="mb-4 flex items-end gap-2" data-controller="autosubmit">
+                <div class="flex-1">
+                    <label for="facility-organization" class="label">{{ 'contact.organization'|trans }}</label>
+                    <select id="facility-organization" name="organization" class="input" data-action="autosubmit#submit">
+                        {% for o in organizations %}
+                            <option value="{{ o.id }}" {{ o == organization ? 'selected' }}>{{ o.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <noscript><button type="submit" class="btn-secondary">{{ 'action.show'|trans }}</button></noscript>
+            </form>
+        {% else %}
+            <p class="mb-4 text-sm text-slate-500">{{ 'contact.organization'|trans }}: {{ organization.name }}</p>
+        {% endif %}
+
+        {{ form_start(form, {attr: edited ? {'data-controller': 'autosave-form'} : {}}) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.name) }}
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.number) }}
+                {{ form_row(form.carrier) }}
+            </div>
+            {{ form_row(form.district) }}
+            {{ form_row(form.street) }}
+            <div class="grid gap-x-4 sm:grid-cols-[8rem_1fr]">
+                {{ form_row(form.postalCode) }}
+                {{ form_row(form.city) }}
+            </div>
+            <div class="grid gap-x-4 sm:grid-cols-2">
+                {{ form_row(form.email) }}
+                {{ form_row(form.phone) }}
+            </div>
+            {{ form_row(form.notes) }}
+            {{ form_rest(form) }}
+            <datalist id="facility-carriers">{% for c in carriers %}<option value="{{ c }}"></option>{% endfor %}</datalist>
+            <datalist id="facility-districts">{% for d in districts %}<option value="{{ d }}"></option>{% endfor %}</datalist>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+                <a href="{{ edited ? path('facility_show', {id: edited.id}) : path('facility_index') }}" class="btn-secondary">{{ 'action.cancel'|trans }}</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

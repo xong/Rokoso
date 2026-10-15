@@ -6,6 +6,7 @@ namespace App\Tests\Browser;
 
 use App\Confidential\ConfidentialInbox;
 use App\Entity\ContactGroup;
+use App\Entity\Facility;
 use App\Entity\MailAccount;
 use App\Entity\PublicSettings;
 use App\Enum\PublicDesign;
@@ -20,7 +21,7 @@ final class AccessibilityTest extends BrowserTestCase
 {
     private const string AXE_VERSION = '4.11.0';
 
-    private const array PAGES = ['/', '/mail', '/mail/spam', '/mail/new', '/calendar', '/tasks', '/meetings', '/polls', '/forum', '/files', '/contacts', '/projects', '/knowledge', '/notifications', '/confidential', '/profile', '/profile/security', '/profile/notifications', '/profile/changelog', '/organizations', '/search?q=Eltern', '/admin', '/admin/organizations', '/admin/log', '/help', '/help/rundschreiben'];
+    private const array PAGES = ['/', '/mail', '/mail/spam', '/mail/new', '/calendar', '/tasks', '/meetings', '/polls', '/forum', '/files', '/contacts', '/contacts/facilities', '/projects', '/knowledge', '/notifications', '/confidential', '/profile', '/profile/security', '/profile/notifications', '/profile/changelog', '/organizations', '/search?q=Eltern', '/admin', '/admin/organizations', '/admin/log', '/help', '/help/rundschreiben'];
 
     public function testMainPagesHaveNoSeriousViolations(): void
     {
@@ -37,6 +38,7 @@ final class AccessibilityTest extends BrowserTestCase
             ->setInfoEnabled(true)->setIntro('Willkommen bei der **Stadtelternvertretung**.')->setContactEnabled(true)->setContactAccount($account)->setSubscribeEnabled(true);
         $this->em()->persist($account);
         $this->em()->persist((new ContactGroup($organization))->setName('Rundbrief')->setPublicSubscribe(true));
+        $this->em()->persist((new Facility($organization))->setName('Kita Sonnenschein')->setDistrict('Nord'));
         $this->em()->persist($settings);
         $this->em()->flush();
         static::getContainer()->get(ConfidentialInbox::class)->open($settings, 'Vorfall', 'Vertrauliche Nachricht', null);

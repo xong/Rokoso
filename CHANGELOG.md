@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.19.0 – 2026-10-15
+
+### Neu
+
+- **Einrichtungen:** Unter Kontakte → „Einrichtungen“ führt ihr Kitas, Schulen und andere Einrichtungen mit ihrer Vertretung und Stellvertretung. Die Personen werden als Kontakte gespeichert und brauchen kein Konto. Mit „Gemeldet am“ seht ihr, wann eine Wahl mitgeteilt wurde; nach einem Jahr wird die Einrichtung zum Prüfen markiert. Filter zeigen Einrichtungen ohne Vertretung oder Stellvertretung, und mit einem Klick schreibt ihr ein Rundschreiben an alle Vertretungen – auch nur für einen Stadtteil oder an die Einrichtungen, für die noch niemand gemeldet ist.
+
 ## 0.18.1 – 2026-10-15
 
 ### Verbessert

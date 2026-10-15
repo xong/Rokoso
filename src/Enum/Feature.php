@@ -22,6 +22,8 @@ enum Feature: string
     case Files = 'files';
     case Wiki = 'wiki';
     case Contacts = 'contacts';
+    /** Facilities with their representatives (contacts), e.g. Kitas of a city parents' council */
+    case Facilities = 'facilities';
     case PublicPage = 'public_page';
 
     public function label(): string
@@ -56,6 +58,7 @@ enum Feature: string
             self::Files => ['file_', 'folder_'],
             self::Wiki => ['wiki_'],
             self::Contacts => ['contact_'],
+            self::Facilities => ['facility_'],
             self::PublicPage => ['public_settings', 'public_topic_'],
         };
     }

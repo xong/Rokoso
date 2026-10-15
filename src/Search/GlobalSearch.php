@@ -9,6 +9,7 @@ use App\Help\HelpCenter;
 use App\Mail\MessageFilter;
 use App\Repository\CalendarItemRepository;
 use App\Repository\ContactRepository;
+use App\Repository\FacilityRepository;
 use App\Repository\FolderRepository;
 use App\Repository\ForumTopicRepository;
 use App\Repository\MessageRepository;
@@ -30,6 +31,7 @@ final readonly class GlobalSearch
         private FolderRepository $folders,
         private ForumTopicRepository $topics,
         private ContactRepository $contacts,
+        private FacilityRepository $facilities,
         private CalendarItemRepository $items,
         private ResolutionRepository $resolutions,
         private WikiPageRepository $wiki,
@@ -54,6 +56,7 @@ final readonly class GlobalSearch
             'files' => $this->files->searchInFolders($this->folders->findVisibleFor($user), $query, self::LIMIT),
             'topics' => $this->topics->search($user, $query, self::LIMIT),
             'contacts' => \array_slice($this->contacts->search($user, $query), 0, self::LIMIT),
+            'facilities' => \array_slice($this->facilities->search($user, $query), 0, self::LIMIT),
             'events' => $this->items->search($user, $query, self::LIMIT),
             'resolutions' => $this->resolutions->search($user, $query, limit: self::LIMIT),
             'wiki' => \array_slice($this->wiki->findVisibleFor($user, $query), 0, self::LIMIT),

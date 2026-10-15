@@ -28,7 +28,7 @@ final class HelpTest extends AppTestCase
         $this->client->request('GET', '/help/kontakte');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('#detail-heading', 'Kontakte und Verteiler');
+        self::assertSelectorTextContains('#detail-heading', 'Kontakte, Verteiler und Einrichtungen');
         self::assertSelectorExists('.help-article h3');
         self::assertSelectorExists('nav a[href="/help/kontakte"][aria-current="page"]');
 
@@ -40,8 +40,10 @@ final class HelpTest extends AppTestCase
     {
         $this->login();
         $this->client->request('GET', '/contacts');
+        self::assertSelectorExists('a[href="/help/kontakte"][aria-label="Hilfe: Kontakte, Verteiler und Einrichtungen"]');
 
-        self::assertSelectorExists('a[href="/help/kontakte"][aria-label="Hilfe: Kontakte und Verteiler"]');
+        $this->client->request('GET', '/contacts/facilities');
+        self::assertSelectorExists('a[href="/help/kontakte"]');
     }
 
     public function testArticlesOfSwitchedOffAreasAreHidden(): void

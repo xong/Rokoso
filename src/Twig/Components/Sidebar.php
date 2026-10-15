@@ -71,10 +71,11 @@ final class Sidebar
                 'label' => 'nav.contacts',
                 'icon' => 'lucide:contact',
                 'route' => 'contact_index',
-                'match' => ['contact_'],
+                'match' => ['contact_', 'facility_'],
                 'children' => [
                     ['label' => 'nav.contacts_all', 'icon' => 'lucide:contact', 'route' => 'contact_index', 'match' => ['contact_']],
                     ['label' => 'nav.contact_groups', 'icon' => 'lucide:users', 'route' => 'contact_group_index', 'match' => ['contact_group_']],
+                    ['label' => 'nav.facilities', 'icon' => 'lucide:school', 'route' => 'facility_index', 'match' => ['facility_']],
                 ],
             ],
         ]],
@@ -182,6 +183,8 @@ final class Sidebar
      */
     private function markActiveChild(array $children, string $route, string $nav): array
     {
+        // sub items of areas switched off everywhere are left out
+        $children = array_values(array_filter($children, fn (array $child): bool => $this->isAvailable(Feature::forRoute($child['route']))));
         $best = null;
         $bestLength = 0;
         foreach ($children as $i => $child) {

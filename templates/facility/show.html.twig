@@ -1,0 +1,89 @@
+{% extends 'facility/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{% set has_detail = true %}
+
+{% block title %}{{ facility.name }}{% endblock %}
+{% block detail_title %}{{ facility.name }}{% endblock %}
+
+{% block detail_actions %}
+    <a href="{{ path('facility_edit', {id: facility.id}) }}" class="btn-icon" aria-label="{{ 'action.edit'|trans }}" title="{{ 'action.edit'|trans }}">
+        {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+    </a>
+    {{ ui.post_button(path('facility_delete', {id: facility.id}), 'delete-facility-' ~ facility.id, 'facility.delete',
+        {class: 'btn-icon hover:text-red-600', icon: 'lucide:trash-2', icon_only: true, confirm: 'facility.delete_confirm'}) }}
+{% endblock %}
+
+{% macro field(label, value, href = null) %}
+    {% if value %}
+        <div class="grid grid-cols-[8rem_1fr] gap-2 py-1.5">
+            <dt class="text-slate-500">{{ label|trans }}</dt>
+            <dd class="min-w-0 break-words">{% if href %}<a class="link" href="{{ href }}">{{ value }}</a>{% else %}{{ value }}{% endif %}</dd>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{% block detail %}
+    <div class="max-w-2xl space-y-6 p-4 lg:p-6">
+        <div>
+            <p class="text-xs text-slate-500">{{ facility.organization.name }}{% if facility.number %} · {{ 'facility.number'|trans }} {{ facility.number }}{% endif %}</p>
+            {% if facility.reportedOn %}
+                <p class="mt-1 text-sm {{ facility.needsReview ? 'text-amber-800' : 'text-slate-600' }}">
+                    {{ 'facility.reported_on_value'|trans({'%date%': facility.reportedOn|date('d.m.Y')}) }}{% if facility.needsReview %} – {{ 'facility.review_hint'|trans }}{% endif %}
+                </p>
+            {% elseif facility.needsReview %}
+                <p class="mt-1 text-sm text-amber-800">{{ 'facility.review_hint'|trans }}</p>
+            {% endif %}
+        </div>
+
+        <section aria-labelledby="people-heading">
+            <h3 id="people-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'facility.people'|trans }}</h3>
+            <ul role="list" class="card divide-y divide-slate-100">
+                {% for role in ['representative', 'deputy'] %}
+                    {% set person = attribute(facility, role) %}
+                    <li class="flex flex-wrap items-center gap-3 px-4 py-3">
+                        {% if person %}
+                            <twig:Avatar name="{{ person.displayName }}" image="{{ person.photo }}" size="size-9 text-xs" />
+                        {% else %}
+                            <span class="grid size-9 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-400" aria-hidden="true">{{ ux_icon('lucide:user-round-x', {class: 'size-4'}) }}</span>
+                        {% endif %}
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs text-slate-500">{{ ('facility.role.' ~ role)|trans }}</p>
+                            {% if person %}
+                                <p class="truncate font-medium"><a class="link" href="{{ path('contact_show', {id: person.id}) }}">{{ person.displayName }}</a></p>
+                                <p class="truncate text-sm text-slate-600">
+                                    {% set email = person.email ?: person.email2 %}
+                                    {% if email %}<a class="link" href="mailto:{{ email }}">{{ email }}</a>{% else %}<span class="text-amber-800">{{ 'contact_group.no_email'|trans }}</span>{% endif %}
+                                    {% set phone = person.phone ?: person.mobile %}
+                                    {% if phone %} · <a class="link" href="tel:{{ phone }}">{{ phone }}</a>{% endif %}
+                                </p>
+                            {% else %}
+                                <p class="text-slate-500">{{ 'facility.vacant'|trans }}</p>
+                            {% endif %}
+                        </div>
+                        <a href="{{ path('facility_assign', {id: facility.id, role: role}) }}" class="btn-secondary">
+                            {{ ux_icon(person ? 'lucide:repeat' : 'lucide:user-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            {{ (person ? 'facility.replace' : 'facility.assign')|trans }}<span class="sr-only"> ({{ ('facility.role.' ~ role)|trans }})</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section aria-labelledby="facility-heading">
+            <h3 id="facility-heading" class="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{{ 'facility.section_facility'|trans }}</h3>
+            {% if facility.carrier or facility.district or facility.address or facility.email or facility.phone %}
+                <dl class="card divide-y divide-slate-100 px-4">
+                    {{ _self.field('facility.carrier', facility.carrier) }}
+                    {{ _self.field('facility.district', facility.district, path('facility_index', {district: facility.district})) }}
+                    {{ _self.field('facility.address', facility.address) }}
+                    {{ _self.field('facility.email', facility.email, 'mailto:' ~ facility.email) }}
+                    {{ _self.field('facility.phone', facility.phone, 'tel:' ~ facility.phone) }}
+                </dl>
+            {% else %}
+                <p class="text-sm text-slate-500">{{ 'facility.no_details'|trans }}</p>
+            {% endif %}
+            {% if facility.notes %}<p class="card mt-2 px-4 py-3 whitespace-pre-line">{{ facility.notes }}</p>{% endif %}
+        </section>
+    </div>
+{% endblock %}

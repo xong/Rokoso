@@ -52,6 +52,8 @@
                                 {{ _self.result(path('forum_topic_show', {id: r.id}), r.title, r.board.name ~ ' · ' ~ r.lastPostAt|short_date) }}
                             {% elseif area == 'contacts' %}
                                 {{ _self.result(path('contact_show', {id: r.id}), r.displayName, [r.company, r.email]|filter(v => v)|join(' · ')) }}
+                            {% elseif area == 'facilities' %}
+                                {{ _self.result(path('facility_show', {id: r.id}), r.name, [r.representative ? r.representative.displayName : 'facility.nobody'|trans, r.district]|filter(v => v)|join(' · ')) }}
                             {% elseif area == 'events' %}
                                 {{ _self.result(path('calendar_item_show', {id: r.id}), r.title, r.startsAt ? r.startsAt|short_date : 'today.no_due'|trans) }}
                             {% elseif area == 'resolutions' %}

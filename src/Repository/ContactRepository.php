@@ -72,6 +72,20 @@ class ContactRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findOneInOrganizationByEmail(Organization $organization, string $email): ?Contact
+    {
+        /* @var ?Contact */
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.organization = :org')
+            ->andWhere('LOWER(c.email) = :email OR LOWER(c.email2) = :email')
+            ->setParameter('org', $organization)
+            ->setParameter('email', mb_strtolower($email))
+            ->orderBy('c.id')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     /**
      * Other visible contacts of the same institution.
      *
