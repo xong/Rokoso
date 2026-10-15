@@ -36,4 +36,29 @@ final class MailTest extends BrowserTestCase
         $this->client->waitForElementToContain('main', $subject);
         self::assertSelectorTextContains('main', $subject);
     }
+
+    public function testSearchByTypingAndEnter(): void
+    {
+        $user = $this->createUser();
+        $organization = $this->createOrganization($user);
+        $account = (new MailAccount($organization))->setName('Postfach')->setEmailAddress('sev@example.org')
+            ->setImapHost('imap.example.org')->setImapUsername('sev@example.org')->setSmtpHost('smtp.example.org');
+        $found = 'Schulweg '.uniqid();
+        $other = 'Elternabend '.uniqid();
+        $this->em()->persist($account);
+        foreach ([$found, $other] as $subject) {
+            $message = (new Message())->setMailAccount($account)->setFrom('eva@example.org', 'Eva')->setSubject($subject)->setBody('Hallo');
+            $message->setThreadKey($message->deriveThreadKey());
+            $this->em()->persist($message);
+        }
+        $this->em()->flush();
+
+        $this->login($user);
+        $this->client->request('GET', '/mail');
+        $this->client->waitForElementToContain('main', $other);
+        $this->client->getCrawler()->filter('#mail-q')->sendKeys($found."\n");
+        $this->client->waitForElementToNotContain('section[aria-labelledby=list-heading]', $other);
+        self::assertSelectorTextContains('section[aria-labelledby=list-heading]', $found);
+        self::assertStringContainsString('q=', (string) $this->client->getCurrentURL());
+    }
 }

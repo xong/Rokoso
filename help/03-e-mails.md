@@ -13,6 +13,10 @@ Ist eine Anfrage für alle abgeschlossen, etwa weil du sie beantwortet hast, nim
 
 Erledigte Nachrichten findest du unter **Erledigt** und **Alle E-Mails**. **Wieder öffnen** holt eine Nachricht zurück in den Eingang.
 
+## Suchen
+
+Das Suchfeld über der Liste durchsucht Betreff, Absender, Empfänger, den ganzen Text und die Namen der Anhänge. Mehrere Wörter müssen alle vorkommen, egal in welcher Reihenfolge; eine Wortgruppe setzt du in Anführungszeichen, z. B. `"Elternabend Grundschule"`. Im Eingang findet die Suche auch erledigte Nachrichten und solche auf Wiedervorlage – nur Papierkorb und Spam bleiben außen vor.
+
 ## Wer kümmert sich?
 
 - **Verantwortliche** – mit „Mir zuordnen“ übernimmst du eine Nachricht. Wer zugeordnet wird, bekommt eine Benachrichtigung. Der Filter „Ohne Verantwortliche“ zeigt, was noch niemand übernommen hat.

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\Attachment;
 use App\Entity\Membership;
 use App\Entity\Message;
 use App\Entity\MessageRead;
@@ -102,7 +103,7 @@ class MessageRepository extends ServiceEntityRepository
         if ('spam' !== $filter->folder && 'trash' !== $filter->folder) {
             $qb->andWhere('m.spamAt IS NULL');
         }
-        match ($filter->folder) {
+        match ($filter->searchesAllFolders() ? 'all' : $filter->folder) {
             'trash' => $qb->andWhere('m.trashedAt IS NOT NULL'),
             'spam' => $qb->andWhere('m.trashedAt IS NULL')->andWhere('m.spamAt IS NOT NULL'),
             'all' => $qb->andWhere('m.trashedAt IS NULL'),
@@ -143,10 +144,7 @@ class MessageRepository extends ServiceEntityRepository
         if (null !== $filter->account) {
             $qb->andWhere('m.mailAccount = :account')->setParameter('account', $filter->account);
         }
-        if ('' !== $filter->query) {
-            $qb->andWhere('m.subject LIKE :q OR m.fromName LIKE :q OR m.fromAddress LIKE :q OR m.snippet LIKE :q')
-                ->setParameter('q', '%'.addcslashes($filter->query, '%_\\').'%');
-        }
+        $this->applySearch($qb, $filter->terms());
 
         /** @var list<Message> $messages */
         $messages = $qb->getQuery()->getResult();
@@ -274,6 +272,29 @@ class MessageRepository extends ServiceEntityRepository
      * Inbox = everything open: not trashed, not spam, not done (for everyone or for the viewer), not snoozed by the viewer,
      * not written by the viewer. The project does not matter (Entscheidung 39, 84).
      */
+    /**
+     * Every term has to appear somewhere: subject, sender, recipients, whole text or an attachment name.
+     *
+     * @param list<string> $terms
+     */
+    private function applySearch(QueryBuilder $qb, array $terms): void
+    {
+        foreach ($terms as $i => $term) {
+            $fields = ['m.subject', 'm.fromName', 'm.fromAddress', 'm.toRecipients', 'm.ccRecipients', 'm.textBody', 'm.htmlBody'];
+            $conditions = array_map(static fn (string $field): string => $field.' LIKE :q'.$i, $fields);
+            $conditions[] = 'EXISTS (SELECT 1 FROM '.Attachment::class.' att'.$i.' WHERE att'.$i.'.message = m AND att'.$i.'.filename LIKE :q'.$i.')';
+            $qb->setParameter('q'.$i, '%'.addcslashes($term, '%_\\').'%');
+            // recipients are stored as JSON with escaped umlauts (ü = ü)
+            $json = substr(json_encode($term, \JSON_THROW_ON_ERROR), 1, -1);
+            if ($json !== $term) {
+                $conditions[] = 'm.toRecipients LIKE :j'.$i;
+                $conditions[] = 'm.ccRecipients LIKE :j'.$i;
+                $qb->setParameter('j'.$i, '%'.addcslashes($json, '%_\\').'%');
+            }
+            $qb->andWhere(implode(' OR ', $conditions));
+        }
+    }
+
     private function applyInbox(QueryBuilder $qb): QueryBuilder
     {
         return $qb->andWhere('m.trashedAt IS NULL')

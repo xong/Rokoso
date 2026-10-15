@@ -755,6 +755,7 @@ mail:
     filter:
         label: Nachrichten filtern
         search: Suchen …
+        search_everywhere: Gesucht wird in allen Nachrichten außer Papierkorb und Spam, auch in erledigten. Mehrere Wörter müssen alle vorkommen, „in Anführungszeichen“ als Wortgruppe.
         show: Anzeigen
         all: Alle
         unassigned: Ohne Verantwortliche

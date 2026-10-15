@@ -89,6 +89,49 @@ final class MailTest extends AppTestCase
         self::assertSelectorTextContains('main', 'Viele Grüße');
     }
 
+    public function testListSearch(): void
+    {
+        $this->syncFixture();
+        $this->login($this->user);
+
+        $crawler = $this->client->request('GET', '/mail');
+        $this->client->submit($crawler->filter('form[role=search]')->form(['q' => 'Schulweg']));
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('main', 'Frage zur Schulwegsicherheit');
+
+        $this->client->request('GET', '/mail?q=Nirgendwo');
+        self::assertSelectorTextNotContains('main', 'Frage zur Schulwegsicherheit');
+
+        // every word on its own, anywhere: sender, text, recipients (also with umlauts), attachment names
+        foreach (['Eva Zebrastreifen', 'müller grundschule', 'Bert', 'Stadtelternvertretung', 'plan.pdf', '"Stand beim"'] as $query) {
+            $this->client->request('GET', '/mail?q='.urlencode($query));
+            self::assertSelectorTextContains('main', 'Frage zur Schulwegsicherheit', $query);
+        }
+        foreach (['Eva Laternenumzug', '"beim Stand"'] as $query) {
+            $this->client->request('GET', '/mail?q='.urlencode($query));
+            self::assertSelectorTextNotContains('main', 'Frage zur Schulwegsicherheit', $query);
+        }
+
+        // text beyond the list preview, and done messages are found from the inbox as well
+        $account = $this->em()->find(MailAccount::class, $this->account->getId());
+        self::assertNotNull($account);
+        $long = (new Message())->setMailAccount($account)->setFrom('tom@example.org', 'Tom')->setSubject('Protokoll Elternrat')
+            ->setBody(str_repeat('Lorem ipsum dolor sit amet. ', 20).'Am Ende geht es um den Laternenumzug.')
+            ->setToRecipients([['name' => 'Jörg Schäfer', 'address' => 'joerg@example.org']])
+            ->markDone(null);
+        $this->em()->persist($long);
+        $this->em()->flush();
+        $this->client->request('GET', '/mail');
+        self::assertSelectorTextNotContains('main', 'Protokoll Elternrat');
+        $this->client->request('GET', '/mail?q=Laternenumzug');
+        self::assertSelectorTextContains('main', 'Protokoll Elternrat');
+        self::assertSelectorTextContains('main', 'auch in erledigten');
+        $this->client->request('GET', '/mail?q=Schäfer');
+        self::assertSelectorTextContains('main', 'Protokoll Elternrat');
+        $this->client->request('GET', '/mail/done?q=Schulweg');
+        self::assertSelectorTextNotContains('main', 'Frage zur Schulwegsicherheit');
+    }
+
     public function testHtmlViewIgnoresDeclaredCharset(): void
     {
         $message = $this->syncFixture();

@@ -56,4 +56,31 @@ final readonly class MessageFilter
     {
         return [] !== $this->params();
     }
+
+    /**
+     * A search from the inbox also finds done and snoozed messages (all folders except trash and spam).
+     */
+    public function searchesAllFolders(): bool
+    {
+        return '' !== $this->query && 'inbox' === $this->folder;
+    }
+
+    /**
+     * Search terms: words, or phrases in double quotes (also typographic ones from phones); every term has to match.
+     *
+     * @return list<string>
+     */
+    public function terms(): array
+    {
+        preg_match_all('/["„“”]([^"„“”]+)["„“”]|([^\s"„“”]+)/u', $this->query, $matches, \PREG_SET_ORDER);
+        $terms = [];
+        foreach ($matches as $match) {
+            $term = trim($match[2] ?? $match[1] ?? '');
+            if ('' !== $term) {
+                $terms[] = $term;
+            }
+        }
+
+        return \array_slice(array_values(array_unique($terms)), 0, 8);
+    }
 }
