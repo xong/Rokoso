@@ -206,6 +206,13 @@ form:
     image_help: JPG, PNG, GIF oder WebP, höchstens 2 MB.
     none: '– keine –'
     optional: optional
+    autosave:
+        saved: 'Automatisch gespeichert um %time%'
+        invalid: Noch nicht gespeichert – bitte die markierten Angaben prüfen und „Speichern“ wählen.
+        failed: Automatisches Speichern fehlgeschlagen – bitte „Speichern“ wählen.
+    backup:
+        restored: Nicht abgeschickte Eingaben wurden wiederhergestellt.
+        discard: Verwerfen
 
 password:
     show: Passwort anzeigen

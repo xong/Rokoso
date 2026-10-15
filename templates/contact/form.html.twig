@@ -6,7 +6,7 @@
 
 {% block detail %}
     <div class="max-w-2xl p-4 lg:p-6">
-        {{ form_start(form) }}
+        {{ form_start(form, {attr: contact ? {'data-controller': 'autosave-form'} : {}}) }}
             {{ form_errors(form) }}
             <fieldset class="card mb-4 p-4">
                 <legend class="px-1 font-semibold">{{ 'contact.section_person'|trans }}</legend>

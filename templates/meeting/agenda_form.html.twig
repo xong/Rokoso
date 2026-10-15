@@ -8,7 +8,7 @@
     <div class="max-w-2xl p-4 lg:p-6">
         <p class="mb-4 text-slate-600">{{ meeting.title }} · {{ meeting.startsAt|date('d.m.Y H:i') }}</p>
         {% if proposal %}<p class="mb-4 rounded-lg bg-slate-100 p-3 text-sm">{{ 'meeting.agenda.propose_hint'|trans }}</p>{% endif %}
-        {{ form_start(form) }}
+        {{ form_start(form, {attr: item ? {'data-controller': 'autosave-form'} : {}}) }}
             {{ form_errors(form) }}
             {{ form_row(form.title) }}
             {{ form_row(form.description) }}

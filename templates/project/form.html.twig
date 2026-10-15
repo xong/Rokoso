@@ -7,7 +7,7 @@
 
 {% block detail %}
     <div class="max-w-xl p-4 lg:p-6">
-        {{ form_start(form) }}
+        {{ form_start(form, {attr: project ? {'data-controller': 'autosave-form'} : {}}) }}
             {{ form_errors(form) }}
             {{ form_row(form.name) }}
             {{ form_row(form.organization) }}

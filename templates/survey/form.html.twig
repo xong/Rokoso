@@ -7,7 +7,7 @@
 
 {% block detail %}
     <div class="max-w-2xl p-4 lg:p-6">
-        {{ form_start(form) }}
+        {{ form_start(form, {attr: survey ? {'data-controller': 'autosave-form'} : {}}) }}
             {% if not survey %}
                 {{ ui.intro('survey.new_intro') }}
                 <p class="mb-4 flex items-start gap-2 rounded-md bg-brand-50 p-3 text-sm text-brand-800">

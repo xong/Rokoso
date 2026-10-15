@@ -32,11 +32,13 @@
             {% set recurrence_units = recurrence_units|merge({(choice.value): [choice.data.unit|trans({'%count%': 1}), choice.data.unit|trans({'%count%': 2})]}) %}
         {% endfor %}
         {{ form_start(form, {attr: {
-            'data-controller': 'recurrence',
+            'data-controller': item ? 'recurrence autosave-form' : 'recurrence',
             'data-recurrence-labels-value': recurrence_labels|json_encode,
             'data-recurrence-units-value': recurrence_units|json_encode,
             'data-recurrence-weekdays-value': (0..6)|map(d => ('calendar.weekdays.' ~ d)|trans)|json_encode,
         }}) }}
+            {# assignees when opened: automatic saving stores new ones early, notified they are on "Save" (CalendarController) #}
+            {% if item %}<input type="hidden" name="assignees_before" value="{{ app.request.request.get('assignees_before', item.assignees|map(u => u.id)|join(',')) }}">{% endif %}
             {{ form_errors(form) }}
             {% if not item %}
                 {# follows the chosen type without a reload #}

@@ -169,4 +169,22 @@ class WikiPage
 
         return $revision;
     }
+
+    /**
+     * Like record(), but one revision per editing session: when the latest revision is newer than the one the form was
+     * opened with ($openedWith) and by the same person, it is continued – automatic saving while writing would
+     * otherwise create a revision for every pause.
+     */
+    public function recordEdit(User $author, ?int $openedWith): WikiRevision
+    {
+        $latest = $this->revisions->first();
+        if (null !== $openedWith && $latest instanceof WikiRevision && $latest->getId() > $openedWith && $latest->getAuthor() === $author) {
+            $this->updatedBy = $author;
+            $this->updatedAt = new \DateTimeImmutable();
+
+            return $latest->update();
+        }
+
+        return $this->record($author);
+    }
 }

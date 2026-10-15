@@ -19,6 +19,12 @@ Links steht die **Navigation**, daneben die **Liste** des gewählten Bereichs un
 
 Neues legst du über **Verfassen** oben in der Navigation an. Oben auf jeder Seite zum Anlegen steht, wofür der Eintrag gedacht ist und was danach passiert.
 
+## Eingaben gehen nicht verloren
+
+Wenn du etwas Bestehendes bearbeitest – etwa eine Sitzung, die Tagesordnung, das Protokoll, einen Termin oder eine Handbuchseite –, speichert Rokoso deine Änderungen während des Schreibens automatisch; neben **Speichern** steht, wann zuletzt gespeichert wurde. Ist eine Eingabe noch ungültig (z. B. ein leerer Titel), wartet Rokoso, bis du sie korrigierst. Benachrichtigungen, etwa an neu eingetragene Verantwortliche, gehen erst beim Klick auf **Speichern** raus.
+
+Neue Einträge, Kommentare, Antworten und Nachrichten werden erst beim Abschicken gespeichert. Bis dahin merkt sich dein Browser, was du geschrieben hast: Lädt die Seite neu oder schließt du sie versehentlich, steht der Text beim nächsten Öffnen wieder da (mit **Verwerfen** löschst du ihn). Textfelder wachsen beim Schreiben mit.
+
 ## Heute
 
 Die Startseite **Heute** zeigt, was für dich ansteht: offene Nachrichten, die dir zugeordnet sind, fällige Aufgaben, die nächsten Termine und Sitzungen, offene Abstimmungen, Erwähnungen und neue Forenbeiträge. Am Anfang steht dort außerdem die Liste **Erste Schritte**: Wer eine Organisation einrichtet, legt sie an, lädt Mitglieder ein, verbindet ein E-Mail-Konto und legt Forum und ersten Termin an. Neue Mitglieder laden ein Profilbild hoch, abonnieren den Kalender und richten die Zwei-Faktor-Anmeldung ein. Erledigte Schritte werden automatisch abgehakt; mit **Ausblenden** verschwindet die Liste.

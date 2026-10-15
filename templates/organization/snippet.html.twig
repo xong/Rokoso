@@ -10,7 +10,7 @@
 {% block detail %}
     <div class="max-w-2xl p-4 lg:p-6">
         <p class="mb-6 text-sm text-slate-600">{{ 'snippet.intro'|trans }}</p>
-        {{ form_start(form) }}
+        {{ form_start(form, {attr: snippet.id ? {'data-controller': 'autosave-form'} : {}}) }}
             {{ form_row(form.title) }}
             {{ form_row(form.body) }}
             {{ form_rest(form) }}

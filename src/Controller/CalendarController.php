@@ -12,6 +12,7 @@ use App\Entity\CalendarItem;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
 use App\Enum\Feature;
+use App\EventListener\AutosaveListener;
 use App\Form\CalendarExceptionFormType;
 use App\Form\CalendarItemFormType;
 use App\Notification\ActivityNotifier;
@@ -240,7 +241,11 @@ final class CalendarController extends AbstractController
     private function handleForm(Request $request, User $user, CalendarItem $item, OrganizationRepository $organizations, ?string $source = null): Response
     {
         $isNew = null === $item->getId();
-        $previousAssignees = $item->getAssignees()->toArray();
+        // assignees when the form was opened: automatic saving in between already stores new ones, notified are they on "Save"
+        $openedWith = array_map(intval(...), explode(',', $request->getPayload()->getString('assignees_before')));
+        $previousAssignees = $request->getPayload()->has('assignees_before')
+            ? array_values(array_filter($item->getAssignees()->toArray(), static fn (User $u): bool => \in_array($u->getId(), $openedWith, true)))
+            : $item->getAssignees()->toArray();
         $form = $this->createForm(CalendarItemFormType::class, $item, [
             'users' => $this->memberships->colleaguesOf($user),
             'organizations' => $organizations->findForUser($user, $item->isTask() ? Feature::Tasks : Feature::Calendar),
@@ -255,8 +260,10 @@ final class CalendarController extends AbstractController
             }
             $this->em->persist($item);
             $this->em->flush();
-            $this->notifier->calendarAssigned($item, array_filter($item->getAssignees()->toArray(), static fn (User $u): bool => !\in_array($u, $previousAssignees, true)), $user);
-            $this->em->flush();
+            if (!AutosaveListener::isAutosave($request)) {
+                $this->notifier->calendarAssigned($item, array_filter($item->getAssignees()->toArray(), static fn (User $u): bool => !\in_array($u, $previousAssignees, true)), $user);
+                $this->em->flush();
+            }
             $this->addFlash('success', $isNew ? 'calendar.created' : 'flash.saved');
 
             return $this->redirectToRoute('calendar_item_show', ['id' => $item->getId()]);

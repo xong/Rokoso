@@ -10,7 +10,7 @@
     <div class="max-w-3xl space-y-4 p-4 lg:p-6">
         {{ include('forum/_breadcrumbs.html.twig', {last_link: true}) }}
         {% if not topic %}{{ ui.intro('forum.topic_intro', 'mb-0') }}{% endif %}
-        {{ form_start(form) }}
+        {{ form_start(form, {attr: topic ? {'data-controller': 'autosave-form'} : {}}) }}
             {{ form_row(form.title) }}
             {{ form_row(form.project) }}
             {% if form.post is defined %}

@@ -41,7 +41,7 @@
             {% endfor %}
         </ol>
 
-        <form method="post" action="{{ path('confidential_reply', {id: case.id}) }}" class="card space-y-3 p-4">
+        <form method="post" action="{{ path('confidential_reply', {id: case.id}) }}" data-backup="off" class="card space-y-3 p-4">
             <input type="hidden" name="_token" value="{{ csrf_token('confidential-reply') }}">
             <label for="confidential-reply" class="label">{{ 'confidential.reply'|trans }}</label>
             <textarea id="confidential-reply" name="body" rows="5" required maxlength="20000" class="input resize-y" aria-describedby="confidential-reply-help"></textarea>

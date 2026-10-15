@@ -7,7 +7,7 @@
 
 {% block detail %}
     <div class="max-w-2xl p-4 lg:p-6">
-        {{ form_start(form) }}
+        {{ form_start(form, {attr: {'data-controller': 'autosave-form'}}) }}
             {{ form_errors(form) }}
             {{ form_rest(form) }}
             <div class="flex gap-2">

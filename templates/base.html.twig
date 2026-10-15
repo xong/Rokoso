@@ -28,5 +28,10 @@
     </head>
     <body class="h-full bg-slate-50 text-sm text-slate-900 antialiased">
         {% block body %}{% endblock %}
+        {# Texte für automatisches Speichern (autosave-form) und die Sicherung im Browser (form_backup.js) #}
+        {% if app.user %}
+            <div id="form-texts" hidden data-user="{{ app.user.id }}" data-saved="{{ 'form.autosave.saved'|trans }}" data-invalid="{{ 'form.autosave.invalid'|trans }}"
+                 data-failed="{{ 'form.autosave.failed'|trans }}" data-restored="{{ 'form.backup.restored'|trans }}" data-discard="{{ 'form.backup.discard'|trans }}"></div>
+        {% endif %}
     </body>
 </html>

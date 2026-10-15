@@ -9,7 +9,7 @@
         <p class="mb-4 text-slate-600">
             {{ resolution.organization.name }}{% if resolution.agendaItem %} · {{ resolution.meeting.title }} – {{ resolution.agendaItem.title }}{% endif %}
         </p>
-        {{ form_start(form) }}
+        {{ form_start(form, {attr: is_new ? {} : {'data-controller': 'autosave-form'}}) }}
             {{ form_errors(form) }}
             {{ form_row(form.title) }}
             {{ form_row(form.text) }}

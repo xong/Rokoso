@@ -14,7 +14,7 @@
 
 {% block body %}
     {# Organisations- bzw. Akzentfarbe färbt die Markentöne (Buttons, Links, Markierungen), siehe .org-theme in app.css #}
-    <div class="{{ org ? 'org-theme' : '' }} min-h-full {{ design == 'plain' ? 'bg-surface' }}" data-design="{{ design }}" {% if org %}style="--org-color: {{ settings.color }}"{% endif %}>
+    <div class="{{ org ? 'org-theme' : '' }} min-h-full {{ design == 'plain' ? 'bg-surface' }}" data-design="{{ design }}" data-backup="off" {% if org %}style="--org-color: {{ settings.color }}"{% endif %}>
         {% if not embed and org %}
             <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">{{ 'nav.skip_to_content'|trans }}</a>
             {% set home_url = path('public_home', {slug: settings.slug}) %}

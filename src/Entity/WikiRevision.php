@@ -43,6 +43,16 @@ class WikiRevision
         $this->createdAt = new \DateTimeImmutable();
     }
 
+    /** Takes over the current state of the page (continued editing, see WikiPage::recordEdit()). */
+    public function update(): self
+    {
+        $this->title = $this->page->getTitle();
+        $this->body = $this->page->getBody();
+        $this->createdAt = new \DateTimeImmutable();
+
+        return $this;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

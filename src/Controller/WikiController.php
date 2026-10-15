@@ -138,7 +138,8 @@ final class WikiController extends AbstractController
             }
             // a revision only when the content changed (moving a page is not a new version)
             if ($isNew || $before !== [$page->getTitle(), $page->getBody()]) {
-                $this->em->persist($page->record($user));
+                $openedWith = $request->getPayload()->has('revision_base') ? $request->getPayload()->getInt('revision_base') : null;
+                $this->em->persist($page->recordEdit($user, $openedWith));
             }
             $this->em->flush();
             $this->addFlash('success', 'flash.saved');

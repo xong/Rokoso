@@ -9,7 +9,7 @@
         {% if parent and not board %}
             <p class="mb-4 text-sm text-slate-500">{{ 'folder.inherits'|trans({'%organization%': parent.organization.name}) }}</p>
         {% endif %}
-        {{ form_start(form) }}
+        {{ form_start(form, {attr: board ? {'data-controller': 'autosave-form'} : {}}) }}
             {{ form_widget(form) }}
             <div class="flex gap-2">
                 <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>

@@ -4,6 +4,18 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.18.0 – 2026-10-15
+
+### Neu
+
+- **Automatisch speichern:** Beim Bearbeiten von Sitzungen, Tagesordnungspunkten, Protokollen, Terminen, Handbuchseiten, Projekten, Kontakten, Beschlüssen, Umfragen, Forenbeiträgen und Textbausteinen speichert Rokoso deine Änderungen während des Schreibens. Neben „Speichern“ steht, wann zuletzt gespeichert wurde. Neu eingetragene Verantwortliche werden erst beim Klick auf „Speichern“ benachrichtigt.
+- **Nichts geht verloren:** Neue Einträge, Kommentare, Antworten und Nachrichten merkt sich dein Browser, bis du sie abschickst – nach einem Neuladen oder versehentlichen Schließen steht der Text wieder da.
+- **Mitwachsende Textfelder:** Textfelder werden beim Schreiben größer, statt zu scrollen.
+
+### Verbessert
+
+- **E-Mail-Entwürfe:** Das automatische Speichern von Entwürfen schlug in manchen Fällen still fehl; jetzt klappt es zuverlässig.
+
 ## 0.17.0 – 2026-10-12
 
 ### Neu

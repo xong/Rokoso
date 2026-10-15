@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import { generateCsrfHeaders, generateCsrfToken, removeCsrfToken } from './csrf_protection_controller.js';
 
 /*
  * Speichert das Formular nach kurzer Pause als Entwurf (ohne neue Dateien).
@@ -20,7 +21,7 @@ export default class extends Controller {
     }
 
     changed(event) {
-        if (event.target.type === 'file' || this.submitting) {
+        if (['file', 'hidden'].includes(event.target.type) || this.submitting) {
             return;
         }
         this.dirty = true;
@@ -44,6 +45,8 @@ export default class extends Controller {
     }
 
     async send() {
+        // doppelt abgesicherter CSRF-Token wie beim normalen Absenden – sonst lehnt Symfony ab, sobald die Sitzung ihn kennt
+        generateCsrfToken(this.element);
         const data = new FormData(this.element);
         for (const [name, value] of [...data.entries()]) {
             if (value instanceof File) {
@@ -54,7 +57,7 @@ export default class extends Controller {
             const response = await fetch(this.element.action || window.location.href, {
                 method: 'POST',
                 body: data,
-                headers: { 'X-Autosave': '1', Accept: 'application/json' },
+                headers: { 'X-Autosave': '1', Accept: 'application/json', ...generateCsrfHeaders(this.element) },
             });
             if (!response.ok) {
                 throw new Error(String(response.status));
@@ -68,6 +71,8 @@ export default class extends Controller {
             this.statusTarget.textContent = this.savedValue.replace('%time%', time);
         } catch {
             this.statusTarget.textContent = this.failedValue;
+        } finally {
+            removeCsrfToken(this.element);
         }
     }
 
