@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Asset\PublicFiles;
+use App\Entity\User;
+use App\Enum\Theme;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,9 +19,26 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 final class PwaController extends AbstractController
 {
+    /** Light page background and dark --color-surface (app.css, like the bottom bar above the phone buttons). */
+    private const string BACKGROUND_LIGHT = '#f9f9f9';
+    private const string BACKGROUND_DARK = '#161616';
+
+    /**
+     * Colors follow the person's color scheme: Android paints the bar of the phone buttons in the background color,
+     * a light one stays light in dark mode. "System" adds the dark variant for browsers that know user_preferences.
+     */
     #[Route('/manifest.webmanifest', name: 'pwa_manifest')]
     public function manifest(TranslatorInterface $translator, PublicFiles $files): JsonResponse
     {
+        $user = $this->getUser();
+        $theme = $user instanceof User ? $user->getTheme() : Theme::System;
+        $colors = [
+            'background_color' => Theme::Dark === $theme ? self::BACKGROUND_DARK : self::BACKGROUND_LIGHT,
+            'theme_color' => '#417230',
+        ];
+        if (Theme::System === $theme) {
+            $colors['user_preferences'] = ['color_scheme' => ['dark' => ['background_color' => self::BACKGROUND_DARK]]];
+        }
         $response = new JsonResponse([
             'name' => $translator->trans('app.name'),
             'short_name' => $translator->trans('app.name'),
@@ -28,8 +47,7 @@ final class PwaController extends AbstractController
             'start_url' => $this->generateUrl('home'),
             'scope' => '/',
             'display' => 'standalone',
-            'background_color' => '#f9f9f9',
-            'theme_color' => '#417230',
+            ...$colors,
             'icons' => [
                 ['src' => $files->url('/app-icons/icon.svg'), 'sizes' => 'any', 'type' => 'image/svg+xml'],
                 ['src' => $files->url('/app-icons/icon-192.png'), 'sizes' => '192x192', 'type' => 'image/png'],
@@ -55,6 +73,9 @@ final class PwaController extends AbstractController
             ],
         ]);
         $response->headers->set('Content-Type', 'application/manifest+json');
+        // differs per person (color scheme)
+        $response->setPrivate();
+        $response->setVary('Cookie');
 
         return $response;
     }

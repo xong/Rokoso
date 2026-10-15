@@ -30,6 +30,23 @@ final class FormSavingTest extends BrowserTestCase
         self::assertSame('Rathaus', $this->em()->find(Meeting::class, $meeting->getId())?->getLocation());
     }
 
+    public function testEventEndFollowsTheStart(): void
+    {
+        $this->login($this->createUser());
+        $this->client->request('GET', '/calendar/new');
+        $this->client->waitFor('#calendar_item_form_startsAt');
+        $setStart = fn (string $value): mixed => $this->client->executeScript(
+            'const s = document.getElementById("calendar_item_form_startsAt"); s.value = arguments[0]; s.dispatchEvent(new Event("change", {bubbles: true}));', [$value]);
+        $end = fn (): string => (string) $this->client->executeScript('return document.getElementById("calendar_item_form_endsAt").value');
+
+        $setStart('2026-10-14T19:00');
+        self::assertSame('2026-10-14T20:00', $end());
+        // a longer end keeps its duration when the start moves
+        $this->client->executeScript('document.getElementById("calendar_item_form_endsAt").value = "2026-10-14T21:30"');
+        $setStart('2026-10-15T18:00');
+        self::assertSame('2026-10-15T20:30', $end());
+    }
+
     public function testNewEntryIsRestoredAfterReloadAndTextareaGrows(): void
     {
         $user = $this->createUser();

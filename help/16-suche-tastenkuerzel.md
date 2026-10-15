@@ -28,4 +28,4 @@ Weitere „Gehe zu“-Kürzel zeigt die Übersicht unter `?`. Kürzel ohne Strg 
 
 ## Als App installieren
 
-Rokoso lässt sich auf Handy und Rechner wie eine App installieren: im Browsermenü über „App installieren“ bzw. „Zum Startbildschirm hinzufügen“. Dann startet es im eigenen Fenster und erscheint im Teilen-Menü anderer Apps.
+Rokoso lässt sich auf Handy und Rechner wie eine App installieren: im Browsermenü über „App installieren“ bzw. „Zum Startbildschirm hinzufügen“. Dann startet es im eigenen Fenster und erscheint im Teilen-Menü anderer Apps. Die Farbe der Leisten folgt deinem Farbschema; nach einem Wechsel übernimmt eine installierte App sie unter Android erst nach ihrer nächsten Aktualisierung (meist innerhalb eines Tages) oder nach einer Neuinstallation.

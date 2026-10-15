@@ -8,7 +8,7 @@ Der Kalender zeigt die Termine aller deiner Organisationen und deine persönlich
 
 ## Termine anlegen
 
-Über **Verfassen → Termin** wählst du die Organisation (dann sehen alle Mitglieder den Termin) oder „Persönlich“. Optional:
+Über **Verfassen → Termin** wählst du die Organisation (dann sehen alle Mitglieder den Termin) oder „Persönlich“. Das **Ende** wird eine Stunde nach dem Beginn vorausgefüllt und wandert mit, wenn du den Beginn verschiebst. Optional:
 
 - **Wiederholen** – täglich, wöchentlich, monatlich am selben Tag oder am selben Wochentag (z. B. „jeden 2. Donnerstag“), jährlich, auch in Abständen wie „alle 2 Wochen“.
 - **Teilnehmende** und eine **Erinnerung** vorher.

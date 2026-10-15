@@ -70,6 +70,9 @@ final class NavigationTest extends AppTestCase
         self::assertCount(1, $crawler->filter('details a[href="/calendar/new?type=task"]'));
         self::assertSame('Umfrage', trim($crawler->filter('details a[href="/surveys/new"]')->text()));
         self::assertSelectorExists('nav[aria-label="Schnellnavigation"] button[data-action="shell#open"][aria-expanded="false"]');
+        // on the phone the profile link opens the list of profile sections
+        self::assertSelectorExists('a.lg\:hidden[href="/profile/menu"]');
+        self::assertSelectorExists('a.max-lg\:hidden[href="/profile"]');
     }
 
     public function testAdminPagesHighlightAdministration(): void

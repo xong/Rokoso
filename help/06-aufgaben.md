@@ -4,7 +4,7 @@ feature: tasks
 ---
 # Aufgaben
 
-Aufgaben halten fest, wer was bis wann erledigt. Sie gehören einer Organisation oder sind persönlich. Sie haben **Verantwortliche**, auf Wunsch eine **Frist** und einen Status: **Offen**, **In Arbeit** oder **Erledigt**.
+Aufgaben halten fest, wer was bis wann erledigt. Sie gehören einer Organisation oder sind persönlich. Sie haben **Verantwortliche**, auf Wunsch eine **Frist** und einen Status: **Offen**, **In Arbeit** oder **Erledigt**. Eine Aufgabe hat keine Dauer: Im Kalender steht sie am Tag ihrer Frist. Woran gerade gearbeitet wird, zeigt der Status **In Arbeit**.
 
 ## Ansichten
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
+use App\Enum\Theme;
 use App\Tests\AppTestCase;
 
 final class PwaTest extends AppTestCase
@@ -31,5 +32,24 @@ final class PwaTest extends AppTestCase
         $this->client->request('GET', '/offline');
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('link[rel=manifest]');
+    }
+
+    public function testManifestColorsFollowTheColorScheme(): void
+    {
+        $manifest = function (): array {
+            $this->client->request('GET', '/manifest.webmanifest');
+            $manifest = json_decode((string) $this->client->getResponse()->getContent(), true);
+            self::assertIsArray($manifest);
+
+            return $manifest;
+        };
+        self::assertSame('#f9f9f9', $manifest()['background_color']);
+        self::assertSame('#161616', $manifest()['user_preferences']['color_scheme']['dark']['background_color'] ?? null);
+
+        $user = $this->login();
+        $user->setTheme(Theme::Dark);
+        $this->em()->flush();
+        self::assertSame('#161616', $manifest()['background_color']);
+        self::assertArrayNotHasKey('user_preferences', $manifest());
     }
 }

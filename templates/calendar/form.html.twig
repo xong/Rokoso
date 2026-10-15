@@ -32,7 +32,7 @@
             {% set recurrence_units = recurrence_units|merge({(choice.value): [choice.data.unit|trans({'%count%': 1}), choice.data.unit|trans({'%count%': 2})]}) %}
         {% endfor %}
         {{ form_start(form, {attr: {
-            'data-controller': item ? 'recurrence autosave-form' : 'recurrence',
+            'data-controller': item ? 'recurrence event-end autosave-form' : 'recurrence event-end',
             'data-recurrence-labels-value': recurrence_labels|json_encode,
             'data-recurrence-units-value': recurrence_units|json_encode,
             'data-recurrence-weekdays-value': (0..6)|map(d => ('calendar.weekdays.' ~ d)|trans)|json_encode,
@@ -62,8 +62,14 @@
             </fieldset>
             {{ form_row(form.title) }}
             <div class="grid gap-x-4 sm:grid-cols-2">
-                {{ form_row(form.startsAt, {attr: {'data-recurrence-target': 'start', 'data-action': 'recurrence#update'}}) }}
-                {{ form_row(form.endsAt, {help: 'calendar.ends_at_help'}) }}
+                {# tasks have a due date only: label follows the chosen type, the end is hidden (and ignored, CalendarItem::setEndsAt) #}
+                {% set task_checked = 'group-has-[input[value=task]:checked]/item' %}
+                {% set start_label %}<span class="{{ task_checked }}:hidden">{{ 'calendar.starts_at'|trans }}</span><span class="hidden {{ task_checked }}:inline">{{ 'task.due'|trans }}</span>{% endset %}
+                {% set start_help %}<span class="hidden {{ task_checked }}:inline">{{ 'calendar.starts_at_help'|trans }}</span>{% endset %}
+                {{ form_row(form.startsAt, {label: start_label, label_html: true, help: start_help, help_html: true, attr: {
+                    'data-recurrence-target': 'start', 'data-event-end-target': 'start', 'data-action': 'recurrence#update change->event-end#follow',
+                }}) }}
+                {{ form_row(form.endsAt, {help: 'calendar.ends_at_help', row_attr: {class: task_checked ~ ':hidden'}, attr: {'data-event-end-target': 'end'}}) }}
             </div>
             {{ form_row(form.allDay) }}
             {{ form_row(form.location) }}

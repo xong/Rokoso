@@ -176,6 +176,27 @@ final class CalendarTest extends AppTestCase
         self::assertSelectorTextSame('[data-recurrence-target="unit"]', 'Wochen');
     }
 
+    public function testTaskHasADueDateOnly(): void
+    {
+        $crawler = $this->client->request('GET', '/calendar/new?type=task');
+        self::assertCount(1, $crawler->filter('div[class*="input[value=task]:checked]/item:hidden"] > #calendar_item_form_endsAt'));
+        $this->client->submitForm('Speichern', [
+            'calendar_item_form[type]' => CalendarItemType::Task->value,
+            'calendar_item_form[title]' => 'Antrag stellen',
+            'calendar_item_form[startsAt]' => '2026-10-14T12:00',
+            'calendar_item_form[endsAt]' => '2026-10-21T12:00',
+        ]);
+        self::assertResponseRedirects();
+        $task = $this->em()->getRepository(CalendarItem::class)->findOneBy(['title' => 'Antrag stellen']);
+        self::assertNotNull($task);
+        self::assertNull($task->getEndsAt());
+        self::assertEquals(new \DateTimeImmutable('2026-10-14 12:00'), $task->getEffectiveEnd());
+
+        // shown on the due date only, not over a period
+        $this->client->request('GET', '/calendar/day/2026-10-15');
+        self::assertSelectorTextNotContains('[aria-labelledby="detail-heading"]', 'Antrag stellen');
+    }
+
     public function testTaskCanBeMarkedDone(): void
     {
         $task = (new CalendarItem($this->user))->setTitle('Protokoll schreiben')->setType(CalendarItemType::Task);

@@ -174,6 +174,10 @@ class CalendarItem
     public function setType(CalendarItemType $type): static
     {
         $this->type = $type;
+        // tasks have a due date only, no duration
+        if ($this->isTask()) {
+            $this->endsAt = null;
+        }
 
         return $this;
     }
@@ -272,13 +276,13 @@ class CalendarItem
 
     public function setEndsAt(?\DateTimeImmutable $endsAt): static
     {
-        $this->endsAt = $endsAt;
+        $this->endsAt = $this->isTask() ? null : $endsAt;
 
         return $this;
     }
 
     /**
-     * Effective end: explicit end, end of day for all-day items, otherwise one hour.
+     * Effective end: explicit end, end of day for all-day items, otherwise one hour (tasks: the due date).
      */
     public function getEffectiveEnd(): \DateTimeImmutable
     {

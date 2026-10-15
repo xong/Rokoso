@@ -12,7 +12,8 @@
         {# Aktionen, die auf dieselbe Seite zurückleiten, aktualisieren sie per Morphing statt neu zu laden (Scroll und Fokus bleiben) #}
         <meta name="turbo-refresh-method" content="morph">
         <meta name="turbo-refresh-scroll" content="preserve">
-        <link rel="manifest" href="{{ path('pwa_manifest') }}">
+        {# with the session cookie: colors follow the color scheme of the profile (PwaController) #}
+        <link rel="manifest" href="{{ path('pwa_manifest') }}" crossorigin="use-credentials">
         <link rel="icon" href="{{ public_file('/favicon.ico') }}" sizes="48x48">
         <link rel="icon" href="{{ public_file('/favicon.svg') }}" type="image/svg+xml">
         <link rel="apple-touch-icon" href="{{ public_file('/app-icons/apple-touch-icon.png') }}">

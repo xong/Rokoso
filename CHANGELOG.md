@@ -4,6 +4,16 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.18.1 – 2026-10-15
+
+### Verbessert
+
+- **Termine im Dunkelmodus:** Einträge im Kalender sind im dunklen Farbschema dunkel getönt mit heller Schrift und dadurch gut lesbar.
+- **App auf Android:** Die Leiste hinter den Handy-Tasten folgt deinem Farbschema, statt im Dunkelmodus weiß zu bleiben. Eine bereits installierte App übernimmt das nach ihrer nächsten Aktualisierung durch Android (meist innerhalb eines Tages) oder nach einer Neuinstallation.
+- **Profil am Handy:** Ein Tipp auf „Profil“ zeigt direkt die Übersicht der Profilbereiche.
+- **Ende folgt dem Beginn:** Beim Anlegen eines Termins wird das Ende eine Stunde nach dem Beginn vorausgefüllt; verschiebst du den Beginn, wandert das Ende mit und die Dauer bleibt gleich.
+- **Aufgaben nur mit Frist:** Aufgaben haben kein Ende mehr und erscheinen im Kalender nur am Tag ihrer Frist statt über einen ganzen Zeitraum.
+
 ## 0.18.0 – 2026-10-15
 
 ### Neu

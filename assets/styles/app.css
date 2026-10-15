@@ -165,6 +165,18 @@
 }
 
 /* Gerenderter Markdown-Text (Forum) */
+/* Kalendereinträge in ihrer Farbe (--event-color): hell getönt mit dunkler Schrift, im Dunkelmodus dunkel getönt mit heller Schrift */
+@layer components {
+    .event-tint {
+        background-color: color-mix(in oklab, var(--event-color) 15%, var(--color-surface));
+        color: color-mix(in oklab, var(--event-color) 70%, black);
+        @variant dark {
+            background-color: color-mix(in oklab, var(--event-color) 30%, var(--color-surface));
+            color: color-mix(in oklab, var(--event-color) 25%, white);
+        }
+    }
+}
+
 @layer components {
     .markdown { @apply text-sm leading-relaxed text-slate-800 break-words; }
     .markdown > * + * { @apply mt-3; }

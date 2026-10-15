@@ -1005,10 +1005,10 @@ calendar:
     delete_confirm: Eintrag wirklich löschen?
     delete_series_confirm: Die ganze Serie löschen?
     title: Titel
-    starts_at: Beginn (bei Aufgaben Frist)
-    starts_at_help: Bei Aufgaben optional.
+    starts_at: Beginn
+    starts_at_help: Optional – Aufgaben mit Frist erscheinen im Kalender.
     ends_at: Ende
-    ends_at_help: Leer lassen für eine Stunde bzw. bei Aufgaben.
+    ends_at_help: Folgt dem Beginn (eine Stunde später) und lässt sich anpassen.
     location: Ort
     organization: Organisation
     organization_help: Einträge einer Organisation sehen und bearbeiten alle Mitglieder.
