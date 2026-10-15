@@ -8,7 +8,8 @@ Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nut
 
 ### Verbessert
 
-- **Suche in den E-Mails startet beim Tippen:** Bisher suchte das Feld über der Mailliste erst nach der Eingabetaste – ohne sie blieb die Liste unverändert. Jetzt filtert die Liste kurz nach dem Tippen, und du kannst gleich weiterschreiben. Leeren des Felds zeigt wieder alle Nachrichten.
+- **Suche in den E-Mails repariert:** Sobald es Projekte gab, lief jede Suche ins Leere – die Seite lud einfach neu und zeigte wieder alle Nachrichten. Jetzt filtert die Liste schon kurz nach dem Tippen, und du kannst gleich weiterschreiben. Leeren des Felds zeigt wieder alle Nachrichten.
+- **Filter mit „Alle …“:** Die Auswahl „Alle Projekte“, „Alle Konten“, „Alle Jahre“ usw. führte bei Aufgaben, Beschlüssen, Kalender, Kontakten und E-Mails zu einer Fehlerseite. Das ist behoben.
 
 ## 0.20.0 – 2026-10-16
 

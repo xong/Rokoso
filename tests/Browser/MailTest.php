@@ -6,6 +6,7 @@ namespace App\Tests\Browser;
 
 use App\Entity\MailAccount;
 use App\Entity\Message;
+use App\Entity\Project;
 
 final class MailTest extends BrowserTestCase
 {
@@ -70,6 +71,8 @@ final class MailTest extends BrowserTestCase
             ->setImapHost('imap.example.org')->setImapUsername('sev')->setSmtpHost('smtp.example.org');
         $word = 'Laternenumzug'.random_int(1000, 9999);
         $this->em()->persist($account);
+        // with a project the form also sends the empty "all projects" option (once a 400 and a full reload)
+        $this->em()->persist((new Project($user))->setName('Schulweg')->setOrganization($organization));
         foreach (['Treffen' => 'Wir planen den '.$word.'.', 'Elternabend' => 'Hallo'] as $subject => $body) {
             $message = (new Message())->setMailAccount($account)->setFrom('eva@example.org', 'Eva')->setSubject($subject)->setBody($body);
             $message->setThreadKey($message->deriveThreadKey());
