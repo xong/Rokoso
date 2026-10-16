@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.20.2 – 2026-10-16
+
+### Verbessert
+
+- **E-Mail-Liste bleibt auf ihrer Seite:** Wer über „Ältere“ blättert und dort eine Nachricht öffnet, sieht links weiter dieselbe Seite an derselben Stelle – die Liste springt nicht mehr auf die erste Seite zurück.
+
 ## 0.20.1 – 2026-10-16
 
 ### Verbessert

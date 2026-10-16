@@ -38,6 +38,45 @@ final class MailTest extends BrowserTestCase
         self::assertSelectorTextContains('main', $subject);
     }
 
+    public function testOpeningAMessageOnPageTwoKeepsPageAndScrollPosition(): void
+    {
+        $user = $this->createUser();
+        $organization = $this->createOrganization($user);
+        $account = (new MailAccount($organization))->setName('Postfach')->setEmailAddress(uniqid('page-').'@example.org')
+            ->setImapHost('imap.example.org')->setImapUsername('sev')->setSmtpHost('smtp.example.org');
+        $this->em()->persist($account);
+        for ($i = 1; $i <= 80; ++$i) {
+            $message = (new Message())->setMailAccount($account)->setFrom('eva@example.org', 'Eva')
+                ->setSubject(\sprintf('Nachricht %02d', $i))->setBody('Hallo')->setDate(new \DateTimeImmutable(\sprintf('-%d minutes', $i)));
+            $message->setThreadKey($message->deriveThreadKey());
+            $this->em()->persist($message);
+        }
+        $this->em()->flush();
+
+        $this->login($user);
+        $this->client->request('GET', '/mail');
+        $this->client->waitForElementToContain('main', 'Nachricht 01');
+        $this->client->clickLink('Ältere');
+        $this->client->waitForElementToContain('section[aria-labelledby=list-heading]', 'Nachricht 80');
+
+        $list = '[data-controller~="keep-scroll"]';
+        // scroll and click a message in view in one go, so the driver does not scroll on its own
+        [$top, $subject] = $this->client->executeScript(<<<JS
+            const l = document.querySelector('$list');
+            l.scrollTop = 300;
+            const box = l.getBoundingClientRect();
+            const link = [...l.querySelectorAll('a[href*="/mail/"]')].find((a) => a.getBoundingClientRect().top > box.top + 150);
+            link.click();
+            return [l.scrollTop, link.querySelector('.truncate.block, span.block').textContent.trim()];
+            JS);
+        self::assertGreaterThan(0, $top);
+        $this->client->waitForElementToContain('#detail-heading', $subject);
+
+        self::assertSelectorTextContains('section[aria-labelledby=list-heading]', 'Nachricht 80');
+        self::assertSelectorTextNotContains('section[aria-labelledby=list-heading]', 'Nachricht 01');
+        self::assertSame($top, $this->client->executeScript("return document.querySelector('$list').scrollTop;"));
+    }
+
     public function testSearchByTypingAndEnter(): void
     {
         $user = $this->createUser();

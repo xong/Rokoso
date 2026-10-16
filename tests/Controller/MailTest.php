@@ -12,6 +12,7 @@ use App\Enum\OrganizationRole;
 use App\Enum\Theme;
 use App\Mail\MailboxReader;
 use App\Mail\MailSynchronizer;
+use App\Repository\MessageRepository;
 use App\Tests\AppTestCase;
 use App\Tests\Fake\FakeMailboxReader;
 
@@ -130,6 +131,32 @@ final class MailTest extends AppTestCase
         self::assertSelectorTextContains('main', 'Protokoll Elternrat');
         $this->client->request('GET', '/mail/done?q=Schulweg');
         self::assertSelectorTextNotContains('main', 'Frage zur Schulwegsicherheit');
+    }
+
+    public function testOpeningAMessageKeepsTheListPage(): void
+    {
+        $account = $this->em()->find(MailAccount::class, $this->account->getId());
+        self::assertNotNull($account);
+        for ($i = 0; $i <= MessageRepository::PAGE_SIZE; ++$i) {
+            // the oldest one lands on page 2
+            $message = (new Message())->setMailAccount($account)->setFrom('eva@example.org', 'Eva')
+                ->setSubject(0 === $i ? 'Ganz alte Nachricht' : 'Nachricht '.$i)->setBody('Hallo')
+                ->setDate(new \DateTimeImmutable(\sprintf('-%d minutes', 0 === $i ? 1000 : $i)));
+            $this->em()->persist($message);
+        }
+        $this->em()->flush();
+        $this->login($this->user);
+
+        $crawler = $this->client->request('GET', '/mail?page=2');
+        self::assertSelectorTextContains('main', 'Ganz alte Nachricht');
+        $link = $crawler->filter('section[aria-labelledby=list-heading] a')->reduce(static fn ($a): bool => str_contains($a->text(), 'Ganz alte Nachricht'))->link();
+        self::assertStringContainsString('page=2', $link->getUri());
+
+        $this->client->click($link);
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('section[aria-labelledby=list-heading]', 'Ganz alte Nachricht');
+        self::assertSelectorTextNotContains('section[aria-labelledby=list-heading]', 'Nachricht 50');
+        self::assertSelectorExists('a[href="/mail?page=1"]');
     }
 
     public function testHtmlViewIgnoresDeclaredCharset(): void

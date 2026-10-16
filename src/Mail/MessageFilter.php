@@ -38,11 +38,25 @@ final readonly class MessageFilter
     }
 
     /**
-     * Query parameters to keep when linking within the list (without page).
+     * Query parameters to keep when linking within the list, including the page – opening a message
+     * from page 2 keeps page 2 in the list column.
      *
      * @return array<string, string|int>
      */
     public function params(): array
+    {
+        return $this->filters() + (1 < $this->page ? ['page' => $this->page] : []);
+    }
+
+    public function isActive(): bool
+    {
+        return [] !== $this->filters();
+    }
+
+    /**
+     * @return array<string, string|int>
+     */
+    private function filters(): array
     {
         return array_filter([
             'show' => 'all' === $this->show ? null : $this->show,
@@ -50,11 +64,6 @@ final readonly class MessageFilter
             'account' => $this->account,
             'q' => '' === $this->query ? null : $this->query,
         ], static fn ($v): bool => null !== $v);
-    }
-
-    public function isActive(): bool
-    {
-        return [] !== $this->params();
     }
 
     /**
