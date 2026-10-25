@@ -60,12 +60,17 @@ final class MailCollaborationTest extends AppTestCase
 
     public function testResizedColumnsAreRendered(): void
     {
-        $this->client->getCookieJar()->set(new Cookie('panel_list', '40'));
-        $this->client->getCookieJar()->set(new Cookie('panel_comments', '99'));
+        $this->client->getCookieJar()->set(new Cookie('panel_list_mail_inbox', '40'));
+        $this->client->getCookieJar()->set(new Cookie('panel_comments_mail_inbox', '99'));
         $this->client->request('GET', $this->showUrl());
 
-        self::assertSelectorExists('#list-panel[style="--panel-width: 40%"] [role="separator"][aria-controls="list-panel"]');
+        self::assertSelectorExists('#list-panel[style="--panel-width: 40%"][data-panel-resize-cookie-value="panel_list_mail_inbox"] [role="separator"][aria-controls="list-panel"]');
         self::assertSelectorExists('#comments[style="--panel-width: 60%"] [role="separator"][aria-controls="comments"]');
+
+        // every page has its own width
+        $this->client->request('GET', '/contacts');
+        self::assertSelectorExists('#list-panel[data-panel-resize-cookie-value="panel_list_contact_index"]');
+        self::assertSelectorNotExists('#list-panel[style]');
     }
 
     public function testAssignMeAndAssignees(): void

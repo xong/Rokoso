@@ -15,7 +15,7 @@ Rokoso ist der gemeinsame Arbeitsplatz eures Gremiums: E-Mails, Diskussionen, Te
 
 ## So ist der Bildschirm aufgebaut
 
-Links steht die **Navigation**, daneben die **Liste** des gewählten Bereichs und rechts die **Ansicht** des gewählten Eintrags. Auf dem Handy siehst du immer nur eine dieser Spalten; mit dem Pfeil oben links kommst du zurück zur Liste.
+Links steht die **Navigation**, daneben die **Liste** des gewählten Bereichs und rechts die **Ansicht** des gewählten Eintrags. Auf dem Handy siehst du immer nur eine dieser Spalten; mit dem Pfeil oben links kommst du zurück zur Liste. Am Computer kannst du die Liste (und die Kommentarspalte) am Rand mit der Maus breiter oder schmaler ziehen; jede Seite merkt sich ihre eigene Breite, ein Doppelklick auf den Rand setzt sie zurück.
 
 Neues legst du über **Verfassen** oben in der Navigation an. Oben auf jeder Seite zum Anlegen steht, wofür der Eintrag gedacht ist und was danach passiert.
 

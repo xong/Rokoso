@@ -2,12 +2,12 @@ import { Controller } from '@hotwired/stimulus';
 
 /**
  * Verschiebbare Spalte (Liste, Kommentare): Ziehen am Trenner oder Pfeiltasten ändern die Breite in Prozent
- * des Elternelements (zwischen min und max), Doppelklick setzt sie zurück. Gespeichert im Cookie "panel_<name>",
- * damit der Server sie ohne Flackern rendert (PanelWidthExtension).
+ * des Elternelements (zwischen min und max), Doppelklick setzt sie zurück. Gespeichert pro Seite im Cookie
+ * "panel_<name>_<seite>" (Wert cookie), damit der Server sie ohne Flackern rendert (PanelWidthExtension).
  */
 export default class extends Controller {
     static targets = ['handle'];
-    static values = { name: String, min: Number, max: Number, edge: { type: String, default: 'right' } };
+    static values = { name: String, cookie: String, min: Number, max: Number, edge: { type: String, default: 'right' } };
 
     connect() {
         this.updateAria();
@@ -63,7 +63,7 @@ export default class extends Controller {
     reset() {
         this.percent = undefined;
         this.element.style.removeProperty('--panel-width');
-        document.cookie = `panel_${this.nameValue}=; path=/; max-age=0; SameSite=Lax`;
+        document.cookie = `${this.cookieValue}=; path=/; max-age=0; SameSite=Lax`;
         this.updateAria();
     }
 
@@ -74,7 +74,9 @@ export default class extends Controller {
     }
 
     save() {
-        document.cookie = `panel_${this.nameValue}=${this.percent.toFixed(1)}; path=/; max-age=31536000; SameSite=Lax`;
+        document.cookie = `${this.cookieValue}=${this.percent.toFixed(1)}; path=/; max-age=31536000; SameSite=Lax`;
+        // width for all pages from before 0.21
+        document.cookie = `panel_${this.nameValue}=; path=/; max-age=0; SameSite=Lax`;
     }
 
     // a CSS min-width in rem can be larger than the minimum percentage on small screens

@@ -28,10 +28,33 @@ final class PanelWidthExtensionTest extends TestCase
     public function testListWidthFromCookie(?string $cookie, ?float $expected): void
     {
         $stack = new RequestStack();
-        $stack->push(new Request(cookies: null === $cookie ? [] : ['panel_list' => $cookie]));
+        $stack->push(new Request(attributes: ['_route' => 'mail_show'], cookies: null === $cookie ? [] : ['panel_list_mail_inbox' => $cookie]));
 
         $panel = (new PanelWidthExtension($stack))->panelWidth('list');
 
-        self::assertSame(['name' => 'list', 'min' => 15, 'max' => 50, 'value' => $expected], $panel);
+        self::assertSame(['name' => 'list', 'cookie' => 'panel_list_mail_inbox', 'min' => 15, 'max' => 50, 'value' => $expected], $panel);
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function routes(): iterable
+    {
+        yield 'mail folder' => ['mail_done', 'mail_inbox'];
+        yield 'mail rules belong to the admin pages' => ['mail_rule_index', 'organization_index'];
+        yield 'folders belong to files' => ['folder_show', 'file_index'];
+        yield 'contacts' => ['contact_show', 'contact_index'];
+        yield 'contact groups' => ['contact_group_show', 'contact_group_index'];
+        yield 'facilities' => ['facility_index', 'facility_index'];
+        yield 'outside the menu' => ['profile_edit', 'profile'];
+    }
+
+    #[DataProvider('routes')]
+    public function testCookiePerPage(string $route, string $section): void
+    {
+        $stack = new RequestStack();
+        $stack->push(new Request(attributes: ['_route' => $route]));
+
+        self::assertSame('panel_comments_'.$section, (new PanelWidthExtension($stack))->panelWidth('comments')['cookie']);
     }
 }

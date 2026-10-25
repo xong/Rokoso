@@ -59,7 +59,8 @@ final class MeetingTest extends AppTestCase
         $this->client->submitForm('Speichern', [
             'meeting_form[title]' => 'Vollversammlung Oktober',
             'meeting_form[organization]' => (string) $this->org->getId(),
-            'meeting_form[startsAt]' => '2026-10-20T19:00',
+            // in the future, so it is listed under "upcoming"
+            'meeting_form[startsAt]' => new \DateTimeImmutable('+1 month')->format('Y-m-d\T19:00'),
             'meeting_form[location]' => 'Rathaus',
             'meeting_form[minuteTaker]' => (string) $this->member->getId(),
         ]);

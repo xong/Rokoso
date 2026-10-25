@@ -120,6 +120,31 @@ final class Sidebar
     }
 
     /**
+     * Page a route belongs to: route of the menu item (or sub item) with the longest `match` prefix, so all mail
+     * folders are one page, contacts and facilities two. Routes outside the menu use their first name part.
+     */
+    public static function section(string $route): string
+    {
+        $section = strstr($route, '_', true) ?: $route;
+        $bestLength = 0;
+        foreach (self::GROUPS as $group) {
+            foreach ($group['items'] as $item) {
+                foreach ([$item, ...$item['children'] ?? []] as $entry) {
+                    foreach ($entry['match'] ?? [] as $prefix) {
+                        // >=: a sub item wins over its parent with the same prefix (facility_)
+                        if (str_starts_with($route, $prefix) && \strlen($prefix) >= max(1, $bestLength)) {
+                            $section = $entry['route'];
+                            $bestLength = \strlen($prefix);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $section;
+    }
+
+    /**
      * Unread messages in the inbox (badge next to "Eingang").
      */
     public function getUnreadCount(): int

@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.21.0 – 2026-10-25
+
+### Verbessert
+
+- **Spaltenbreite pro Seite:** Wie breit die Liste und die Kommentarspalte sind, merkt sich jetzt jede Seite für sich – E-Mails, Kalender, Kontakte, Einrichtungen, Dateien usw. Eine breitere Liste bei den E-Mails verändert also nicht mehr die anderen Seiten. Bisher eingestellte Breiten gelten nicht mehr; einmal neu ziehen genügt.
+
 ## 0.20.2 – 2026-10-16
 
 ### Verbessert

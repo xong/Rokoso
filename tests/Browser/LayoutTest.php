@@ -24,6 +24,37 @@ final class LayoutTest extends BrowserTestCase
         self::assertLessThanOrEqual(0, $overflow);
     }
 
+    public function testListWidthIsStoredPerPage(): void
+    {
+        $user = $this->createUser();
+        $this->createOrganization($user);
+        $this->login($user);
+        $this->client->request('GET', '/mail');
+        $this->client->waitFor('#list-panel [role="separator"]');
+        $width = "return Math.round(document.getElementById('list-panel').getBoundingClientRect().width);";
+        $default = $this->client->executeScript($width);
+
+        // End = widest
+        $this->client->executeScript(<<<'JS'
+            const separator = document.querySelector('#list-panel [role="separator"]');
+            separator.focus();
+            separator.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+            JS);
+        // reduced motion in the test browser still runs a 0.01ms width transition
+        $this->client->wait(2)->until(fn (): bool => $this->client->executeScript($width) > $default);
+        $wide = $this->client->executeScript($width);
+        self::assertGreaterThan($default, $wide);
+
+        // another page keeps its own (default) width, also after a full load
+        $this->client->clickLink('Kontakte');
+        $this->client->waitFor('#list-panel[data-panel-resize-cookie-value="panel_list_contact_index"]');
+        self::assertSame($default, $this->client->executeScript($width));
+
+        $this->client->request('GET', '/mail/done');
+        $this->client->waitFor('#list-panel');
+        self::assertSame($wide, $this->client->executeScript($width));
+    }
+
     /** Jumping to an anchor scrolls the column only; the shell around it must not move (content cut off at the top) */
     public function testAnchorJumpScrollsOnlyTheColumn(): void
     {
