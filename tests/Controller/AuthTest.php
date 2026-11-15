@@ -61,6 +61,11 @@ final class AuthTest extends AppTestCase
         $this->client->request('GET', '/reset-password');
         $this->client->submitForm('Link anfordern', ['email_only[email]' => 'anna@example.org']);
         self::assertResponseRedirects('/reset-password/check-email');
+        // the reset link must not be rewritten by the mail service's click tracking
+        $mail = self::getMailerMessage();
+        self::assertNotNull($mail);
+        self::assertEmailHeaderSame($mail, 'X-Mailjet-TrackClick', '0');
+        self::assertEmailHeaderSame($mail, 'X-Mailjet-TrackOpen', '0');
 
         $this->client->request('GET', $this->linkFromLastMail('/reset-password/reset/'));
         $this->client->followRedirect();

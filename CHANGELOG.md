@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.21.1 – 2026-11-15
+
+### Datenschutz
+
+- **Systemmails ohne Nachverfolgung:** Bestätigungen, Passwort-Links, Einladungen und Benachrichtigungen bitten den Versanddienst ausdrücklich, weder Öffnungen zu zählen noch Links umzuleiten. Links in diesen Mails führen damit direkt zu Rokoso.
+
 ## 0.21.0 – 2026-10-25
 
 ### Verbessert

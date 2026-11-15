@@ -52,8 +52,13 @@ final readonly class SystemMailer
     public function create(string $to, string $subjectKey, string $template, array $context = [], ?string $toName = null): TemplatedEmail
     {
         $subject = $this->translator->trans($subjectKey, $context['subject_params'] ?? []);
+        $email = new TemplatedEmail();
+        // No tracking pixel and no rewritten links (e.g. reset links) at Mailjet, whatever the account settings say; other servers ignore these headers
+        $email->getHeaders()
+            ->addTextHeader('X-Mailjet-TrackOpen', '0')
+            ->addTextHeader('X-Mailjet-TrackClick', '0');
 
-        return (new TemplatedEmail())
+        return $email
             ->from(Address::create($this->from))
             ->to(new Address($to, $toName ?? ''))
             ->subject($subject)

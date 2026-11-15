@@ -248,6 +248,11 @@ Fehlgeschlagene Einladungen, Benachrichtigungen und Rundschreiben stehen als Feh
 
    Sonderzeichen in Benutzername und Passwort URL-kodieren: `@` → `%40`, `&` → `%26`, `#` → `%23`, `/` → `%2F`, `:` → `%3A`. Ein Neustart ist nicht nötig.
 5. Testmail unter `/admin/mail` schicken, auch an eine Microsoft-365-Adresse. Im Mailjet-Dashboard steht danach für jede Mail, ob sie zugestellt, abgelehnt oder als Spam markiert wurde.
+6. Unter Kontoeinstellungen → Tracking das Zählen von Öffnungen und Klicks abschalten. Rokoso schickt dafür zusätzlich die Header `X-Mailjet-TrackOpen: 0` und `X-Mailjet-TrackClick: 0` mit (andere Server ignorieren sie). Sonst baut Mailjet ein Zählpixel ein und leitet Links, auch Passwort-Links, über eigene Server um.
+
+**DKIM-Eintrag prüfen:** `nslookup -type=TXT mailjet._domainkey.<domain>` muss den ganzen Wert `k=rsa; p=…` zeigen. Steht dort nur `k=rsa`, hat das DNS-Panel den Wert am `;` abgeschnitten (Kommentarzeichen in Zonendateien). Dann den Wert in Anführungszeichen eintragen und, weil er länger als 255 Zeichen ist, auf zwei Zeichenketten aufteilen: `"k=rsa; p=…erster Teil" "zweiter Teil"`.
+
+**Mails angenommen, aber nicht zugestellt:** Meldet `/admin/mail` „angenommen“ und erscheint die Mail trotzdem nicht in Mailjet, zeigt die API die zuletzt verarbeiteten Mails: `curl -s -u "API_KEY:SECRET_KEY" "https://api.mailjet.com/v3/REST/message?Limit=10&ShowSubject=true&Sort=ArrivedAt+DESC"` (im eigenen Terminal ausführen). Fehlen die neuen Mails dort, hält Mailjet sie zurück, etwa weil das Konto geprüft oder angehalten wird. Dann mit der Kennung aus `/admin/mail` beim Mailjet-Support nachfragen.
 
 **DMARC-Berichte:** Den TXT-Eintrag `_dmarc.<domain>` auf `v=DMARC1; p=none; rua=mailto:dmarc@<domain>` setzen. Die großen Anbieter schicken dann täglich Berichte, wer im Namen der Domain sendet und ob es durchkommt. Wenn alles passt, auf `p=quarantine` verschärfen.
 
