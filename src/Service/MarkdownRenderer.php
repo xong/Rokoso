@@ -22,7 +22,7 @@ final class MarkdownRenderer
 {
     private ?MarkdownConverter $converter = null;
 
-    private ?MarkdownConverter $emailConverter = null;
+    private ?MarkdownConverter $breaksConverter = null;
 
     public function render(string $markdown): string
     {
@@ -30,13 +30,21 @@ final class MarkdownRenderer
     }
 
     /**
-     * HTML part of an email: like render(), but single line breaks stay line breaks (as in the text part).
+     * Like render(), but single line breaks within a paragraph stay line breaks (addresses, poems, plain-text habits).
+     */
+    public function renderWithBreaks(string $markdown): string
+    {
+        $this->breaksConverter ??= $this->createConverter(true);
+
+        return $this->breaksConverter->convert($markdown)->getContent();
+    }
+
+    /**
+     * HTML part of an email: line breaks stay as in the text part.
      */
     public function renderEmail(string $markdown): string
     {
-        $this->emailConverter ??= $this->createConverter(true);
-
-        return $this->emailConverter->convert($markdown)->getContent();
+        return $this->renderWithBreaks($markdown);
     }
 
     private function converter(): MarkdownConverter

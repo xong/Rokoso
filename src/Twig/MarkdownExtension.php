@@ -13,9 +13,10 @@ final readonly class MarkdownExtension
     {
     }
 
+    /** `|markdown(breaks: true)` keeps single line breaks within paragraphs */
     #[AsTwigFilter('markdown', isSafe: ['html'])]
-    public function markdown(string $text): string
+    public function markdown(string $text, bool $breaks = false): string
     {
-        return $this->renderer->render($text);
+        return $breaks ? $this->renderer->renderWithBreaks($text) : $this->renderer->render($text);
     }
 }

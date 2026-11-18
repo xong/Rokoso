@@ -226,7 +226,7 @@ platform:
     legal:
         title: Datenschutz und Impressum
         intro: Datenschutzerklärung und Impressum der Installation. Sie stehen öffentlich unter /privacy und /imprint und werden auf der Anmeldeseite, im Profil und in jeder Systemmail verlinkt. Ein leeres Feld wird nicht veröffentlicht.
-        help: Formatierung mit Markdown, z. B. „## Überschrift“, „- Aufzählung“, „[Linktext](https://…)“.
+        help: Formatierung mit Markdown, z. B. „## Überschrift“, „- Aufzählung“, „[Linktext](https://…)“. Zeilenumbrüche bleiben erhalten, eine Leerzeile beginnt einen neuen Absatz.
         view: Ansehen
         saved: Gespeichert.
 

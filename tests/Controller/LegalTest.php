@@ -27,7 +27,7 @@ final class LegalTest extends AppTestCase
         $this->client->request('GET', '/admin/legal');
         self::assertResponseIsSuccessful();
         $this->client->submitForm('Speichern', [
-            'privacy' => "## Verantwortlich\r\n\r\nStadtelternvertretung <script>x</script>",
+            'privacy' => "## Verantwortlich\r\n\r\nStadtelternvertretung <script>x</script>\r\nMarktplatz 1",
             'imprint' => '   ',
         ]);
         self::assertResponseRedirects('/admin/legal');
@@ -38,6 +38,8 @@ final class LegalTest extends AppTestCase
         self::assertSelectorTextContains('h1', 'Datenschutzerklärung');
         self::assertSelectorTextContains('.markdown h2', 'Verantwortlich');
         self::assertSelectorNotExists('.markdown script');
+        // line breaks within a paragraph stay (e.g. the address)
+        self::assertSelectorExists('.markdown p br');
         $this->client->request('GET', '/imprint');
         self::assertResponseStatusCodeSame(404);
 

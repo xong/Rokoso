@@ -8,7 +8,7 @@ Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nut
 
 ### Neu
 
-- **Datenschutzerklärung und Impressum:** Die Betreiber einer Rokoso-Installation hinterlegen beides unter Plattform → „Datenschutz und Impressum“. Die Texte sind öffentlich und auf der Anmeldeseite, im Profil und in jeder E-Mail von Rokoso verlinkt.
+- **Datenschutzerklärung und Impressum:** Die Betreiber einer Rokoso-Installation hinterlegen beides unter Plattform → „Datenschutz und Impressum“. Die Texte sind öffentlich und auf der Anmeldeseite, im Profil und in jeder E-Mail von Rokoso verlinkt. Zeilenumbrüche, etwa in der Anschrift, bleiben erhalten.
 
 ## 0.21.1 – 2026-11-15
 
