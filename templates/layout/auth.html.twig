@@ -13,5 +13,6 @@
             {% block content %}{% endblock %}
         </div>
         {% block below %}{% endblock %}
+        {{ include('legal/_links.html.twig', {class: 'mt-6'}) }}
     </main>
 {% endblock %}

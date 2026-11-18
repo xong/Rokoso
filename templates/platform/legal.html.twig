@@ -1,0 +1,26 @@
+{% extends 'platform/_layout.html.twig' %}
+
+{% block detail_title %}{{ 'platform.legal.title'|trans }}{% endblock %}
+
+{% block content %}
+    <p class="mb-4 max-w-prose text-sm text-slate-600">{{ 'platform.legal.intro'|trans }}</p>
+    <form method="post" class="flex max-w-3xl flex-col gap-5" data-controller="autosave-form">
+        <input type="hidden" name="_token" value="{{ csrf_token('platform-legal') }}">
+        {% for text in texts %}
+            {% set id = 'platform-legal-' ~ text.document.value %}
+            <div>
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                    <label for="{{ id }}" class="label">{{ text.document.label|trans }}</label>
+                    {% if text.content is not empty %}
+                        <a href="{{ path('legal', {document: text.document.value}) }}" class="link text-xs">{{ 'platform.legal.view'|trans }}</a>
+                    {% endif %}
+                </div>
+                <textarea id="{{ id }}" name="{{ text.document.value }}" rows="12" class="input font-mono text-sm" aria-describedby="platform-legal-help">{{ text.content }}</textarea>
+            </div>
+        {% endfor %}
+        <p id="platform-legal-help" class="text-xs text-slate-500">{{ 'platform.legal.help'|trans }}</p>
+        <div class="flex flex-wrap gap-2">
+            <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
+        </div>
+    </form>
+{% endblock %}

@@ -54,7 +54,7 @@ security:
         - { path: ^/admin, roles: ROLE_PLATFORM_ADMIN }
         - { path: ^/mcp, roles: ROLE_USER }
         - { path: ^/(\.well-known/|oauth/token$|oauth/register$), roles: PUBLIC_ACCESS }
-        - { path: ^/(login|register|verify|reset-password|invitation|manifest|sw\.js|offline|p/|ical/|s/|unsubscribe/|_deploy$|_cron/), roles: PUBLIC_ACCESS }
+        - { path: ^/(login|register|verify|reset-password|invitation|manifest|sw\.js|offline|p/|ical/|s/|unsubscribe/|_deploy$|_cron/|privacy$|imprint$), roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
 
 when@test:

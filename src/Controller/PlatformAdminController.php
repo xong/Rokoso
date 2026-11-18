@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\LegalDocument;
+use App\Repository\LegalTextRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\SecurityEventRepository;
 use App\Repository\UserRepository;
@@ -24,7 +26,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Operator area for the whole installation: accounts (block, delete), organizations, security log.
+ * Operator area for the whole installation: accounts (block, delete), organizations, mail, legal texts, security log.
  * Content of the organizations stays invisible here.
  */
 #[Route('/admin')]
@@ -124,6 +126,33 @@ final class PlatformAdminController extends AbstractController
             'to' => $to,
             'result' => $result,
         ], new Response(status: false === ($result['ok'] ?? null) ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+    }
+
+    /**
+     * Privacy policy and imprint of the installation (Markdown); empty = not published and not linked.
+     */
+    #[Route('/legal', name: 'platform_legal', methods: ['GET', 'POST'])]
+    public function legal(Request $request, LegalTextRepository $repository): Response
+    {
+        $texts = array_map($repository->get(...), LegalDocument::cases());
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('platform-legal', $request->getPayload()->getString('_token'))) {
+                throw $this->createAccessDeniedException();
+            }
+            foreach ($texts as $text) {
+                $text->setContent($request->getPayload()->getString($text->getDocument()->value));
+                $this->em->persist($text);
+            }
+            $this->em->flush();
+            $this->addFlash('success', 'platform.legal.saved');
+
+            return $this->redirectToRoute('platform_legal');
+        }
+
+        return $this->render('platform/legal.html.twig', [
+            'section' => 'legal',
+            'texts' => $texts,
+        ]);
     }
 
     #[Route('/log', name: 'platform_log')]

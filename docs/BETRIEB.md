@@ -236,6 +236,8 @@ Fehlgeschlagene Einladungen, Benachrichtigungen und Rundschreiben stehen als Feh
 
 **Beispiel Mailjet:**
 
+Vorher Datenschutzerklärung und Impressum unter `/admin/legal` eintragen. Mailjet prüft neue Konten und hält den Versand an, wenn die Website keine öffentliche Datenschutzerklärung hat oder die Mails nicht darauf verlinken. Fragt Mailjet nach den Mailarten: Rokoso verschickt nur Mails an einzelne Personen, ausgelöst durch deren eigene Aktion (Registrierung, Passwort, Adressänderung, Formular auf der öffentlichen Seite) oder durch eine Aktion anderer Mitglieder, die sie direkt betrifft (Einladung, Sitzungseinladung, Benachrichtigung). Rundschreiben und E-Mails der Organisationen gehen über deren eigene Postfächer, nicht über den Versanddienst.
+
 1. Konto anlegen und unter „Absender & Domains“ die Domain hinzufügen (z. B. `rokoso.de`). Die Domain bestätigen, entweder mit einer Datei bzw. einem TXT-Eintrag oder mit einer Mail an die Absenderadresse.
 2. **DKIM:** den angezeigten TXT-Eintrag `mailjet._domainkey` im DNS anlegen.
 3. **SPF:** den vorhandenen Eintrag ergänzen, nicht ersetzen, z. B. `v=spf1 a mx include:spf.mailjet.com -all`. Auch das Webmail beim Hoster soll weiter senden dürfen.
@@ -267,7 +269,7 @@ Benachrichtigungsmails haben die Header `List-Unsubscribe` und `List-Unsubscribe
 - **Zwei-Faktor-Anmeldung** (TOTP-App, Ersatzcodes) kann jede Person im Profil unter **Sicherheit** einschalten; dort gibt es auch „Überall abmelden“ und das persönliche Sicherheitsprotokoll. Für Admins einer Organisation wird sie dringend empfohlen.
 - **Vertraulicher Kontakt:** Betreff, Nachrichten und die optionale E-Mail-Adresse liegen verschlüsselt in der Datenbank; der Schlüssel hängt an `APP_SECRET`. **`APP_SECRET` nach dem Einrichten nie ändern** – sonst sind alle vertraulichen Gespräche unlesbar (und die Zugangscodes ungültig). Rokoso speichert dafür keine IP-Adressen und keine Uhrzeiten; die **Zugriffsprotokolle des Webservers** enthalten aber IP-Adressen – sie sollten kurz aufbewahrt bzw. gekürzt werden (beim Hoster einstellbar), wenn ihr Anonymität zusagt.
 - **KI-Agenten** (MCP unter `https://<domain>/mcp`) sind pro Organisation standardmäßig **aus**. Wer sie einschaltet, sollte das in der Datenschutzerklärung erwähnen: Was ein Agent liest, geht an den jeweiligen KI-Anbieter (z. B. Anthropic). Zugänge lassen sich im Profil widerrufen, „Überall abmelden“ beendet alle; abgelaufene Zugänge löscht `app:notify`. Ein zusätzlicher Cronjob ist nicht nötig. Damit Agenten durchkommen, muss der Webserver den `Authorization`-Header an PHP weitergeben (`public/.htaccess` erledigt das bei Apache); ein `BASIC_AUTH`-Passwortschutz gilt für `/mcp`, `/oauth/token`, `/oauth/register` und `/.well-known/` nicht.
-- Für den Betrieb sind ein Impressum und eine Datenschutzerklärung der betreibenden Stelle nötig (nicht Teil von Rokoso).
+- Für den Betrieb sind ein Impressum und eine Datenschutzerklärung der betreibenden Stelle nötig. Beides pflegt ein Plattform-Admin unter `/admin/legal` (Markdown); veröffentlicht unter `/privacy` und `/imprint`, verlinkt auf den Anmeldeseiten, im Profil und im Fuß jeder Systemmail. Leere Texte werden nicht veröffentlicht. Muster: siehe unten. Versanddienste wie Mailjet verlangen eine öffentliche Datenschutzerklärung, auf die die Mails verlinken.
 
 ## Fehlersuche
 
@@ -306,3 +308,59 @@ Vorlage für die betreibende Stelle – Angaben in eckigen Klammern ergänzen. D
 | **Drittlandübermittlung** | Keine [bei Hosting in der EU]; Web-Push läuft über den Push-Dienst des jeweiligen Browsers (nur Titel und Link der Benachrichtigung) |
 | **Löschfristen** | Papierkorb [30] Tage; Nachrichten [unbegrenzt / X Jahre]; öffentliche Einsendungen [2] Jahre; Sicherheitsprotokoll 1 Jahr; unbestätigte Anfragen 7 Tage; Konten auf Wunsch sofort (Inhalte in gemeinsamen Bereichen werden anonymisiert); Mitgliedschaften nach Ende der Amtszeit ohne Zugriff, [Löschung nach … ] |
 | **Technische und organisatorische Maßnahmen** | HTTPS; Passwörter mit modernem Hash (bcrypt/argon2); optionale Zwei-Faktor-Anmeldung; Sperre nach wiederholten Fehlversuchen; „Überall abmelden“; Postfach-Passwörter verschlüsselt (aus `APP_SECRET`); Anhänge außerhalb des Web-Roots, Auslieferung nur nach Rechteprüfung; externe Bilder in E-Mails blockiert; Sicherheitsprotokoll; tägliche Datensicherung [Ort, Aufbewahrung]; Updates [Rhythmus] |
+
+## Muster: Datenschutzerklärung
+
+Vorlage zum Einfügen unter `/admin/legal` – Angaben in eckigen Klammern ergänzen, Nicht-Zutreffendes streichen. Keine Rechtsberatung; die Verantwortung liegt bei der betreibenden Stelle.
+
+```markdown
+## Verantwortliche Stelle
+
+[Name der Stadtelternvertretung / des Trägervereins]
+[Anschrift]
+E-Mail: [Kontaktadresse]
+
+## Worum es geht
+
+Rokoso ist die Arbeitsplattform der [Stadtelternvertretung …]. Mitglieder organisieren hier E-Mails, Sitzungen, Beschlüsse, Termine, Aufgaben und Dateien. Ein Konto bekommt nur, wer sich registriert oder eingeladen wird.
+
+## Welche Daten wir verarbeiten
+
+- **Konto:** Name, E-Mail-Adresse, Passwort (nur als Hash), optional Profilbild und Zwei-Faktor-Schlüssel.
+- **Mitarbeit:** Mitgliedschaften mit Funktion und Amtszeit sowie alles, was ihr in Rokoso schreibt oder hochladet.
+- **E-Mails der Organisation:** Die Postfächer der Organisationen werden abgerufen und für die Mitglieder angezeigt, einschließlich Absender, Inhalt und Anhängen.
+- **Öffentliche Seiten und Formulare:** Eingaben in Kontaktformulare, Umfragen, Anmeldungen und Verteiler, bei Verteilern mit Bestätigung per E-Mail (Double-Opt-in).
+- **Sicherheitsprotokoll:** Anmeldungen und sicherheitsrelevante Änderungen mit gekürzter IP-Adresse, ein Jahr lang.
+- **Server-Logs:** Der Webserver protokolliert Zugriffe mit IP-Adresse; [Aufbewahrung beim Hoster, z. B. 7 Tage].
+
+## Zwecke und Rechtsgrundlagen
+
+- Gremienarbeit der Elternvertretung: Art. 6 Abs. 1 lit. e DSGVO i. V. m. [Landesschulgesetz, § …].
+- Konto und Nutzung der Plattform: Art. 6 Abs. 1 lit. b DSGVO.
+- Verteiler-Abos und freiwillige Angaben: Einwilligung, Art. 6 Abs. 1 lit. a DSGVO, jederzeit widerrufbar.
+- Sicherheitsprotokoll und Spamschutz: berechtigtes Interesse, Art. 6 Abs. 1 lit. f DSGVO.
+
+## E-Mails von Rokoso
+
+Rokoso schickt nur E-Mails, die eine Person direkt betreffen: Bestätigung der Adresse, Passwort zurücksetzen, Einladungen, Sitzungseinladungen und Benachrichtigungen (einzeln oder als tägliche Zusammenfassung). Benachrichtigungsmails lassen sich im Profil oder mit einem Klick in der Mail abbestellen. Die Mails gehen über [Versanddienst, z. B. Mailjet SAS, Paris] als Auftragsverarbeiter; Öffnungen und Klicks werden nicht gezählt.
+
+## Cookies und Speicher im Browser
+
+Rokoso setzt nur technisch nötige Cookies: die Sitzung, auf Wunsch „Angemeldet bleiben“, sowie Anzeigeeinstellungen (eingeklappte Navigation, Spaltenbreiten). Entwürfe von Formularen werden bis zum Absenden im eigenen Browser zwischengespeichert. Es gibt keine Analyse- oder Werbedienste und keine eingebundenen Inhalte Dritter.
+
+## Push-Benachrichtigungen
+
+Wer Push-Benachrichtigungen einschaltet, bekommt sie über den Push-Dienst des eigenen Browsers (z. B. Google, Mozilla, Apple). Dabei werden nur Titel und Link der Benachrichtigung übertragen, verschlüsselt.
+
+## Empfänger
+
+Inhalte sehen nur die Mitglieder der jeweiligen Organisation, je nach Rolle; Gäste nur freigegebene Projekte. Technische Dienstleister: [Hoster, Sitz] und [Versanddienst], jeweils mit Vertrag zur Auftragsverarbeitung. Eine Übermittlung in Drittländer findet nicht statt[, außer …].
+
+## Speicherdauer
+
+Gelöschte Inhalte bleiben [30] Tage im Papierkorb. Einsendungen über öffentliche Formulare werden nach [2] Jahren gelöscht, unbestätigte Anfragen nach 7 Tagen, das Sicherheitsprotokoll nach einem Jahr. Ein Konto kann jederzeit im Profil gelöscht werden; Beiträge in gemeinsamen Bereichen bleiben dann unter „Gelöschtes Konto“ erhalten.
+
+## Eure Rechte
+
+Ihr habt das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie auf Widerruf einer Einwilligung. Im Profil unter „Konto und Daten“ könnt ihr eure Daten herunterladen und das Konto löschen. Außerdem könnt ihr euch bei einer Datenschutz-Aufsichtsbehörde beschweren, z. B. [Landesbeauftragte*r für den Datenschutz …].
+```

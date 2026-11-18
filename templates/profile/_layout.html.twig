@@ -38,6 +38,7 @@
         {% endfor %}
     </ul>
     <p class="px-5 pb-4 text-xs text-slate-500">{{ 'changelog.footer'|trans({'%version%': app_version()}) }}</p>
+    {{ include('legal/_links.html.twig', {class: 'px-5 pb-4 [&_ul]:justify-start'}) }}
 {% endblock %}
 
 {% block detail %}

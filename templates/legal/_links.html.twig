@@ -1,0 +1,11 @@
+{# Links to the privacy policy and imprint of the installation, if written #}
+{% set documents = legal_documents() %}
+{% if documents is not empty %}
+    <nav aria-label="{{ 'legal.nav'|trans }}" class="{{ class|default('') }} text-xs text-slate-500">
+        <ul role="list" class="flex flex-wrap justify-center gap-x-4 gap-y-1">
+            {% for document in documents %}
+                <li><a href="{{ path('legal', {document: document.value}) }}" class="hover:text-slate-700 hover:underline">{{ document.label|trans }}</a></li>
+            {% endfor %}
+        </ul>
+    </nav>
+{% endif %}

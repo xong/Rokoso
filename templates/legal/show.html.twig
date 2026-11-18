@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ text.document.label|trans }}{% endblock %}
+
+{% block body %}
+    <main id="main" class="mx-auto max-w-2xl px-4 py-10">
+        <a href="{{ path('home') }}" class="mb-8 inline-flex items-center gap-2 font-semibold">
+            {{ include('_partials/logo.html.twig', {variant: 'line', class: 'size-8 text-brand-600'}) }}
+            {{ 'app.name'|trans }}
+        </a>
+        <h1 class="mb-6 text-2xl font-semibold">{{ text.document.label|trans }}</h1>
+        <div class="markdown">{{ text.content|markdown }}</div>
+        <p class="mt-8 text-xs text-slate-500">{{ 'legal.updated'|trans({'%date%': text.updatedAt|date('d.m.Y')}) }}</p>
+        {{ include('legal/_links.html.twig', {class: 'mt-4'}) }}
+    </main>
+{% endblock %}

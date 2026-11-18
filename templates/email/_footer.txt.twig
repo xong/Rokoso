@@ -1,0 +1,9 @@
+{% set documents = legal_documents() %}
+{% if documents is not empty %}
+
+--
+{{ 'email.footer'|trans }}
+{% for document in documents %}
+{{ document.label|trans }}: {{ url('legal', {document: document.value}) }}
+{% endfor %}
+{% endif %}

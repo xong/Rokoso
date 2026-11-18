@@ -223,6 +223,12 @@ platform:
         sent: 'An %to%, Kennung beim Server: %id%'
         ok_hint: Kommt sie trotzdem nicht an, liegt es am Empfänger (Spam-Ordner, Quarantäne) oder an der Zustellung des Servers – die Kennung hilft beim Nachfragen.
         failed: Der Versand ist fehlgeschlagen.
+    legal:
+        title: Datenschutz und Impressum
+        intro: Datenschutzerklärung und Impressum der Installation. Sie stehen öffentlich unter /privacy und /imprint und werden auf der Anmeldeseite, im Profil und in jeder Systemmail verlinkt. Ein leeres Feld wird nicht veröffentlicht.
+        help: Formatierung mit Markdown, z. B. „## Überschrift“, „- Aufzählung“, „[Linktext](https://…)“.
+        view: Ansehen
+        saved: Gespeichert.
 
 account:
     export_title: Meine Daten herunterladen
@@ -2077,6 +2083,14 @@ public:
         assignee_none: – niemand –
         deleted: Das Thema wurde gelöscht.
         delete_confirm: Thema löschen?
+
+legal:
+    nav: Rechtliches
+    updated: 'Stand: %date%'
+    privacy:
+        title: Datenschutzerklärung
+    imprint:
+        title: Impressum
 
 changelog:
     title: Neuigkeiten
