@@ -346,7 +346,23 @@ Rokoso schickt nur E-Mails, die eine Person direkt betreffen: Bestätigung der A
 
 ## Cookies und Speicher im Browser
 
-Rokoso setzt nur technisch nötige Cookies: die Sitzung, auf Wunsch „Angemeldet bleiben“, sowie Anzeigeeinstellungen (eingeklappte Navigation, Spaltenbreiten). Entwürfe von Formularen werden bis zum Absenden im eigenen Browser zwischengespeichert. Es gibt keine Analyse- oder Werbedienste und keine eingebundenen Inhalte Dritter.
+Rokoso verwendet nur Cookies und Browser-Speicher, die für den Betrieb nötig sind oder eine Einstellung speichern, die ihr selbst vornehmt. Eine Einwilligung ist dafür nicht erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG). Es gibt keine Analyse-, Werbe- oder Tracking-Cookies und keine eingebundenen Inhalte Dritter; die Cookies werden nicht an andere weitergegeben.
+
+| Name | Zweck | Speicherdauer |
+|---|---|---|
+| `PHPSESSID` | Sitzung: hält euch nach der Anmeldung angemeldet, auch beim Absenden von Formularen | bis zum Schließen des Browsers bzw. zur Abmeldung |
+| `REMEMBERME` | nur wenn ihr „Angemeldet bleiben“ wählt | 30 Tage, „Überall abmelden“ macht es ungültig |
+| `__Host-csrf-token_…` | Schutz vor gefälschten Formularen (CSRF) | wird nach dem Absenden gelöscht |
+| `nav_collapsed` | ob die Navigation eingeklappt ist | 1 Jahr |
+| `panel_…` | von euch eingestellte Spaltenbreite je Seite | 1 Jahr |
+
+Außerdem nutzt Rokoso den Speicher eures Browsers:
+
+- **Formular-Sicherung (Local Storage):** Was ihr in ein Formular schreibt, wird bis zum Absenden auf eurem Gerät zwischengespeichert, damit nichts verloren geht. Die Sicherung wird beim Absenden gelöscht und verfällt nach 7 Tagen. Auf den öffentlichen Seiten und beim vertraulichen Kontakt ist sie abgeschaltet.
+- **Sitzungsspeicher (Session Storage):** merkt sich kurzzeitig, welches Suchfeld den Fokus hatte; wird beim Schließen des Tabs gelöscht.
+- **App-Cache:** Wer Rokoso als App installiert, bekommt eine Offline-Seite und das App-Symbol im Cache des Browsers, keine Inhalte.
+
+Ihr könnt Cookies und Browser-Speicher jederzeit in den Einstellungen eures Browsers löschen; danach müsst ihr euch neu anmelden.
 
 ## Push-Benachrichtigungen
 
