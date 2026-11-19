@@ -224,8 +224,9 @@ platform:
         ok_hint: Kommt sie trotzdem nicht an, liegt es am Empfänger (Spam-Ordner, Quarantäne) oder an der Zustellung des Servers – die Kennung hilft beim Nachfragen.
         failed: Der Versand ist fehlgeschlagen.
     legal:
-        title: Datenschutz und Impressum
-        intro: Datenschutzerklärung und Impressum der Installation. Sie stehen öffentlich unter /privacy und /imprint und werden auf der Anmeldeseite, im Profil und in jeder Systemmail verlinkt. Ein leeres Feld wird nicht veröffentlicht.
+        title: Begrüßung und Rechtliches
+        intro: Texte der Installation. Die Begrüßung erscheint auf der Anmeldeseite; Datenschutzerklärung und Impressum stehen öffentlich unter /privacy und /imprint und werden auf der Anmeldeseite, im Profil und in jeder Systemmail verlinkt. Ein leeres Feld wird nicht veröffentlicht.
+        welcome_help: 'Optional, steht auf der Anmeldeseite über der Erklärung von Rokoso – z. B. für wen diese Installation ist und wie man Zugang bekommt.'
         help: Formatierung mit Markdown, z. B. „## Überschrift“, „- Aufzählung“, „[Linktext](https://…)“. Zeilenumbrüche bleiben erhalten, eine Leerzeile beginnt einen neuen Absatz.
         view: Ansehen
         saved: Gespeichert.
@@ -2087,10 +2088,68 @@ public:
 legal:
     nav: Rechtliches
     updated: 'Stand: %date%'
+    welcome:
+        title: Begrüßung auf der Anmeldeseite
     privacy:
         title: Datenschutzerklärung
     imprint:
         title: Impressum
+
+landing:
+    title: Gemeinsam arbeiten in der Elternvertretung
+    lead: 'Rokoso bündelt, was ehrenamtliche Elternvertretungen für ihre Arbeit brauchen – Postfach, Sitzungen, Abstimmungen, Termine, Aufgaben und Dateien an einem Ort statt verstreut über private E-Mail-Adressen und Messenger-Gruppen.'
+    more: Mehr über Rokoso
+    footer_source: Rokoso ist Open Source – Quellcode auf GitHub
+    features:
+        title: Was Rokoso kann
+        mail:
+            title: Gemeinsames Postfach
+            text: 'Die E-Mail-Adresse der Elternvertretung für das ganze Team: Nachrichten zuweisen, kommentieren, erledigen und gemeinsam beantworten. Rundschreiben an Verteiler gehen über euer eigenes Postfach.'
+        forum:
+            title: Forum und Direktnachrichten
+            text: Diskussionen nach Themen statt endloser Chatverläufe, mit @-Erwähnungen und Benachrichtigungen.
+        meetings:
+            title: Sitzungen
+            text: 'Tagesordnung mit Vorschlägen, Einladung mit Kalendereintrag, Anwesenheit, Protokoll mit Freigabe und eine Beschlussliste.'
+        polls:
+            title: Abstimmungen und Umfragen
+            text: 'Offen oder geheim, Umlaufbeschlüsse und Terminfindung – Umfragen auch für Eltern außerhalb des Gremiums.'
+        calendar:
+            title: Kalender und Aufgaben
+            text: 'Termine mit Wiederholungen, Aufgaben mit Zuständigen und Fristen, Projekte, die alles zu einem Vorhaben bündeln.'
+        files:
+            title: Dateien und Handbuch
+            text: 'Ablage mit Versionen und Freigabelinks; im Handbuch steht, wie eure Arbeit läuft.'
+        contacts:
+            title: Kontakte und Einrichtungen
+            text: 'Ansprechpersonen, Verteiler und die Vertretungen der Schulen und Kitas – aktuell und für das ganze Team.'
+        public:
+            title: Öffentliche Seite
+            text: 'Kontaktformular, Termine, Beschlüsse, Anmeldung zum Verteiler und ein vertraulicher Kontakt – ohne eigene Website.'
+        app:
+            title: Auch als App
+            text: 'Läuft im Browser und lässt sich auf Handy und Computer installieren, mit Push-Benachrichtigungen und Kalender-Abo.'
+    handover:
+        title: Wissen bleibt, wenn das Amt wechselt
+        text: 'Elternvertretungen wechseln jedes Jahr. In Rokoso gehören Postfach, Unterlagen, Beschlüsse und Kontakte der Organisation, nicht einzelnen Personen: Neue Mitglieder finden alles vor, und wer ausscheidet, verliert mit dem Ende der Amtszeit den Zugriff.'
+    start:
+        title: So kommt ihr dazu
+        account:
+            title: Konto anlegen
+            text: 'mit eurer E-Mail-Adresse – oder ihr bekommt eine Einladung von eurer Elternvertretung.'
+        organization:
+            title: Organisation anlegen
+            text: 'für eure Elternvertretung, Mitglieder per E-Mail einladen und Rollen vergeben.'
+        mailbox:
+            title: E-Mail-Konto verbinden
+            text: 'das bestehende Postfach der Elternvertretung einbinden; Rokoso ruft die Mails ab und verschickt darüber.'
+    trust:
+        title: Datenschutz und Offenheit
+        tracking: 'Keine Werbung, kein Tracking und keine eingebundenen Inhalte von Dritten.'
+        access: 'Inhalte sehen nur die Mitglieder der jeweiligen Organisation, je nach Rolle; Gäste nur freigegebene Projekte.'
+        account: 'Zwei-Faktor-Anmeldung, Datenexport und Konto löschen jederzeit im Profil.'
+        open_source: 'Open Source unter MIT-Lizenz:'
+        source: Quellcode auf GitHub
 
 changelog:
     title: Neuigkeiten

@@ -19,7 +19,7 @@ final class LegalController extends AbstractController
     public function show(LegalDocument $document, LegalTextRepository $texts): Response
     {
         $text = $texts->get($document);
-        if ('' === $text->getContent()) {
+        if (!$document->isPage() || '' === $text->getContent()) {
             throw $this->createNotFoundException();
         }
 

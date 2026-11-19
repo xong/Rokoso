@@ -1,22 +1,41 @@
-# Rokoso – Kollaborationssoftware für Stadtelternvertretungen
+# Rokoso – Kollaborationssoftware für Elternvertretungen
 
-Gemeinsames Postfach, interne Nachrichten, Projekte, Kalender und Kontakte für ehrenamtliche Gremien.
+Rokoso bündelt, was ehrenamtliche Elternvertretungen (Stadt-, Kreis-, Schul- und Kita-Elternvertretungen) für ihre
+Arbeit brauchen – Postfach, Sitzungen, Abstimmungen, Termine, Aufgaben und Dateien an einem Ort statt verstreut über
+private E-Mail-Adressen und Messenger-Gruppen. Was die Organisation weiß, gehört ihr und nicht einzelnen Personen:
+Beim jährlichen Amtswechsel finden neue Mitglieder alles vor.
+
 Open Source unter [MIT-Lizenz](LICENSE).
 
-> Stand und Fahrplan: [`docs/PLAN.md`](docs/PLAN.md) · Betrieb: [`docs/BETRIEB.md`](docs/BETRIEB.md)
+> Stand und Fahrplan: [`docs/PLAN.md`](docs/PLAN.md) · Betrieb: [`docs/BETRIEB.md`](docs/BETRIEB.md) · Hilfe für Nutzer:innen: [`help/`](help/)
 
 ## Funktionen
 
-- **Konten:** Registrierung mit E-Mail-Bestätigung, Anmeldung („angemeldet bleiben“), Passwort vergessen, Profil mit Bild
-- **Organisationen:** Name, Logo, Farbe, Beschreibung; Rollen Administrator/Nutzer; Einladungen per E-Mail
-- **E-Mail:** IMAP-Konten je Organisation, gemeinsamer Eingang mit Ausgang und Papierkorb, Gruppierung nach Datum,
-  Filter (ohne Verantwortliche, mir zugeordnet, ungelesen, Projekt, Konto, Suche), Text-/HTML-Ansicht (sicher im Sandbox-iframe),
-  Anhänge, Kommentare, Verantwortliche, Projektzuordnung, Hover-Funktionsleiste, Schreiben/Antworten/Weiterleiten per SMTP
-- **Interne Nachrichten** an Personen, Organisationen oder Projekte – in derselben Liste wie E-Mails
-- **Projekte** mit Farbe und Bild, optional einer Organisation zugeordnet
-- **Kalender:** Monats-, Wochen- und Tagesansicht, Termine und Aufgaben, Verantwortliche/Teilnehmende, Wiederholungen
-- **Kontakte** mit Foto; bekannte Absender erscheinen in der Nachrichtenliste mit Foto bzw. Initialen
-- **Installierbar** als App (PWA) auf Smartphone und Desktop
+- **Gemeinsames Postfach:** die IMAP-Konten der Organisation für das ganze Team – zuweisen, kommentieren, Wiedervorlage,
+  „Erledigt“ für mich oder für alle, Regeln, Spam-Ordner, Projekten zuordnen; Schreiben mit Entwürfen, Signaturen,
+  Textbausteinen und „Senden rückgängig“, Versand über den eigenen SMTP-Server samt Kopie im Gesendet-Ordner
+- **Rundschreiben** an Verteiler, einzeln adressiert, mit Fehlerprotokoll
+- **Forum und Direktnachrichten** mit @-Erwähnungen, Beobachten und Abstimmungen in Themen
+- **Sitzungen:** Tagesordnung mit Vorschlägen, Einladung mit .ics, Anwesenheit und Beschlussfähigkeit, Protokoll mit
+  Freigabe, Beschlussliste, Aufgaben aus Tagesordnungspunkten
+- **Abstimmungen und Umfragen:** offen oder geheim, Umlaufbeschluss, Terminfindung; Umfragen auch öffentlich mit Auswertung
+- **Kalender** mit Wiederholungen, Einzelterminen einer Serie, Erinnerungen, Abo-Link und Gäste-Einladung
+- **Aufgaben und Projekte:** Liste und Board, Zuständige, Fristen; Projekte bündeln Mails, Termine, Aufgaben und Dateien,
+  Gastzugang pro Projekt
+- **Dateien und Handbuch:** Ablage mit Vorschau, Versionen und Freigabelinks; Handbuch als Seitenbaum mit Versionen
+- **Kontakte und Einrichtungen:** Kontakte mit Verlauf und Notizen, Verteiler, vCard-Import/-Export; Schulen und Kitas mit
+  Vertretung und Stellvertretung
+- **Öffentliche Seite** pro Organisation: Kontaktformular in den Eingang, Termine, Beschlüsse, Veranstaltungs-Anmeldung,
+  Verteiler-Abo mit Double-Opt-in, vertraulicher Kontakt (verschlüsselt, ohne Konto)
+- **Organisationen und Rechte:** Rollen, Funktionen und Amtszeiten, Übergabe beim Amtswechsel, Bereiche pro Organisation
+  ein- und ausschaltbar
+- **Startseite „Heute“,** globale Suche, Befehlspalette (Strg+K), Benachrichtigungen per Glocke, E-Mail und Push
+- **App (PWA)** für Handy und Computer, Dunkelmodus, barrierearm (axe-geprüft)
+- **Sicherheit und Datenschutz:** Zwei-Faktor-Anmeldung, „Überall abmelden“, Datenexport, Konto löschen, Löschfristen,
+  Sicherheitsprotokoll; kein Tracking, keine Inhalte von Dritten
+- **KI-Agenten (optional):** MCP-Schnittstelle mit persönlichen Tokens bzw. OAuth, pro Organisation abschaltbar
+- **Betrieb:** Plattform-Verwaltung unter `/admin` mit Begrüßungstext der Anmeldeseite, Datenschutzerklärung und Impressum;
+  läuft beim normalen Webhoster (Cron und Migrationen per URL) oder im Docker-Container
 
 ## Voraussetzungen
 

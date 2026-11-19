@@ -12,10 +12,13 @@
                 <div class="flex flex-wrap items-baseline justify-between gap-2">
                     <label for="{{ id }}" class="label">{{ text.document.label|trans }}</label>
                     {% if text.content is not empty %}
-                        <a href="{{ path('legal', {document: text.document.value}) }}" class="link text-xs">{{ 'platform.legal.view'|trans }}</a>
+                        <a href="{{ text.document.page ? path('legal', {document: text.document.value}) : path('app_login') }}" class="link text-xs">{{ 'platform.legal.view'|trans }}</a>
                     {% endif %}
                 </div>
-                <textarea id="{{ id }}" name="{{ text.document.value }}" rows="12" class="input font-mono text-sm" aria-describedby="platform-legal-help">{{ text.content }}</textarea>
+                {% if not text.document.page %}
+                    <p id="{{ id }}-help" class="mb-1 text-xs text-slate-500">{{ 'platform.legal.welcome_help'|trans }}</p>
+                {% endif %}
+                <textarea id="{{ id }}" name="{{ text.document.value }}" rows="{{ text.document.page ? 12 : 4 }}" class="input font-mono text-sm" aria-describedby="{{ text.document.page ? '' : id ~ '-help ' }}platform-legal-help">{{ text.content }}</textarea>
             </div>
         {% endfor %}
         <p id="platform-legal-help" class="text-xs text-slate-500">{{ 'platform.legal.help'|trans }}</p>

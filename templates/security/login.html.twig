@@ -1,42 +1,124 @@
-{% extends 'layout/auth.html.twig' %}
+{% extends 'base.html.twig' %}
 
+{# Anmeldeseite = Einstiegsseite: oben Erklärung und Anmeldeformular nebeneinander (mobil untereinander), darunter was Rokoso kann #}
 {% block title %}{{ 'security.login'|trans }}{% endblock %}
 
-{% block content %}
-    <form method="post" action="{{ path('app_login') }}" data-turbo="false">
-        {% if error %}
-            <div role="alert" class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
-                {{ error.messageKey|trans(error.messageData, 'security') }}
-                {% if error.messageKey == 'security.not_verified' %}
-                    <a class="link mt-1 block" href="{{ path('app_verify_resend') }}">{{ 'registration.resend_link'|trans }}</a>
+{% block body %}
+    {% set features = [
+        {key: 'mail', icon: 'inbox'},
+        {key: 'forum', icon: 'messages-square'},
+        {key: 'meetings', icon: 'presentation'},
+        {key: 'polls', icon: 'vote'},
+        {key: 'calendar', icon: 'calendar'},
+        {key: 'files', icon: 'folder-open'},
+        {key: 'contacts', icon: 'contact'},
+        {key: 'public', icon: 'globe'},
+        {key: 'app', icon: 'smartphone'},
+    ] %}
+    {% set welcome = welcome_text() %}
+    {{ include('_partials/flashes.html.twig') }}
+    <main id="main">
+        <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_22rem] md:items-center md:gap-12 lg:py-16">
+            <div>
+                <div class="mb-6 flex items-center gap-3">
+                    {{ include('_partials/logo.html.twig', {variant: 'line', class: 'size-12 text-brand-600'}) }}
+                    <span class="text-xl font-semibold">{{ 'app.name'|trans }}</span>
+                </div>
+                <h1 class="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ 'landing.title'|trans }}</h1>
+                <p class="mt-4 max-w-prose text-base leading-relaxed text-slate-600 sm:text-lg">{{ 'landing.lead'|trans }}</p>
+                {% if welcome is not empty %}
+                    <div class="markdown mt-6 max-w-prose rounded-lg border-l-4 border-brand-600 bg-surface p-4 ring-1 ring-slate-200">{{ welcome|markdown(breaks: true) }}</div>
                 {% endif %}
+                <p class="mt-6"><a href="#about" class="link inline-flex items-center gap-1">{{ ux_icon('lucide:arrow-down', {class: 'size-4', 'aria-hidden': 'true'}) }}{{ 'landing.more'|trans }}</a></p>
             </div>
-        {% endif %}
 
-        <div class="mb-4">
-            <label for="username" class="label">{{ 'user.email'|trans }}</label>
-            <input type="email" value="{{ last_username }}" name="_username" id="username" class="input" autocomplete="email" required autofocus>
+            <section class="card p-6 shadow-sm" aria-labelledby="login-title">
+                <h2 id="login-title" class="mb-4 text-lg font-semibold">{{ 'security.login'|trans }}</h2>
+                <form method="post" action="{{ path('app_login') }}" data-turbo="false">
+                    {% if error %}
+                        <div role="alert" class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                            {% if error.messageKey == 'security.not_verified' %}
+                                <a class="link mt-1 block" href="{{ path('app_verify_resend') }}">{{ 'registration.resend_link'|trans }}</a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-4">
+                        <label for="username" class="label">{{ 'user.email'|trans }}</label>
+                        <input type="email" value="{{ last_username }}" name="_username" id="username" class="input" autocomplete="email" required autofocus>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex items-baseline justify-between">
+                            <label for="password" class="label">{{ 'user.password'|trans }}</label>
+                            <a href="{{ path('app_forgot_password') }}" class="link text-xs">{{ 'security.forgot'|trans }}</a>
+                        </div>
+                        <div class="relative" data-controller="password-reveal">
+                            <input type="password" name="_password" id="password" class="input pr-11" autocomplete="current-password" required data-password-reveal-target="input">
+                            {{ include('_partials/password_toggle.html.twig', {target: 'password'}) }}
+                        </div>
+                    </div>
+                    <div class="mb-5 flex items-center gap-2">
+                        <input type="checkbox" name="_remember_me" id="remember_me" class="size-4 accent-brand-600">
+                        <label for="remember_me" class="text-sm text-slate-700">{{ 'security.remember_me'|trans }}</label>
+                    </div>
+
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+                    <button type="submit" class="btn-primary w-full">{{ 'security.login'|trans }}</button>
+                </form>
+                <p class="mt-5 border-t border-slate-200 pt-4 text-sm text-slate-600">{{ 'security.no_account'|trans }} <a class="link" href="{{ path('app_register') }}">{{ 'registration.title'|trans }}</a></p>
+            </section>
         </div>
-        <div class="mb-4">
-            <div class="flex items-baseline justify-between">
-                <label for="password" class="label">{{ 'user.password'|trans }}</label>
-                <a href="{{ path('app_forgot_password') }}" class="link text-xs">{{ 'security.forgot'|trans }}</a>
+
+        <div id="about" class="border-t border-slate-200 bg-surface">
+            <section class="mx-auto max-w-6xl px-4 py-12" aria-labelledby="landing-features">
+                <h2 id="landing-features" class="text-2xl font-semibold tracking-tight">{{ 'landing.features.title'|trans }}</h2>
+                <ul role="list" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {% for feature in features %}
+                        <li class="rounded-lg p-4 ring-1 ring-slate-200">
+                            <h3 class="flex items-center gap-2 font-semibold">
+                                <span class="flex size-8 shrink-0 items-center justify-center rounded-md bg-brand-600 text-white">{{ ux_icon('lucide:' ~ feature.icon, {class: 'size-4', 'aria-hidden': 'true'}) }}</span>
+                                {{ ('landing.features.' ~ feature.key ~ '.title')|trans }}
+                            </h3>
+                            <p class="mt-2 leading-relaxed text-slate-600">{{ ('landing.features.' ~ feature.key ~ '.text')|trans }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <div class="mx-auto grid max-w-6xl gap-10 px-4 pb-12 md:grid-cols-2">
+                <section aria-labelledby="landing-handover">
+                    <h2 id="landing-handover" class="text-2xl font-semibold tracking-tight">{{ 'landing.handover.title'|trans }}</h2>
+                    <p class="mt-4 max-w-prose leading-relaxed text-slate-600">{{ 'landing.handover.text'|trans }}</p>
+                </section>
+                <section aria-labelledby="landing-start">
+                    <h2 id="landing-start" class="text-2xl font-semibold tracking-tight">{{ 'landing.start.title'|trans }}</h2>
+                    <ol class="mt-4 flex flex-col gap-3">
+                        {% for step in ['account', 'organization', 'mailbox'] %}
+                            <li class="flex gap-3">
+                                <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-white" aria-hidden="true">{{ loop.index }}</span>
+                                <p class="leading-relaxed text-slate-600"><strong class="font-semibold text-slate-900">{{ ('landing.start.' ~ step ~ '.title')|trans }}</strong> – {{ ('landing.start.' ~ step ~ '.text')|trans }}</p>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                </section>
             </div>
-            <div class="relative" data-controller="password-reveal">
-                <input type="password" name="_password" id="password" class="input pr-11" autocomplete="current-password" required data-password-reveal-target="input">
-                {{ include('_partials/password_toggle.html.twig', {target: 'password'}) }}
+        </div>
+
+        <section class="border-t border-slate-200" aria-labelledby="landing-trust">
+            <div class="mx-auto max-w-6xl px-4 py-12">
+                <h2 id="landing-trust" class="text-2xl font-semibold tracking-tight">{{ 'landing.trust.title'|trans }}</h2>
+                <ul role="list" class="mt-4 grid gap-3 sm:grid-cols-2">
+                    {% for item in ['tracking', 'access', 'account'] %}
+                        <li class="flex gap-2 leading-relaxed text-slate-600">{{ ux_icon('lucide:shield-check', {class: 'mt-0.5 size-5 shrink-0 text-brand-700', 'aria-hidden': 'true'}) }}<span>{{ ('landing.trust.' ~ item)|trans }}</span></li>
+                    {% endfor %}
+                    <li class="flex gap-2 leading-relaxed text-slate-600">{{ ux_icon('lucide:shield-check', {class: 'mt-0.5 size-5 shrink-0 text-brand-700', 'aria-hidden': 'true'}) }}<span>{{ 'landing.trust.open_source'|trans }} <a href="{{ repository_url }}" class="link" rel="noopener">{{ 'landing.trust.source'|trans }}</a></span></li>
+                </ul>
             </div>
-        </div>
-        <div class="mb-5 flex items-center gap-2">
-            <input type="checkbox" name="_remember_me" id="remember_me" class="size-4 accent-brand-600">
-            <label for="remember_me" class="text-sm text-slate-700">{{ 'security.remember_me'|trans }}</label>
-        </div>
-
-        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
-        <button type="submit" class="btn-primary w-full">{{ 'security.login'|trans }}</button>
-    </form>
-{% endblock %}
-
-{% block below %}
-    <p class="mt-4 text-sm text-slate-600">{{ 'security.no_account'|trans }} <a class="link" href="{{ path('app_register') }}">{{ 'registration.title'|trans }}</a></p>
+        </section>
+    </main>
+    <footer class="border-t border-slate-200 px-4 py-6">
+        {{ include('legal/_links.html.twig') }}
+        <p class="mt-2 text-center text-xs text-slate-500"><a href="{{ repository_url }}" class="hover:text-slate-700 hover:underline" rel="noopener">{{ 'landing.footer_source'|trans }}</a></p>
+    </footer>
 {% endblock %}

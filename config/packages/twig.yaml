@@ -1,6 +1,9 @@
 twig:
     file_name_pattern: '*.twig'
     form_themes: ['form/theme.html.twig']
+    globals:
+        # Quellcode, verlinkt auf der Anmeldeseite (Forks: eigenes Repository eintragen)
+        repository_url: 'https://github.com/xong/Rokoso'
     date:
         timezone: Europe/Berlin
 

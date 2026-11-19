@@ -26,7 +26,7 @@ class LegalTextRepository extends ServiceEntityRepository
     }
 
     /**
-     * Documents with text, in enum order – only these are linked.
+     * Pages with text, in enum order – only these are linked.
      *
      * @return list<LegalDocument>
      */
@@ -38,6 +38,6 @@ class LegalTextRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleColumnResult();
 
-        return array_values(array_filter(LegalDocument::cases(), static fn (LegalDocument $d): bool => \in_array($d, $documents, true) || \in_array($d->value, $documents, true)));
+        return array_values(array_filter(LegalDocument::cases(), static fn (LegalDocument $d): bool => $d->isPage() && (\in_array($d, $documents, true) || \in_array($d->value, $documents, true))));
     }
 }

@@ -27,6 +27,7 @@ final class LegalTest extends AppTestCase
         $this->client->request('GET', '/admin/legal');
         self::assertResponseIsSuccessful();
         $this->client->submitForm('Speichern', [
+            'welcome' => 'Plattform der **Stadtelternvertretung** – Zugang über Einladung.',
             'privacy' => "## Verantwortlich\r\n\r\nStadtelternvertretung <script>x</script>\r\nMarktplatz 1",
             'imprint' => '   ',
         ]);
@@ -46,6 +47,11 @@ final class LegalTest extends AppTestCase
         $this->client->request('GET', '/login');
         self::assertSelectorExists('a[href="/privacy"]');
         self::assertSelectorNotExists('a[href="/imprint"]');
+        // the welcome text shows on the login page, but has no page of its own
+        self::assertSelectorTextContains('main .markdown strong', 'Stadtelternvertretung');
+        self::assertSelectorNotExists('a[href="/welcome"]');
+        $this->client->request('GET', '/welcome');
+        self::assertResponseStatusCodeSame(404);
 
         // every system mail links the privacy policy, in both parts
         $this->client->request('GET', '/reset-password');

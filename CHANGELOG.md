@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.23.0 – 2026-11-19
+
+### Neu
+
+- **Anmeldeseite erklärt Rokoso:** Neben dem Anmeldeformular steht jetzt, wofür Rokoso gedacht ist, darunter was es kann, wie man dazukommt und wie es mit dem Datenschutz aussieht. Die Betreiber einer Installation können oben einen eigenen Begrüßungstext ergänzen, etwa für wen die Installation ist und wie man Zugang bekommt (Plattform → „Begrüßung und Rechtliches“).
+
 ## 0.22.0 – 2026-11-18
 
 ### Neu

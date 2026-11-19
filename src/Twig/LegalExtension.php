@@ -24,4 +24,11 @@ final readonly class LegalExtension
     {
         return $this->texts->published();
     }
+
+    /** Welcome text of the installation for the login page (Markdown), empty if not written */
+    #[AsTwigFunction('welcome_text')]
+    public function welcome(): string
+    {
+        return $this->texts->get(LegalDocument::Welcome)->getContent();
+    }
 }
