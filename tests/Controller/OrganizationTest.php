@@ -10,21 +10,9 @@ use App\Entity\Organization;
 use App\Entity\User;
 use App\Enum\NotificationType;
 use App\Enum\OrganizationRole;
-use App\Notification\NotificationCenter;
-use App\Repository\InvitationRepository;
-use App\Repository\NotificationRepository;
 use App\Repository\UserRepository;
 use App\Service\InvitationManager;
-use App\Service\SystemMailer;
 use App\Tests\AppTestCase;
-use Psr\Log\NullLogger;
-use Symfony\Component\Mailer\Envelope;
-use Symfony\Component\Mailer\Exception\TransportException;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\RawMessage;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class OrganizationTest extends AppTestCase
 {
@@ -88,12 +76,19 @@ final class OrganizationTest extends AppTestCase
         $owner = $this->login();
         $org = $this->createOrganization($owner);
         $this->client->request('GET', '/organizations/'.$org->getId());
-        $this->client->submitForm('Einladen', [
+        $this->client->submitForm('Einladung anlegen', [
             'invitation_form[email]' => 'neu@example.org',
             'invitation_form[role]' => 'member',
         ]);
-        self::assertEmailCount(1);
-        $link = $this->linkFromLastMail('/invitation/');
+        // Rokoso sends no invitation email itself: the admin passes the link on
+        self::assertEmailCount(0);
+        $crawler = $this->client->followRedirect();
+        self::assertSelectorTextContains('#detail-heading', 'Einladung verschicken');
+        self::assertSelectorTextContains('main', 'kein E-Mail-Postfach');
+        $text = $crawler->filter('#invitation-text')->text();
+        self::assertStringContainsString('neu@example.org', $text);
+        self::assertMatchesRegularExpression('~https?://\S+/invitation/\S+~', $text);
+        $link = (string) preg_replace('~^.*?https?://[^/\s]+(/invitation/\S+).*$~s', '$1', $text);
 
         $this->client->request('GET', '/logout');
         $this->client->request('GET', $link);
@@ -139,17 +134,14 @@ final class OrganizationTest extends AppTestCase
         $owner = $this->login($this->createUser('owner@example.org', 'Owner'));
         $org = $this->createOrganization($owner);
         $this->client->request('GET', '/organizations/'.$org->getId());
-        $this->client->submitForm('Einladen', [
+        $this->client->submitForm('Einladung anlegen', [
             'invitation_form[email]' => 'Anna@Example.org',
             'invitation_form[role]' => 'member',
         ]);
-        // only the invitation itself, no extra notification email
-        self::assertEmailCount(1);
-        $email = self::getMailerMessage();
-        self::assertInstanceOf(Email::class, $email);
-        self::assertStringContainsString('schon ein Konto', (string) $email->getTextBody());
-        $crawler = $this->client->followRedirect();
-        self::assertSelectorTextContains('[role=status]', 'unter ihren Benachrichtigungen');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('main', 'unter ihren Benachrichtigungen');
+        self::assertSelectorTextContains('#invitation-text', 'schon ein Konto');
+        $crawler = $this->client->request('GET', '/organizations/'.$org->getId());
 
         $notifications = fn (): array => $this->em()->getRepository(Notification::class)->findBy(['recipient' => $anna->getId()]);
         self::assertCount(1, $notifications());
@@ -184,36 +176,30 @@ final class OrganizationTest extends AppTestCase
         static::getContainer()->get(InvitationManager::class)->join($invitation, $other);
     }
 
-    public function testInvitationSurvivesAFailingMailAndOffersItsLink(): void
+    public function testInvitationIsSentFromTheOrganizationMailbox(): void
     {
-        $anna = $this->createUser();
         $owner = $this->login($this->createUser('owner@example.org', 'Owner'));
         $org = $this->createOrganization($owner);
+        $account = $this->createMailAccount($org);
+        $other = $this->createOrganization($owner, 'Andere');
+        $invitation = static::getContainer()->get(InvitationManager::class)->invite($org, 'neu@example.org', OrganizationRole::Member, $owner);
+        self::assertEmailCount(0);
 
-        $container = static::getContainer();
-        $brokenMailer = new class implements MailerInterface {
-            public function send(RawMessage $message, ?Envelope $envelope = null): void
-            {
-                throw new TransportException('Connection refused');
-            }
-        };
-        $manager = new InvitationManager(
-            $container->get(InvitationRepository::class),
-            $container->get(UserRepository::class),
-            $container->get(NotificationRepository::class),
-            $container->get(NotificationCenter::class),
-            new SystemMailer($brokenMailer, $container->get(TranslatorInterface::class), 'noreply@example.org'),
-            $container->get(UrlGeneratorInterface::class),
-            $this->em(),
-            new NullLogger(),
-        );
-        $result = $manager->invite($org, 'anna@example.org', OrganizationRole::Member, $owner);
-        self::assertFalse($result->mailed);
-        self::assertTrue($result->hasAccount);
-        self::assertNotNull($result->invitation->getId());
-        self::assertCount(1, $this->em()->getRepository(Notification::class)->findBy(['recipient' => $anna->getId()]));
+        $crawler = $this->client->request('GET', '/organizations/'.$org->getId());
+        $this->client->click($crawler->filter('a:contains("Verschicken")')->link());
+        self::assertSelectorTextContains('main', 'sev@example.org');
 
-        $this->client->request('GET', '/organizations/'.$org->getId());
-        self::assertSelectorExists(\sprintf('[data-controller="copy"][data-copy-text-value$="/invitation/%s"]', $result->invitation->getToken()));
+        $crawler = $this->client->clickLink('E-Mail schreiben');
+        self::assertResponseIsSuccessful();
+        self::assertSame((string) $account->getId(), $crawler->filter('#compose_form_account option[selected]')->attr('value'));
+        self::assertSame('neu@example.org', $crawler->filter('#compose_form_to')->attr('value'));
+        self::assertStringContainsString('Einladung zu', (string) $crawler->filter('#compose_form_subject')->attr('value'));
+        self::assertStringContainsString('/invitation/'.$invitation->getToken(), $crawler->filter('#compose_form_body')->text());
+        // nothing is sent until the admin sends the email
+        self::assertEmailCount(0);
+
+        // other organizations' invitations are not reachable
+        $this->client->request('GET', \sprintf('/organizations/%d/invitations/%d', $other->getId(), $invitation->getId()));
+        self::assertResponseStatusCodeSame(404);
     }
 }

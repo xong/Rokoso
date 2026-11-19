@@ -236,7 +236,7 @@ Fehlgeschlagene Einladungen, Benachrichtigungen und Rundschreiben stehen als Feh
 
 **Beispiel Mailjet:**
 
-Vorher Datenschutzerklärung und Impressum unter `/admin/legal` eintragen. Mailjet prüft neue Konten und hält den Versand an, wenn die Website keine öffentliche Datenschutzerklärung hat oder die Mails nicht darauf verlinken. Fragt Mailjet nach den Mailarten: Rokoso verschickt nur Mails an einzelne Personen, ausgelöst durch deren eigene Aktion (Registrierung, Passwort, Adressänderung, Formular auf der öffentlichen Seite) oder durch eine Aktion anderer Mitglieder, die sie direkt betrifft (Einladung, Sitzungseinladung, Benachrichtigung). Rundschreiben und E-Mails der Organisationen gehen über deren eigene Postfächer, nicht über den Versanddienst.
+Vorher Datenschutzerklärung und Impressum unter `/admin/legal` eintragen. Mailjet prüft neue Konten und hält den Versand an, wenn die Website keine öffentliche Datenschutzerklärung hat oder die Mails nicht darauf verlinken. Fragt Mailjet nach den Mailarten: Rokoso verschickt über den Versanddienst nur Mails an Personen mit eigenem Konto bzw. ausgelöst durch deren eigene Aktion (Registrierung, Passwort, Adressänderung, Formular auf der öffentlichen Seite, Sitzungseinladung an Mitglieder, Benachrichtigungen nach eigener Einstellung). Adressen ohne Konto bekommen nie eine Systemmail: Einladungen in eine Organisation gibt die einladende Person selbst weiter (vorbereitete E-Mail aus dem Postfach der Organisation oder kopierter Link), Gäste von Sitzungen und Terminen werden aus dem Postfach der Organisation eingeladen. Rundschreiben und E-Mails der Organisationen gehen ebenfalls über deren eigene Postfächer (Mailjet verlangt nach AUP 1c eine Zustimmung der Empfänger für nicht rein transaktionale Mails).
 
 1. Konto anlegen und unter „Absender & Domains“ die Domain hinzufügen (z. B. `rokoso.de`). Die Domain bestätigen, entweder mit einer Datei bzw. einem TXT-Eintrag oder mit einer Mail an die Absenderadresse.
 2. **DKIM:** den angezeigten TXT-Eintrag `mailjet._domainkey` im DNS anlegen.
@@ -343,7 +343,7 @@ Rokoso ist die Arbeitsplattform der [Stadtelternvertretung …]. Mitglieder orga
 
 ## E-Mails von Rokoso
 
-Rokoso schickt nur E-Mails, die eine Person direkt betreffen: Bestätigung der Adresse, Passwort zurücksetzen, Einladungen, Sitzungseinladungen und Benachrichtigungen (einzeln oder als tägliche Zusammenfassung). Benachrichtigungsmails lassen sich im Profil oder mit einem Klick in der Mail abbestellen. Die Mails gehen über [Versanddienst, z. B. Mailjet SAS, Paris] als Auftragsverarbeiter; Öffnungen und Klicks werden nicht gezählt.
+Rokoso schickt nur E-Mails an Personen mit Konto bzw. auf deren eigene Anfrage: Bestätigung der Adresse, Passwort zurücksetzen, Sitzungseinladungen und Benachrichtigungen (einzeln oder als tägliche Zusammenfassung). Benachrichtigungsmails lassen sich im Profil oder mit einem Klick in der Mail abbestellen. Die Mails gehen über [Versanddienst, z. B. Mailjet SAS, Paris] als Auftragsverarbeiter; Öffnungen und Klicks werden nicht gezählt.
 
 ## Cookies und Speicher im Browser
 

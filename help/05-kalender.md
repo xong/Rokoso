@@ -12,7 +12,7 @@ Der Kalender zeigt die Termine aller deiner Organisationen und deine persönlich
 
 - **Wiederholen** – täglich, wöchentlich, monatlich am selben Tag oder am selben Wochentag (z. B. „jeden 2. Donnerstag“), jährlich, auch in Abständen wie „alle 2 Wochen“.
 - **Teilnehmende** und eine **Erinnerung** vorher.
-- **Gäste (E-Mail)** – Personen ohne Konto bekommen über **Gäste einladen** eine Einladung mit Kalenderdatei.
+- **Gäste (E-Mail)** – Personen ohne Konto bekommen über **Gäste einladen** eine Einladung mit Kalenderdatei. Sie geht aus dem Postfach der Organisation raus und liegt danach unter **Gesendet**. Ohne Postfach (z. B. bei persönlichen Terminen) lädst du die **Kalenderdatei** herunter und schickst sie selbst.
 - **Öffentlich** – der Termin erscheint auf der [öffentlichen Seite](/help/oeffentliche-seite), auf Wunsch mit **Anmeldung** und Höchstzahl.
 
 ## Einzelne Termine einer Serie

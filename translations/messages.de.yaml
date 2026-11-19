@@ -213,7 +213,7 @@ platform:
     log_intro: Anmeldungen, Rollenänderungen und Löschungen aller Konten. Einträge werden nach einem Jahr gelöscht, IP-Adressen sind gekürzt.
     mail:
         title: E-Mail-Versand
-        intro: Systemmails (Bestätigung, Passwort, Einladungen, Benachrichtigungen) gehen über diesen Absender und Server. Eine Testmail zeigt, ob der Server sie annimmt.
+        intro: Systemmails (Bestätigung, Passwort, Sitzungseinladungen, Benachrichtigungen) gehen über diesen Absender und Server. Eine Testmail zeigt, ob der Server sie annimmt.
         from: Absender
         server: Server
         to: Empfänger
@@ -401,17 +401,12 @@ email:
         text: jemand (hoffentlich du) möchte das Passwort für dein Rokoso-Konto zurücksetzen.
         button: Neues Passwort setzen
         expires: Der Link ist eine Stunde gültig. Wenn du das nicht angefordert hast, ignoriere diese E-Mail.
-    invitation:
-        subject: Einladung zu „%organization%“ in Rokoso
-        text: 'Hallo, %inviter% lädt dich in die Organisation „%organization%“ in Rokoso ein.'
-        button: Einladung ansehen
-        has_account: 'Mit dieser Adresse hast du schon ein Konto: Melde dich an und nimm die Einladung an. Du findest sie in Rokoso auch unter den Benachrichtigungen.'
-        no_account: Lege mit dieser Adresse ein Konto an, um die Einladung anzunehmen.
-        expires: Die Einladung ist 14 Tage gültig.
     meeting:
         text: '%sender% lädt dich im Namen von „%organization%“ zur Sitzung „%title%“ ein.'
         button: Sitzung ansehen
         ics_hint: Den Termin kannst du über den Anhang in deinen Kalender übernehmen. Antworten auf diese E-Mail gehen an die einladende Person.
+    guest:
+        ics_hint: Den Termin kannst du über den Anhang in deinen Kalender übernehmen.
     calendar:
         text: '%sender% lädt dich zum Termin „%title%“ ein.'
 
@@ -444,9 +439,10 @@ organization:
     member_removed: Mitglied entfernt.
     last_admin: Eine Organisation braucht mindestens einen Administrator.
     invite: Mitglied einladen
-    send_invite: Einladen
-    invited: Einladung verschickt.
-    invited_account: Einladung verschickt. Die Person hat schon ein Konto und sieht die Einladung auch unter ihren Benachrichtigungen.
+    send_invite: Einladung anlegen
+    invite_help: Rokoso verschickt selbst keine Einladungs-E-Mails. Nach dem Anlegen gibst du den Link weiter – über das Postfach der Organisation oder per Messenger.
+    invited: Einladung angelegt. Jetzt nur noch an die Person weitergeben.
+    send_invitation: Verschicken
     invite_invalid: Bitte gib eine gültige E-Mail-Adresse ein.
     already_member: Diese Person ist bereits Mitglied.
     pending_invitations: Offene Einladungen
@@ -454,8 +450,6 @@ organization:
     revoke: Einladung zurückziehen
     copy_link: Link kopieren
     invitation_link_copied: Link kopiert
-    invite_unmailed: Die Einladung ist angelegt, aber die E-Mail konnte nicht verschickt werden. Kopiere den Link unter „Offene Einladungen“ und schick ihn der Person selbst.
-    invite_unmailed_account: Die Einladung ist angelegt, aber die E-Mail konnte nicht verschickt werden. Die Person hat schon ein Konto und sieht die Einladung unter ihren Benachrichtigungen; den Link kannst du auch unter „Offene Einladungen“ kopieren.
     invitation_revoked: Einladung zurückgezogen.
     meetings_legend: Sitzungen
     features_legend: Bereiche
@@ -547,6 +541,12 @@ wiki:
     restore_confirm: Diese Version als aktuellen Stand übernehmen? Der bisherige Stand bleibt als Version erhalten.
     restored: Version wiederhergestellt.
 
+guest_mail:
+    via: 'Gäste ohne Konto bekommen die Einladung als E-Mail von %account% – sie liegt danach unter „Gesendet“.'
+    no_mailbox_hint: Gäste ohne Konto lädt Rokoso über ein E-Mail-Postfach der Organisation ein. Weil keins eingerichtet ist, schick ihnen die Kalenderdatei bitte selbst.
+    no_mailbox: '{1}Ein Gast wurde nicht eingeladen: Für die Organisation ist kein E-Mail-Postfach eingerichtet.|]1,Inf[%count% Gäste wurden nicht eingeladen: Für die Organisation ist kein E-Mail-Postfach eingerichtet.'
+    failed: '{1}Die Einladung an einen Gast konnte nicht verschickt werden (%error%). Sie liegt unter „Entwürfe“.|]1,Inf[Die Einladung an %count% Gäste konnte nicht verschickt werden (%error%). Sie liegt unter „Entwürfe“.'
+
 invitation:
     title: Einladung
     invalid: Diese Einladung ist ungültig oder abgelaufen. Bitte frage nach einer neuen Einladung.
@@ -563,6 +563,34 @@ invitation:
     logout: Abmelden
     joined: Willkommen! Du bist jetzt Mitglied.
     registered: Dein Konto ist angelegt und du bist der Organisation beigetreten. Bitte melde dich an.
+    send:
+        title: Einladung verschicken
+        intro: 'Die Einladung für %email% ist angelegt und bis %date% gültig. Rokoso verschickt selbst keine E-Mail an diese Adresse – bitte gib den Link persönlich weiter.'
+        notified: Die Person hat schon ein Konto und sieht die Einladung zusätzlich unter ihren Benachrichtigungen in Rokoso.
+        mailbox_title: Über das Postfach der Organisation schreiben
+        mailbox_text: 'Öffnet eine neue E-Mail von %account% mit vorbereitetem Text. Du kannst ihn vor dem Senden anpassen.'
+        mailbox_button: E-Mail schreiben
+        no_mailbox: Für diese Organisation ist kein E-Mail-Postfach eingerichtet. Kopiere den Text und schick ihn aus deinem eigenen Postfach oder per Messenger.
+        copy_title: Text oder Link kopieren
+        copy_text: Für Messenger, private E-Mail oder persönliche Weitergabe.
+        text_label: Vorbereiteter Text
+        copy_button: Text kopieren
+        text_copied: Text kopiert
+        back: 'Zurück zu %organization%'
+        subject: 'Einladung zu „%organization%“ in Rokoso'
+        has_account: 'Mit %email% hast du schon ein Konto: Melde dich an und nimm die Einladung an.'
+        no_account: 'Lege dort mit %email% ein Konto an, um die Einladung anzunehmen.'
+        text: |-
+            Hallo,
+
+            ich lade dich in die Organisation „%organization%“ in Rokoso ein. Rokoso ist unsere gemeinsame Arbeitsplattform für E-Mails, Termine, Dateien und Abstimmungen.
+
+            %url%
+
+            %account% Der Link gilt bis %date% und nur für %email%.
+
+            Viele Grüße
+            %inviter%
 
 project:
     new: Projekt anlegen
@@ -1069,7 +1097,7 @@ facility:
     seats: Vertritt
 
 calendar:
-    new_intro: Termine einer Organisation sehen alle ihre Mitglieder im Kalender, persönliche Termine nur du. Du kannst eine Wiederholung, Teilnehmende und eine Erinnerung festlegen und Gäste ohne Konto per E-Mail mit Kalenderdatei einladen.
+    new_intro: Termine einer Organisation sehen alle ihre Mitglieder im Kalender, persönliche Termine nur du. Du kannst eine Wiederholung, Teilnehmende und eine Erinnerung festlegen und Gäste ohne Konto über das Postfach der Organisation mit Kalenderdatei einladen.
     timeline_region: Tagesablauf (scrollbar)
     today: Heute
     public_title: Öffentlich
@@ -1093,7 +1121,8 @@ calendar:
         m2880: 2 Tage vorher
         m10080: 1 Woche vorher
     guests: Gäste (E-Mail)
-    guests_help: Eine Adresse pro Zeile. Gäste bekommen eine Einladung mit Kalenderdatei, ohne Zugang zu Rokoso.
+    guests_help: Eine Adresse pro Zeile. Gäste bekommen die Einladung mit Kalenderdatei aus dem Postfach der Organisation, ohne Zugang zu Rokoso.
+    ics_download: Kalenderdatei
     occurrence:
         title: 'Termin am %date%'
         edit: Nur diesen Termin ändern
@@ -1114,7 +1143,7 @@ calendar:
         text: Die Gäste haben noch keine Einladung bekommen.
         invited_at: 'Zuletzt eingeladen am %date%.'
         subject: 'Einladung: %title% am %date%'
-        sent: '{1}Einladung an einen Gast verschickt.|]1,Inf[Einladung an %count% Gäste verschickt.'
+        sent: '{1}Einladung an einen Gast über %account% verschickt.|]1,Inf[Einladung an %count% Gäste über %account% verschickt.'
         none: Keine Gäste zum Einladen.
     ical:
         name: 'Rokoso – %name%'
@@ -1614,7 +1643,7 @@ meeting:
     minute_taker_none: '– noch offen –'
     description: Hinweise
     guests: Gäste (E-Mail)
-    guests_help: Eine Adresse pro Zeile. Gäste erhalten die Einladung ohne Zugang zu Rokoso.
+    guests_help: Eine Adresse pro Zeile. Gäste erhalten die Einladung aus dem Postfach der Organisation, ohne Zugang zu Rokoso.
     planned_duration: Geplante Dauer
     minutes_count: '{1}1 Minute|]1,Inf[%count% Minuten'
     period: Zeitraum

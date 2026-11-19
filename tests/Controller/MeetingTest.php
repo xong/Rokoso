@@ -7,6 +7,7 @@ namespace App\Tests\Controller;
 use App\Entity\AgendaItem;
 use App\Entity\CalendarItem;
 use App\Entity\Meeting;
+use App\Entity\Message;
 use App\Entity\Organization;
 use App\Entity\Resolution;
 use App\Entity\User;
@@ -125,8 +126,10 @@ final class MeetingTest extends AppTestCase
         $meeting = $this->meeting()->setGuestEmails("gast@example.org\nmember@example.org");
         $this->item($meeting, 'Begrüßung');
 
+        $this->createMailAccount($this->org);
         $this->login($this->admin);
         $crawler = $this->client->request('GET', '/meetings/'.$meeting->getId());
+        self::assertSelectorTextContains('main', 'als E-Mail von sev@example.org');
         $this->client->submit($crawler->selectButton('Einladung verschicken')->form());
         self::assertResponseRedirects();
         self::assertEmailCount(4);
@@ -134,8 +137,14 @@ final class MeetingTest extends AppTestCase
         $recipients = [];
         foreach (self::getMailerMessages() as $message) {
             self::assertInstanceOf(Email::class, $message);
-            $recipients[] = $message->getTo()[0]->getAddress();
-            self::assertSame('owner@example.org', $message->getReplyTo()[0]->getAddress());
+            $recipient = $message->getTo()[0]->getAddress();
+            $recipients[] = $recipient;
+            if (\in_array($recipient, ['gast@example.org', 'member@example.org'], true)) {
+                // guests without an account: from the organization's mailbox, not as a system mail
+                self::assertSame('sev@example.org', $message->getFrom()[0]->getAddress());
+            } else {
+                self::assertSame('owner@example.org', $message->getReplyTo()[0]->getAddress());
+            }
             $attachments = $message->getAttachments();
             self::assertCount(1, $attachments);
             self::assertStringContainsString('BEGIN:VEVENT', $attachments[0]->getBody());
@@ -153,6 +162,29 @@ final class MeetingTest extends AppTestCase
         $this->client->request('GET', '/meetings/'.$meeting->getId().'/meeting.ics');
         self::assertResponseIsSuccessful();
         self::assertStringContainsString('text/calendar', (string) $this->client->getResponse()->headers->get('Content-Type'));
+        // the guest invitation is filed under "Sent" of the mailbox
+        $sent = $this->em()->getRepository(Message::class)->findAll();
+        self::assertCount(1, $sent);
+        self::assertStringContainsString('Vollversammlung', $sent[0]->getSubject());
+    }
+
+    public function testGuestsAreNotMailedWithoutAMailbox(): void
+    {
+        $meeting = $this->meeting()->setGuestEmails('gast@example.org');
+        $this->em()->flush();
+
+        $this->login($this->admin);
+        $crawler = $this->client->request('GET', '/meetings/'.$meeting->getId());
+        self::assertSelectorTextContains('main', 'kein');
+        $this->client->submit($crawler->selectButton('Einladung verschicken')->form());
+        // only the members get their (system) invitation
+        self::assertEmailCount(2);
+        foreach (self::getMailerMessages() as $message) {
+            self::assertInstanceOf(Email::class, $message);
+            self::assertNotSame('gast@example.org', $message->getTo()[0]->getAddress());
+        }
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('[role=status]', 'Ein Gast wurde nicht eingeladen');
     }
 
     public function testAttendanceQuorumAndVotingRight(): void

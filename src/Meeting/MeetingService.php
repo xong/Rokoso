@@ -9,11 +9,15 @@ use App\Entity\CalendarItem;
 use App\Entity\Meeting;
 use App\Entity\User;
 use App\Enum\CalendarItemType;
+use App\Mail\GuestDelivery;
+use App\Mail\GuestMailer;
 use App\Notification\ActivityNotifier;
 use App\Repository\CalendarItemRepository;
 use App\Service\SystemMailer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 /**
  * Keeps the calendar entry of a meeting in sync and sends invitations with an .ics file.
@@ -24,6 +28,9 @@ final readonly class MeetingService
         private EntityManagerInterface $em,
         private CalendarItemRepository $calendarItems,
         private SystemMailer $mailer,
+        private GuestMailer $guests,
+        private Environment $twig,
+        private TranslatorInterface $translator,
         private UrlGeneratorInterface $urls,
         private ActivityNotifier $notifier,
     ) {
@@ -49,38 +56,32 @@ final readonly class MeetingService
     }
 
     /**
-     * Sends the invitation to all members and guests, notifies the members and marks the meeting as invited (not flushed).
+     * Sends the invitation, notifies the members and marks the meeting as invited (flushes when guests are mailed).
+     * Members get it as system mail, guests without an account from the organization's mailbox.
      *
-     * @return int number of recipients
+     * @return array{members: int, guests: GuestDelivery}
      */
-    public function invite(Meeting $meeting, User $sender): int
+    public function invite(Meeting $meeting, User $sender): array
     {
         $url = $this->urls->generate('meeting_show', ['id' => $meeting->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
         $ics = ['body' => $this->ics($meeting, $url), 'filename' => 'sitzung.ics', 'mimeType' => 'text/calendar; charset=utf-8; method=PUBLISH'];
-        $context = [
-            'meeting' => $meeting,
-            'sender' => $sender->getName(),
-            'subject_params' => ['%title%' => $meeting->getTitle(), '%date%' => $meeting->getStartsAt()->format('d.m.Y')],
-        ];
+        $subjectParams = ['%title%' => $meeting->getTitle(), '%date%' => $meeting->getStartsAt()->format('d.m.Y')];
+        $context = ['meeting' => $meeting, 'sender' => $sender->getName()];
 
-        $count = 0;
-        $sent = [];
+        $members = [];
         foreach ($meeting->getOrganization()->getMembers() as $member) {
-            $this->mailer->send($member->getEmail(), 'meeting.invitation.subject', 'meeting_invitation', $context + ['url' => $url], $member->getName(), [$ics], $sender->getEmail());
-            $sent[mb_strtolower($member->getEmail())] = true;
-            ++$count;
+            $this->mailer->send($member->getEmail(), 'meeting.invitation.subject', 'meeting_invitation', $context + ['url' => $url, 'subject_params' => $subjectParams], $member->getName(), [$ics], $sender->getEmail());
+            $members[mb_strtolower($member->getEmail())] = true;
         }
-        foreach ($meeting->getGuestEmailList() as $guest) {
-            if (isset($sent[$guest])) {
-                continue;
-            }
-            $this->mailer->send($guest, 'meeting.invitation.subject', 'meeting_invitation', $context + ['url' => null], null, [$ics], $sender->getEmail());
-            ++$count;
-        }
+        $guests = array_values(array_filter($meeting->getGuestEmailList(), static fn (string $guest): bool => !isset($members[$guest])));
         $meeting->markInvited();
         $this->notifier->meetingInvited($meeting, $sender);
 
-        return $count;
+        $delivery = $this->guests->send($meeting->getOrganization(), $sender, $guests,
+            $this->translator->trans('meeting.invitation.subject', $subjectParams),
+            $this->twig->render('email/guest_meeting.txt.twig', $context), $ics, $meeting->getProject());
+
+        return ['members' => \count($members), 'guests' => $delivery];
     }
 
     /** iCalendar (RFC 5545) file of the meeting. */

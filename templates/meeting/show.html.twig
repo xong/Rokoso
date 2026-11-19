@@ -59,6 +59,11 @@
                         {{ 'meeting.notice_too_short'|trans({'%days%': meeting.organization.invitationDays}) }}
                     </p>
                 {% endif %}
+                {% if open and meeting.guestEmailList is not empty %}
+                    {# Mitglieder bekommen die Einladung als Systemmail, Gäste ohne Konto nur über ein Postfach der Organisation #}
+                    {% set mailbox = guest_mailbox(meeting.organization) %}
+                    <p class="text-sm text-slate-600">{{ mailbox ? 'guest_mail.via'|trans({'%account%': mailbox.emailAddress}) : 'guest_mail.no_mailbox_hint'|trans }}</p>
+                {% endif %}
                 <div class="flex flex-wrap gap-2">
                     {% if open %}
                     <form method="post" action="{{ path('meeting_invite', {id: meeting.id}) }}"

@@ -14,14 +14,14 @@ use App\Repository\InvitationRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Invitations to an organization. The link only works for the invited address: people with an account
- * also get a notification in Rokoso, everyone gets an email (worded for login or registration). If the email
- * cannot be sent, the invitation stays: admins can copy its link from the list of open invitations.
+ * Invitations to an organization. The link only works for the invited address. Rokoso sends no invitation
+ * email itself (the invited person has not agreed to mails from the platform): the inviting admin passes the
+ * link on personally, e.g. from the organization's mailbox with the prepared {@see text()}. People with an
+ * account also get a notification in Rokoso (by email only if they chose so).
  */
 final readonly class InvitationManager
 {
@@ -30,10 +30,9 @@ final readonly class InvitationManager
         private UserRepository $users,
         private NotificationRepository $notifications,
         private NotificationCenter $notificationCenter,
-        private SystemMailer $mailer,
         private UrlGeneratorInterface $urls,
+        private TranslatorInterface $translator,
         private EntityManagerInterface $em,
-        private LoggerInterface $logger,
     ) {
     }
 
@@ -48,37 +47,50 @@ final readonly class InvitationManager
     }
 
     /**
-     * Creates the invitation, notifies an existing account and sends the email.
+     * Creates the invitation and notifies an existing account (no email to the invited address).
      */
-    public function invite(Organization $organization, string $email, OrganizationRole $role, User $inviter): InvitationResult
+    public function invite(Organization $organization, string $email, OrganizationRole $role, User $inviter): Invitation
     {
         $invitation = new Invitation($organization, $email, $role, $inviter);
         $this->em->persist($invitation);
         $this->em->flush();
 
-        $path = $this->urls->generate('invitation_show', ['token' => $invitation->getToken()]);
         $existing = $this->users->findOneBy(['email' => $invitation->getEmail()]);
         if (null !== $existing) {
-            // the invitation email is sent below, so no second email for the notification
-            $this->notificationCenter->notify([$existing], NotificationType::Invitation, $organization->getName(), $path, $inviter, refKey: self::refKey($invitation), email: false);
+            $path = $this->urls->generate('invitation_show', ['token' => $invitation->getToken()]);
+            $this->notificationCenter->notify([$existing], NotificationType::Invitation, $organization->getName(), $path, $inviter, refKey: self::refKey($invitation));
             $this->em->flush();
         }
 
-        try {
-            $this->mailer->send($invitation->getEmail(), 'email.invitation.subject', 'invitation', [
-                'inviter' => $inviter->getName(),
-                'organization' => $organization->getName(),
-                'url' => $this->urls->generate('invitation_show', ['token' => $invitation->getToken()], UrlGeneratorInterface::ABSOLUTE_URL),
-                'has_account' => null !== $existing,
-                'subject_params' => ['%organization%' => $organization->getName()],
-            ]);
-            $mailed = true;
-        } catch (TransportExceptionInterface $e) {
-            $this->logger->error('Invitation mail failed: {message}', ['message' => $e->getMessage()]);
-            $mailed = false;
-        }
+        return $invitation;
+    }
 
-        return new InvitationResult($invitation, null !== $existing, $mailed);
+    public function url(Invitation $invitation): string
+    {
+        return $this->urls->generate('invitation_show', ['token' => $invitation->getToken()], UrlGeneratorInterface::ABSOLUTE_URL);
+    }
+
+    public function subject(Invitation $invitation): string
+    {
+        return $this->translator->trans('invitation.send.subject', ['%organization%' => $invitation->getOrganization()->getName()]);
+    }
+
+    /** Prepared message with the link, for the inviting person to send personally */
+    public function text(Invitation $invitation, User $inviter): string
+    {
+        return $this->translator->trans('invitation.send.text', [
+            '%organization%' => $invitation->getOrganization()->getName(),
+            '%url%' => $this->url($invitation),
+            '%email%' => $invitation->getEmail(),
+            '%account%' => $this->translator->trans($this->hasAccount($invitation) ? 'invitation.send.has_account' : 'invitation.send.no_account', ['%email%' => $invitation->getEmail()]),
+            '%date%' => self::validUntil($invitation)->format('d.m.Y'),
+            '%inviter%' => $inviter->getName(),
+        ]);
+    }
+
+    public static function validUntil(Invitation $invitation): \DateTimeImmutable
+    {
+        return $invitation->getCreatedAt()->modify(Invitation::VALIDITY);
     }
 
     public function hasAccount(Invitation $invitation): bool

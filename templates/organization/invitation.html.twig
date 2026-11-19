@@ -1,0 +1,62 @@
+{% extends 'organization/_layout.html.twig' %}
+{% import '_partials/ui.html.twig' as ui %}
+
+{# Einladung verschicken: Rokoso schickt keine Einladungs-E-Mail, die einladende Person gibt den Link selbst weiter #}
+{% set has_detail = true %}
+
+{% block title %}{{ 'invitation.send.title'|trans }}{% endblock %}
+{% block detail_title %}{{ 'invitation.send.title'|trans }}{% endblock %}
+{% block back_url %}{{ path('organization_show', {id: organization.id}) }}{% endblock %}
+
+{% block detail %}
+    <div class="max-w-2xl space-y-6 p-4 lg:p-6">
+        <div class="space-y-2">
+            <p class="flex flex-wrap items-center gap-2">
+                <span class="font-medium break-all">{{ invitation.email }}</span>
+                <span class="badge bg-slate-100 text-slate-600">{{ invitation.role.label|trans }}</span>
+                <span class="text-sm text-slate-500">{{ organization.name }}</span>
+            </p>
+            <p class="text-sm text-slate-600">{{ 'invitation.send.intro'|trans({'%email%': invitation.email, '%date%': valid_until|date('d.m.Y')}) }}</p>
+            {% if has_account %}
+                <p class="flex items-start gap-2 text-sm text-slate-600">{{ ux_icon('lucide:bell', {class: 'mt-0.5 size-4 shrink-0 text-brand-700', 'aria-hidden': 'true'}) }}<span>{{ 'invitation.send.notified'|trans }}</span></p>
+            {% endif %}
+        </div>
+
+        <section aria-labelledby="invitation-mailbox" class="card space-y-3 p-4">
+            <h3 id="invitation-mailbox" class="font-semibold">{{ 'invitation.send.mailbox_title'|trans }}</h3>
+            {% if mailbox %}
+                <p class="text-sm text-slate-600">{{ 'invitation.send.mailbox_text'|trans({'%account%': mailbox.emailAddress}) }}</p>
+                <a href="{{ compose_url }}" class="btn-primary">{{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'invitation.send.mailbox_button'|trans }}</a>
+            {% else %}
+                <p class="text-sm text-slate-600">{{ 'invitation.send.no_mailbox'|trans }}</p>
+            {% endif %}
+        </section>
+
+        <section aria-labelledby="invitation-copy" class="card space-y-3 p-4">
+            <h3 id="invitation-copy" class="font-semibold">{{ 'invitation.send.copy_title'|trans }}</h3>
+            <p id="invitation-copy-help" class="text-sm text-slate-600">{{ 'invitation.send.copy_text'|trans }}</p>
+            <div>
+                <label for="invitation-text" class="label">{{ 'invitation.send.text_label'|trans }}</label>
+                <textarea id="invitation-text" readonly rows="10" class="input text-sm" aria-describedby="invitation-copy-help">{{ text }}</textarea>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span data-controller="copy" data-copy-text-value="{{ text }}" data-copy-done-value="{{ 'invitation.send.text_copied'|trans }}">
+                    <button type="button" class="btn-secondary" data-action="copy#copy">
+                        {{ ux_icon('lucide:copy', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                        <span data-copy-target="label">{{ 'invitation.send.copy_button'|trans }}</span>
+                    </button>
+                    <span class="sr-only" role="status" data-copy-target="status"></span>
+                </span>
+                <span data-controller="copy" data-copy-text-value="{{ url }}" data-copy-done-value="{{ 'organization.invitation_link_copied'|trans }}">
+                    <button type="button" class="btn-secondary" data-action="copy#copy">
+                        {{ ux_icon('lucide:link', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                        <span data-copy-target="label">{{ 'organization.copy_link'|trans }}</span>
+                    </button>
+                    <span class="sr-only" role="status" data-copy-target="status"></span>
+                </span>
+            </div>
+        </section>
+
+        <p><a href="{{ path('organization_show', {id: organization.id}) }}" class="link">{{ 'invitation.send.back'|trans({'%organization%': organization.name}) }}</a></p>
+    </div>
+{% endblock %}

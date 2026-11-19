@@ -120,13 +120,27 @@ final class CalendarSeriesTest extends AppTestCase
         $item->setGuestEmails("gast@example.org\npresse@example.org");
         $this->em()->flush();
 
+        // a personal appointment has no organization mailbox: no invitation, but the calendar file to pass on
         $this->client->request('GET', '/calendar/item/'.$item->getId());
         self::assertSelectorTextContains('main', 'presse@example.org');
+        self::assertSelectorNotExists('button:contains("Gäste einladen")');
+        $this->client->clickLink('Kalenderdatei');
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString('RRULE:FREQ=WEEKLY', (string) $this->client->getResponse()->getContent());
+
+        $user = $this->em()->find(User::class, $this->user->getId()) ?? throw new \LogicException();
+        $organization = $this->createOrganization($user);
+        $this->createMailAccount($organization);
+        $this->em()->find(CalendarItem::class, $item->getId())?->setOrganization($organization);
+        $this->em()->flush();
+
+        $this->client->request('GET', '/calendar/item/'.$item->getId());
         $this->client->submitForm('Gäste einladen');
         self::assertEmailCount(2);
         $email = self::getMailerMessage();
         self::assertInstanceOf(Email::class, $email);
         self::assertSame('Einladung: Vorstandstreffen am 05.10.2026', $email->getSubject());
+        self::assertSame('sev@example.org', $email->getFrom()[0]->getAddress());
         $attachment = $email->getAttachments()[0];
         self::assertSame('termin.ics', $attachment->getFilename());
         $ics = $attachment->getBody();
@@ -135,5 +149,6 @@ final class CalendarSeriesTest extends AppTestCase
 
         $this->client->followRedirect();
         self::assertSelectorTextContains('main', 'Zuletzt eingeladen');
+        self::assertSelectorTextContains('[role=status]', 'über sev@example.org');
     }
 }

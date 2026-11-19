@@ -14,6 +14,7 @@ use App\Enum\OrganizationRole;
 use App\Form\InvitationFormType;
 use App\Form\MembershipFormType;
 use App\Form\OrganizationFormType;
+use App\Mail\GuestMailer;
 use App\Organization\HandoverService;
 use App\Repository\BlockedSenderRepository;
 use App\Repository\InvitationRepository;
@@ -272,18 +273,49 @@ final class OrganizationController extends AbstractController
             if ($alreadyMember) {
                 $this->addFlash('info', 'organization.already_member');
             } else {
-                $result = $invitations->invite($organization, $email, $data['role'], $user);
-                if ($result->mailed) {
-                    $this->addFlash('success', $result->hasAccount ? 'organization.invited_account' : 'organization.invited');
-                } else {
-                    $this->addFlash('error', $result->hasAccount ? 'organization.invite_unmailed_account' : 'organization.invite_unmailed');
-                }
+                $invitation = $invitations->invite($organization, $email, $data['role'], $user);
+                $this->addFlash('success', 'organization.invited');
+
+                return $this->redirectToRoute('organization_invitation_send', ['id' => $organization->getId(), 'invitation' => $invitation->getId()]);
             }
         } else {
             $this->addFlash('error', 'organization.invite_invalid');
         }
 
         return $this->redirectToRoute('organization_show', ['id' => $organization->getId()]);
+    }
+
+    /**
+     * "Send invitation": Rokoso sends no email itself, the admin passes the link on personally –
+     * from the organization's mailbox (prefilled email) or by copying the prepared text.
+     */
+    #[Route('/{id<\d+>}/invitations/{invitation<\d+>}', name: 'organization_invitation_send')]
+    #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
+    public function sendInvitation(Organization $organization, Invitation $invitation, #[CurrentUser] User $user, InvitationManager $invitations, GuestMailer $guests): Response
+    {
+        if ($invitation->getOrganization() !== $organization || $invitation->isExpired()) {
+            throw $this->createNotFoundException();
+        }
+        $mailbox = $guests->account($organization, $user);
+        $subject = $invitations->subject($invitation);
+        $text = $invitations->text($invitation, $user);
+
+        return $this->render('organization/invitation.html.twig', [
+            'organizations' => $this->organizations->findForUser($user),
+            'organization' => $organization,
+            'invitation' => $invitation,
+            'has_account' => $invitations->hasAccount($invitation),
+            'valid_until' => InvitationManager::validUntil($invitation),
+            'url' => $invitations->url($invitation),
+            'text' => $text,
+            'mailbox' => $mailbox,
+            'compose_url' => null === $mailbox ? null : $this->generateUrl('mail_compose', [
+                'account' => $mailbox->getId(),
+                'to' => $invitation->getEmail(),
+                'subject' => $subject,
+                'body' => $text,
+            ]),
+        ]);
     }
 
     #[Route('/{id<\d+>}/invitations/{invitation<\d+>}/revoke', name: 'organization_invitation_revoke', methods: ['POST'])]

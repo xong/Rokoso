@@ -58,7 +58,7 @@ php bin/console app:js:build --watch       # in eigenem Terminal (JavaScript-Bü
 php -S 127.0.0.1:8000 -t public public/index.php   # oder: symfony serve
 ```
 
-Systemmails (Bestätigung, Passwort, Einladungen) landen in **Mailpit**: http://localhost:8025.
+Systemmails (Bestätigung, Passwort, Benachrichtigungen) landen in **Mailpit**: http://localhost:8025.
 Das Demo-Postfach `sev@rokoso.test` liegt in **GreenMail**; Mails dorthin (SMTP `127.0.0.1:3025`) erscheinen nach „Neue E-Mails abrufen“ bzw. `php bin/console app:mail:sync`.
 
 Eigene Einstellungen (z. B. `APP_SECRET`) gehören in `.env.local`.

@@ -4,6 +4,13 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.24.0 – 2026-11-19
+
+### Geändert
+
+- **Einladungen persönlich verschicken:** Rokoso schickt keine Einladungs-E-Mails mehr an Personen, die noch kein Konto haben. Nach „Einladung anlegen“ wählst du, wie der Link ankommt: als vorbereitete E-Mail aus dem Postfach eurer Organisation (Text vorher anpassbar) oder als kopierter Text bzw. Link für Messenger und private E-Mail. Unter „Offene Einladungen“ geht das jederzeit wieder über „Verschicken“. Wer schon ein Konto hat, sieht die Einladung weiterhin unter den Benachrichtigungen.
+- **Gäste aus dem eigenen Postfach einladen:** Einladungen an Gäste ohne Konto – bei Sitzungen und Terminen – gehen jetzt aus dem E-Mail-Postfach der Organisation raus, jede Adresse einzeln, mit Kalenderdatei. Sie liegen danach unter „Gesendet“, und Antworten landen direkt in eurem Eingang. Ohne Postfach kannst du die Kalenderdatei herunterladen und selbst weitergeben.
+
 ## 0.23.0 – 2026-11-19
 
 ### Neu

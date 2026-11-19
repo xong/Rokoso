@@ -1,0 +1,19 @@
+{# Markdown-Text der Einladung an Gäste, verschickt über das Postfach der Organisation (GuestMailer) #}
+{{ 'email.calendar.text'|trans({'%sender%': sender, '%title%': item.title}) }}
+
+**{{ item.allDay ? item.date|date('d.m.Y') : item.date|date('d.m.Y H:i') }}{% if item.endsAt and not item.allDay %} – {{ item.endsAt|date('H:i') }}{% endif %}**
+{%- if item.recurring %}
+{{ recurrence_label(item) }}
+{%- endif %}
+{%- if item.location %}
+{{ item.location }}
+{%- endif %}
+{%- if item.url %}
+{{ item.url }}
+{%- endif %}
+
+{% if item.description %}
+{{ item.description }}
+
+{% endif %}
+{{ 'email.guest.ics_hint'|trans }}

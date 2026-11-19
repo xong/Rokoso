@@ -5,18 +5,22 @@ declare(strict_types=1);
 namespace App\Calendar;
 
 use App\Entity\CalendarItem;
+use App\Entity\Organization;
 use App\Entity\User;
-use App\Service\SystemMailer;
+use App\Mail\GuestDelivery;
+use App\Mail\GuestMailer;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 /**
- * .ics files for calendar items: invitations to external guests and the personal subscription feed.
+ * .ics files for calendar items: invitations to external guests (from the organization's mailbox) and the personal subscription feed.
  */
 final readonly class CalendarInvitation
 {
     public function __construct(
-        private SystemMailer $mailer,
+        private GuestMailer $guests,
+        private Environment $twig,
         private UrlGeneratorInterface $urls,
         private TranslatorInterface $translator,
         private CalendarService $calendar,
@@ -24,26 +28,35 @@ final readonly class CalendarInvitation
     }
 
     /**
-     * Sends the item to all guest addresses (not flushed). Returns the number of recipients.
+     * Sends the item to all guest addresses from the organization's mailbox and marks it as invited (flushes).
      */
-    public function invite(CalendarItem $item, User $sender): int
+    public function invite(CalendarItem $item, User $sender): GuestDelivery
     {
         $guests = $item->getGuestEmailList();
-        if ([] === $guests || $item->isTask() || null === $item->getStartsAt()) {
-            return 0;
+        if ($item->isTask() || null === $item->getStartsAt()) {
+            return new GuestDelivery(0);
         }
-        $ics = ['body' => $this->itemIcs($item), 'filename' => 'termin.ics', 'mimeType' => 'text/calendar; charset=utf-8; method=PUBLISH'];
-        $context = [
-            'item' => $item,
-            'sender' => $sender->getName(),
-            'subject_params' => ['%title%' => $item->getTitle(), '%date%' => $item->getDate()->format('d.m.Y')],
-        ];
-        foreach ($guests as $guest) {
-            $this->mailer->send($guest, 'calendar.invite.subject', 'calendar_invitation', $context, null, [$ics], $sender->getEmail());
+        $delivery = $this->guests->send(self::organization($item), $sender, $guests,
+            $this->translator->trans('calendar.invite.subject', ['%title%' => $item->getTitle(), '%date%' => $item->getDate()->format('d.m.Y')]),
+            $this->twig->render('email/guest_calendar.txt.twig', ['item' => $item, 'sender' => $sender->getName()]),
+            $this->attachment($item), $item->getProject());
+        if ($delivery->mailed > 0) {
+            $item->markInvited();
         }
-        $item->markInvited();
 
-        return \count($guests);
+        return $delivery;
+    }
+
+    /** The organization whose mailbox invites the guests */
+    public static function organization(CalendarItem $item): ?Organization
+    {
+        return $item->getOrganization() ?? $item->getProject()?->getOrganization();
+    }
+
+    /** @return array{body: string, filename: string, mimeType: string} */
+    public function attachment(CalendarItem $item): array
+    {
+        return ['body' => $this->itemIcs($item), 'filename' => 'termin.ics', 'mimeType' => 'text/calendar; charset=utf-8; method=PUBLISH'];
     }
 
     /** The item as one event; series with rule, cancelled dates and changed occurrences */

@@ -108,16 +108,20 @@ final class MeetingController extends AbstractController
     }
 
     /**
-     * Sends the invitation with agenda and .ics to all members and guests.
+     * Sends the invitation with agenda and .ics to all members and guests (guests via the organization's mailbox).
      */
     #[Route('/{id<\d+>}/invite', name: 'meeting_invite', methods: ['POST'])]
     #[IsGranted(MeetingVoter::MANAGE, 'meeting')]
     #[IsCsrfTokenValid('meeting-invite')]
     public function invite(Meeting $meeting, #[CurrentUser] User $user, TranslatorInterface $translator): Response
     {
-        $count = $this->service->invite($meeting, $user);
+        ['members' => $members, 'guests' => $guests] = $this->service->invite($meeting, $user);
         $this->em->flush();
-        $this->addFlash('success', $translator->trans('meeting.invited_flash', ['%count%' => $count]));
+        $this->addFlash('success', $translator->trans('meeting.invited_flash', ['%count%' => $members + $guests->mailed]));
+        $problem = $guests->problem();
+        if (null !== $problem) {
+            $this->addFlash('error', $translator->trans(...$problem));
+        }
 
         return $this->redirectToRoute('meeting_show', ['id' => $meeting->getId()]);
     }

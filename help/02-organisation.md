@@ -17,7 +17,7 @@ Eine Organisation braucht immer mindestens einen Administrator.
 
 ## Mitglieder einladen
 
-Bei der Organisation unter **Mitglied einladen** die E-Mail-Adresse und die Rolle eingeben. Die Person bekommt eine E-Mail mit einem Link. Er gilt 14 Tage und funktioniert nur für diese Adresse. Unter **Offene Einladungen** kannst du den Link kopieren, z. B. für einen Messenger, oder die Einladung zurückziehen. Schritt für Schritt: [Jemanden einladen](/help/jemanden-einladen).
+Bei der Organisation unter **Mitglied einladen** die E-Mail-Adresse und die Rolle eingeben. Rokoso legt einen Link an, der 14 Tage gilt und nur für diese Adresse funktioniert. Den Link gibst du selbst weiter – per E-Mail aus dem Postfach der Organisation (Text ist vorbereitet) oder per Messenger. Unter **Offene Einladungen** kannst du ihn erneut **verschicken** oder die Einladung zurückziehen. Schritt für Schritt: [Jemanden einladen](/help/jemanden-einladen).
 
 ## Mitgliedschaft bearbeiten
 

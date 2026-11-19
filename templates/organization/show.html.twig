@@ -247,8 +247,9 @@
                     {{ form_row(invite_form.email, {row_attr: {class: 'mb-0 min-w-56 flex-1'}}) }}
                     {{ form_row(invite_form.role, {row_attr: {class: 'mb-0'}}) }}
                     {{ form_rest(invite_form) }}
-                    <button type="submit" class="btn-primary">{{ ux_icon('lucide:send', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'organization.send_invite'|trans }}</button>
+                    <button type="submit" class="btn-primary">{{ ux_icon('lucide:user-plus', {class: 'size-4', 'aria-hidden': 'true'}) }} {{ 'organization.send_invite'|trans }}</button>
                 {{ form_end(invite_form) }}
+                <p class="mt-2 text-sm text-slate-600">{{ 'organization.invite_help'|trans }}</p>
 
                 {% if invitations is not empty %}
                     <h4 class="mt-4 mb-2 text-sm font-medium text-slate-600">{{ 'organization.pending_invitations'|trans }}</h4>
@@ -260,15 +261,11 @@
                                 <span class="badge bg-slate-100 text-slate-600">{{ invitation.role.label|trans }}</span>
                                 <span class="text-xs text-slate-500">{{ invitation.expired ? 'organization.invitation_expired'|trans : invitation.createdAt|date('d.m.Y') }}</span>
                                 {% if not invitation.expired %}
-                                    {# Link zum Weitergeben, z. B. wenn die E-Mail nicht ankam #}
-                                    <span data-controller="copy" data-copy-text-value="{{ url('invitation_show', {token: invitation.token}) }}" data-copy-done-value="{{ 'organization.invitation_link_copied'|trans }}">
-                                        <button type="button" class="btn-secondary px-2 py-1 text-xs" data-action="copy#copy">
-                                            {{ ux_icon('lucide:link', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
-                                            <span data-copy-target="label">{{ 'organization.copy_link'|trans }}</span>
-                                            <span class="sr-only">({{ invitation.email }})</span>
-                                        </button>
-                                        <span class="sr-only" role="status" data-copy-target="status"></span>
-                                    </span>
+                                    {# Rokoso verschickt keine Einladungen selbst: Link per Postfach oder Kopie weitergeben #}
+                                    <a href="{{ path('organization_invitation_send', {id: organization.id, invitation: invitation.id}) }}" class="btn-secondary px-2 py-1 text-xs">
+                                        {{ ux_icon('lucide:send', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                                        {{ 'organization.send_invitation'|trans }}<span class="sr-only"> ({{ invitation.email }})</span>
+                                    </a>
                                 {% endif %}
                                 {{ ui.post_button(path('organization_invitation_revoke', {id: organization.id, invitation: invitation.id}), 'invitation-revoke',
                                     'organization.revoke', {class: 'btn-icon hover:text-red-600', icon: 'lucide:x', icon_only: true}) }}

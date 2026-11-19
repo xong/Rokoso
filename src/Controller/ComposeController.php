@@ -93,7 +93,8 @@ final class ComposeController extends AbstractController
             }
         } else {
             $data = new ComposeData();
-            $data->account = $available[0];
+            $preferred = $request->query->getInt('account');
+            $data->account = array_find($available, static fn (MailAccount $a): bool => $a->getId() === $preferred) ?? $available[0];
             $data->to = $request->query->getString('to');
             // e.g. text shared from another app
             $data->subject = mb_substr($request->query->getString('subject'), 0, 500);
@@ -120,7 +121,11 @@ final class ComposeController extends AbstractController
                 $this->denyAccessUnlessGranted(MessageVoter::VIEW, $original);
                 $assistant->prefill($data, $original, $request->query->has('forward'), $request->query->getBoolean('all'), $available);
             }
-            $data->body = ComposeAssistant::withSignature($data->body, $signatures[$data->account?->getId() ?? 0] ?? '');
+            $signature = $signatures[$data->account?->getId() ?? 0] ?? '';
+            // a prepared text (e.g. an invitation) keeps the signature below, replies and forwards above the quote
+            $data->body = null === $data->original && '' !== trim($data->body) && '' !== $signature
+                ? rtrim($data->body)."\n\n-- \n".$signature
+                : ComposeAssistant::withSignature($data->body, $signature);
         }
 
         $shelfItems = $shelf->files($user);

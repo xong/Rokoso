@@ -187,17 +187,39 @@ final class CalendarController extends AbstractController
         return $this->redirectToRoute('calendar_item_show', ['id' => $item->getId(), 'date' => $date]);
     }
 
-    /** Sends the item as .ics to the external guests */
+    /** Sends the item as .ics to the external guests, from the organization's mailbox */
     #[Route('/item/{id<\d+>}/invite', name: 'calendar_item_invite', methods: ['POST'])]
     #[IsGranted(CalendarItemVoter::EDIT, 'item')]
     #[IsCsrfTokenValid('calendar-invite')]
     public function invite(CalendarItem $item, #[CurrentUser] User $user, CalendarInvitation $invitation, TranslatorInterface $translator): Response
     {
-        $count = $invitation->invite($item, $user);
+        $delivery = $invitation->invite($item, $user);
         $this->em->flush();
-        $this->addFlash($count > 0 ? 'success' : 'error', $count > 0 ? $translator->trans('calendar.invite.sent', ['%count%' => $count]) : 'calendar.invite.none');
+        $problem = $delivery->problem();
+        if ($delivery->mailed > 0) {
+            $this->addFlash('success', $translator->trans('calendar.invite.sent', ['%count%' => $delivery->mailed, '%account%' => $delivery->account?->getEmailAddress() ?? '']));
+        } elseif (null !== $problem) {
+            $this->addFlash('error', $translator->trans(...$problem));
+        } else {
+            $this->addFlash('error', 'calendar.invite.none');
+        }
 
         return $this->redirectToRoute('calendar_item_show', ['id' => $item->getId()]);
+    }
+
+    /** The item as .ics file, e.g. to send it to guests yourself */
+    #[Route('/item/{id<\d+>}/termin.ics', name: 'calendar_item_ics')]
+    #[IsGranted(CalendarItemVoter::EDIT, 'item')]
+    public function ics(CalendarItem $item, CalendarInvitation $invitation): Response
+    {
+        if ($item->isTask() || null === $item->getStartsAt()) {
+            throw $this->createNotFoundException();
+        }
+
+        return new Response($invitation->itemIcs($item), 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="termin-'.$item->getId().'.ics"',
+        ]);
     }
 
     private function occurrence(CalendarItem $item, string $date): Occurrence
