@@ -1,4 +1,4 @@
-{# Markdown-Text der Einladung an Gäste, verschickt über das Postfach der Organisation (GuestMailer) #}
+{# Markdown-Text der Sitzungseinladung, verschickt über das Postfach der Organisation (OrganizationMailer); url nur für Mitglieder #}
 {{ 'email.meeting.text'|trans({'%sender%': sender, '%organization%': meeting.organization.name, '%title%': meeting.title}) }}
 
 **{{ meeting.startsAt|date('d.m.Y H:i') }}{% if meeting.endsAt %} – {{ meeting.endsAt|date('H:i') }}{% endif %}**
@@ -22,4 +22,8 @@
 {{ 'meeting.agenda.empty'|trans }}
 {% endfor %}
 
+{% if url|default(null) %}
+{{ 'email.meeting.in_rokoso'|trans }} {{ url }}
+
+{% endif %}
 {{ 'email.guest.ics_hint'|trans }}

@@ -11,7 +11,7 @@ Von der Einladung bis zum genehmigten Protokoll an einer Stelle.
 1. **Verfassen → Sitzung**: Titel, Beginn, Ort oder Videolink und wer **Protokoll führt**. Steht der Termin noch nicht fest: [Termin finden](/help/termin-finden).
 2. **Tagesordnung** aufstellen: Punkte mit Dauer und Verantwortlichen. Unterlagen hängst du aus den Dateien an den jeweiligen Punkt.
 3. Mitglieder können über **Thema vorschlagen** Punkte einreichen. Du übernimmst sie in die Tagesordnung oder lehnst sie ab.
-4. **Einladung verschicken**. Alle bekommen eine E-Mail mit Tagesordnung und Kalenderdatei – Mitglieder von Rokoso, Gäste ohne Konto aus dem Postfach der Organisation (danach unter **Gesendet**). Ist die Ladungsfrist eurer Organisation unterschritten, fragt Rokoso nach.
+4. **Einladung verschicken**. Alle bekommen eine E-Mail mit Tagesordnung und Kalenderdatei aus dem Postfach der Organisation, in deinem Namen und mit deiner Signatur (danach unter **Gesendet**, Antworten landen im Eingang). Ist kein Postfach eingerichtet, schickt Rokoso die Einladung an die Mitglieder selbst; Gäste ohne Konto lädst du dann persönlich ein. Ist die Ladungsfrist eurer Organisation unterschritten, fragt Rokoso nach.
 
 ## In der Sitzung
 

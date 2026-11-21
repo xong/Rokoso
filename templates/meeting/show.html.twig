@@ -59,10 +59,12 @@
                         {{ 'meeting.notice_too_short'|trans({'%days%': meeting.organization.invitationDays}) }}
                     </p>
                 {% endif %}
-                {% if open and meeting.guestEmailList is not empty %}
-                    {# Mitglieder bekommen die Einladung als Systemmail, Gäste ohne Konto nur über ein Postfach der Organisation #}
-                    {% set mailbox = guest_mailbox(meeting.organization) %}
-                    <p class="text-sm text-slate-600">{{ mailbox ? 'guest_mail.via'|trans({'%account%': mailbox.emailAddress}) : 'guest_mail.no_mailbox_hint'|trans }}</p>
+                {% if open %}
+                    {# Einladungen gehen aus dem Postfach der Organisation; ohne Postfach Mitglieder per Systemmail, Gäste gar nicht #}
+                    {% set mailbox = org_mailbox(meeting.organization) %}
+                    <p class="text-sm text-slate-600">
+                        {% if mailbox %}{{ 'org_mail.meeting_via'|trans({'%account%': mailbox.emailAddress}) }}{% else %}{{ 'org_mail.meeting_no_mailbox'|trans }}{% if meeting.guestEmailList is not empty %} {{ 'org_mail.no_mailbox_hint'|trans }}{% endif %}{% endif %}
+                    </p>
                 {% endif %}
                 <div class="flex flex-wrap gap-2">
                     {% if open %}

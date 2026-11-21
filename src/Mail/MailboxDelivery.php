@@ -7,9 +7,9 @@ namespace App\Mail;
 use App\Entity\MailAccount;
 
 /**
- * Outcome of {@see GuestMailer::send()}: how many guests got the email, how many not (no mailbox or sending failed).
+ * Outcome of {@see OrganizationMailer::send()}: how many addresses got the email, how many not (no mailbox or sending failed).
  */
-final readonly class GuestDelivery
+final readonly class MailboxDelivery
 {
     public function __construct(
         public int $mailed,
@@ -20,7 +20,7 @@ final readonly class GuestDelivery
     }
 
     /**
-     * Translation key and parameters for the flash message about guests that got nothing, or null.
+     * Translation key and parameters for the flash message about addresses that got nothing, or null.
      *
      * @return array{string, array<string, int|string>}|null
      */
@@ -31,7 +31,7 @@ final readonly class GuestDelivery
         }
 
         return null === $this->error
-            ? ['guest_mail.no_mailbox', ['%count%' => $this->skipped]]
-            : ['guest_mail.failed', ['%count%' => $this->skipped, '%error%' => $this->error]];
+            ? ['org_mail.no_mailbox', ['%count%' => $this->skipped]]
+            : ['org_mail.failed', ['%count%' => $this->skipped, '%error%' => $this->error]];
     }
 }

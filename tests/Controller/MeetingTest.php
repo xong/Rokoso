@@ -139,11 +139,14 @@ final class MeetingTest extends AppTestCase
             self::assertInstanceOf(Email::class, $message);
             $recipient = $message->getTo()[0]->getAddress();
             $recipients[] = $recipient;
+            // members and guests: from the organization's mailbox, not as a system mail
+            self::assertSame('sev@example.org', $message->getFrom()[0]->getAddress());
+            $link = '/meetings/'.$meeting->getId();
             if (\in_array($recipient, ['gast@example.org', 'member@example.org'], true)) {
-                // guests without an account: from the organization's mailbox, not as a system mail
-                self::assertSame('sev@example.org', $message->getFrom()[0]->getAddress());
+                // guests have no account, so no link into Rokoso
+                self::assertStringNotContainsString($link, (string) $message->getTextBody());
             } else {
-                self::assertSame('owner@example.org', $message->getReplyTo()[0]->getAddress());
+                self::assertStringContainsString($link, (string) $message->getTextBody());
             }
             $attachments = $message->getAttachments();
             self::assertCount(1, $attachments);
@@ -162,9 +165,9 @@ final class MeetingTest extends AppTestCase
         $this->client->request('GET', '/meetings/'.$meeting->getId().'/meeting.ics');
         self::assertResponseIsSuccessful();
         self::assertStringContainsString('text/calendar', (string) $this->client->getResponse()->headers->get('Content-Type'));
-        // the guest invitation is filed under "Sent" of the mailbox
+        // both invitations (members, guests) are filed under "Sent" of the mailbox
         $sent = $this->em()->getRepository(Message::class)->findAll();
-        self::assertCount(1, $sent);
+        self::assertCount(2, $sent);
         self::assertStringContainsString('Vollversammlung', $sent[0]->getSubject());
     }
 
@@ -177,11 +180,12 @@ final class MeetingTest extends AppTestCase
         $crawler = $this->client->request('GET', '/meetings/'.$meeting->getId());
         self::assertSelectorTextContains('main', 'kein');
         $this->client->submit($crawler->selectButton('Einladung verschicken')->form());
-        // only the members get their (system) invitation
+        // only the members get their invitation, as system mail
         self::assertEmailCount(2);
         foreach (self::getMailerMessages() as $message) {
             self::assertInstanceOf(Email::class, $message);
             self::assertNotSame('gast@example.org', $message->getTo()[0]->getAddress());
+            self::assertSame('owner@example.org', $message->getReplyTo()[0]->getAddress());
         }
         $this->client->followRedirect();
         self::assertSelectorTextContains('[role=status]', 'Ein Gast wurde nicht eingeladen');

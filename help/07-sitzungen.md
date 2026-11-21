@@ -10,7 +10,7 @@ Eine Sitzung durchläuft in Rokoso die Schritte **geplant → eingeladen → dur
 
 1. **Sitzung anlegen** – Titel, Beginn, Ort oder Link zur Videokonferenz und wer Protokoll führt. Steht der Termin noch nicht fest, findet ihr ihn zuerst gemeinsam: [Termin finden](/help/termin-finden).
 2. **Tagesordnung** – Punkte mit Dauer, Verantwortlichen und Unterlagen aus den Dateien. Mitglieder können **Themen vorschlagen**; die Sitzungsleitung übernimmt sie oder lehnt sie ab.
-3. **Einladung verschicken** – per E-Mail mit Kalenderdatei; Gäste ohne Konto bekommen sie aus dem Postfach der Organisation. Wird die eingestellte **Ladungsfrist** unterschritten, warnt Rokoso.
+3. **Einladung verschicken** – per E-Mail mit Kalenderdatei aus dem Postfach der Organisation, an jede Person einzeln (danach unter **Gesendet**). Mitglieder finden darin den Link zur Sitzung in Rokoso. Ohne Postfach bekommen Mitglieder die Einladung von Rokoso selbst, Gäste ohne Konto dann gar nicht. Wird die eingestellte **Ladungsfrist** unterschritten, warnt Rokoso.
 4. **Anwesenheit** – anwesend, entschuldigt oder abwesend. Rokoso zeigt, ob die Sitzung **beschlussfähig** ist.
 5. **Protokoll** – Notizen je Tagesordnungspunkt. **Beschlüsse**, **Aufgaben** und **Abstimmungen** legst du direkt am Punkt an.
 6. **Protokoll genehmigen** – danach ist es schreibgeschützt.

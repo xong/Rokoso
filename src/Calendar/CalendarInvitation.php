@@ -7,8 +7,8 @@ namespace App\Calendar;
 use App\Entity\CalendarItem;
 use App\Entity\Organization;
 use App\Entity\User;
-use App\Mail\GuestDelivery;
-use App\Mail\GuestMailer;
+use App\Mail\MailboxDelivery;
+use App\Mail\OrganizationMailer;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
@@ -19,7 +19,7 @@ use Twig\Environment;
 final readonly class CalendarInvitation
 {
     public function __construct(
-        private GuestMailer $guests,
+        private OrganizationMailer $mailer,
         private Environment $twig,
         private UrlGeneratorInterface $urls,
         private TranslatorInterface $translator,
@@ -30,15 +30,15 @@ final readonly class CalendarInvitation
     /**
      * Sends the item to all guest addresses from the organization's mailbox and marks it as invited (flushes).
      */
-    public function invite(CalendarItem $item, User $sender): GuestDelivery
+    public function invite(CalendarItem $item, User $sender): MailboxDelivery
     {
         $guests = $item->getGuestEmailList();
         if ($item->isTask() || null === $item->getStartsAt()) {
-            return new GuestDelivery(0);
+            return new MailboxDelivery(0);
         }
-        $delivery = $this->guests->send(self::organization($item), $sender, $guests,
+        $delivery = $this->mailer->send(self::organization($item), $sender, $guests,
             $this->translator->trans('calendar.invite.subject', ['%title%' => $item->getTitle(), '%date%' => $item->getDate()->format('d.m.Y')]),
-            $this->twig->render('email/guest_calendar.txt.twig', ['item' => $item, 'sender' => $sender->getName()]),
+            $this->twig->render('email/mailbox_calendar.txt.twig', ['item' => $item, 'sender' => $sender->getName()]),
             $this->attachment($item), $item->getProject());
         if ($delivery->mailed > 0) {
             $item->markInvited();

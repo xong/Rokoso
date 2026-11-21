@@ -128,8 +128,8 @@
                     </ul>
                     <p class="text-sm text-slate-600">{{ item.invitedAt ? 'calendar.invite.invited_at'|trans({'%date%': item.invitedAt|date('d.m.Y H:i')}) : 'calendar.invite.text'|trans }}</p>
                     {# Gäste werden nie per Systemmail eingeladen, sondern über ein Postfach der Organisation #}
-                    {% set mailbox = guest_mailbox(item.organization ?? item.project.organization ?? null) %}
-                    <p class="text-sm text-slate-600">{{ mailbox ? 'guest_mail.via'|trans({'%account%': mailbox.emailAddress}) : 'guest_mail.no_mailbox_hint'|trans }}</p>
+                    {% set mailbox = org_mailbox(item.organization ?? item.project.organization ?? null) %}
+                    <p class="text-sm text-slate-600">{{ mailbox ? 'org_mail.via'|trans({'%account%': mailbox.emailAddress}) : 'org_mail.no_mailbox_hint'|trans }}</p>
                     <div class="flex flex-wrap gap-2">
                         {% if mailbox %}
                             {{ ui.post_button(path('calendar_item_invite', {id: item.id}), 'calendar-invite', item.invitedAt ? 'calendar.invite.again' : 'calendar.invite.button',

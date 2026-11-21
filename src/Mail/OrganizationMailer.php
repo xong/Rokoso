@@ -15,11 +15,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Invitations to guests without an account go out from the organization's own mailbox – one email per guest,
- * filed under "sent" – and never as system mail: guests have not signed up for mails from the platform.
+ * Invitations (meetings, appointments) go out from the organization's own mailbox in the name of the inviting
+ * person – one email per address, filed under "sent", answers arrive where they are dealt with. Guests without
+ * an account never get them as system mail: they have not signed up for mails from the platform.
  * If sending fails, the email stays under drafts with the error.
  */
-final readonly class GuestMailer
+final readonly class OrganizationMailer
 {
     public function __construct(
         private MailAccountRepository $accounts,
@@ -47,25 +48,25 @@ final readonly class GuestMailer
     }
 
     /**
-     * Sends the Markdown body with the attachment to every guest (flushes).
+     * Sends the Markdown body with the attachment to every address (flushes).
      *
-     * @param list<string>                                            $guests
+     * @param list<string>                                            $recipients
      * @param array{body: string, filename: string, mimeType: string} $attachment
      */
-    public function send(?Organization $organization, User $sender, array $guests, string $subject, string $body, array $attachment, ?Project $project = null): GuestDelivery
+    public function send(?Organization $organization, User $sender, array $recipients, string $subject, string $body, array $attachment, ?Project $project = null): MailboxDelivery
     {
-        if ([] === $guests) {
-            return new GuestDelivery(0);
+        if ([] === $recipients) {
+            return new MailboxDelivery(0);
         }
         $account = $this->account($organization, $sender);
         if (null === $account) {
-            return new GuestDelivery(0, \count($guests));
+            return new MailboxDelivery(0, \count($recipients));
         }
 
         $signature = $this->assistant->signature($sender, $account)?->getBody() ?? '';
         $data = new ComposeData();
         $data->account = $account;
-        $data->to = implode(', ', $guests);
+        $data->to = implode(', ', $recipients);
         $data->subject = $subject;
         $data->body = '' === trim($signature) ? $body : $body."\n\n-- \n".$signature;
         $data->project = $project;
@@ -77,15 +78,15 @@ final readonly class GuestMailer
         try {
             $this->sender->send($draft);
         } catch (\Throwable $e) {
-            $this->logger->error('Guest invitation failed: {error}', ['error' => $e->getMessage()]);
+            $this->logger->error('Invitation from the organization mailbox failed: {error}', ['error' => $e->getMessage()]);
             if ($this->em->isOpen()) {
                 $draft->unqueue($e->getMessage());
                 $this->em->flush();
             }
 
-            return new GuestDelivery(0, \count($guests), $account, $e->getMessage());
+            return new MailboxDelivery(0, \count($recipients), $account, $e->getMessage());
         }
 
-        return new GuestDelivery(\count($guests), 0, $account);
+        return new MailboxDelivery(\count($recipients), 0, $account);
     }
 }

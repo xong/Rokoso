@@ -14,7 +14,7 @@ use App\Enum\OrganizationRole;
 use App\Form\InvitationFormType;
 use App\Form\MembershipFormType;
 use App\Form\OrganizationFormType;
-use App\Mail\GuestMailer;
+use App\Mail\OrganizationMailer;
 use App\Organization\HandoverService;
 use App\Repository\BlockedSenderRepository;
 use App\Repository\InvitationRepository;
@@ -291,12 +291,12 @@ final class OrganizationController extends AbstractController
      */
     #[Route('/{id<\d+>}/invitations/{invitation<\d+>}', name: 'organization_invitation_send')]
     #[IsGranted(OrganizationVoter::MANAGE, 'organization')]
-    public function sendInvitation(Organization $organization, Invitation $invitation, #[CurrentUser] User $user, InvitationManager $invitations, GuestMailer $guests): Response
+    public function sendInvitation(Organization $organization, Invitation $invitation, #[CurrentUser] User $user, InvitationManager $invitations, OrganizationMailer $mailer): Response
     {
         if ($invitation->getOrganization() !== $organization || $invitation->isExpired()) {
             throw $this->createNotFoundException();
         }
-        $mailbox = $guests->account($organization, $user);
+        $mailbox = $mailer->account($organization, $user);
         $subject = $invitations->subject($invitation);
         $text = $invitations->text($invitation, $user);
 

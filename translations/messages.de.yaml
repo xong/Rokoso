@@ -213,7 +213,7 @@ platform:
     log_intro: Anmeldungen, Rollenänderungen und Löschungen aller Konten. Einträge werden nach einem Jahr gelöscht, IP-Adressen sind gekürzt.
     mail:
         title: E-Mail-Versand
-        intro: Systemmails (Bestätigung, Passwort, Sitzungseinladungen, Benachrichtigungen) gehen über diesen Absender und Server. Eine Testmail zeigt, ob der Server sie annimmt.
+        intro: Systemmails (Bestätigung, Passwort, Benachrichtigungen) gehen über diesen Absender und Server. Eine Testmail zeigt, ob der Server sie annimmt.
         from: Absender
         server: Server
         to: Empfänger
@@ -404,6 +404,7 @@ email:
     meeting:
         text: '%sender% lädt dich im Namen von „%organization%“ zur Sitzung „%title%“ ein.'
         button: Sitzung ansehen
+        in_rokoso: 'Tagesordnung, Unterlagen und Rückmeldung in Rokoso:'
         ics_hint: Den Termin kannst du über den Anhang in deinen Kalender übernehmen. Antworten auf diese E-Mail gehen an die einladende Person.
     guest:
         ics_hint: Den Termin kannst du über den Anhang in deinen Kalender übernehmen.
@@ -541,11 +542,13 @@ wiki:
     restore_confirm: Diese Version als aktuellen Stand übernehmen? Der bisherige Stand bleibt als Version erhalten.
     restored: Version wiederhergestellt.
 
-guest_mail:
+org_mail:
     via: 'Gäste ohne Konto bekommen die Einladung als E-Mail von %account% – sie liegt danach unter „Gesendet“.'
+    meeting_via: 'Die Einladung geht als E-Mail von %account% einzeln an jedes Mitglied und jeden Gast – sie liegt danach unter „Gesendet“.'
+    meeting_no_mailbox: Für die Organisation ist kein E-Mail-Postfach eingerichtet, deshalb bekommen Mitglieder die Einladung als Systemmail von Rokoso.
     no_mailbox_hint: Gäste ohne Konto lädt Rokoso über ein E-Mail-Postfach der Organisation ein. Weil keins eingerichtet ist, schick ihnen die Kalenderdatei bitte selbst.
     no_mailbox: '{1}Ein Gast wurde nicht eingeladen: Für die Organisation ist kein E-Mail-Postfach eingerichtet.|]1,Inf[%count% Gäste wurden nicht eingeladen: Für die Organisation ist kein E-Mail-Postfach eingerichtet.'
-    failed: '{1}Die Einladung an einen Gast konnte nicht verschickt werden (%error%). Sie liegt unter „Entwürfe“.|]1,Inf[Die Einladung an %count% Gäste konnte nicht verschickt werden (%error%). Sie liegt unter „Entwürfe“.'
+    failed: '{1}Die Einladung an eine Adresse konnte nicht verschickt werden (%error%). Sie liegt unter „Entwürfe“.|]1,Inf[Die Einladung an %count% Adressen konnte nicht verschickt werden (%error%). Sie liegt unter „Entwürfe“.'
 
 invitation:
     title: Einladung
@@ -1663,6 +1666,7 @@ meeting:
     notice_too_short: 'Achtung: Die Ladungsfrist von %days% Tagen ist nicht mehr einzuhalten.'
     invited_at: 'Eingeladen am %date%'
     invited_flash: '{0}Niemand eingeladen.|{1}Einladung an 1 Person verschickt.|]1,Inf[Einladung an %count% Personen verschickt.'
+    invited_flash_via: '{0}Niemand eingeladen.|{1}Einladung an 1 Person über %account% verschickt.|]1,Inf[Einladung an %count% Personen über %account% verschickt.'
     invitation:
         subject: 'Einladung: %title% am %date%'
     minutes_locked: Das Protokoll ist genehmigt und kann nicht mehr geändert werden.

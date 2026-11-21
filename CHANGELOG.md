@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.25.0 – 2026-11-21
+
+### Geändert
+
+- **Sitzungseinladungen aus dem eigenen Postfach:** Auch die Mitglieder bekommen die Einladung zu einer Sitzung jetzt aus dem E-Mail-Postfach der Organisation – in deinem Namen, mit deiner Signatur, jede Person einzeln und mit Link zur Sitzung in Rokoso. Die Einladung liegt danach unter „Gesendet“, Antworten landen in eurem Eingang. Ist kein Postfach eingerichtet, verschickt Rokoso die Einladung an die Mitglieder wie bisher selbst.
+
 ## 0.24.0 – 2026-11-19
 
 ### Geändert
