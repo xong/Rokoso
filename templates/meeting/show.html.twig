@@ -60,10 +60,10 @@
                     </p>
                 {% endif %}
                 {% if open %}
-                    {# Einladungen gehen aus dem Postfach der Organisation; ohne Postfach Mitglieder per Systemmail, Gäste gar nicht #}
+                    {# Einladungen gehen nur aus dem Postfach der Organisation, nie als Systemmail #}
                     {% set mailbox = org_mailbox(meeting.organization) %}
                     <p class="text-sm text-slate-600">
-                        {% if mailbox %}{{ 'org_mail.meeting_via'|trans({'%account%': mailbox.emailAddress}) }}{% else %}{{ 'org_mail.meeting_no_mailbox'|trans }}{% if meeting.guestEmailList is not empty %} {{ 'org_mail.no_mailbox_hint'|trans }}{% endif %}{% endif %}
+                        {% if mailbox %}{{ 'org_mail.meeting_via'|trans({'%account%': mailbox.emailAddress}) }}{% else %}{{ 'org_mail.meeting_no_mailbox'|trans }}{% endif %}
                     </p>
                 {% endif %}
                 <div class="flex flex-wrap gap-2">

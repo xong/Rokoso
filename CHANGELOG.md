@@ -8,7 +8,7 @@ Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nut
 
 ### Geändert
 
-- **Sitzungseinladungen aus dem eigenen Postfach:** Auch die Mitglieder bekommen die Einladung zu einer Sitzung jetzt aus dem E-Mail-Postfach der Organisation – in deinem Namen, mit deiner Signatur, jede Person einzeln und mit Link zur Sitzung in Rokoso. Die Einladung liegt danach unter „Gesendet“, Antworten landen in eurem Eingang. Ist kein Postfach eingerichtet, verschickt Rokoso die Einladung an die Mitglieder wie bisher selbst.
+- **Sitzungseinladungen aus dem eigenen Postfach:** Auch die Mitglieder bekommen die Einladung zu einer Sitzung jetzt aus dem E-Mail-Postfach der Organisation – in deinem Namen, mit deiner Signatur, jede Person einzeln und mit Link zur Sitzung in Rokoso. Die Einladung liegt danach unter „Gesendet“, Antworten landen in eurem Eingang. Rokoso selbst verschickt keine Sitzungseinladungen mehr: Ist kein Postfach eingerichtet, sehen Mitglieder die Einladung nur unter ihren Benachrichtigungen, und die Kalenderdatei kannst du selbst weitergeben.
 
 ## 0.24.0 – 2026-11-19
 

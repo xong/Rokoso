@@ -8,11 +8,13 @@ use App\Entity\AgendaItem;
 use App\Entity\CalendarItem;
 use App\Entity\Meeting;
 use App\Entity\Message;
+use App\Entity\Notification;
 use App\Entity\Organization;
 use App\Entity\Resolution;
 use App\Entity\User;
 use App\Enum\AttendanceStatus;
 use App\Enum\MeetingStatus;
+use App\Enum\NotificationType;
 use App\Enum\OrganizationRole;
 use App\Tests\AppTestCase;
 use Symfony\Component\Mime\Email;
@@ -171,7 +173,7 @@ final class MeetingTest extends AppTestCase
         self::assertStringContainsString('Vollversammlung', $sent[0]->getSubject());
     }
 
-    public function testGuestsAreNotMailedWithoutAMailbox(): void
+    public function testNoInvitationMailsWithoutAMailbox(): void
     {
         $meeting = $this->meeting()->setGuestEmails('gast@example.org');
         $this->em()->flush();
@@ -180,15 +182,14 @@ final class MeetingTest extends AppTestCase
         $crawler = $this->client->request('GET', '/meetings/'.$meeting->getId());
         self::assertSelectorTextContains('main', 'kein');
         $this->client->submit($crawler->selectButton('Einladung verschicken')->form());
-        // only the members get their invitation, as system mail
-        self::assertEmailCount(2);
-        foreach (self::getMailerMessages() as $message) {
-            self::assertInstanceOf(Email::class, $message);
-            self::assertNotSame('gast@example.org', $message->getTo()[0]->getAddress());
-            self::assertSame('owner@example.org', $message->getReplyTo()[0]->getAddress());
-        }
+        // invitations never go out as system mail: members only get the notification in Rokoso
+        self::assertEmailCount(0);
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[role=status]', 'Ein Gast wurde nicht eingeladen');
+        self::assertSelectorTextContains('[role=status]', 'Keine E-Mails verschickt');
+        $notifications = $this->em()->getRepository(Notification::class)->findBy(['recipient' => $this->member->getId()]);
+        self::assertCount(1, $notifications);
+        self::assertSame(NotificationType::Meeting, $notifications[0]->getType());
+        self::assertSame(MeetingStatus::Invited, $this->em()->find(Meeting::class, $meeting->getId())?->getStatus());
     }
 
     public function testAttendanceQuorumAndVotingRight(): void

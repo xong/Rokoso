@@ -403,9 +403,7 @@ email:
         expires: Der Link ist eine Stunde gültig. Wenn du das nicht angefordert hast, ignoriere diese E-Mail.
     meeting:
         text: '%sender% lädt dich im Namen von „%organization%“ zur Sitzung „%title%“ ein.'
-        button: Sitzung ansehen
         in_rokoso: 'Tagesordnung, Unterlagen und Rückmeldung in Rokoso:'
-        ics_hint: Den Termin kannst du über den Anhang in deinen Kalender übernehmen. Antworten auf diese E-Mail gehen an die einladende Person.
     guest:
         ics_hint: Den Termin kannst du über den Anhang in deinen Kalender übernehmen.
     calendar:
@@ -545,7 +543,7 @@ wiki:
 org_mail:
     via: 'Gäste ohne Konto bekommen die Einladung als E-Mail von %account% – sie liegt danach unter „Gesendet“.'
     meeting_via: 'Die Einladung geht als E-Mail von %account% einzeln an jedes Mitglied und jeden Gast – sie liegt danach unter „Gesendet“.'
-    meeting_no_mailbox: Für die Organisation ist kein E-Mail-Postfach eingerichtet, deshalb bekommen Mitglieder die Einladung als Systemmail von Rokoso.
+    meeting_no_mailbox: Für die Organisation ist kein E-Mail-Postfach eingerichtet. Einladungen per E-Mail verschickt Rokoso nur über ein Postfach der Organisation – ohne Postfach sehen Mitglieder die Einladung nur unter ihren Benachrichtigungen in Rokoso, Gäste bekommen nichts. Die Kalenderdatei kannst du herunterladen und selbst weitergeben.
     no_mailbox_hint: Gäste ohne Konto lädt Rokoso über ein E-Mail-Postfach der Organisation ein. Weil keins eingerichtet ist, schick ihnen die Kalenderdatei bitte selbst.
     no_mailbox: '{1}Ein Gast wurde nicht eingeladen: Für die Organisation ist kein E-Mail-Postfach eingerichtet.|]1,Inf[%count% Gäste wurden nicht eingeladen: Für die Organisation ist kein E-Mail-Postfach eingerichtet.'
     failed: '{1}Die Einladung an eine Adresse konnte nicht verschickt werden (%error%). Sie liegt unter „Entwürfe“.|]1,Inf[Die Einladung an %count% Adressen konnte nicht verschickt werden (%error%). Sie liegt unter „Entwürfe“.'
@@ -1665,8 +1663,8 @@ meeting:
     invite_confirm_short: 'Die Ladungsfrist von %days% Tagen wird unterschritten. Trotzdem einladen?'
     notice_too_short: 'Achtung: Die Ladungsfrist von %days% Tagen ist nicht mehr einzuhalten.'
     invited_at: 'Eingeladen am %date%'
-    invited_flash: '{0}Niemand eingeladen.|{1}Einladung an 1 Person verschickt.|]1,Inf[Einladung an %count% Personen verschickt.'
-    invited_flash_via: '{0}Niemand eingeladen.|{1}Einladung an 1 Person über %account% verschickt.|]1,Inf[Einladung an %count% Personen über %account% verschickt.'
+    invited_flash: '{0}Niemand eingeladen.|{1}Einladung an 1 Person über %account% verschickt.|]1,Inf[Einladung an %count% Personen über %account% verschickt.'
+    invited_no_mailbox: Keine E-Mails verschickt, weil für die Organisation kein E-Mail-Postfach eingerichtet ist. Die Mitglieder sehen die Einladung unter ihren Benachrichtigungen; Gäste lädst du bitte selbst ein.
     invitation:
         subject: 'Einladung: %title% am %date%'
     minutes_locked: Das Protokoll ist genehmigt und kann nicht mehr geändert werden.

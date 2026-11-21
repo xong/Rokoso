@@ -161,7 +161,7 @@ final class PushTest extends AppTestCase
 
         static::getContainer()->get(MeetingService::class)->invite($meeting, $admin);
         $this->em()->flush();
-        self::assertEmailCount(2, null, 'only the invitations themselves');
+        self::assertEmailCount(0, null, 'no mailbox: no system mail, neither invitation nor notification');
         $this->deliver();
 
         self::assertSame([NotificationType::Meeting], $this->typesOf($this->member));

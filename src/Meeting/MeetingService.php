@@ -13,7 +13,6 @@ use App\Mail\MailboxDelivery;
 use App\Mail\OrganizationMailer;
 use App\Notification\ActivityNotifier;
 use App\Repository\CalendarItemRepository;
-use App\Service\SystemMailer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -27,7 +26,6 @@ final readonly class MeetingService
     public function __construct(
         private EntityManagerInterface $em,
         private CalendarItemRepository $calendarItems,
-        private SystemMailer $mailer,
         private OrganizationMailer $organizationMailer,
         private Environment $twig,
         private TranslatorInterface $translator,
@@ -56,9 +54,9 @@ final readonly class MeetingService
     }
 
     /**
-     * Sends the invitation, notifies the members and marks the meeting as invited (flushes when mailed via the mailbox).
-     * Everything goes out from the organization's mailbox (members with the link to the meeting, guests without);
-     * without a mailbox members get it as system mail and guests nothing.
+     * Sends the invitation, notifies the members and marks the meeting as invited (flushes when mailed).
+     * Emails only go out from the organization's mailbox (members with the link to the meeting, guests without),
+     * never as system mail: without a mailbox members only get the notification in Rokoso, guests nothing.
      *
      * @return array{members: MailboxDelivery, guests: MailboxDelivery}
      */
@@ -79,15 +77,8 @@ final readonly class MeetingService
         $meeting->markInvited();
         $this->notifier->meetingInvited($meeting, $sender);
 
-        if (null === $this->organizationMailer->account($organization, $sender)) {
-            foreach ($members as $member) {
-                $this->mailer->send($member->getEmail(), 'meeting.invitation.subject', 'meeting_invitation', $context + ['url' => $url, 'subject_params' => $subjectParams], $member->getName(), [$ics], $sender->getEmail());
-            }
-            $memberDelivery = new MailboxDelivery(\count($members));
-        } else {
-            $memberDelivery = $this->organizationMailer->send($organization, $sender, array_map(static fn (User $member): string => $member->getEmail(), array_values($members)),
-                $subject, $this->twig->render('email/mailbox_meeting.txt.twig', $context + ['url' => $url]), $ics, $meeting->getProject());
-        }
+        $memberDelivery = $this->organizationMailer->send($organization, $sender, array_map(static fn (User $member): string => $member->getEmail(), array_values($members)),
+            $subject, $this->twig->render('email/mailbox_meeting.txt.twig', $context + ['url' => $url]), $ics, $meeting->getProject());
         $guestDelivery = $this->organizationMailer->send($organization, $sender, $guests,
             $subject, $this->twig->render('email/mailbox_meeting.txt.twig', $context), $ics, $meeting->getProject());
 

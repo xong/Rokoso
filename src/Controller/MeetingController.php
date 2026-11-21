@@ -109,7 +109,7 @@ final class MeetingController extends AbstractController
 
     /**
      * Sends the invitation with agenda and .ics to all members and guests from the organization's mailbox
-     * (without one: members as system mail, guests not at all).
+     * (never as system mail; without a mailbox members only get the notification).
      */
     #[Route('/{id<\d+>}/invite', name: 'meeting_invite', methods: ['POST'])]
     #[IsGranted(MeetingVoter::MANAGE, 'meeting')]
@@ -119,9 +119,15 @@ final class MeetingController extends AbstractController
         ['members' => $members, 'guests' => $guests] = $this->service->invite($meeting, $user);
         $this->em->flush();
         $account = $members->account ?? $guests->account;
-        $this->addFlash('success', $translator->trans(null === $account ? 'meeting.invited_flash' : 'meeting.invited_flash_via', [
+        if (null === $account) {
+            // no mailbox: nobody got an email, members see the invitation under their notifications
+            $this->addFlash('error', 'meeting.invited_no_mailbox');
+
+            return $this->redirectToRoute('meeting_show', ['id' => $meeting->getId()]);
+        }
+        $this->addFlash('success', $translator->trans('meeting.invited_flash', [
             '%count%' => $members->mailed + $guests->mailed,
-            '%account%' => $account?->getEmailAddress() ?? '',
+            '%account%' => $account->getEmailAddress(),
         ]));
         foreach ([$members->problem(), $guests->problem()] as $problem) {
             if (null !== $problem) {
