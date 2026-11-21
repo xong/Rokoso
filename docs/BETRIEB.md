@@ -343,7 +343,7 @@ Rokoso ist die Arbeitsplattform der [Stadtelternvertretung …]. Mitglieder orga
 
 ## E-Mails von Rokoso
 
-Rokoso schickt nur E-Mails an Personen mit Konto bzw. auf deren eigene Anfrage: Bestätigung der Adresse, Passwort zurücksetzen, Benachrichtigungen (einzeln oder als tägliche Zusammenfassung) und Sitzungseinladungen an Mitglieder von Organisationen ohne eigenes E-Mail-Postfach. Benachrichtigungsmails lassen sich im Profil oder mit einem Klick in der Mail abbestellen. Die Mails gehen über [Versanddienst, z. B. Mailjet SAS, Paris] als Auftragsverarbeiter; Öffnungen und Klicks werden nicht gezählt.
+Rokoso schickt nur E-Mails an Personen mit Konto bzw. auf deren eigene Anfrage: Bestätigung der Adresse, Passwort zurücksetzen, Benachrichtigungen (einzeln oder als tägliche Zusammenfassung), Sitzungseinladungen an Mitglieder von Organisationen ohne eigenes E-Mail-Postfach sowie Bestätigungen zu Formularen auf den öffentlichen Seiten der Organisationen (Bestätigungslink, auf Wunsch eine Kopie der eigenen Nachricht). Einladungen an Personen ohne Konto verschickt Rokoso nicht selbst; sie kommen persönlich von der einladenden Person oder aus dem Postfach der jeweiligen Organisation. Benachrichtigungsmails lassen sich im Profil oder mit einem Klick in der Mail abbestellen. Die Mails gehen über [Versanddienst, z. B. Mailjet SAS, Paris] als Auftragsverarbeiter; Öffnungen und Klicks werden nicht gezählt.
 
 ## Cookies und Speicher im Browser
 
