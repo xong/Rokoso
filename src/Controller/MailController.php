@@ -159,7 +159,8 @@ final class MailController extends AbstractController
             return $this->redirectAfterAction($request, null);
         }
 
-        $projectId = $payload->getInt('project') ?: null;
+        // the bulk toolbar always posts its project select, empty unless a project is chosen
+        $projectId = (int) $payload->getString('project') ?: null;
         $changed = $this->actions->apply($action, $selected, $user, $projectId, $this->snoozeUntil($payload->getString('until') ?: $payload->getString('until_custom')));
 
         if ($payload->getBoolean('undo')) {
@@ -333,7 +334,7 @@ final class MailController extends AbstractController
         $url = $this->generateUrl('mail_show', [
             'folder' => \in_array($folder, self::FOLDERS, true) ? $folder : 'inbox',
             'id' => $message->getId(),
-        ]);
+        ] + $this->listParams($request));
 
         return $this->redirect($url.(null === $fragment ? '' : '#'.$fragment));
     }
@@ -398,9 +399,24 @@ final class MailController extends AbstractController
     {
         $folder = $request->getPayload()->getString('folder', 'inbox');
         $route = \in_array($folder, self::FOLDERS, true) && 'inbox' !== $folder ? 'mail_'.$folder : 'mail_inbox';
-        /** @var array<string, string> $params */
-        $params = $request->getPayload()->all('params');
 
-        return $this->redirectToRoute($route, $params);
+        return $this->redirectToRoute($route, $this->listParams($request));
+    }
+
+    /**
+     * Filter and page of the list the action came from (`params[…]`, see `MessageFilter::params()`).
+     *
+     * @return array<string, string>
+     */
+    private function listParams(Request $request): array
+    {
+        $params = [];
+        foreach ($request->getPayload()->all('params') as $key => $value) {
+            if (\in_array($key, ['show', 'project', 'account', 'q', 'page'], true) && \is_string($value) && '' !== $value) {
+                $params[$key] = $value;
+            }
+        }
+
+        return $params;
     }
 }

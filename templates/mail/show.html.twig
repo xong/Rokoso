@@ -2,7 +2,9 @@
 {% import '_partials/ui.html.twig' as ui %}
 
 {% set has_detail = true %}
+{# Filter und Seite der Liste reisen mit, damit Aktionen dorthin zurückführen #}
 {% set action_fields = {folder: folder} %}
+{% for key, value in filter.params %}{% set action_fields = action_fields|merge({('params[' ~ key ~ ']'): value}) %}{% endfor %}
 
 {% block title %}{{ message.subject ?: 'mail.no_subject'|trans }}{% endblock %}
 {% block detail_title %}{{ message.subject ?: 'mail.no_subject'|trans }}{% endblock %}
@@ -38,6 +40,7 @@
                     <input type="hidden" name="action" value="snooze">
                     <input type="hidden" name="ids[]" value="{{ message.id }}">
                     <input type="hidden" name="folder" value="{{ folder }}">
+                    {% for key, value in filter.params %}<input type="hidden" name="params[{{ key }}]" value="{{ value }}">{% endfor %}
                     <input type="hidden" name="return" value="list">
                     <p class="px-2 pb-1 text-xs font-semibold text-slate-500">{{ 'mail.snooze.label'|trans }}</p>
                     {% for preset in ['tomorrow', 'monday', 'week'] %}
@@ -231,7 +234,7 @@
             delete_params: {id: message.id},
             token: 'mail-comment',
             mention_org: message.organization,
-            fields: {folder: folder},
+            fields: action_fields,
         }) }}
     </div>
 {% endblock %}

@@ -18,6 +18,7 @@ use App\Mail\MailboxReader;
 use App\Mail\MailSynchronizer;
 use App\Tests\AppTestCase;
 use App\Tests\Fake\FakeMailboxReader;
+use Symfony\Component\DomCrawler\Field\ChoiceFormField;
 
 /**
  * Status model (done for me / for everyone), personal snooze, bulk actions, undo, threads and inbox rules.
@@ -207,6 +208,53 @@ final class MailStatusTest extends AppTestCase
         $this->action('trash', [$a->getId(), $b->getId()]);
         self::assertTrue($this->reload($a)->isTrashed());
         self::assertTrue($this->reload($b)->isTrashed());
+    }
+
+    public function testBulkFormKeepsFilterAndWorksWithProjectSelect(): void
+    {
+        $project = (new Project($this->user))->setName('Schulwege')->setOrganization($this->org);
+        $this->em()->persist($project);
+        $a = $this->message('Erste')->addProject($project);
+        $b = $this->message('Zweite')->addProject($project);
+        $this->message('Ohne Projekt');
+        $this->em()->flush();
+        $this->login($this->user);
+
+        // the real bulk form, with the (empty) project select of the toolbar
+        $crawler = $this->client->request('GET', '/mail?project='.$project->getId());
+        $form = $crawler->filter('#bulk-form button[value="done"]')->form();
+        $checkboxes = $form->get('ids');
+        self::assertIsArray($checkboxes);
+        self::assertCount(2, $checkboxes, 'only the messages of the project');
+        foreach ($checkboxes as $checkbox) {
+            self::assertInstanceOf(ChoiceFormField::class, $checkbox);
+            $checkbox->tick();
+        }
+        $this->client->submit($form);
+        self::assertResponseRedirects('/mail?project='.$project->getId());
+        self::assertTrue($this->state($this->reload($a), $this->user)?->isDone());
+        self::assertTrue($this->state($this->reload($b), $this->user)?->isDone());
+    }
+
+    public function testDoneFromMessageKeepsFilterAndPage(): void
+    {
+        $project = (new Project($this->user))->setName('Schulwege')->setOrganization($this->org);
+        $this->em()->persist($project);
+        $message = $this->message('Erste')->addProject($project);
+        $this->em()->flush();
+        $this->login($this->user);
+
+        $crawler = $this->client->request('GET', '/mail/inbox/'.$message->getId().'?project='.$project->getId().'&page=2');
+        $this->client->submit($crawler->filter('form[action="/mail/action"] input[name="action"][value="done_all"]')->closest('form')?->form()
+            ?? throw new \LogicException('no form'));
+        self::assertResponseRedirects('/mail?project='.$project->getId().'&page=2');
+        self::assertTrue($this->reload($message)->isDone());
+
+        // reopening stays on the message, also with the filter
+        $crawler = $this->client->request('GET', '/mail/done/'.$message->getId().'?project='.$project->getId());
+        $this->client->submit($crawler->filter('form[action="/mail/action"] input[name="action"][value="reopen"]')->closest('form')?->form()
+            ?? throw new \LogicException('no form'));
+        self::assertResponseRedirects('/mail/done/'.$message->getId().'?project='.$project->getId());
     }
 
     public function testBulkIgnoresForeignMessages(): void

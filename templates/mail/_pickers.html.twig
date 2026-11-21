@@ -12,7 +12,7 @@
         </summary>
         <form method="post" action="{{ path('mail_projects', {id: message.id}) }}" class="absolute left-0 z-20 mt-1 w-64 rounded-lg bg-surface p-2 shadow-lg ring-1 ring-slate-200">
             <input type="hidden" name="_token" value="{{ csrf_token('mail-action') }}">
-            <input type="hidden" name="folder" value="{{ folder }}">
+            <input type="hidden" name="folder" value="{{ folder }}">{% for key, value in filter.params %}<input type="hidden" name="params[{{ key }}]" value="{{ value }}">{% endfor %}
             <label for="project-search-{{ message.id }}" class="sr-only">{{ 'mail.project.search'|trans }}</label>
             <input type="search" id="project-search-{{ message.id }}" class="input mb-2 py-1.5" placeholder="{{ 'mail.project.search'|trans }}"
                    data-picker-target="search" data-action="input->picker#filter keydown.enter->picker#preventSubmit">
@@ -45,7 +45,7 @@
         </summary>
         <form method="post" action="{{ path('mail_assignees', {id: message.id}) }}" class="absolute left-0 z-20 mt-1 w-64 rounded-lg bg-surface p-2 shadow-lg ring-1 ring-slate-200">
             <input type="hidden" name="_token" value="{{ csrf_token('mail-action') }}">
-            <input type="hidden" name="folder" value="{{ folder }}">
+            <input type="hidden" name="folder" value="{{ folder }}">{% for key, value in filter.params %}<input type="hidden" name="params[{{ key }}]" value="{{ value }}">{% endfor %}
             <label for="assignee-search-{{ message.id }}" class="sr-only">{{ 'mail.assignees.search'|trans }}</label>
             <input type="search" id="assignee-search-{{ message.id }}" class="input mb-2 py-1.5" placeholder="{{ 'mail.assignees.search'|trans }}"
                    data-picker-target="search" data-action="input->picker#filter keydown.enter->picker#preventSubmit">
@@ -66,7 +66,7 @@
 
     <form method="post" action="{{ path('mail_assign_me', {id: message.id}) }}">
         <input type="hidden" name="_token" value="{{ csrf_token('mail-action') }}">
-        <input type="hidden" name="folder" value="{{ folder }}">
+        <input type="hidden" name="folder" value="{{ folder }}">{% for key, value in filter.params %}<input type="hidden" name="params[{{ key }}]" value="{{ value }}">{% endfor %}
         <button type="submit" class="btn-ghost py-1 text-xs">
             {{ ux_icon(message.isAssignedTo(app.user) ? 'lucide:user-minus' : 'lucide:user-plus', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
             {{ message.isAssignedTo(app.user) ? 'mail.assignees.unassign_me'|trans : 'mail.assignees.assign_me'|trans }}

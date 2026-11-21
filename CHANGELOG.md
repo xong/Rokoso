@@ -10,6 +10,11 @@ Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nut
 
 - **Sitzungseinladungen aus dem eigenen Postfach:** Auch die Mitglieder bekommen die Einladung zu einer Sitzung jetzt aus dem E-Mail-Postfach der Organisation – in deinem Namen, mit deiner Signatur, jede Person einzeln und mit Link zur Sitzung in Rokoso. Die Einladung liegt danach unter „Gesendet“, Antworten landen in eurem Eingang. Rokoso selbst verschickt keine Sitzungseinladungen mehr: Ist kein Postfach eingerichtet, sehen Mitglieder die Einladung nur unter ihren Benachrichtigungen, und die Kalenderdatei kannst du selbst weitergeben.
 
+### Behoben
+
+- **E-Mails mehrfach auswählen:** „Erledigt“ und die anderen Sammelaktionen funktionieren wieder, wenn mehrere E-Mails markiert sind.
+- **Filter und Seite bleiben:** Wer eine E-Mail aus einer gefilterten Liste (z. B. nach Projekt) oder von einer späteren Seite erledigt, kommt wieder zu genau dieser Liste zurück – auch nach Wiedervorlage, Projekt, Verantwortlichen und Kommentaren.
+
 ## 0.24.0 – 2026-11-19
 
 ### Geändert
