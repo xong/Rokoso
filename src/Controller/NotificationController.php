@@ -119,7 +119,7 @@ final class NotificationController extends AbstractController
             throw $this->createNotFoundException();
         }
         if ($request->isMethod('POST')) {
-            $account->setNotificationEmail(NotificationEmail::Off);
+            $account->setNotificationEmail(NotificationEmail::Off)->setMailDigest(false);
             $this->em->flush();
 
             return $this->render('notification/unsubscribed.html.twig');
@@ -143,7 +143,8 @@ final class NotificationController extends AbstractController
                 $this->em->flush();
                 $this->addFlash('success', 'flash.saved');
             } elseif (null !== $mode = NotificationEmail::tryFrom($request->getPayload()->getString('email'))) {
-                $user->setNotificationEmail($mode);
+                $user->setNotificationEmail($mode)
+                    ->setMailDigest($request->getPayload()->getBoolean('mail_digest'));
                 $this->em->flush();
                 $this->addFlash('success', 'flash.saved');
             }

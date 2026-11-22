@@ -18,6 +18,16 @@
                 </label>
             {% endfor %}
         </fieldset>
+        {% if has_feature('mail') %}
+            <label class="flex items-start gap-2">
+                <input type="checkbox" name="mail_digest" value="1" class="mt-1" {{ app.user.wantsMailDigest ? 'checked' }}
+                       aria-describedby="mail-digest-help">
+                <span>
+                    <span class="block">{{ 'notification.email.mail_digest'|trans }}</span>
+                    <span id="mail-digest-help" class="block text-xs text-slate-500">{{ 'notification.email.mail_digest_help'|trans }}</span>
+                </span>
+            </label>
+        {% endif %}
         <button type="submit" class="btn-primary">{{ 'action.save'|trans }}</button>
     </form>
 

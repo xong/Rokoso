@@ -236,6 +236,33 @@ class MessageRepository extends ServiceEntityRepository
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
+    /**
+     * Emails that arrived in the user's inboxes since a point in time, newest first (daily summary);
+     * like the inbox without spam, trash, done and snoozed mails.
+     *
+     * @return array{messages: list<Message>, total: int}
+     */
+    public function findForDigest(User $user, \DateTimeImmutable $since, int $limit = 50): array
+    {
+        $qb = $this->applyInbox($this->visibleQuery($user))
+            ->andWhere('m.type = :email')
+            ->andWhere('m.createdAt > :since')
+            ->setParameter('since', $since);
+        $total = (int) (clone $qb)->select('COUNT(m.id)')->getQuery()->getSingleScalarResult();
+        if (0 === $total) {
+            return ['messages' => [], 'total' => 0];
+        }
+
+        /** @var list<Message> $messages */
+        $messages = $qb->addSelect('a')
+            ->leftJoin('m.mailAccount', 'a')
+            ->orderBy('m.date', \SortDirection::Descending)
+            ->setMaxResults($limit)
+            ->getQuery()->getResult();
+
+        return ['messages' => $messages, 'total' => $total];
+    }
+
     public function countSpam(User $user): int
     {
         return (int) $this->visibleQuery($user)

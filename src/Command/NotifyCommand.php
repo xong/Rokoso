@@ -13,6 +13,7 @@ use App\Enum\NotificationType;
 use App\Notification\NotificationCenter;
 use App\Notification\NotificationMailer;
 use App\Participation\PublicSubmissionHandler;
+use App\Repository\MessageRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\UserRepository;
 use App\Service\FileStorage;
@@ -35,6 +36,7 @@ final readonly class NotifyCommand
     public function __construct(
         private UserRepository $users,
         private NotificationRepository $notifications,
+        private MessageRepository $messages,
         private NotificationCenter $center,
         private NotificationMailer $mailer,
         private CalendarService $calendar,
@@ -59,8 +61,18 @@ final readonly class NotifyCommand
         $this->center->deliverPending();
 
         $mails = 0;
+        $recipients = [];
         foreach ($this->notifications->findRecipientsWithUnmailed() as $user) {
-            $mails += $this->mail($user, $now);
+            $recipients[(int) $user->getId()] = $user;
+        }
+        // the summary of new mails also goes out without any notification
+        foreach ($this->users->findBy(['mailDigest' => true, 'verified' => true]) as $user) {
+            $recipients[(int) $user->getId()] = $user;
+        }
+        foreach ($recipients as $user) {
+            if ($user->isActive()) {
+                $mails += $this->mail($user, $now);
+            }
         }
         $this->em->flush();
 
@@ -102,43 +114,54 @@ final readonly class NotifyCommand
     }
 
     /**
-     * Instant mode: mails that were not sent right away. Daily mode: one digest per day from 7 o'clock.
+     * Instant mode: mails that were not sent right away. Daily mode: one digest per day from 7 o'clock,
+     * together with the summary of new mails if chosen (which otherwise goes out on its own at the same time).
      */
     private function mail(User $user, \DateTimeImmutable $now): int
     {
         try {
-            switch ($user->getNotificationEmail()) {
-                case NotificationEmail::Instant:
-                    $pending = $this->notifications->findUnmailed($user, $now->modify('-5 minutes'));
-                    foreach ($pending as $notification) {
-                        $this->mailer->sendInstant($notification);
-                        $notification->markEmailed();
-                    }
-
-                    return \count($pending);
-                case NotificationEmail::Daily:
-                    $today = $now->setTime(0, 0);
-                    if ((int) $now->format('G') < self::DIGEST_HOUR || ($user->getLastDigestAt() ?? new \DateTimeImmutable('@0')) >= $today) {
-                        return 0;
-                    }
-                    $pending = $this->notifications->findUnmailed($user);
-                    if ([] === $pending) {
-                        return 0;
-                    }
-                    $this->mailer->sendDigest($user, $pending);
-                    foreach ($pending as $notification) {
-                        $notification->markEmailed();
-                    }
-                    $user->setLastDigestAt($now);
-
-                    return 1;
-                case NotificationEmail::Off:
-                    return 0;
+            $sent = 0;
+            $pending = [];
+            if (NotificationEmail::Instant === $user->getNotificationEmail()) {
+                foreach ($this->notifications->findUnmailed($user, $now->modify('-5 minutes')) as $notification) {
+                    $this->mailer->sendInstant($notification);
+                    $notification->markEmailed();
+                    ++$sent;
+                }
+            } elseif (NotificationEmail::Daily === $user->getNotificationEmail() && $this->digestDue($user->getLastDigestAt(), $now)) {
+                $pending = $this->notifications->findUnmailed($user);
             }
+
+            $mails = null;
+            if ($user->wantsMailDigest() && $this->digestDue($user->getLastMailDigestAt(), $now)) {
+                $mails = $this->messages->findForDigest($user, $user->getLastMailDigestAt() ?? $now->modify('-1 day'));
+            }
+            if ([] !== $pending || 0 < ($mails['total'] ?? 0)) {
+                $this->mailer->sendDigest($user, $pending, $mails ?? ['messages' => [], 'total' => 0]);
+                ++$sent;
+            }
+            foreach ($pending as $notification) {
+                $notification->markEmailed();
+            }
+            if ([] !== $pending) {
+                $user->setLastDigestAt($now);
+            }
+            // also without new mails, so the next summary starts from here
+            if (null !== $mails) {
+                $user->setLastMailDigestAt($now);
+            }
+
+            return $sent;
         } catch (\Throwable $e) {
             $this->logger->error('Notification mail to user {id} failed: {message}', ['id' => $user->getId(), 'message' => $e->getMessage()]);
 
             return 0;
         }
+    }
+
+    /** From 7 o'clock, once a day. */
+    private function digestDue(?\DateTimeImmutable $last, \DateTimeImmutable $now): bool
+    {
+        return (int) $now->format('G') >= self::DIGEST_HOUR && ($last ?? new \DateTimeImmutable('@0')) < $now->setTime(0, 0);
     }
 }

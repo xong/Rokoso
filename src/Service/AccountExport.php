@@ -41,6 +41,7 @@ final readonly class AccountExport
                 'created_at' => self::date($user->getCreatedAt()),
                 'two_factor' => $user->isTotpAuthenticationEnabled(),
                 'notification_email' => $user->getNotificationEmail()->value,
+                'mail_digest' => $user->wantsMailDigest(),
                 'theme' => $user->getTheme()->value,
             ],
             'memberships' => array_map(static fn (Membership $m): array => [

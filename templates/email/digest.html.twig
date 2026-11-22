@@ -1,11 +1,31 @@
 {% extends 'email/_layout.html.twig' %}
 {% block content %}
-    <p>{{ 'email.digest.intro'|trans({'%count%': items|length}) }}</p>
-    <ul style="padding-left:18px;">
-        {% for item in items %}
-            <li style="margin-bottom:8px;"><a href="{{ item.url }}" style="color:#0f172a;">{{ item.text }}</a><br><span style="font-size:12px;color:#64748b;">{{ item.date|date('d.m.Y H:i') }}</span></li>
-        {% endfor %}
-    </ul>
-    {{ include('email/_button.html.twig', {url: url, label: 'email.digest.button'|trans}) }}
+    {% if items is not empty %}
+        <p>{{ 'email.digest.intro'|trans({'%count%': items|length}) }}</p>
+        <ul style="padding-left:18px;">
+            {% for item in items %}
+                <li style="margin-bottom:8px;"><a href="{{ item.url }}" style="color:#0f172a;">{{ item.text }}</a><br><span style="font-size:12px;color:#64748b;">{{ item.date|date('d.m.Y H:i') }}</span></li>
+            {% endfor %}
+        </ul>
+        {{ include('email/_button.html.twig', {url: url, label: 'email.digest.button'|trans}) }}
+    {% endif %}
+    {% if messages is not empty %}
+        <h2 style="font-size:16px;margin:{{ items is not empty ? '24px' : '0' }} 0 8px;">{{ 'email.digest.mails_title'|trans }}</h2>
+        <p>{{ 'email.digest.mails_intro'|trans({'%count%': mail_total}) }}</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+            {% for m in messages %}
+                <tr><td style="padding:8px 0;border-top:1px solid #e2e8f0;">
+                    <span style="font-size:12px;color:#64748b;">{{ m.date|date('d.m.Y H:i') }}{% if m.account %} · {{ m.account }}{% endif %}</span><br>
+                    <strong>{{ m.from }}</strong>{% if m.from != m.from_address %} <span style="font-size:12px;color:#64748b;">&lt;{{ m.from_address }}&gt;</span>{% endif %}<br>
+                    <a href="{{ m.url }}" style="color:#0f172a;">{{ m.subject ?: 'mail.no_subject'|trans }}</a>
+                    {% if m.preview %}<br><span style="font-size:13px;color:#475569;">{{ m.preview }}</span>{% endif %}
+                </td></tr>
+            {% endfor %}
+        </table>
+        {% if mail_total > messages|length %}
+            <p style="font-size:13px;color:#475569;">{{ 'email.digest.mails_more'|trans({'%count%': mail_total - messages|length}) }}</p>
+        {% endif %}
+        {{ include('email/_button.html.twig', {url: mail_url, label: 'email.digest.mails_button'|trans}) }}
+    {% endif %}
     <p style="font-size:12px;color:#64748b;">{{ 'email.notification.settings'|trans }} <a href="{{ settings_url }}" style="color:#365e28;">{{ 'email.notification.settings_link'|trans }}</a></p>
 {% endblock %}

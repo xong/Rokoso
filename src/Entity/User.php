@@ -56,6 +56,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastDigestAt = null;
 
+    /** Daily email with the new mails of the shared mailboxes (opt-in) */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $mailDigest = false;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastMailDigestAt = null;
+
     /**
      * Push choices per category; missing categories use their default.
      *
@@ -257,6 +264,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
         $this->backupCodes = [];
         $this->platformAdmin = false;
         $this->notificationEmail = NotificationEmail::Off;
+        $this->mailDigest = false;
         $this->renewSessionStamp();
 
         return $this;
@@ -380,6 +388,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     public function setLastDigestAt(?\DateTimeImmutable $lastDigestAt): static
     {
         $this->lastDigestAt = $lastDigestAt;
+
+        return $this;
+    }
+
+    public function wantsMailDigest(): bool
+    {
+        return $this->mailDigest;
+    }
+
+    public function setMailDigest(bool $mailDigest): static
+    {
+        $this->mailDigest = $mailDigest;
+
+        return $this;
+    }
+
+    public function getLastMailDigestAt(): ?\DateTimeImmutable
+    {
+        return $this->lastMailDigestAt;
+    }
+
+    public function setLastMailDigestAt(?\DateTimeImmutable $lastMailDigestAt): static
+    {
+        $this->lastMailDigestAt = $lastMailDigestAt;
 
         return $this;
     }

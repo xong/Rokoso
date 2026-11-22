@@ -13,7 +13,9 @@ Unter **Mein Profil → Benachrichtigungen** wählst du für E-Mails:
 - **Täglich** – morgens eine Zusammenfassung mit allem, was du noch nicht gelesen hast.
 - **Nie** – Benachrichtigungen erscheinen nur in Rokoso.
 
-Jede Benachrichtigungsmail lässt sich auch direkt abbestellen: über den Link „Abbestellen“, den viele E-Mail-Programme neben dem Absender anzeigen. Danach bekommst du keine E-Mails mehr, in Rokoso erscheinen die Benachrichtigungen weiterhin.
+Zusätzlich kannst du **Täglich eine Übersicht der neuen E-Mails** anhaken: Dann kommt morgens ab 7 Uhr eine E-Mail mit allen E-Mails, die seit der letzten Übersicht in den Postfächern deiner Organisationen angekommen sind – je mit Datum und Uhrzeit, Absender, Betreff, den ersten 100 Zeichen und einem Link in Rokoso. Spam, Erledigtes und Wiedervorlagen fehlen darin. Bei „Täglich“ steckt die Übersicht in derselben E-Mail wie die Benachrichtigungen, sonst kommt sie für sich. Gibt es keine neuen E-Mails, kommt auch keine Übersicht.
+
+Jede Benachrichtigungsmail lässt sich auch direkt abbestellen: über den Link „Abbestellen“, den viele E-Mail-Programme neben dem Absender anzeigen. Danach bekommst du keine E-Mails mehr (auch keine Übersicht neuer E-Mails), in Rokoso erscheinen die Benachrichtigungen weiterhin.
 
 ## Push-Benachrichtigungen
 

@@ -4,6 +4,12 @@ Was sich von Version zu Version ändert – in der App unter Profil → „Neuig
 Neue Version: oben einen Abschnitt `## <Version> – <JJJJ-MM-TT>` ergänzen (Nummerierung nach [SemVer](https://semver.org/lang/de/)).
 Der oberste Abschnitt ist die aktuelle Version; der Text richtet sich an die Nutzerinnen und Nutzer.
 
+## 0.26.0 – 2026-11-22
+
+### Neu
+
+- **Tägliche Übersicht neuer E-Mails:** Unter Profil → Benachrichtigungen kannst du jetzt „Täglich eine Übersicht der neuen E-Mails“ anhaken. Dann bekommst du morgens eine E-Mail mit allem, was seit gestern in den Postfächern deiner Organisationen angekommen ist: Datum und Uhrzeit, Absender, Betreff und die ersten 100 Zeichen, jeweils mit Link zur E-Mail in Rokoso. Wer Benachrichtigungen täglich bekommt, erhält beides in einer E-Mail.
+
 ## 0.25.0 – 2026-11-21
 
 ### Geändert

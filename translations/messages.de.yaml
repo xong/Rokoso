@@ -385,6 +385,12 @@ email:
         subject: '{1} Rokoso: 1 neue Benachrichtigung|]1,Inf[ Rokoso: %count% neue Benachrichtigungen'
         intro: '{1} Seit der letzten Zusammenfassung gibt es eine neue Benachrichtigung:|]1,Inf[ Seit der letzten Zusammenfassung gibt es %count% neue Benachrichtigungen:'
         button: Alle Benachrichtigungen
+        subject_mails: '{1} Rokoso: 1 neue E-Mail|]1,Inf[ Rokoso: %count% neue E-Mails'
+        subject_both: 'Rokoso: neue E-Mails und Benachrichtigungen'
+        mails_title: Neue E-Mails
+        mails_intro: '{1} Seit gestern ist eine E-Mail in euren Postfächern angekommen:|]1,Inf[ Seit gestern sind %count% E-Mails in euren Postfächern angekommen:'
+        mails_more: '{1} … und eine weitere.|]1,Inf[ … und %count% weitere.'
+        mails_button: Zum Posteingang
     hello: Hallo %name%,
     link_fallback: 'Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:'
     verify:
@@ -1497,9 +1503,9 @@ notification:
     title: Benachrichtigungen
     unsubscribe:
         title: Benachrichtigungen abbestellen
-        question: 'Sollen an %email% keine Benachrichtigungen per E-Mail mehr geschickt werden? In Rokoso siehst du sie weiterhin.'
+        question: 'Sollen an %email% keine Benachrichtigungen und Übersichten per E-Mail mehr geschickt werden? In Rokoso siehst du sie weiterhin.'
         submit: Keine E-Mails mehr
-        done: Du bekommst keine Benachrichtigungen mehr per E-Mail. In deinem Profil kannst du das jederzeit wieder einschalten.
+        done: Du bekommst keine Benachrichtigungen und Übersichten mehr per E-Mail. In deinem Profil kannst du das jederzeit wieder einschalten.
         settings: Zu den Einstellungen
     settings: Einstellungen für Benachrichtigungen
     filter: Benachrichtigungen filtern
@@ -1533,6 +1539,8 @@ notification:
         daily_help: Eine Zusammenfassung am Morgen mit allem, was du noch nicht gelesen hast.
         'off': Nie
         off_help: Benachrichtigungen erscheinen nur in Rokoso.
+        mail_digest: Täglich eine Übersicht der neuen E-Mails
+        mail_digest_help: Morgens eine E-Mail mit Datum, Absender, Betreff und dem Anfang jeder neuen E-Mail in den Postfächern deiner Organisationen (ohne Spam und Erledigtes). Bei „Täglich“ kommt sie zusammen mit den Benachrichtigungen.
     push:
         title: Push-Benachrichtigungen
         help: Zeigt neue Benachrichtigungen auch dann an, wenn Rokoso nicht geöffnet ist – auf diesem Gerät und in diesem Browser.

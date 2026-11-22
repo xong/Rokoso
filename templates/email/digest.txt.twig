@@ -1,3 +1,4 @@
+{% if items is not empty %}
 {{ 'email.digest.intro'|trans({'%count%': items|length}) }}
 
 {% for item in items %}
@@ -7,5 +8,29 @@
 
 {{ url }}
 
+{% endif %}
+{% if messages is not empty %}
+{{ 'email.digest.mails_title'|trans }}
+{{ 'email.digest.mails_intro'|trans({'%count%': mail_total}) }}
+
+{% for m in messages %}
+- {{ m.date|date('d.m.Y H:i') }}{% if m.account %} · {{ m.account }}{% endif %}
+
+  {{ m.from }}{% if m.from != m.from_address %} <{{ m.from_address }}>{% endif %}
+
+  {{ m.subject ?: 'mail.no_subject'|trans }}
+{% if m.preview %}
+  {{ m.preview }}
+{% endif %}
+  {{ m.url }}
+{% endfor %}
+{% if mail_total > messages|length %}
+
+{{ 'email.digest.mails_more'|trans({'%count%': mail_total - messages|length}) }}
+{% endif %}
+
+{{ mail_url }}
+
+{% endif %}
 {{ 'email.notification.settings'|trans }} {{ settings_url }}
 {{ include('email/_footer.txt.twig') }}
